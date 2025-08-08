@@ -1,0 +1,9 @@
+
+.idea/*
+
+main
+
+*.exe
+*.out
+
+*.o
