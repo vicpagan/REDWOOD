@@ -25,13 +25,10 @@ double probability(double *dp, int m, int n, double delta_t) {
     for (int i = m; i <= n; ++i) {
         double running_probability = success_probability(m, delta_t);
         for (int k = 0; k < m; ++k) {
-            if (i - k > 0) {
-                running_probability += fail_probability(k, delta_t) * dp[i - k - 1];
-            }
+            running_probability += fail_probability(k, delta_t) * dp[i - k - 1];
         }
         dp[i] = running_probability;
     }
-
     return dp[n];
 }
 
@@ -51,7 +48,7 @@ int main (int argc, char *argv[]) {
 
     int repeats = 25;
 
-    // Tests with delta_t = 1
+    // Tests with set delta_t
     // This is meant to be the baseline for comparison
     int m = static_cast<int>(ceil(t / delta_t));
     int n = static_cast<int>(ceil(d / delta_t));
