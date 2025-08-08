@@ -2,14 +2,21 @@
 #include <iostream>
 #include <chrono>
 
+// Constants
+// Default delta_t can be adjusted, but shouldn't we pick a small enough
+// value to compare our choice of delta to for accuracy?
+double default_delta_t = 0.5;
 double lambda = 0.0001;
 double epsilon = 1e-6;
+int repeats = 25;
+
 
 // Relative closeness check with a small epsilon
 bool is_equal(double a, double b) {
     return fabs(a - b) < epsilon * std::max(fabs(a), fabs(b));
 }
 
+// This is e^(-u * lambda * delta_t)
 double success_probability(int u, double delta_t) {
     return exp(-u * lambda * delta_t);
 }
@@ -20,6 +27,7 @@ double fail_probability(int u, double delta_t) {
 }
 
 // Bottom up recursive function P(m, n)
+// Can edit to account for restart overhead if necessary
 double probability(double *dp, int m, int n, double delta_t) {
 
     for (int i = m; i <= n; ++i) {
@@ -41,17 +49,13 @@ int main (int argc, char *argv[]) {
 
     double t = atof(argv[1]);
     double d = atof(argv[2]);
-    double delta_t = 0.5;
     double mult_delta_t = atof(argv[3]);
-    double test_delta_t = delta_t * mult_delta_t;
+    double test_delta_t = default_delta_t * mult_delta_t;
 
-
-    int repeats = 25;
-
-    // Tests with set delta_t
+    // Tests with default delta_t
     // This is meant to be the baseline for comparison
-    int m = static_cast<int>(ceil(t / delta_t));
-    int n = static_cast<int>(ceil(d / delta_t));
+    int m = static_cast<int>(ceil(t / default_delta_t));
+    int n = static_cast<int>(ceil(d / default_delta_t));
 
     std::chrono::duration<double, std::milli> duration = std::chrono::duration<double, std::milli>::zero();
     double result = 0.0;
@@ -63,7 +67,7 @@ int main (int argc, char *argv[]) {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        result += probability(dp, m, n, delta_t);
+        result += probability(dp, m, n, default_delta_t);
 
         auto end = std::chrono::high_resolution_clock::now();
 
@@ -98,7 +102,7 @@ int main (int argc, char *argv[]) {
     std::cout << "Lambda: " << lambda << std::endl;
     std::cout << "t: " << t << ", d: " << d << std::endl;
     std::cout << "m: " << m << ", n: " << n << std::endl;
-    std::cout << "delta_t: " << delta_t << std::endl;
+    std::cout << "delta_t: " << default_delta_t << std::endl;
     std::cout << "Probability: " << result << std::endl;
     std::cout << "Probability (" << mult_delta_t << "x delta): " << result_2 << std::endl;
     std::cout << "Accurate: " << (is_equal(result, result_2) ? "Yes" : "No") << " (within " << epsilon << ")" << std::endl;
