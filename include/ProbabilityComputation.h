@@ -24,10 +24,9 @@ public:
     }
 
 private:
-    bool is_equal(double a, double b);
     [[nodiscard]] double success_probability(long u) const;
     [[nodiscard]] double fail_probability(long u) const;
-    double compute_probability(std::vector<double>& dp, long m, long n) const;
+    double compute_probability(std::vector<double>& dp, long m, long n, long R) const;
 
     double lambda;
     double restart_overhead;

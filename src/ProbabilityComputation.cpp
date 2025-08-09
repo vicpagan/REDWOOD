@@ -4,13 +4,6 @@
 
 #include <ProbabilityComputation.h>
 
-double epsilon = 1e-6;
-
-
-// Relative closeness check with a small epsilon
-bool ProbabilityComputation::is_equal(double a, double b) {
-    return fabs(a - b) < epsilon * std::max(fabs(a), fabs(b));
-}
 
 // This is e^(-u * lambda * delta_t)
 double inline ProbabilityComputation::success_probability(const long u) const {
@@ -29,42 +22,53 @@ double ProbabilityComputation::compute_probability(const double task_time, const
     }
 
     // Discretize time
-    const long m = ceil(task_time / this->delta_t);
-    const long n = ceil(time_to_deadline / this->delta_t);
+    const long m = static_cast<long>(ceil(task_time / this->delta_t));
+    const long n = static_cast<long>(ceil(time_to_deadline / this->delta_t));
+    const long R = (this->restart_overhead > 0.0) ? static_cast<long>(ceil(this->restart_overhead / this->delta_t)) : 0L;
 
     // Allocate memoization array
     // TODO: Bound that perhaps? (i.e., only memoize "small" values...)
-    auto dp(std::vector<double>(n + 1, -1.0));
+    // auto dp(std::vector<double>(n + 1, -1.0)); // For memoized recursive
+    auto dp(std::vector<double>(n + 1, 0.0)); // For bottom up iterative
 
     // Call recursive function
-    return compute_probability(dp, m, n);
+    return compute_probability(dp, m, n, R);
 }
 
-// Bottom up recursive function P(m, n)
-// Can edit to account for restart overhead if necessary
-double ProbabilityComputation::compute_probability(std::vector<double>& dp, long m, long n) const {
+// Bottom up function P(m, n)
+double ProbabilityComputation::compute_probability(std::vector<double>& dp, long m, long n, long R) const {
 
-    // Memoization
-    if (dp[n] >= 0.0) {
-        return dp[n];
+    // // Memoization
+    // if (dp[n] >= 0.0) {
+    //     return dp[n];
+    // }
+    //
+    // // Base case
+    // if (n < m) {
+    //     dp[n] = 0.0;
+    //     return 0.0;
+    // }
+    //
+    // // Recursion
+    // double probability = success_probability(m);
+    // for (int k = 0; k <= m - 1; ++k) {
+    //     probability += fail_probability(k) * compute_probability(dp, m,
+    //         std::max(0L, n - k - R - 1), R);
+    // }
+    //
+    // // Memoization
+    // dp[n] = probability;
+    // return probability;
+
+    // Bottom up DP
+    for (long i = m; i <= n; ++i) {
+        double probability = success_probability(m);
+        for (long k = 0; k < m; ++k) {
+            probability += fail_probability(k) * dp[std::max(i - k - R - 1, 0L)];
+        }
+        dp[i] = probability;
     }
-
-    // Base case
-    if (n < m) {
-        dp[n] = 0.0;
-        return 0.0;
-    }
-
-    // Recursion
-    double probability = success_probability(m);
-    for (int k = 0; k <= m - 1; ++k) {
-        probability += fail_probability(k) * compute_probability(dp, m,
-            std::max(0L, n - k - 1 - static_cast<long>(this->restart_overhead / this->delta_t)));
-    }
-
-    // Memoization
-    dp[n] = probability;
-    return probability;
+    return dp[n];
 }
 
 double ProbabilityComputation::compute_best_deltat(const double task_time, double time_to_deadline, double precision) {
