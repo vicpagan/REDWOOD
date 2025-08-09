@@ -1,9 +1,11 @@
-
+# CLion IDE
 .idea/*
 
+# CMake
+build/*
+
+# Main executable
 main
 
-*.exe
-*.out
-
+# Object files
 *.o
