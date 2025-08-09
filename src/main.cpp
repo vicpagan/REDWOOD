@@ -14,17 +14,18 @@ int repeats = 25;
 
 int main (int argc, char *argv[]) {
 
-    if (argc != 4) {
-        printf("Usage: %s <lambda> <task time> <time to deadline>\n", argv[0]);
+    if (argc != 5) {
+        printf("Usage: %s <lambda> <task time> <time to deadline> <restart overhead>\n", argv[0]);
         return 1;
     }
 
     double lambda = atof(argv[1]);
     double task_time = atof(argv[2]);
     double time_to_deadline = atof(argv[3]);
+    double restart_overhead = atof(argv[4]);
 
     // Allocate object
-    auto prob = new ProbabilityComputation(lambda);
+    auto prob = new ProbabilityComputation(lambda, restart_overhead);
 
     std::chrono::duration<double, std::milli> duration = std::chrono::duration<double, std::milli>::zero();
 

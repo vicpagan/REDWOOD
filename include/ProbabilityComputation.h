@@ -5,8 +5,9 @@ class ProbabilityComputation  {
 
 public:
 
-    explicit ProbabilityComputation(const double lambda) {
+    explicit ProbabilityComputation(const double lambda, const double restart_overhead) {
         this->lambda = lambda;
+        this->restart_overhead = restart_overhead;
         this->delta_t = -1.0;
     }
 
@@ -29,6 +30,7 @@ private:
     double compute_probability(std::vector<double>& dp, long m, long n) const;
 
     double lambda;
+    double restart_overhead;
     double delta_t;
 };
 

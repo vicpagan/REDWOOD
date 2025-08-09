@@ -58,7 +58,8 @@ double ProbabilityComputation::compute_probability(std::vector<double>& dp, long
     // Recursion
     double probability = success_probability(m);
     for (int k = 0; k <= m - 1; ++k) {
-        probability += fail_probability(k) * compute_probability(dp, m, std::max(0L, n - k - 1));
+        probability += fail_probability(k) * compute_probability(dp, m,
+            std::max(0L, n - k - 1 - static_cast<long>(this->restart_overhead / this->delta_t)));
     }
 
     // Memoization
