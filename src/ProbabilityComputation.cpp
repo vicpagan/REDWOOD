@@ -82,10 +82,21 @@ double ProbabilityComputation::compute_best_deltat(const double task_time, doubl
     while (std::abs(hi - lo) / hi  > precision) {
         // std::cerr << "HI=" << hi << "  LO=" <<  lo << std::endl;
         double mid = (lo + hi) / 2;
+
+        std::chrono::duration<double, std::nano> duration_mid = std::chrono::duration<double, std::nano>::zero();
+        std::chrono::duration<double, std::nano> duration_half = std::chrono::duration<double, std::nano>::zero();
+
         this->delta_t = mid;
+        auto start_mid = std::chrono::high_resolution_clock::now();
         double result_mid = compute_probability(task_time, time_to_deadline);
+        auto end_mid = std::chrono::high_resolution_clock::now();
+        duration_mid += end_mid - start_mid;
+
         this->delta_t = mid/2;
+        auto start_half = std::chrono::high_resolution_clock::now();
         double result_half = compute_probability(task_time, time_to_deadline);
+        auto end_half = std::chrono::high_resolution_clock::now();
+        duration_half += end_half - start_half;
         // std::cerr << "PROB(MID) = " << result_mid << "   PROB(HALF) = " << result_half << std::endl;
 
         if ((std::abs(result_mid - result_half) / result_mid) < precision) {

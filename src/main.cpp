@@ -27,14 +27,18 @@ int main (int argc, char *argv[]) {
     // See what happens for worse delta_t
     for (int factor = 5; factor < 20; factor += 1) {
         double candidate_delta_t = best_delta_t * (factor * 0.1);
+        std::chrono::duration<double, std::nano> duration_candidate = std::chrono::duration<double, std::nano>::zero();
         prob->set_delta_t(candidate_delta_t);
+        auto start_candidate = std::chrono::high_resolution_clock::now();
         double probability = prob->compute_probability(task_time, time_to_deadline);
+        auto end_candidate = std::chrono::high_resolution_clock::now();
+        duration_candidate += end_candidate - start_candidate;
         if (factor == 10) {
             std::cout << "* ";
         } else {
             std::cout << "  ";
         }
-        std::cout << "With delta_t: " << candidate_delta_t << "   Prob = " << probability << std::endl;
+        std::cout << "With delta_t: " << candidate_delta_t << "   Prob = " << probability << "   Exec Time = " << duration_candidate.count() << "ns" << std::endl;
     }
 
     return 0;
