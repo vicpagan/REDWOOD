@@ -11,8 +11,10 @@
 #include <iostream>
 #include <wrench-dev.h>
 
+#include "PlatformCreator.h"
 #include "Controller.h"
 #include <boost/json.hpp>
+
 
 
 /**
@@ -49,53 +51,6 @@ boost::json::object readJSONFromFile(const std::string& filepath) {
  */
 
 namespace sg4 = simgrid::s4u;
-
-class PlatformCreator {
-public:
-    explicit PlatformCreator(const boost::json::object& platform_spec) {
-        _platform_spec = platform_spec;
-    }
-
-    void operator()() const {
-        create_platform();
-    }
-
-private:
-    boost::json::object _platform_spec;
-
-    void create_platform() const {
-        // Get the top-level zone
-        auto zone = simgrid::s4u::Engine::get_instance()->get_netzone_root();
-
-        // Create the UserHost host with its disk
-        auto controller_host = zone->add_host("ControllerHost", "10Gf");
-        controller_host->set_core_count(1);
-        auto controller_host_disk = controller_host->add_disk("hard_drive",
-                                                              boost::json::value_to<std::string>(_platform_spec.at("io_read_bandwidth")),
-                                                              boost::json::value_to<std::string>(_platform_spec.at("io_write_bandwidth"))
-                                                              );
-        controller_host_disk->set_property("size", "50000GiB");
-        controller_host_disk->set_property("mount", "/");
-
-        // Create a single network link for now (infinitely fast)
-        auto network_link = zone->add_link("network_link", "10000Gps")->set_latency("0us");
-
-        // Create compute nodes
-        for (int i = 0; i < boost::json::value_to<int>(_platform_spec.at("num_compute_nodes")); i++) {
-            auto compute_host = zone->add_host("ComputeHost_" + std::to_string(i), "1f");
-            compute_host->set_core_count(10);
-            auto compute_host_disk = compute_host->add_disk("hard_drive",
-                                                            "100MBps",
-                                                            "100MBps");
-            // Add route
-            sg4::LinkInRoute network_link_in_route{network_link};
-            zone->add_route(controller_host,
-                            compute_host,
-                            {network_link_in_route});
-        }
-        zone->seal();
-    }
-};
 
 
 /**
