@@ -27,14 +27,14 @@ namespace wrench {
     /**
      * @brief Constructor
      *
-     * @param bare_metal_compute_service: a set of compute services available to run actions
-     * @param storage_services: a set of storage services available to store files
+     * @param compute_services: a set of compute services available to run actions
+     * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const std::shared_ptr<BareMetalComputeService> &bare_metal_compute_service,
+    Controller::Controller(const std::vector<std::shared_ptr<BareMetalComputeService>> &compute_services,
                            const std::shared_ptr<SimpleStorageService> &storage_service,
                            const std::string &hostname) : ExecutionController(hostname, "controller"),
-                                                          bare_metal_compute_service(bare_metal_compute_service), storage_service(storage_service) {}
+                                                          _compute_services(compute_services), _storage_service(storage_service) {}
 
     /**
      * @brief main method of the Controller
@@ -48,44 +48,8 @@ namespace wrench {
         TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_GREEN);
         WRENCH_INFO("Controller starting");
 
-        /* Create files */
-        auto some_file = wrench::Simulation::addFile("some_file", 1 * GBYTE);
-        auto some_other_file = wrench::Simulation::addFile("some_other_file", 2 * GBYTE);
-        wrench::StorageService::createFileAtLocation(wrench::FileLocation::LOCATION(this->storage_service, some_file));
-
         /* Create a job manager so that we can create/submit jobs */
         auto job_manager = this->createJobManager();
-
-        WRENCH_INFO("Creating a compound job with a file read action followed by a compute action");
-        auto job1 = job_manager->createCompoundJob("job1");
-        auto fileread = job1->addFileReadAction("fileread", wrench::FileLocation::LOCATION(this->storage_service, some_file));
-        auto compute = job1->addComputeAction("compute", 100 * GFLOP, 50 * MBYTE, 1, 3, wrench::ParallelModel::AMDAHL(0.8));
-        job1->addActionDependency(fileread, compute);
-
-        WRENCH_INFO("Creating a compound job with a file write action and a (simultaneous) sleep action");
-        auto job2 = job_manager->createCompoundJob("job2");
-        auto filewrite = job2->addFileWriteAction("filewrite", wrench::FileLocation::LOCATION(this->storage_service, some_other_file));
-        auto sleep = job2->addSleepAction("sleep", 20.0);
-
-        WRENCH_INFO("Making the second job depend on the first one");
-        job2->addParentJob(job1);
-
-        WRENCH_INFO("Submitting both jobs to the bare-metal compute service");
-
-        job_manager->submitJob(job1, this->bare_metal_compute_service);
-        job_manager->submitJob(job2, this->bare_metal_compute_service);
-
-        WRENCH_INFO("Waiting for an execution event...");
-        this->waitForAndProcessNextEvent();
-        WRENCH_INFO("Waiting for an execution event...");
-        this->waitForAndProcessNextEvent();
-
-        WRENCH_INFO("Execution complete!");
-
-        std::vector<std::shared_ptr<wrench::Action>> actions = {fileread, compute, filewrite, sleep};
-        for (auto const &a: actions) {
-            printf("Action %s: %.2fs - %.2fs\n", a->getName().c_str(), a->getStartDate(), a->getEndDate());
-        }
 
         return 0;
     }

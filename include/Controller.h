@@ -24,7 +24,7 @@ namespace wrench {
     public:
         // Constructor
         Controller(
-                const std::shared_ptr<BareMetalComputeService> &bare_metal_compute_service,
+                const std::vector<std::shared_ptr<BareMetalComputeService>> &compute_services,
                 const std::shared_ptr<SimpleStorageService> &storage_service,
                 const std::string &hostname);
 
@@ -36,8 +36,8 @@ namespace wrench {
         // main() method of the Execution Controller
         int main() override;
 
-        const std::shared_ptr<BareMetalComputeService> bare_metal_compute_service;
-        const std::shared_ptr<SimpleStorageService> storage_service;
+        const std::vector<std::shared_ptr<BareMetalComputeService>> _compute_services;
+        const std::shared_ptr<SimpleStorageService> _storage_service;
     };
 }// namespace wrench
 #endif//CONTROLLER_H
