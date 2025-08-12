@@ -1,0 +1,7 @@
+{
+  "platform": {
+    "num_compute_nodes": 2,
+    "io_read_bandwidth": "200MBps",
+    "io_write_bandwidth": "200MBps"
+  }
+}

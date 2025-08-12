@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2017-2021. The WRENCH Team.
  *
@@ -8,10 +7,38 @@
  * (at your option) any later version.
  */
 
+#include <fstream>
 #include <iostream>
 #include <wrench-dev.h>
 
 #include "Controller.h"
+#include <boost/json.hpp>
+
+
+/**
+ * @brief Helper function to read a JSON object from a file
+ * @param filepath: the file path
+ * @return a boost::json::object object
+ */
+boost::json::object readJSONFromFile(const std::string& filepath) {
+    // Open the file using ifstream
+    ifstream file(filepath);
+
+    // Check if the file was opened successfully
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << filepath << endl;
+        exit(1);
+    }
+
+    // Read the whole file into a string
+    std::string json_string((istreambuf_iterator<char>(file)),
+                            istreambuf_iterator<char>());
+    file.close();
+
+    // Parse string into an object
+    auto json_object = boost::json::parse(json_string).as_object();
+    return json_object;
+}
 
 
 /**
@@ -22,71 +49,50 @@
  */
 
 namespace sg4 = simgrid::s4u;
-class PlatformCreator {
 
+class PlatformCreator {
 public:
-    explicit PlatformCreator() {}
+    explicit PlatformCreator(const boost::json::object& platform_spec) {
+        _platform_spec = platform_spec;
+    }
 
     void operator()() const {
         create_platform();
     }
 
 private:
+    boost::json::object _platform_spec;
 
     void create_platform() const {
         // Get the top-level zone
         auto zone = simgrid::s4u::Engine::get_instance()->get_netzone_root();
-       
+
         // Create the UserHost host with its disk
-        auto user_host = zone->add_host("UserHost", "10Gf");
-        user_host->set_core_count(1);
-        auto user_host_disk = user_host->add_disk("hard_drive",
-                                                   "100MBps",
-                                                   "100MBps");
-        user_host_disk->set_property("size", "50000GiB");
-        user_host_disk->set_property("mount", "/");
-        
-        // Create the HeadHost host with its disk
-        auto head_host = zone->add_host("HeadHost", "10Gf");
-        head_host->set_core_count(1);
-        auto head_host_disk = head_host->add_disk("hard_drive",
-                                                   "100MBps",
-                                                   "100MBps");
-        head_host_disk->set_property("size", "50000GiB");
-        head_host_disk->set_property("mount", "/");
+        auto controller_host = zone->add_host("ControllerHost", "10Gf");
+        controller_host->set_core_count(1);
+        auto controller_host_disk = controller_host->add_disk("hard_drive",
+                                                              boost::json::value_to<std::string>(_platform_spec.at("io_read_bandwidth")),
+                                                              boost::json::value_to<std::string>(_platform_spec.at("io_write_bandwidth"))
+                                                              );
+        controller_host_disk->set_property("size", "50000GiB");
+        controller_host_disk->set_property("mount", "/");
 
-        // Create a ComputeHost
-        auto compute_host = zone->add_host("ComputeHost", "100Gf");
-        compute_host->set_core_count(10);
-        auto compute_host_disk = compute_host->add_disk("hard_drive",
-                                                   "100MBps",
-                                                   "100MBps");
-        compute_host_disk->set_property("size", "5000GiB");
-        compute_host_disk->set_property("mount", "/");
+        // Create a single network link for now (infinitely fast)
+        auto network_link = zone->add_link("network_link", "10000Gps")->set_latency("0us");
 
-        // Create a single network link
-        auto network_link = zone->add_link("network_link", "50MBps")->set_latency("20us");
-
-        // Add routes
-        {
+        // Create compute nodes
+        for (int i = 0; i < boost::json::value_to<int>(_platform_spec.at("num_compute_nodes")); i++) {
+            auto compute_host = zone->add_host("ComputeHost_" + std::to_string(i), "1f");
+            compute_host->set_core_count(10);
+            auto compute_host_disk = compute_host->add_disk("hard_drive",
+                                                            "100MBps",
+                                                            "100MBps");
+            // Add route
             sg4::LinkInRoute network_link_in_route{network_link};
-            zone->add_route(user_host,
+            zone->add_route(controller_host,
                             compute_host,
                             {network_link_in_route});
         }
-        {
-            sg4::LinkInRoute network_link_in_route{network_link};
-            zone->add_route(user_host,
-                            head_host,
-                            {network_link_in_route});
-        }
-        {
-            sg4::LinkInRoute network_link_in_route{network_link};
-            zone->add_route(head_host,
-                            compute_host,
-                            {network_link_in_route});
-        }
-
         zone->seal();
     }
 };
@@ -99,8 +105,7 @@ private:
  * @param argv: argument array
  * @return 0 on success, non-zero otherwise
  */
-int main(int argc, char **argv) {
-
+int main(int argc, char** argv) {
     /* Create a WRENCH simulation object */
     auto simulation = wrench::Simulation::createSimulation();
 
@@ -108,30 +113,35 @@ int main(int argc, char **argv) {
     simulation->init(&argc, argv);
 
     /* Parsing of the command-line arguments */
-    if ((argc != 1) && ((argc != 3) || (argc == 3 && (std::string(argv[1]).compare("--platform_file"))))) {
-        std::cerr << "Usage: " << argv[0] << " [--platform_file <path to XML file>] [--log=controller.threshold=info | --wrench-full-log]" << std::endl;
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] <<
+            " --json <JSON input (file)> [--log=controller.threshold=info | --wrench-full-log]" << std::endl;
         exit(1);
     }
 
-    /* Instantiating the platform */
-    if (argc == 1) {
-        simulation->instantiatePlatform(PlatformCreator());
-    } else {
-        /* Instantiating the simulated platform */
-        simulation->instantiatePlatform(argv[2]);
+    /* Load the json input */
+    boost::json::object json_input;
+    if (argv[1][0] == '{') {
+        json_input = boost::json::parse(argv[1]).as_object();
+    }
+    else {
+        json_input = readJSONFromFile(argv[1]);
     }
 
-    /* Instantiate a storage service on the UserHost */
-    auto storage_service = simulation->add(wrench::SimpleStorageService::createSimpleStorageService(
-            "UserHost", {"/"}, {}, {}));
+    /* Instantiating the platform */
+    simulation->instantiatePlatform(PlatformCreator(json_input["platform"].as_object()));
 
-    /* Instantiate a bare-metal compute service on the platform */
+    /* Instantiate a storage service on the ControlerHost */
+    auto storage_service = simulation->add(wrench::SimpleStorageService::createSimpleStorageService(
+        "ControllerHost", {"/"}, {}, {}));
+
+    /* Instantiate a bare-metal compute service on each host of the platform */
     auto baremetal_service = simulation->add(new wrench::BareMetalComputeService(
-            "HeadHost", {"ComputeHost"}, "", {}, {}));
+        "HeadHost", {"ComputeHost"}, "", {}, {}));
 
     /* Instantiate an execution controller */
     auto controller = simulation->add(
-            new wrench::Controller(baremetal_service, storage_service, "UserHost"));
+        new wrench::Controller(baremetal_service, storage_service, "UserHost"));
 
     /* Launch the simulation */
     simulation->launch();
