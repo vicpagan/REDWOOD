@@ -3,5 +3,17 @@
     "num_compute_nodes": 2,
     "io_read_bandwidth": "200MBps",
     "io_write_bandwidth": "200MBps"
+  },
+  "failures": {
+    "restart_overhead": 0,
+    "lambda": 0.0001,
+    "seed": 1
+  },
+  "application": {
+    "task":
+    {
+      "name": "task1",
+      "exec_time": 10
+    }
   }
 }

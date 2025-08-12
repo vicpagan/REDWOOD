@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2017-2021. The WRENCH Team.
  *
@@ -23,7 +22,6 @@
 WRENCH_LOG_CATEGORY(controller, "Log category for Controller");
 
 namespace wrench {
-
     /**
      * @brief Constructor
      *
@@ -31,10 +29,14 @@ namespace wrench {
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const std::vector<std::shared_ptr<BareMetalComputeService>> &compute_services,
-                           const std::shared_ptr<SimpleStorageService> &storage_service,
-                           const std::string &hostname) : ExecutionController(hostname, "controller"),
-                                                          _compute_services(compute_services), _storage_service(storage_service) {}
+    Controller::Controller(const boost::json::object& application_spec,
+                           const std::vector<std::shared_ptr<BareMetalComputeService>>& compute_services,
+                           const std::shared_ptr<SimpleStorageService>& storage_service,
+                           const std::string& hostname) : ExecutionController(hostname, "controller"),
+                                                          _application_spec(application_spec),
+                                                          _compute_services(compute_services),
+                                                          _storage_service(storage_service) {
+    }
 
     /**
      * @brief main method of the Controller
@@ -43,7 +45,6 @@ namespace wrench {
      *
      */
     int Controller::main() {
-
         /* Set the logging output to GREEN */
         TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_GREEN);
         WRENCH_INFO("Controller starting");
@@ -59,10 +60,10 @@ namespace wrench {
      *
      * @param event: the event
      */
-    void Controller::processEventCompoundJobCompletion(const std::shared_ptr<CompoundJobCompletedEvent> &event) {
+    void Controller::processEventCompoundJobCompletion(const std::shared_ptr<CompoundJobCompletedEvent>& event) {
         /* Retrieve the job that this event is for */
         auto job = event->job;
         /* Print info about all actions in the job */
         WRENCH_INFO("Notified that compound job %s has completed:", job->getName().c_str());
     }
-}// namespace wrench
+} // namespace wrench

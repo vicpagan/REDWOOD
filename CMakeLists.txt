@@ -84,9 +84,11 @@ add_executable(redwood_main ${MAIN_SOURCE_FILES})
 # Simulator executable
 set(SIMULATOR_SOURCE_FILES
         src/PlatformCreator.cpp
+        src/NodeKiller.cpp
         src/Simulator.cpp
         src/Controller.cpp
         include/PlatformCreator.h
+        include/NodeKiller.h
         include/Controller.h
 )
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
