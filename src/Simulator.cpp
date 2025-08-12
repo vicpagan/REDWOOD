@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     /* Initialize the simulation */
     simulation->init(&argc, argv);
 
-    /* Parsing of the command-line arguments */
+    /* Parse  the command-line arguments */
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] <<
             " --json <JSON input (file)> [--log=controller.threshold=info | --wrench-full-log]" << std::endl;
@@ -86,17 +86,23 @@ int main(int argc, char** argv) {
     /* Instantiating the platform */
     simulation->instantiatePlatform(PlatformCreator(json_input["platform"].as_object()));
 
-    /* Instantiate a storage service on the ControlerHost */
+    /* Instantiate a storage service on the ControllerHost */
     auto storage_service = simulation->add(wrench::SimpleStorageService::createSimpleStorageService(
         "ControllerHost", {"/"}, {}, {}));
 
     /* Instantiate a bare-metal compute service on each host of the platform */
-    auto baremetal_service = simulation->add(new wrench::BareMetalComputeService(
-        "HeadHost", {"ComputeHost"}, "", {}, {}));
+    auto num_compute_nodes = boost::json::value_to<int>(json_input.at("platform").at("num_compute_nodes"));
+    std::vector<std::shared_ptr<wrench::BareMetalComputeService>> compute_services;
+    compute_services.reserve(num_compute_nodes);
+    for (int i = 0; i < num_compute_nodes; i++) {
+        auto baremetal_service = simulation->add(new wrench::BareMetalComputeService(
+         "ControllerHost", {"ComputeHost_" + std::to_string(i)}, "", {}, {}));
+        compute_services.push_back(baremetal_service);
+    }
 
     /* Instantiate an execution controller */
     auto controller = simulation->add(
-        new wrench::Controller(baremetal_service, storage_service, "UserHost"));
+        new wrench::Controller(compute_services, storage_service, "ControllerHost"));
 
     /* Launch the simulation */
     simulation->launch();
