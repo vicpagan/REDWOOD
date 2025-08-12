@@ -14,6 +14,8 @@ if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif()
 find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS json REQUIRED)
+
 
 # Find SimGrid
 if (DEFINED SimGrid_PATH)
