@@ -19,20 +19,26 @@
 
 #include "Controller.h"
 
+#include "NodeKiller.h"
+
 WRENCH_LOG_CATEGORY(controller, "Log category for Controller");
 
 namespace wrench {
     /**
      * @brief Constructor
      *
+     * @param failure_spec: failure specifications
+     * @param application_spec: application specifications
      * @param compute_services: a set of compute services available to run actions
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const boost::json::object& application_spec,
+    Controller::Controller(const boost::json::object& failure_spec,
+                           const boost::json::object& application_spec,
                            const std::vector<std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
+                                                          _failure_spec(_failure_spec),
                                                           _application_spec(application_spec),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
@@ -51,6 +57,14 @@ namespace wrench {
 
         /* Create a job manager so that we can create/submit jobs */
         auto job_manager = this->createJobManager();
+
+        /* Create node on/off turners */
+        for (int i = 0; i < _compute_services.size(); i++) {
+            auto murderer = std::shared_ptr<wrench::NodeKiller>(new wrench::NodeKiller(
+                _failure_spec,"ComputeHost_" + std::to_string(i), "ControllerHost"));
+            murderer->setSimulation(this->getSimulation());
+            murderer->start(murderer, true, false); // Daemonized, no auto-restart
+        }
 
         return 0;
     }

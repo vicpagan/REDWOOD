@@ -21,7 +21,7 @@ namespace wrench {
     class NodeKiller : public Service {
     public:
         // Constructor
-        NodeKiller(boost::json::object& failure_spec,
+        NodeKiller(const boost::json::object& failure_spec,
                    const std::string& victim_host,
                    const std::string& hostname);
 
