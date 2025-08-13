@@ -69,10 +69,11 @@ namespace wrench {
         _callback_id = simgrid::s4u::Host::on_onoff.connect(
             [this](simgrid::s4u::Host const &h) {
                 std::string hostname = h.get_name();
+                std::cerr << "WMS: GOT NOTIFIED FOR HOST " << hostname << ": is_on = " << h.is_on()<< "\n";
                 if (h.is_on()) {
                     this->commport->dputMessage(
                         new ExecutionControllerAlarmTimerMessage(hostname, 0));
-                    std::cerr << "WMS: HOST CHANGED STATE\n";
+
                 }
             });
     }
