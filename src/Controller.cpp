@@ -54,6 +54,12 @@ namespace wrench {
 
     }
 
+    /**
+     * @brief Method to start a node killer on a host
+     * @param victim: the victim's hostname
+     * @param seed: the seed for the RNG
+     * @return A node killer service
+     */
     std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string &victim, const int seed) {
         // Turn the host (back) on just in case
         Simulation::turnOnHost(victim);
@@ -72,6 +78,9 @@ namespace wrench {
     }
 
 
+    /**
+     * @brief Start a node killer on each host
+     */
     void Controller::start_node_killers() {
         static int seed = _seed;
         for (int i = 0; i < _compute_services.size(); i++) {

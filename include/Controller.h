@@ -36,7 +36,6 @@ namespace wrench {
     protected:
 
     private:
-        // main() method of the Execution Controller
         int main() override;
         void start_node_killers();
         std::shared_ptr<NodeKiller> start_node_killer(const std::string &victim, int seed);
