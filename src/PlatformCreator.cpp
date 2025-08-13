@@ -37,7 +37,7 @@
         controller_host_disk->set_property("mount", "/");
 
         // Create a single network link for now (infinitely fast)
-        auto network_link = zone->add_link("network_link", "10000Gps")->set_latency("0us");
+        auto network_link = zone->add_link("network_link", "10000Gbps")->set_latency("0us");
 
         // Create compute nodes
         for (int i = 0; i < boost::json::value_to<int>(_platform_spec.at("num_compute_nodes")); i++) {

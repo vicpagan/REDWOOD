@@ -38,10 +38,31 @@ namespace wrench {
                            const std::vector<std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
-                                                          _failure_spec(_failure_spec),
+                                                          _failure_spec(failure_spec),
                                                           _application_spec(application_spec),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
+    }
+
+    void Controller::start_node_killers() const {
+        std::default_random_engine rng;
+        auto lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
+        auto exponential_distribution = std::exponential_distribution<double>(lambda);
+        int seed = boost::json::value_to<int>(_failure_spec.at("seed"));
+        if (seed < 0) {
+            seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
+        }
+        auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
+        for (int i = 0; i < _compute_services.size(); i++) {
+            auto murderer = std::make_shared<NodeKiller>(
+                std::default_random_engine(seed + i),
+                exponential_distribution,
+                restart_overhead,
+                "ComputeHost_" + std::to_string(i),
+                "ControllerHost");
+            murderer->setSimulation(this->getSimulation());
+            murderer->start(murderer, true, false); // Daemonized, no auto-restart
+        }
     }
 
     /**
@@ -59,11 +80,20 @@ namespace wrench {
         auto job_manager = this->createJobManager();
 
         /* Create node on/off turners */
-        for (int i = 0; i < _compute_services.size(); i++) {
-            auto murderer = std::shared_ptr<wrench::NodeKiller>(new wrench::NodeKiller(
-                _failure_spec,"ComputeHost_" + std::to_string(i), "ControllerHost"));
-            murderer->setSimulation(this->getSimulation());
-            murderer->start(murderer, true, false); // Daemonized, no auto-restart
+        start_node_killers();
+
+        for (int i = 0; i < 10; i++) {
+            auto job = job_manager->createCompoundJob("my_job");
+            job->addSleepAction("my_sleep_action", 100);
+            job_manager->submitJob(job, _compute_services.at(0));
+            std::cerr << "SUBMITTING JOB\n";
+            auto event = this->waitForNextEvent();
+            if (std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
+                std::cerr << "JOB FAILED\n";
+            }
+            else {
+                std::cerr << "JOB SUCCEEDED\n";
+            }
         }
 
         return 0;
