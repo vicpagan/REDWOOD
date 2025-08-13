@@ -32,11 +32,11 @@ namespace wrench {
     private:
         [[noreturn]] int main() override;
 
-        std::string _victim_host;
-        S4U_CommPort *_notify_commport;
         std::default_random_engine _rng;
         std::exponential_distribution<double> _exponential_distribution;
         double _restart_overhead;
+        std::string _victim_host;
+        S4U_CommPort *_notify_commport;
     };
 } // namespace wrench
 #endif//NODE_KILLER_H

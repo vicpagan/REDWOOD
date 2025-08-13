@@ -16,6 +16,7 @@
 #include <boost/json/object.hpp>
 
 namespace wrench {
+    class NodeKiller;
 
     /**
      *  @brief An Execution Controller implementation
@@ -27,6 +28,7 @@ namespace wrench {
         Controller(
                 const boost::json::object& failure_spec,
                 const boost::json::object& application_spec,
+                long num_repeats,
                 const std::map<std::string, std::shared_ptr<BareMetalComputeService>> &compute_services,
                 const std::shared_ptr<SimpleStorageService> &storage_service,
                 const std::string &hostname);
@@ -39,12 +41,20 @@ namespace wrench {
         // main() method of the Execution Controller
         int main() override;
         void start_node_killers();
+        std::shared_ptr<NodeKiller> start_node_killer(const std::string &victim, int seed);
+
+        std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
 
         const boost::json::object _failure_spec;
         double _deadline;
         const boost::json::object _application_spec;
+        const long _num_repeats;
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
+
+        double _lambda;
+        int _seed;
+        std::exponential_distribution<double> _exponential_distribution;
     };
 }// namespace wrench
 #endif//CONTROLLER_H

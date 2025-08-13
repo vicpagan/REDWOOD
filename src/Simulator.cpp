@@ -14,7 +14,6 @@
 
 #include "PlatformCreator.h"
 #include "Controller.h"
-#include "NodeKiller.h"
 
 /**
  * @brief Helper function to read a JSON object from a file
@@ -99,11 +98,12 @@ int main(int argc, char** argv) {
         compute_services[hostname] = baremetal_service;
     }
 
-    /* Instantiate an execution controller */
+    /* Instantiate the execution controller */
     auto controller = simulation->add(
         new wrench::Controller(
             json_input["failures"].as_object(),
             json_input["application"].as_object(),
+            json_input["execution"].as_object()["num_repeats"].as_int64(),
             compute_services, storage_service, "ControllerHost"));
 
     /* Launch the simulation */

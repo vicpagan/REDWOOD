@@ -24,12 +24,12 @@ wrench::NodeKiller::NodeKiller(
     TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_RED);
     WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
     while (true) {
-        wrench::Simulation::sleep(_exponential_distribution(_rng));
+        Simulation::sleep(_exponential_distribution(_rng));
         WRENCH_INFO("TURNING OFF HOST %s", _victim_host.c_str());
-        wrench::Simulation::turnOffHost(_victim_host);
-        wrench::Simulation::sleep(_restart_overhead);
+        Simulation::turnOffHost(_victim_host);
+        Simulation::sleep(_restart_overhead);
         WRENCH_INFO("TURNING ON HOST %s", _victim_host.c_str());
-        wrench::Simulation::turnOnHost(_victim_host);
+        Simulation::turnOnHost(_victim_host);
         WRENCH_INFO("SENDING MESSAGE TO CONTROLER");
         _notify_commport->dputMessage(
             new ExecutionControllerAlarmTimerMessage(_victim_host, 0));
