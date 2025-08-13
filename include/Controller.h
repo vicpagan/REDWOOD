@@ -34,8 +34,6 @@ namespace wrench {
                 const std::string &hostname);
 
     protected:
-        // Overridden method
-        void processEventCompoundJobCompletion(const std::shared_ptr<CompoundJobCompletedEvent>&) override;
 
     private:
         // main() method of the Execution Controller

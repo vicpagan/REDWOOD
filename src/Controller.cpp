@@ -127,6 +127,8 @@ namespace wrench {
                 }
                 idle_hosts.clear();
 
+                // Here we could instead call waitForAndProcessNextEvent() and define the handling
+                // methods, in case this if-else-if thing becomes too unwieldly
                 auto event = this->waitForNextEvent();
                 if (auto failure_event = std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
                     auto hostname = failure_event->compute_service->getHosts().at(0);
@@ -153,15 +155,4 @@ namespace wrench {
         return 0;
     }
 
-    /**
-     * @brief Process a compound job completion event
-     *
-     * @param event: the event
-     */
-    void Controller::processEventCompoundJobCompletion(const std::shared_ptr<CompoundJobCompletedEvent>& event) {
-        /* Retrieve the job that this event is for */
-        auto job = event->job;
-        /* Print info about all actions in the job */
-        WRENCH_INFO("Notified that compound job %s has completed:", job->getName().c_str());
-    }
 } // namespace wrench
