@@ -7,8 +7,6 @@
  * (at your option) any later version.
  */
 
-#include <fstream>
-#include <iostream>
 #include <wrench-dev.h>
 #include <boost/json.hpp>
 
@@ -43,7 +41,7 @@
         for (int i = 0; i < boost::json::value_to<int>(_platform_spec.at("num_compute_nodes")); i++) {
             auto compute_host = zone->add_host("ComputeHost_" + std::to_string(i), "1f");
             compute_host->set_core_count(10);
-            auto compute_host_disk = compute_host->add_disk("hard_drive",
+            compute_host->add_disk("hard_drive",
                                                             "100MBps",
                                                             "100MBps");
             // Add route

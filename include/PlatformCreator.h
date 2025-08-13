@@ -6,9 +6,9 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  */
+#ifndef PLATFORMCREATOR_H
+#define PLATFORMCREATOR_H
 
-#include <fstream>
-#include <iostream>
 #include <wrench-dev.h>
 #include <boost/json.hpp>
 
@@ -38,3 +38,4 @@ private:
     void create_platform() const;
 };
 
+#endif // PLATFORMCREATOR_H
