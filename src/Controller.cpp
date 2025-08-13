@@ -36,7 +36,7 @@ namespace wrench {
      */
     Controller::Controller(const boost::json::object& failure_spec,
                            const boost::json::object& application_spec,
-                           const std::vector<std::shared_ptr<BareMetalComputeService>>& compute_services,
+                           const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
                                                           _failure_spec(failure_spec),
@@ -60,24 +60,12 @@ namespace wrench {
                 exponential_distribution,
                 restart_overhead,
                 "ComputeHost_" + std::to_string(i),
+                this->commport,
                 "ControllerHost");
             murderer->setSimulation(this->getSimulation());
             murderer->start(murderer, true, false); // Daemonized, no auto-restart
         }
-
-        // Register my callback
-        _callback_id = simgrid::s4u::Host::on_onoff.connect(
-            [this](simgrid::s4u::Host const &h) {
-                std::string hostname = h.get_name();
-                std::cerr << "WMS: GOT NOTIFIED FOR HOST " << hostname << ": is_on = " << h.is_on()<< "\n";
-                if (h.is_on()) {
-                    this->commport->dputMessage(
-                        new ExecutionControllerAlarmTimerMessage(hostname, 0));
-
-                }
-            });
     }
-
 
 
     /**
@@ -97,21 +85,41 @@ namespace wrench {
         /* Create node on/off turners */
         start_node_killers();
 
-        for (int i = 0; i < 10; i++) {
-            auto job = job_manager->createCompoundJob("my_job");
-            job->addSleepAction("my_sleep_action", 100);
-            job_manager->submitJob(job, _compute_services.at(0));
-            std::cerr << "SUBMITTING JOB\n";
+        /* Create the set of idle hosts */
+        std::set<std::string> idle_hosts;
+        for (const auto &item : _compute_services) {
+            idle_hosts.insert(item.first);
+        }
+
+        /* Loop until the task completes successfully somewhere */
+        while (true) {
+
+            // Submit the task to each idle hosts
+            for (const auto &idle_host : idle_hosts) {
+                auto job = job_manager->createCompoundJob("");
+                job->addSleepAction("", 100);
+                WRENCH_INFO("Submitting a job to %s", idle_host.c_str());
+                job_manager->submitJob(job, _compute_services.at(idle_host));
+            }
+            idle_hosts.clear();
+
             auto event = this->waitForNextEvent();
-            if (std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
-                std::cerr << "JOB FAILED\n";
-            } else if (std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
-                std::cerr << "JOB SUCCEEDED\n";
-            } else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
-                std::cerr << "GOT A TIMER EVENT: " << timer_event->message << "\n";
+            if (auto failure_event = std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
+                auto hostname = failure_event->compute_service->getHosts().at(0);
+                WRENCH_INFO("A job just failed on %s... oh well", hostname.c_str());
+            }
+            else if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
+                auto hostname = success_event->compute_service->getHosts().at(0);
+                WRENCH_INFO("A job succeeded on %s... we're done!", hostname.c_str());
+                break;
+            }
+            else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                auto hostname = timer_event->message;
+                WRENCH_INFO("Host %s just became usable", hostname.c_str());
+                idle_hosts.insert(hostname);
+
             }
         }
-        simgrid::s4u::Host::on_onoff.disconnect(_callback_id);
         return 0;
     }
 

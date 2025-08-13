@@ -26,12 +26,14 @@ namespace wrench {
             const std::exponential_distribution<double> exponential_distribution,
             const double restart_overhead,
             const std::string& victim_host,
+            S4U_CommPort *notify_commport,
             const std::string& hostname);
 
     private:
         [[noreturn]] int main() override;
 
         std::string _victim_host;
+        S4U_CommPort *_notify_commport;
         std::default_random_engine _rng;
         std::exponential_distribution<double> _exponential_distribution;
         double _restart_overhead;

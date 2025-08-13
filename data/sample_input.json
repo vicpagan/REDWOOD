@@ -6,9 +6,9 @@
   },
   "failures": {
     "restart_overhead": 10,
-    "lambda": 0.01,
+    "lambda": 0.1,
     "seed_comment": "If seed value is negative, and a random seed will be used",
-    "seed": 1
+    "seed": -1
   },
   "application": {
     "task":

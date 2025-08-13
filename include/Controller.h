@@ -27,7 +27,7 @@ namespace wrench {
         Controller(
                 const boost::json::object& failure_spec,
                 const boost::json::object& application_spec,
-                const std::vector<std::shared_ptr<BareMetalComputeService>> &compute_services,
+                const std::map<std::string, std::shared_ptr<BareMetalComputeService>> &compute_services,
                 const std::shared_ptr<SimpleStorageService> &storage_service,
                 const std::string &hostname);
 
@@ -42,9 +42,8 @@ namespace wrench {
 
         const boost::json::object _failure_spec;
         const boost::json::object _application_spec;
-        const std::vector<std::shared_ptr<BareMetalComputeService>> _compute_services;
+        const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
-        unsigned int _callback_id;
     };
 }// namespace wrench
 #endif//CONTROLLER_H
