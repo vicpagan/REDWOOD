@@ -16,6 +16,7 @@
 #define GBYTE (1000.0 * 1000.0 * 1000.0)
 
 #include <iostream>
+#include <wrench/execution_controller/ExecutionControllerMessage.h>
 
 #include "Controller.h"
 
@@ -44,7 +45,7 @@ namespace wrench {
                                                           _storage_service(storage_service) {
     }
 
-    void Controller::start_node_killers() const {
+    void Controller::start_node_killers() {
         std::default_random_engine rng;
         auto lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         auto exponential_distribution = std::exponential_distribution<double>(lambda);
@@ -63,7 +64,20 @@ namespace wrench {
             murderer->setSimulation(this->getSimulation());
             murderer->start(murderer, true, false); // Daemonized, no auto-restart
         }
+
+        // Register my callback
+        _callback_id = simgrid::s4u::Host::on_onoff.connect(
+            [this](simgrid::s4u::Host const &h) {
+                std::string hostname = h.get_name();
+                if (h.is_on()) {
+                    this->commport->dputMessage(
+                        new ExecutionControllerAlarmTimerMessage(hostname, 0));
+                    std::cerr << "WMS: HOST CHANGED STATE\n";
+                }
+            });
     }
+
+
 
     /**
      * @brief main method of the Controller
@@ -90,12 +104,13 @@ namespace wrench {
             auto event = this->waitForNextEvent();
             if (std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
                 std::cerr << "JOB FAILED\n";
-            }
-            else {
+            } else if (std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
                 std::cerr << "JOB SUCCEEDED\n";
+            } else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                std::cerr << "GOT A TIMER EVENT: " << timer_event->message << "\n";
             }
         }
-
+        simgrid::s4u::Host::on_onoff.disconnect(_callback_id);
         return 0;
     }
 

@@ -38,12 +38,13 @@ namespace wrench {
     private:
         // main() method of the Execution Controller
         int main() override;
-        void start_node_killers() const;
+        void start_node_killers();
 
         const boost::json::object _failure_spec;
         const boost::json::object _application_spec;
         const std::vector<std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
+        unsigned int _callback_id;
     };
 }// namespace wrench
 #endif//CONTROLLER_H
