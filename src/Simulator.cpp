@@ -67,19 +67,19 @@ int main(int argc, char** argv) {
     simulation->init(&argc, argv);
 
     /* Parse  the command-line arguments */
-    if (argc != 2) {
+    if (argc != 3) {
         std::cerr << "Usage: " << argv[0] <<
-            " --json <JSON input (file)> [--log=controller.threshold=info | --wrench-full-log]" << std::endl;
+            " --json <JSON input (file)> --wrench-host-shutdown-simulation [--log=controller.threshold=info | --wrench-full-log]" << std::endl;
         exit(1);
     }
 
     /* Load the json input */
     boost::json::object json_input;
-    if (argv[1][0] == '{') {
-        json_input = boost::json::parse(argv[1]).as_object();
+    if (argv[2][0] == '{') {
+        json_input = boost::json::parse(argv[2]).as_object();
     }
     else {
-        json_input = readJSONFromFile(argv[1]);
+        json_input = readJSONFromFile(argv[2]);
     }
 
     /* Instantiating the platform */

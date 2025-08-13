@@ -5,21 +5,15 @@ WRENCH_LOG_CATEGORY(node_killer, "Log category for HostSwitcher");
 
 
 wrench::NodeKiller::NodeKiller(
-    const boost::json::object& failure_spec,
+    const std::default_random_engine rng,
+    const std::exponential_distribution<double> exponential_distribution,
+    const double restart_overhead,
     const std::string& victim_host,
-    const std::string& hostname) : Service(hostname, "node_killer") {
+    const std::string& hostname) : Service(hostname, "node_killer"),
+                                   _rng(rng),
+                                   _exponential_distribution(exponential_distribution),
+                                   _restart_overhead(restart_overhead) {
     _victim_host = victim_host;
-    _lambda = boost::json::value_to<double>(failure_spec.at("lambda"));
-    int seed = boost::json::value_to<int>(failure_spec.at("seed"));
-    if (seed < 0) {
-        std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
-    }
-    else {
-        std::default_random_engine rng(static_cast<unsigned int>(seed));
-    }
-    std::exponential_distribution<double> _exponential_distribution(_lambda);
-
-    _restart_overhead = boost::json::value_to<double>(failure_spec.at("restart_overhead"));
 }
 
 [[noreturn]] int wrench::NodeKiller::main() {

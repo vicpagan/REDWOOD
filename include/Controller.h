@@ -38,6 +38,7 @@ namespace wrench {
     private:
         // main() method of the Execution Controller
         int main() override;
+        void start_node_killers() const;
 
         const boost::json::object _failure_spec;
         const boost::json::object _application_spec;

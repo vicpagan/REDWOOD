@@ -21,9 +21,12 @@ namespace wrench {
     class NodeKiller : public Service {
     public:
         // Constructor
-        NodeKiller(const boost::json::object& failure_spec,
-                   const std::string& victim_host,
-                   const std::string& hostname);
+        NodeKiller(
+            const std::default_random_engine rng,
+            const std::exponential_distribution<double> exponential_distribution,
+            const double restart_overhead,
+            const std::string& victim_host,
+            const std::string& hostname);
 
     private:
         [[noreturn]] int main() override;
@@ -31,7 +34,6 @@ namespace wrench {
         std::string _victim_host;
         std::default_random_engine _rng;
         std::exponential_distribution<double> _exponential_distribution;
-        double _lambda;
         double _restart_overhead;
     };
 } // namespace wrench
