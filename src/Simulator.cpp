@@ -15,6 +15,8 @@
 #include "PlatformCreator.h"
 #include "Controller.h"
 
+namespace sg4 = simgrid::s4u;
+
 /**
  * @brief Helper function to read a JSON object from a file
  * @param filepath: the file path
@@ -39,17 +41,6 @@ boost::json::object readJSONFromFile(const std::string& filepath) {
     auto json_object = boost::json::parse(json_string).as_object();
     return json_object;
 }
-
-
-/**
- * @brief Functor to instantiate a simulated platform, instead of
- * loading it from an XML file. This function directly uses SimGrid's s4u API
- * (see the SimGrid documentation). This function creates a platform that's
- * identical to that described in the file platform.xml located in the ../data/.
- */
-
-namespace sg4 = simgrid::s4u;
-
 
 /**
  * @brief The Simulator's main function
