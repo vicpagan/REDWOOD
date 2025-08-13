@@ -2,6 +2,13 @@
 
 TO UPDATE
 
+``
+cd build
+cmake ..
+make
+./redwood_sim --json ../data/sample_input.json --wrench-host-shutdown-simulation --wrench-commport-pool-size=20000
+```
+
 
 Basic code for experimenting with different delta values for a single host, single task execution with a deadline.
 
