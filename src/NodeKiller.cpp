@@ -21,8 +21,10 @@ wrench::NodeKiller::NodeKiller(
     WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
     while (true) {
         wrench::Simulation::sleep(_exponential_distribution(_rng));
+        std::cerr << wrench::Simulation::getCurrentSimulatedDate() << ": TURNINGT HOST " << _victim_host << " OFF\n";
         wrench::Simulation::turnOffHost(_victim_host);
         wrench::Simulation::sleep(_restart_overhead);
+        std::cerr << "TURNING HOST " << _victim_host << " BACK ON\n";
         wrench::Simulation::turnOnHost(_victim_host);
     }
 }

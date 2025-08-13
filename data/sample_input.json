@@ -5,7 +5,7 @@
     "io_write_bandwidth": "200MBps"
   },
   "failures": {
-    "restart_overhead": 0,
+    "restart_overhead": 10,
     "lambda": 0.01,
     "seed_comment": "If seed value is negative, and a random seed will be used",
     "seed": 1
