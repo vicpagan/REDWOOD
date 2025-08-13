@@ -1,6 +1,8 @@
 #include <chrono>
 #include "NodeKiller.h"
 
+#include <wrench/execution_controller/ExecutionControllerMessage.h>
+
 WRENCH_LOG_CATEGORY(node_killer, "Log category for HostSwitcher");
 
 
@@ -9,11 +11,13 @@ wrench::NodeKiller::NodeKiller(
     const std::exponential_distribution<double> exponential_distribution,
     const double restart_overhead,
     const std::string& victim_host,
+    S4U_CommPort * notify_commport,
     const std::string& hostname) : Service(hostname, "node_killer"),
                                    _rng(rng),
                                    _exponential_distribution(exponential_distribution),
-                                   _restart_overhead(restart_overhead) {
-    _victim_host = victim_host;
+                                   _restart_overhead(restart_overhead),
+                                   _victim_host(victim_host),
+                                   _notify_commport(notify_commport) {
 }
 
 [[noreturn]] int wrench::NodeKiller::main() {
@@ -21,10 +25,13 @@ wrench::NodeKiller::NodeKiller(
     WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
     while (true) {
         wrench::Simulation::sleep(_exponential_distribution(_rng));
-        std::cerr << wrench::Simulation::getCurrentSimulatedDate() << ": TURNINGT HOST " << _victim_host << " OFF\n";
+        WRENCH_INFO("TURNING OFF HOST %s", _victim_host.c_str());
         wrench::Simulation::turnOffHost(_victim_host);
         wrench::Simulation::sleep(_restart_overhead);
-        std::cerr << "TURNING HOST " << _victim_host << " BACK ON\n";
+        WRENCH_INFO("TURNING ON HOST %s", _victim_host.c_str());
         wrench::Simulation::turnOnHost(_victim_host);
+        WRENCH_INFO("SENDING MESSAGE TO CONTROLER");
+        _notify_commport->dputMessage(
+            new ExecutionControllerAlarmTimerMessage(_victim_host, 0));
     }
 }

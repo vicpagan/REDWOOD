@@ -91,12 +91,12 @@ int main(int argc, char** argv) {
 
     /* Instantiate a bare-metal compute service on each host of the platform */
     auto num_compute_nodes = boost::json::value_to<int>(json_input.at("platform").at("num_compute_nodes"));
-    std::vector<std::shared_ptr<wrench::BareMetalComputeService>> compute_services;
-    compute_services.reserve(num_compute_nodes);
+    std::map<std::string, std::shared_ptr<wrench::BareMetalComputeService>> compute_services;
     for (int i = 0; i < num_compute_nodes; i++) {
+        std::string hostname = "ComputeHost_" + std::to_string(i);
         auto baremetal_service = simulation->add(new wrench::BareMetalComputeService(
-         "ControllerHost", {"ComputeHost_" + std::to_string(i)}, "", {}, {}));
-        compute_services.push_back(baremetal_service);
+         "ControllerHost", {hostname}, "", {}, {}));
+        compute_services[hostname] = baremetal_service;
     }
 
     /* Instantiate an execution controller */
