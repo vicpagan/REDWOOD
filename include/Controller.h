@@ -41,6 +41,7 @@ namespace wrench {
         void start_node_killers();
 
         const boost::json::object _failure_spec;
+        double _deadline;
         const boost::json::object _application_spec;
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
