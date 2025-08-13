@@ -99,7 +99,6 @@ int main(int argc, char** argv) {
         compute_services.push_back(baremetal_service);
     }
 
-
     /* Instantiate an execution controller */
     auto controller = simulation->add(
         new wrench::Controller(
