@@ -87,15 +87,19 @@ namespace wrench {
 
         /* Create the set of idle hosts */
         std::set<std::string> idle_hosts;
-        for (const auto &item : _compute_services) {
+        for (const auto& item : _compute_services) {
             idle_hosts.insert(item.first);
         }
 
-        /* Loop until the task completes successfully somewhere */
-        while (true) {
+        /* Create an alarm for the deadline */
+        auto deadline = boost::json::value_to<double>(_application_spec.at("deadline"));
+        this->setTimer(deadline, "time out");
 
+        /* Loop until the task completes successfully somewhere */
+        bool success = false;
+        while (true) {
             // Submit the task to each idle hosts
-            for (const auto &idle_host : idle_hosts) {
+            for (const auto& idle_host : idle_hosts) {
                 auto job = job_manager->createCompoundJob("");
                 job->addSleepAction("", 100);
                 WRENCH_INFO("Submitting a job to %s", idle_host.c_str());
@@ -111,15 +115,20 @@ namespace wrench {
             else if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                 auto hostname = success_event->compute_service->getHosts().at(0);
                 WRENCH_INFO("A job succeeded on %s... we're done!", hostname.c_str());
+                success = true;
                 break;
             }
             else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                if (timer_event->message == "time out") {
+                    break;
+                }
+                // Otherwise it's a hacky "timer" event that means a host came back online
                 auto hostname = timer_event->message;
                 WRENCH_INFO("Host %s just became usable", hostname.c_str());
                 idle_hosts.insert(hostname);
-
             }
         }
+        std::cout << "SUCCESS: " << success << std::endl;
         return 0;
     }
 
