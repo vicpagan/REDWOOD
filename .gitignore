@@ -4,7 +4,7 @@
 # CMake
 build/*
 
-# Main executable
+# Executable
 main
 
 # Object files
