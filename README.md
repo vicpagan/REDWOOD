@@ -2,7 +2,7 @@
 
 TO UPDATE
 
-``
+```
 cd build
 cmake ..
 make
