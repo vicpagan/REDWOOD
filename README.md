@@ -1,6 +1,6 @@
 # REDWOOD
 
-TO UPDATE
+# Current Wrench Simulation Execution
 
 ```
 cd build
@@ -9,22 +9,18 @@ make
 ./redwood_sim --json ../data/sample_input.json --wrench-host-shutdown-simulation --wrench-commport-pool-size=20000
 ```
 
+# Old Main File Execution
 
-Basic code for experimenting with different delta values for a single host, single task execution with a deadline.
-
-# Usage
+## Usage
 ``` 
 $ make
-$ ./main <t> <d> <delta multiplier>
+$ ./main <lambda> <restart overhead> <task time> <time to deadline>
 ```
-Where `t` is the execution time of the task, `d` is the deadline for the task, and `delta multiplier` is a factor to scale the delta value for testing.  
 
-# Example
+## Example
 ``` 
-$ ./main 1000 5000 2
+$ ./main 0.001 50 1000 5000
 ```
-This runs an experiment for a single task with an execution time of `1000ms`, a deadline for the task to finish of `5000ms`, and a multiplier to test against the default delta of `2`.  
-  
-For example, if the default delta is 0.5, this will test the same task with a delta of 0.5ms and a delta of 1ms (0.5 * 2) and compare them.  
+This runs an experiment for a single task with an execution time of `1000ms`, a deadline for the task to finish of `5000ms`, with a lambda failure rate of `0.001` and a restart overhead of `50ms`.  
 
 It compares average execution time via speedup constant, and accuracy using a relative epsilon.
