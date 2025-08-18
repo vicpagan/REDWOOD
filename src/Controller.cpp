@@ -51,7 +51,6 @@ namespace wrench {
         if (_seed < 0) {
             _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
         }
-
     }
 
     /**
@@ -60,7 +59,7 @@ namespace wrench {
      * @param seed: the seed for the RNG
      * @return A node killer service
      */
-    std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string &victim, const int seed) {
+    std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string& victim, const int seed) {
         // Turn the host (back) on just in case
         Simulation::turnOnHost(victim);
 
@@ -87,10 +86,10 @@ namespace wrench {
             auto victim_hostname = "ComputeHost_" + std::to_string(i);
             // Kill an existing node killer if any
             if (_node_killers.find(victim_hostname) != _node_killers.end()) {
-                _node_killers[victim_hostname]->killActor();  // brutal
+                _node_killers[victim_hostname]->killActor(); // brutal
             }
             // Start a node killer (note the seed++ there)
-            _node_killers[victim_hostname] =  this->start_node_killer(victim_hostname, seed++);
+            _node_killers[victim_hostname] = this->start_node_killer(victim_hostname, seed++);
         }
     }
 
@@ -111,7 +110,6 @@ namespace wrench {
 
         /* Do all the repeats */
         for (int repeat = 0; repeat < _num_repeats; repeat++) {
-
             /* (Re-)Create node on/off turners */
             start_node_killers();
 
@@ -122,7 +120,8 @@ namespace wrench {
             }
 
             /* Create an alarm for the deadline */
-            this->setTimer(Simulation::getCurrentSimulatedDate() + _deadline, "time out");
+            WRENCH_INFO("SETTING AN ALARM FOR %lf", Simulation::getCurrentSimulatedDate() + _deadline);
+            this->setTimer(Simulation::getCurrentSimulatedDate() + _deadline, "timeout:" + std::to_string(repeat));
 
             /* Loop until the task completes successfully somewhere */
             bool success = false;
@@ -150,8 +149,19 @@ namespace wrench {
                     break;
                 }
                 else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
-                    if (timer_event->message == "time out") {
-                        break;
+                    std::string timeout_prefix = "timeout";
+                    if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
+                        size_t pos = timer_event->message.find(':');
+                        // Check if the colon exists
+                        std::string repeat_id = timer_event->message.substr(pos + 1);
+                        if (repeat_id != std::to_string(repeat)) {
+                            WRENCH_INFO("SPURIOUS :)");
+                            continue; // Spurious timeout
+                        }
+                        else {
+                            WRENCH_INFO("HIT THE DEADLINE!");
+                            break;
+                        }
                     }
                     // Otherwise it's a hacky "timer" event that means a host came back online
                     auto hostname = timer_event->message;
@@ -163,5 +173,4 @@ namespace wrench {
         }
         return 0;
     }
-
 } // namespace wrench
