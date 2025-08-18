@@ -109,9 +109,11 @@ namespace wrench {
         /* Create a job manager so that we can create/submit jobs */
         auto job_manager = this->createJobManager();
 
+        /* Keep track of number of successes */
+        int num_successes = 0;
+
         /* Do all the repeats */
         for (int repeat = 0; repeat < _num_repeats; repeat++) {
-
             /* (Re-)Create node on/off turners */
             start_node_killers();
 
@@ -147,6 +149,7 @@ namespace wrench {
                     auto hostname = success_event->compute_service->getHosts().at(0);
                     WRENCH_INFO("A job succeeded on %s... we're done!", hostname.c_str());
                     success = true;
+                    num_successes++;
                     break;
                 }
                 else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
@@ -161,6 +164,8 @@ namespace wrench {
             }
             std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
+        std::cout << "TOTAL REPEATS = " << _num_repeats << "    TOTAL SUCCESSES = " << num_successes << std::endl;
+        std::cout << "PROBABILITY = " << (static_cast<double>(num_successes) / static_cast<double>(_num_repeats)) << std::endl;
         return 0;
     }
 
