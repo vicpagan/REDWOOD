@@ -155,11 +155,10 @@ namespace wrench {
                         // Check if the colon exists
                         std::string repeat_id = timer_event->message.substr(pos + 1);
                         if (repeat_id != std::to_string(repeat)) {
-                            WRENCH_INFO("SPURIOUS :)");
                             continue; // Spurious timeout
                         }
                         else {
-                            WRENCH_INFO("HIT THE DEADLINE!");
+                            WRENCH_INFO("Deadline reached :(");
                             break;
                         }
                     }
