@@ -173,10 +173,8 @@ namespace wrench {
                         if (repeat_id != std::to_string(repeat)) {
                             continue; // Spurious timeout
                         }
-                        else {
-                            WRENCH_INFO("Deadline reached :(");
-                            break;
-                        }
+                        WRENCH_INFO("Deadline reached :(");
+                        break;
                     }
                     // Otherwise it's a hacky "timer" event that means a host came back online
                     auto hostname = timer_event->message;
@@ -188,11 +186,13 @@ namespace wrench {
         }
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
-                                std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
+            std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
 
-        std::cout << std::endl << "TOTAL REPEATS = " << _num_repeats << "    TOTAL SUCCESSES = " << num_successes << std::endl;
+        std::cout << std::endl << "TOTAL REPEATS = " << _num_repeats << "    TOTAL SUCCESSES = " << num_successes <<
+            std::endl;
         std::cout << "EXPERIMENTAL PROBABILITY = " << experimental_probability << std::endl;
-        std::cout << "DELTA PROBABILITY = " << probability_midpoint << "    with deltat = " << prob->get_delta_t() << std::endl;
+        std::cout << "DELTA PROBABILITY = " << probability_midpoint << "    with deltat = " << prob->get_delta_t() <<
+            std::endl;
         std::cout << "IS THIS ACCURATE ENOUGH? " << (relative_error < 1e-2 ? "YES" : "NO") << std::endl;
 
         return 0;
