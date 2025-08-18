@@ -87,9 +87,11 @@ set(SIMULATOR_SOURCE_FILES
         src/NodeKiller.cpp
         src/Simulator.cpp
         src/Controller.cpp
+        src/ProbabilityComputation.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
         include/Controller.h
+        include/ProbabilityComputation.h
 )
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 
