@@ -113,14 +113,12 @@ namespace wrench {
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
         auto task_time = boost::json::value_to<double>(_application_spec.at("task").as_object().at("exec_time"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
-#if 0
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
 
         double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
         double probability_lower_bound = prob->compute_probability(task_time, _deadline, true);
 	double probability_midpoint = (probability_upper_bound + probability_lower_bound) / 2;
-#endif        
 
         /* Keep track of number of successes */
         int num_successes = 0;
@@ -186,7 +184,6 @@ namespace wrench {
             }
             std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
-#if 0
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
             std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
@@ -197,7 +194,6 @@ namespace wrench {
         std::cout << "DELTA PROBABILITY = " << probability_midpoint << "    with deltat = " << prob->get_delta_t() <<
             std::endl;
         std::cout << "IS THIS ACCURATE ENOUGH? " << (relative_error < 1e-2 ? "YES" : "NO") << std::endl;
-#endif
 
         return 0;
     }
