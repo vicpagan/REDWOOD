@@ -175,7 +175,7 @@ namespace wrench {
                         if (repeat_id != std::to_string(repeat)) {
                             continue; // Spurious timeout
                         }
-                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED" << std::endl;
+                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" << Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                         WRENCH_INFO("Deadline reached :(");
                         break;
                     }
