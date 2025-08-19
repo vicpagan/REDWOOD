@@ -11,14 +11,15 @@
     "seed": -1
   },
   "application": {
-    "deadline": 1000,
-    "task":
-    {
-      "name": "task1",
-      "exec_time": 100
-    }
+    "deadline": 10000,
+    "tasks": [
+      {
+        "name": "task1",
+        "exec_time": 400
+      }
+    ]
   },
   "execution": {
-    "num_repeats": 1000
+    "num_repeats": 10000
   }
 }
