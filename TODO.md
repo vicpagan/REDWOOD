@@ -1,0 +1,3 @@
+  - [VP] Implement the "pick the next execution option" based on recurcive expected error computation
+  - [HC] Implement the functions ("affine", etc.) in a convenient data structure in src/FunctionDefinitions.cpp
+  - [HC] Modify the simulator to use a scheduling algorithm, loop over algorithms, and reset the RNG
