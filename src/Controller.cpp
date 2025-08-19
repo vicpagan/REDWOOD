@@ -15,6 +15,8 @@
 #define MBYTE (1000.0 * 1000.0)
 #define GBYTE (1000.0 * 1000.0 * 1000.0)
 
+#define COMPUTE_PROBABILITIES 1
+
 #include <iostream>
 
 #include "Controller.h"
@@ -114,7 +116,7 @@ namespace wrench {
             _application_spec.at("tasks").as_array()[0].as_object().at("exec_time"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
 
-#if 1
+#ifdef COMPUTE_PROBABILITIES
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
         double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
@@ -220,7 +222,7 @@ namespace wrench {
             // std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
 
-#if 1
+#ifdef COMPUTE_PROBABILITIES
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
             std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
