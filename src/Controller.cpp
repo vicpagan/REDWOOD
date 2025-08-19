@@ -113,12 +113,16 @@ namespace wrench {
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
         auto task_time = boost::json::value_to<double>(_application_spec.at("task").as_object().at("exec_time"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
+
+#if 0
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
+
 
         double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
         double probability_lower_bound = prob->compute_probability(task_time, _deadline, true);
         double probability_midpoint = (probability_upper_bound + probability_lower_bound) / 2;
+#endif
 
         /* Keep track of number of successes */
         int num_successes = 0;
@@ -128,44 +132,48 @@ namespace wrench {
             /* (Re-)Create node on/off turners */
             start_node_killers();
 
-            /* Create the set of idle hosts */
-            std::set<std::string> idle_hosts;
-            for (const auto& item : _compute_services) {
-                idle_hosts.insert(item.first);
-            }
-
             /* Create an alarm for the deadline */
-            WRENCH_INFO("SETTING AN ALARM FOR %lf", Simulation::getCurrentSimulatedDate() + _deadline);
-            this->setTimer(Simulation::getCurrentSimulatedDate() + _deadline, "timeout:" + std::to_string(repeat));
+            WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, Simulation::getCurrentSimulatedDate() + _deadline);
+            this->setTimer(Simulation::getCurrentSimulatedDate() + _deadline, "time_out:" + std::to_string(repeat));
+
+            /* Create the map of hosts, where entries are either null (if idle) or
+             * a submitted job
+             */
+            std::map<std::string, std::shared_ptr<CompoundJob>> running_jobs;
+            for (const auto &item : _compute_services) {
+                running_jobs[item.first] = nullptr;;
+            }
 
             /* Loop until the task completes successfully somewhere */
             bool success = false;
             while (true) {
                 // Submit the task to each idle hosts
-                for (const auto& idle_host : idle_hosts) {
-                    auto job = job_manager->createCompoundJob("");
-                    job->addSleepAction("", 100);
-                    WRENCH_INFO("Submitting a job to %s", idle_host.c_str());
-                    job_manager->submitJob(job, _compute_services.at(idle_host));
+                for (const auto& [hostname, job] : running_jobs) {
+                    if (job == nullptr) {
+                        auto new_job = job_manager->createCompoundJob("");
+                        new_job->addSleepAction("", task_time);
+                        WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
+                        job_manager->submitJob(new_job, _compute_services.at(hostname));
+                        running_jobs[hostname] = new_job;
+                    }
                 }
-                idle_hosts.clear();
 
                 // Here we could instead call waitForAndProcessNextEvent() and define the handling
                 // methods, in case this if-else-if thing becomes too unwieldly
                 auto event = this->waitForNextEvent();
-                if (auto failure_event = std::dynamic_pointer_cast<CompoundJobFailedEvent>(event)) {
-                    auto hostname = failure_event->compute_service->getHosts().at(0);
-                    WRENCH_INFO("A job just failed on %s... oh well", hostname.c_str());
-                }
-                else if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
+                if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                     auto hostname = success_event->compute_service->getHosts().at(0);
                     WRENCH_INFO("A job succeeded on %s... we're done!", hostname.c_str());
                     success = true;
                     num_successes++;
                     break;
-                }
-                else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
-                    std::string timeout_prefix = "timeout";
+                } else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                    // This is the catch-all timer-based stuff
+                    std::string timeout_prefix = "time_out";
+                    std::string hostup_prefix = "host_up";
+                    std::string hostdown_prefix = "host_down";
+
+                    // Is it a timeout?
                     if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
                         size_t pos = timer_event->message.find(':');
                         // Check if the colon exists
@@ -176,14 +184,39 @@ namespace wrench {
                         WRENCH_INFO("Deadline reached :(");
                         break;
                     }
-                    // Otherwise it's a hacky "timer" event that means a host came back online
-                    auto hostname = timer_event->message;
-                    WRENCH_INFO("Host %s just became usable", hostname.c_str());
-                    idle_hosts.insert(hostname);
+
+                    if (timer_event->message.compare(0, hostup_prefix.length(), hostup_prefix) == 0) {
+                        size_t pos = timer_event->message.find(':');
+                        std::string hostname = timer_event->message.substr(pos + 1);
+                        // Reset the host's entry to nullptr, so that we now know it's idle
+                        WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
+                        running_jobs[hostname] = nullptr;
+                        continue;
+                    }
+
+                    if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
+                        size_t pos = timer_event->message.find(':');
+                        std::string hostname = timer_event->message.substr(pos + 1);
+                        // Cancel the job
+                        WRENCH_INFO("Was notified that %s is down... terminating job", hostname.c_str());
+                        job_manager->terminateJob(running_jobs[hostname]);
+                        // Leave the job in the map, so that we don't mistake the host as idle
+                        continue;
+                    }
+                }
+            }
+            // Cancel pending jobs
+            for (const auto& [hostname, job] : running_jobs) {
+                if (job) {
+                    try {
+                        job_manager->terminateJob(job);
+                    } catch (ExecutionException &ignore) {}
                 }
             }
             std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
+
+#if 0
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
             std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
@@ -194,6 +227,7 @@ namespace wrench {
         std::cout << "DELTA PROBABILITY = " << probability_midpoint << "    with deltat = " << prob->get_delta_t() <<
             std::endl;
         std::cout << "IS THIS ACCURATE ENOUGH? " << (relative_error < 1e-2 ? "YES" : "NO") << std::endl;
+#endif
 
         return 0;
     }

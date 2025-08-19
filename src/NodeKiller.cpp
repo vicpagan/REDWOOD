@@ -38,13 +38,13 @@ wrench::NodeKiller::NodeKiller(
     WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
     while (true) {
         Simulation::sleep(_exponential_distribution(_rng));
-        WRENCH_INFO("TURNING OFF HOST %s", _victim_host.c_str());
-        Simulation::turnOffHost(_victim_host);
+        WRENCH_INFO("Turning host %s \"off\"", _victim_host.c_str());
+        // Simulation::turnOffHost(_victim_host);
+        _notify_commport->dputMessage(new ExecutionControllerAlarmTimerMessage("host_down:" + _victim_host, 0));
+
         Simulation::sleep(_restart_overhead);
-        WRENCH_INFO("TURNING ON HOST %s", _victim_host.c_str());
-        Simulation::turnOnHost(_victim_host);
-        WRENCH_INFO("SENDING MESSAGE TO CONTROLER");
-        _notify_commport->dputMessage(
-            new ExecutionControllerAlarmTimerMessage(_victim_host, 0));
+        WRENCH_INFO("Turning host %s \"on\"", _victim_host.c_str());
+        // Simulation::turnOnHost(_victim_host);
+        _notify_commport->dputMessage(new ExecutionControllerAlarmTimerMessage("host_up:" + _victim_host, 0));
     }
 }
