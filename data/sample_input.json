@@ -15,11 +15,53 @@
     "tasks": [
       {
         "name": "task1",
-        "exec_time": 400
+        "execution_options": [
+          {
+            "name": "option1",
+            "t_function": {
+              "type":"affine",
+              "parameters": [1.2, 4.1]
+            },
+            "d_function": {
+              "type":"affine",
+              "parameters": [10, 20]
+            },
+            "e_function": {
+              "type":"quadratic",
+              "parameters": [1.2, 4.1, 4.2]
+            }
+          },
+          {
+            "name": "option1",
+            "t_function": {
+              "type":"affine",
+              "parameters": [1, 4]
+            },
+            "d_function": {
+              "type":"affine",
+              "parameters": [2, 4]
+            },
+            "e_function": {
+              "type":"quadratic",
+              "parameters": [32, 44, 12]
+            }
+          }
+        ]
       }
     ]
   },
   "execution": {
-    "num_repeats": 10000
+    "num_repeats": 10000,
+    "algorithms": {
+      "one_host":
+      {
+        "one_task": ["static", "dynamic"],
+        "chain": []
+      },
+      "multi_host":
+      {
+        "one_task": ["static", "dynamic_independent", "heuristic1"]
+      }
+    }
   }
 }
