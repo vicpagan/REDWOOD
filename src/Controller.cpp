@@ -94,7 +94,6 @@ namespace wrench {
         }
     }
 
-
     /**
      * @brief main method of the Controller
      *
@@ -111,26 +110,17 @@ namespace wrench {
 
         /* Calculate estimate deltat probability to compare to */
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        auto task_time = boost::json::value_to<double>(_application_spec.at("tasks").as_array()[0].as_object().at("exec_time"));
+        auto task_time = boost::json::value_to<double>(
+            _application_spec.at("tasks").as_array()[0].as_object().at("exec_time"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
 
-#if 0
+#if 1
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
-
-
         double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
         double probability_lower_bound = prob->compute_probability(task_time, _deadline, true);
         double probability_midpoint = (probability_upper_bound + probability_lower_bound) / 2;
 #endif
-        double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-2);
-        prob->set_delta_t(deltat_computation);
-
-        // std::cout << "TASK TIME = " << task_time << "\n";
-
-        double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
-        double probability_lower_bound = prob->compute_probability(task_time, _deadline, true);
-	double probability_midpoint = (probability_upper_bound + probability_lower_bound) / 2;
 
         /* Keep track of number of successes */
         int num_successes = 0;
@@ -141,14 +131,15 @@ namespace wrench {
             start_node_killers();
 
             /* Create an alarm for the deadline */
-            WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, Simulation::getCurrentSimulatedDate() + _deadline);
+            WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat,
+                        Simulation::getCurrentSimulatedDate() + _deadline);
             this->setTimer(Simulation::getCurrentSimulatedDate() + _deadline, "time_out:" + std::to_string(repeat));
 
             /* Create the map of hosts, where entries are either null (if idle) or
              * a submitted job
              */
             std::map<std::string, std::shared_ptr<CompoundJob>> running_jobs;
-            for (const auto &item : _compute_services) {
+            for (const auto& item : _compute_services) {
                 running_jobs[item.first] = nullptr;;
             }
 
@@ -171,11 +162,13 @@ namespace wrench {
                 auto event = this->waitForNextEvent();
                 if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                     auto hostname = success_event->compute_service->getHosts().at(0);
-                    WRENCH_INFO("A job succeeded on %s... we're done!", hostname.c_str());
+                    std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
+                            Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                     success = true;
                     num_successes++;
                     break;
-                } else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                }
+                else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
                     // This is the catch-all timer-based stuff
                     std::string timeout_prefix = "time_out";
                     std::string hostup_prefix = "host_up";
@@ -189,7 +182,8 @@ namespace wrench {
                         if (repeat_id != std::to_string(repeat)) {
                             continue; // Spurious timeout
                         }
-                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" << Simulation::getCurrentSimulatedDate() << ")" << std::endl;
+                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" <<
+                            Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                         WRENCH_INFO("Deadline reached :(");
                         break;
                     }
@@ -214,18 +208,19 @@ namespace wrench {
                     }
                 }
             }
-            // Cancel pending jobs
+            // Cancel all pending jobs
             for (const auto& [hostname, job] : running_jobs) {
                 if (job) {
                     try {
                         job_manager->terminateJob(job);
-                    } catch (ExecutionException &ignore) {}
+                    } catch (ExecutionException& ignore) {
+                    }
                 }
             }
             // std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
 
-#if 0
+#if 1
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
             std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
