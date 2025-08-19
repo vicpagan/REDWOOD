@@ -111,10 +111,12 @@ namespace wrench {
 
         /* Calculate estimate deltat probability to compare to */
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        auto task_time = boost::json::value_to<double>(_application_spec.at("task").as_object().at("exec_time"));
+        auto task_time = boost::json::value_to<double>(_application_spec.at("tasks").as_array()[0].as_object().at("exec_time"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
-        double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
+        double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-2);
         prob->set_delta_t(deltat_computation);
+
+        // std::cout << "TASK TIME = " << task_time << "\n";
 
         double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
         double probability_lower_bound = prob->compute_probability(task_time, _deadline, true);
@@ -144,7 +146,7 @@ namespace wrench {
                 // Submit the task to each idle hosts
                 for (const auto& idle_host : idle_hosts) {
                     auto job = job_manager->createCompoundJob("");
-                    job->addSleepAction("", 100);
+                    job->addSleepAction("", task_time);
                     WRENCH_INFO("Submitting a job to %s", idle_host.c_str());
                     job_manager->submitJob(job, _compute_services.at(idle_host));
                 }
@@ -173,6 +175,7 @@ namespace wrench {
                         if (repeat_id != std::to_string(repeat)) {
                             continue; // Spurious timeout
                         }
+                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED" << std::endl;
                         WRENCH_INFO("Deadline reached :(");
                         break;
                     }
@@ -182,7 +185,7 @@ namespace wrench {
                     idle_hosts.insert(hostname);
                 }
             }
-            std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
+            // std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
