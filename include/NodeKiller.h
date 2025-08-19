@@ -19,7 +19,9 @@ namespace wrench {
      *  @brief An Execution Controller implementation
      */
     class NodeKiller : public Service {
+
     public:
+
         // Constructor
         NodeKiller(
             const std::default_random_engine rng,
