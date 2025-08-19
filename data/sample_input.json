@@ -20,30 +20,64 @@
             "name": "option1",
             "t_function": {
               "type":"affine",
-              "parameters": [1.2, 4.1]
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1,
+                "b": 4,
+                "c": 10
+              }
             },
             "d_function": {
               "type":"affine",
-              "parameters": [10, 20]
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1,
+                "b": 4,
+                "c": 20
+              }
             },
             "e_function": {
               "type":"quadratic",
-              "parameters": [1.2, 4.1, 4.2]
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 10,
+                "b": 1,
+                "c": 3,
+                "d": 1,
+                "e": 2
+              }
             }
           },
           {
-            "name": "option1",
+            "name": "option2",
             "t_function": {
               "type":"affine",
-              "parameters": [1, 4]
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 3,
+                "b": 4,
+                "c": 4
+              }
             },
             "d_function": {
-              "type":"affine",
-              "parameters": [2, 4]
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 100,
+                "b": 1,
+                "c": 3,
+                "d": 1,
+                "e": 2
+              }
             },
             "e_function": {
-              "type":"quadratic",
-              "parameters": [32, 44, 12]
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1,
+                "b": 4,
+                "c": 666
+              }
             }
           }
         ]
