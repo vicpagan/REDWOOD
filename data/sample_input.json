@@ -12,6 +12,8 @@
   },
   "application": {
     "deadline": 10000,
+    "initial_data_size": 100.0,
+    "initial_error_level": 0.0,
     "tasks": [
       {
         "name": "task1",
