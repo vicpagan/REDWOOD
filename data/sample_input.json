@@ -88,15 +88,7 @@
     "num_repeats": 10000,
     "e_fail": 100,
     "algorithms": {
-      "one_host":
-      {
-        "one_task": ["static", "dynamic"],
-        "chain": []
-      },
-      "multi_host":
-      {
-        "one_task": ["static", "dynamic_independent", "heuristic1"]
-      }
+        "one_task": ["static", "dynamic"]
     }
   }
 }
