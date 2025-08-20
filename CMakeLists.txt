@@ -89,11 +89,13 @@ set(SIMULATOR_SOURCE_FILES
         src/Controller.cpp
         src/ProbabilityComputation.cpp
         src/FunctionGenerator.cpp
+        src/SchedulingAlgorithm.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
         include/Controller.h
         include/ProbabilityComputation.h
         include/FunctionGenerator.h
+        include/SchedulingAlgorithm.h
 )
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 

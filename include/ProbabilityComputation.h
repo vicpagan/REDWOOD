@@ -23,6 +23,10 @@ public:
         return this->delta_t;
     }
 
+    [[nodiscard]] double get_lambda() const {
+        return this->lambda;
+    }
+
 private:
     [[nodiscard]] double success_probability(long u) const;
     [[nodiscard]] double fail_probability(long u) const;
