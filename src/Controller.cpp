@@ -167,10 +167,9 @@ namespace wrench {
                 running_jobs[item.first] = nullptr;;
             }
 
-            auto running_output_data = initial_data_x;
-            auto running_output_error = initial_error_y;
-
-            std::cout << "TASK 1 OPTION 1 RUNNING TIME = " << task_functions["task1"]["option1"]["t_function"](running_output_data, running_output_error) << std::endl;
+            double running_output_data = initial_data_x;
+            double running_output_error = initial_error_y;
+            std::string current_task = "task_1";
 
             /* Loop until the task completes successfully somewhere */
             while (true) {
@@ -178,7 +177,7 @@ namespace wrench {
                 for (const auto& [hostname, job] : running_jobs) {
                     if (job == nullptr) {
                         auto new_job = job_manager->createCompoundJob("");
-                        new_job->addSleepAction("", task_functions["task1"]["option1"]["t_function"](running_output_data, running_output_error));
+                        new_job->addSleepAction("", task_functions[current_task]["option1"]["t_function"](running_output_data, running_output_error));
                         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
                         job_manager->submitJob(new_job, _compute_services.at(hostname));
                         running_jobs[hostname] = new_job;
@@ -193,6 +192,11 @@ namespace wrench {
                     std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
                             Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                     num_successes++;
+                    /* TODO:
+                     * With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
+                     * Realistically, should this be done with a forced restart of the other hosts?
+                     * Or would the other hosts be able to start on the new task and give up the old one instantly?
+                     */
                     break;
                 }
                 else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {

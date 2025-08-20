@@ -86,6 +86,7 @@
   },
   "execution": {
     "num_repeats": 10000,
+    "e_fail": 100,
     "algorithms": {
       "one_host":
       {
