@@ -15,6 +15,8 @@
 #include <wrench-dev.h>
 #include <boost/json/object.hpp>
 
+#include "ProbabilityComputation.h"
+
 namespace wrench {
     class NodeKiller;
 
@@ -36,11 +38,24 @@ namespace wrench {
     protected:
 
     private:
+
         int main() override;
         void start_node_killers();
+        void start_probability_computation(double lambda, double restart_overhead);
+
         std::shared_ptr<NodeKiller> start_node_killer(const std::string &victim, int seed);
+        std::string select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> &exec_options,
+            const double input_data_size, const double input_error_level, const double remaining_time);
+        double calculate_expected_error(double exec_option_error,
+                                        double probability_midpoint,
+                                        double probability_success,
+                                        long m_j,
+                                        long n,
+                                        double input_data_size,
+                                        double input_error_level);
 
         std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
+        std::unique_ptr<ProbabilityComputation> _probability_computation;
 
         const boost::json::object _failure_spec;
         const boost::json::object _application_spec;
@@ -49,6 +64,7 @@ namespace wrench {
         const std::shared_ptr<SimpleStorageService> _storage_service;
 
         double _deadline;
+        double _e_fail;
         long _num_repeats;
         double _lambda;
         int _seed;

@@ -51,9 +51,11 @@ namespace wrench {
                                                           _storage_service(storage_service) {
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
         _deadline = boost::json::value_to<double>(_application_spec.at("deadline"));
+        _e_fail = boost::json::value_to<double>(_execution_spec.at("e_fail"));
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
         _seed = boost::json::value_to<int>(_failure_spec.at("seed"));
+
         if (_seed < 0) {
             _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
         }
@@ -100,6 +102,81 @@ namespace wrench {
     }
 
     /**
+     * @brief Calculates expected error recursively for one execution option for a single task
+     *
+     * @param exec_option_error This is our e(x, y,) for this execution option
+     * @param probability_midpoint This is our p_u
+     * @param probability_success This is our e^(-lambda * m_j * delta)
+     * @param m_j This is m_j in the paper
+     * @param n THis is n in the paper
+     * @param input_data_size This is our x
+     * @param input_error_level This is our y
+     * @return The expected error for the selected execution option
+     */
+    double Controller::calculate_expected_error(double exec_option_error,
+                                                double probability_midpoint,
+                                                double probability_success,
+                                                long m_j,
+                                                long n,
+                                                double input_data_size,
+                                                double input_error_level) {
+
+        if (n < m_j) {
+            return _e_fail;
+        }
+
+        double reward_success = probability_success * exec_option_error;
+        double fail_punishment = 0.0;
+        for (long i = 0; i < m_j; i++) {
+            fail_punishment += (probability_midpoint * calculate_expected_error(
+                exec_option_error, probability_midpoint, probability_success, m_j, n - i - 1, input_data_size, input_error_level));
+        }
+        return reward_success + fail_punishment;
+    }
+
+    /**
+     * @brief Selects the best execution option based on the lowest E(x, y, n)
+     *
+     * @param exec_options Map of execution options for the current task
+     * @param input_data_size This is our x
+     * @param input_error_level This is our y
+     * @param remaining_time This is our n, which is the remaining time until the deadline
+     * @return The name of the best execution option
+     */
+    std::string Controller::select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> & exec_options,
+                                                    const double input_data_size,
+                                                    const double input_error_level,
+                                                    const double remaining_time) {
+
+        double min_error_level = std::numeric_limits<double>::max();
+        std::string min_execution_option;
+
+        for (const auto &[option_name, option_functions] : exec_options) {
+            const auto exec_option_name = option_name;
+            const auto exec_option_time = option_functions.at("t_function")(input_data_size, input_error_level);
+            const auto exec_option_error = option_functions.at("e_function")(input_data_size, input_error_level);
+
+            double deltat_computation = _probability_computation->compute_best_deltat(exec_option_time, remaining_time, 1e-3);
+            _probability_computation->set_delta_t(deltat_computation);
+            double probability_midpoint = _probability_computation->compute_probability_midpoint(exec_option_time, remaining_time);
+
+            // TODO: m_j does not take I/O into account just yet. Need to set up bandwidth.
+            auto m_j = static_cast<long>(std::ceil(exec_option_time/deltat_computation));
+            auto n = static_cast<long>(std::ceil(remaining_time / deltat_computation));
+            auto probability_success = exp(-_lambda * m_j * deltat_computation);
+
+            auto expected_error_option = calculate_expected_error(exec_option_error, probability_midpoint, probability_success, m_j, n, input_data_size, input_error_level);
+            if (expected_error_option < min_error_level) {
+                min_error_level = expected_error_option;
+                min_execution_option = exec_option_name;
+            }
+        }
+
+        return min_execution_option;
+    }
+
+
+    /**
      * @brief main method of the Controller
      *
      * @return 0 on completion
@@ -115,12 +192,11 @@ namespace wrench {
 
         /* Calculate estimate deltat probability to compare to */
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
+        _probability_computation = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
 
         /* Get initial x and y as well as e_fail from the JSON file */
         auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
         auto initial_error_level = boost::json::value_to<double>(_application_spec.at("initial_error_level"));
-        auto e_fail = boost::json::value_to<double>(_execution_spec.at("e_fail"));
 
 #ifdef COMPUTE_PROBABILITIES
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
@@ -157,9 +233,9 @@ namespace wrench {
             start_node_killers();
 
             /* Create an alarm for the deadline */
-            WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat,
-                        Simulation::getCurrentSimulatedDate() + _deadline);
-            this->setTimer(Simulation::getCurrentSimulatedDate() + _deadline, "time_out:" + std::to_string(repeat));
+            auto alarm = Simulation::getCurrentSimulatedDate() + _deadline;
+            WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, alarm);
+            this->setTimer(alarm, "time_out:" + std::to_string(repeat));
 
             /* Create the map of hosts, where entries are either null (if idle) or
              * a submitted job
@@ -181,8 +257,13 @@ namespace wrench {
                 for (const auto& [hostname, job] : running_jobs) {
                     if (job == nullptr) {
                         auto new_job = job_manager->createCompoundJob("");
+                        std::string selected_exec_option = select_execution_option(task_functions[current_task],
+                            running_output_data_size, running_output_error_level,
+                            alarm - Simulation::getCurrentSimulatedDate());
+
+                        std::cout << "Selected execution option = " << selected_exec_option << std::endl;
                         new_job->addSleepAction("",
-                            task_functions[current_task]["option1"]["t_function"]
+                            task_functions[current_task][selected_exec_option]["t_function"]
                             (running_output_data_size, running_output_error_level));
 
                         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
@@ -199,10 +280,11 @@ namespace wrench {
                     std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
                             Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                     num_successes++;
-                    /* TODO:
-                     * With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
+                    /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
                      * Realistically, should this be done with a forced restart of the other hosts?
                      * Or would the other hosts be able to start on the new task and give up the old one instantly?
+                     * We also need to update the running input data size and input error level based on the
+                     * execution option that was successful
                      */
                     break;
                 }

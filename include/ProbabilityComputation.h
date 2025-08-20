@@ -11,7 +11,7 @@ public:
         this->delta_t = -1.0;
     }
 
-    [[nodiscard]] double compute_probability(double task_time, double time_to_deadline, bool lower_bound) const;
+    [[nodiscard]] double compute_probability_midpoint(double task_time, double time_to_deadline) const;
 
     double compute_best_deltat(double task_time, double time_to_deadline, double precision);
 
@@ -26,6 +26,8 @@ public:
 private:
     [[nodiscard]] double success_probability(long u) const;
     [[nodiscard]] double fail_probability(long u) const;
+    [[nodiscard]] double compute_probability(double task_time, double time_to_deadline, bool lower_bound) const;
+
     double compute_probability(std::vector<double>& dp, long m, long n, long R) const;
 
     double lambda;
