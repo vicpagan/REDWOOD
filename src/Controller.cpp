@@ -15,11 +15,13 @@
 #define MBYTE (1000.0 * 1000.0)
 #define GBYTE (1000.0 * 1000.0 * 1000.0)
 
-#define COMPUTE_PROBABILITIES 1
+// #define COMPUTE_PROBABILITIES 1
 
 #include <iostream>
 
 #include "Controller.h"
+
+#include "FunctionGenerator.h"
 #include "NodeKiller.h"
 #include "ProbabilityComputation.h"
 
@@ -112,10 +114,10 @@ namespace wrench {
 
         /* Calculate estimate deltat probability to compare to */
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        auto task_time = boost::json::value_to<double>(
-            _application_spec.at("tasks").as_array()[0].as_object().at("exec_time"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
 
+        // TODO: This hard-coded task_time is now temporary
+        auto task_time = 10;
 #ifdef COMPUTE_PROBABILITIES
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
