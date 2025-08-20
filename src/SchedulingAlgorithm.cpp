@@ -42,6 +42,8 @@ double SchedulingAlgorithm::calculate_expected_error(double exec_option_error,
         return e_fail;
     }
 
+    // TODO: Implement memoization
+
     double reward_success = probability_success * exec_option_error;
     double fail_punishment = 0.0;
     for (long i = 0; i < m_j; i++) {
@@ -81,7 +83,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
         const auto exec_option_error = option_functions.at("e_function")(input_data_size, input_error_level);
         // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << "\n";
 
-        if (_delta_t == -1) {
+        if (_delta_t < 0) {
             double deltat_computation = probability_computation->compute_best_deltat(
                 exec_option_time, remaining_time, _delta_t_precision);
             probability_computation->set_delta_t(deltat_computation);
@@ -90,6 +92,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
         }
         double probability_midpoint = probability_computation->compute_probability_midpoint(
             exec_option_time, remaining_time);
+
 
         // TODO: m_j does not take I/O into account just yet. Need to set up bandwidth.
         // TODO: HENRI: The Controller now has a _io_read_bandwidth and _io_write_bandwidth variables
