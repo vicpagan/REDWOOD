@@ -75,7 +75,7 @@ include_directories(include/ /usr/local/include/ /opt/local/include/ ${WRENCH_IN
 
 # Main executable
 set(MAIN_SOURCE_FILES
-        include/main.cpp
+        src/main.cpp
         src/ProbabilityComputation.cpp
         include/ProbabilityComputation.h
 )

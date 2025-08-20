@@ -2,12 +2,13 @@
 #define FUNCTIONGENERATOR_H
 
 #include <boost/json.hpp>
+#include <map>
 
 
 class FunctionGenerator {
 public:
     FunctionGenerator() = default;
-    static std::function<double(double, double)> get_function(boost::json::object& spec);
+    static std::function<double(double, double)> get_function(const boost::json::object& spec);
 
     class AffineFunctor {
     public:
