@@ -32,6 +32,7 @@ namespace wrench {
                 const boost::json::object& failure_spec,
                 const boost::json::object& application_spec,
                 const boost::json::object& execution_spec,
+                const boost::json::object& scheduling_spec,
                 const std::map<std::string, std::shared_ptr<BareMetalComputeService>> &compute_services,
                 const std::shared_ptr<SimpleStorageService> &storage_service,
                 const std::string &hostname);
@@ -62,6 +63,7 @@ namespace wrench {
         const boost::json::object _failure_spec;
         const boost::json::object _application_spec;
         const boost::json::object _execution_spec;
+        const boost::json::object _scheduling_spec;
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
 
@@ -69,6 +71,8 @@ namespace wrench {
         double _e_fail;
         long _num_repeats;
         double _lambda;
+        double _delta_t;
+        double _delta_t_precision;
         int _seed;
         double _io_read_bandwidth;
         double _io_write_bandwidth;
