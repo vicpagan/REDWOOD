@@ -7,7 +7,7 @@
 class FunctionGenerator {
 public:
     FunctionGenerator() = default;
-    std::function<double(double, double)> get_function(boost::json::object& spec);
+    static std::function<double(double, double)> get_function(boost::json::object& spec);
 
     class AffineFunctor {
     public:
@@ -36,7 +36,7 @@ public:
     };
 
 private:
-    std::map<std::string, std::function<double(double, double)>> _function_registry;
+    static std::map<std::string, std::function<double(double, double)>> _function_registry;
 };
 
 
