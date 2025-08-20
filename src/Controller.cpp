@@ -33,22 +33,23 @@ namespace wrench {
      *
      * @param failure_spec: failure specifications
      * @param application_spec: application specifications
-     * @param num_repeats: number of repeats
+     * @param execution_spec: application specifications
      * @param compute_services: a set of compute services available to run actions
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
     Controller::Controller(const boost::json::object& failure_spec,
                            const boost::json::object& application_spec,
-                           const long num_repeats,
+                           const boost::json::object& execution_spec,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
                                                           _failure_spec(failure_spec),
                                                           _application_spec(application_spec),
-                                                          _num_repeats(num_repeats),
+                                                          _execution_spec(execution_spec),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
+        _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
         _deadline = boost::json::value_to<double>(_application_spec.at("deadline"));
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);

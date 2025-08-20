@@ -28,7 +28,7 @@ namespace wrench {
         Controller(
                 const boost::json::object& failure_spec,
                 const boost::json::object& application_spec,
-                long num_repeats,
+                const boost::json::object& execution_spec,
                 const std::map<std::string, std::shared_ptr<BareMetalComputeService>> &compute_services,
                 const std::shared_ptr<SimpleStorageService> &storage_service,
                 const std::string &hostname);
@@ -43,12 +43,13 @@ namespace wrench {
         std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
 
         const boost::json::object _failure_spec;
-        double _deadline;
         const boost::json::object _application_spec;
-        const long _num_repeats;
+        const boost::json::object _execution_spec;
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
 
+        double _deadline;
+        long _num_repeats;
         double _lambda;
         int _seed;
         std::exponential_distribution<double> _exponential_distribution;
