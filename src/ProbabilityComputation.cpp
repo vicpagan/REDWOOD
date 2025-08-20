@@ -72,6 +72,12 @@ double ProbabilityComputation::compute_probability(std::vector<double>& dp, long
     return dp[n];
 }
 
+double ProbabilityComputation::compute_probability_midpoint(const double task_time, const double time_to_deadline) const {
+    double result_upper_bound = compute_probability(task_time, time_to_deadline, false);
+    double result_lower_bound = compute_probability(task_time, time_to_deadline, true);
+    return ((result_upper_bound + result_lower_bound) / 2);
+}
+
 double ProbabilityComputation::compute_best_deltat(const double task_time, double time_to_deadline, double precision) {
     // Remember the current delta to restore it later (pretty hacky)
     double current_delta_t = this->delta_t;

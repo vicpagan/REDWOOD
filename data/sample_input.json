@@ -88,7 +88,7 @@
   },
   "execution": {
     "num_repeats": 10000,
-    "e_fail": 100,
+    "e_fail": 100.0,
     "algorithms": {
         "one_task": ["static", "dynamic"]
     }
