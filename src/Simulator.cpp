@@ -120,6 +120,7 @@ int main(int argc, char** argv) {
     /* Instantiate the execution controller */
     auto controller = simulation->add(
         new wrench::Controller(
+            json_input["platform"].as_object(),
             json_input["failures"].as_object(),
             json_input["application"].as_object(),
             json_input["execution"].as_object(),

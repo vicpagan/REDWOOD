@@ -11,7 +11,6 @@
     "seed": -1
   },
   "application": {
-    "deadline": 10000,
     "initial_data_size": 100.0,
     "initial_error_level": 0.0,
     "tasks": [
@@ -88,6 +87,7 @@
   },
   "execution": {
     "num_repeats": 10000,
+    "deadline": 10000,
     "e_fail": 100.0,
     "algorithms": {
         "one_task": ["static", "dynamic"]

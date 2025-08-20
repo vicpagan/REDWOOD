@@ -28,6 +28,7 @@ namespace wrench {
     public:
         // Constructor
         Controller(
+                const boost::json::object& platform_spec,
                 const boost::json::object& failure_spec,
                 const boost::json::object& application_spec,
                 const boost::json::object& execution_spec,
@@ -40,7 +41,7 @@ namespace wrench {
     private:
 
         int main() override;
-        void start_node_killers();
+        void start_node_killers(bool reset_seed);
         void start_probability_computation(double lambda, double restart_overhead);
 
         std::shared_ptr<NodeKiller> start_node_killer(const std::string &victim, int seed);
@@ -57,6 +58,7 @@ namespace wrench {
         std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
         std::unique_ptr<ProbabilityComputation> _probability_computation;
 
+        const boost::json::object _platform_spec;
         const boost::json::object _failure_spec;
         const boost::json::object _application_spec;
         const boost::json::object _execution_spec;
@@ -68,6 +70,8 @@ namespace wrench {
         long _num_repeats;
         double _lambda;
         int _seed;
+        double _io_read_bandwidth;
+        double _io_write_bandwidth;
         std::exponential_distribution<double> _exponential_distribution;
     };
 }// namespace wrench

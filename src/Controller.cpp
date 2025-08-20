@@ -24,6 +24,7 @@
 #include "FunctionGenerator.h"
 #include "NodeKiller.h"
 #include "ProbabilityComputation.h"
+#include <wrench/util/UnitParser.h>
 
 WRENCH_LOG_CATEGORY(controller, "Log category for Controller");
 
@@ -31,6 +32,7 @@ namespace wrench {
     /**
      * @brief Constructor
      *
+     * @param platform_spec: platform specifications
      * @param failure_spec: failure specifications
      * @param application_spec: application specifications
      * @param execution_spec: application specifications
@@ -38,19 +40,23 @@ namespace wrench {
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const boost::json::object& failure_spec,
+    Controller::Controller(const boost::json::object& platform_spec,
+                           const boost::json::object& failure_spec,
                            const boost::json::object& application_spec,
                            const boost::json::object& execution_spec,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
+                                                          _platform_spec(platform_spec),
                                                           _failure_spec(failure_spec),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
+        _io_read_bandwidth = wrench::UnitParser::parse_bandwidth(boost::json::value_to<string>(_platform_spec.at("io_read_bandwidth")));
+        _io_write_bandwidth = wrench::UnitParser::parse_bandwidth(boost::json::value_to<string>(_platform_spec.at("io_write_bandwidth")));
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
-        _deadline = boost::json::value_to<double>(_application_spec.at("deadline"));
+        _deadline = boost::json::value_to<double>(_execution_spec.at("deadline"));
         _e_fail = boost::json::value_to<double>(_execution_spec.at("e_fail"));
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
@@ -88,8 +94,11 @@ namespace wrench {
     /**
      * @brief Start a node killer on each host
      */
-    void Controller::start_node_killers() {
+    void Controller::start_node_killers(bool reset_seed) {
         static int seed = _seed;
+        if (reset_seed) {
+            seed = _seed;
+        }
         for (int i = 0; i < _compute_services.size(); i++) {
             auto victim_hostname = "ComputeHost_" + std::to_string(i);
             // Kill an existing node killer if any
@@ -120,7 +129,6 @@ namespace wrench {
                                                 long n,
                                                 double input_data_size,
                                                 double input_error_level) {
-
         if (n < m_j) {
             return _e_fail;
         }
@@ -129,7 +137,8 @@ namespace wrench {
         double fail_punishment = 0.0;
         for (long i = 0; i < m_j; i++) {
             fail_punishment += (probability_midpoint * calculate_expected_error(
-                exec_option_error, probability_midpoint, probability_success, m_j, n - i - 1, input_data_size, input_error_level));
+                exec_option_error, probability_midpoint, probability_success, m_j, n - i - 1, input_data_size,
+                input_error_level));
         }
         return reward_success + fail_punishment;
     }
@@ -143,29 +152,35 @@ namespace wrench {
      * @param remaining_time This is our n, which is the remaining time until the deadline
      * @return The name of the best execution option
      */
-    std::string Controller::select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> & exec_options,
-                                                    const double input_data_size,
-                                                    const double input_error_level,
-                                                    const double remaining_time) {
-
+    std::string Controller::select_execution_option(
+        const map<std::string, map<std::string, std::function<double(double, double)>>>& exec_options,
+        const double input_data_size,
+        const double input_error_level,
+        const double remaining_time) {
         double min_error_level = std::numeric_limits<double>::max();
         std::string min_execution_option;
 
-        for (const auto &[option_name, option_functions] : exec_options) {
+        for (const auto& [option_name, option_functions] : exec_options) {
             const auto exec_option_name = option_name;
             const auto exec_option_time = option_functions.at("t_function")(input_data_size, input_error_level);
             const auto exec_option_error = option_functions.at("e_function")(input_data_size, input_error_level);
 
-            double deltat_computation = _probability_computation->compute_best_deltat(exec_option_time, remaining_time, 1e-3);
+            double deltat_computation = _probability_computation->compute_best_deltat(
+                exec_option_time, remaining_time, 1e-3);
             _probability_computation->set_delta_t(deltat_computation);
-            double probability_midpoint = _probability_computation->compute_probability_midpoint(exec_option_time, remaining_time);
+            double probability_midpoint = _probability_computation->compute_probability_midpoint(
+                exec_option_time, remaining_time);
 
             // TODO: m_j does not take I/O into account just yet. Need to set up bandwidth.
-            auto m_j = static_cast<long>(std::ceil(exec_option_time/deltat_computation));
+            // TODO: HENRI: The Controller now has a _io_read_bandwidth and _io_write_bandwidth variables
+            // TODO         that store the I/O bandwidths in byte/sec
+            auto m_j = static_cast<long>(std::ceil(exec_option_time / deltat_computation));
             auto n = static_cast<long>(std::ceil(remaining_time / deltat_computation));
             auto probability_success = exp(-_lambda * m_j * deltat_computation);
 
-            auto expected_error_option = calculate_expected_error(exec_option_error, probability_midpoint, probability_success, m_j, n, input_data_size, input_error_level);
+            auto expected_error_option = calculate_expected_error(exec_option_error, probability_midpoint,
+                                                                  probability_success, m_j, n, input_data_size,
+                                                                  input_error_level);
             if (expected_error_option < min_error_level) {
                 min_error_level = expected_error_option;
                 min_execution_option = exec_option_name;
@@ -206,11 +221,17 @@ namespace wrench {
         double probability_midpoint = (probability_upper_bound + probability_lower_bound) / 2;
 #endif
 
-        /* Keep track of number of successes */
-        int num_successes = 0;
+        std::string scheduler_type;
+        if (_application_spec.at("tasks").as_array().size() == 1) {
+            scheduler_type = "one_task";
+        }
+        else {
+            throw std::invalid_argument("Multi-task applications not supported (yet)");
+        }
 
         /* Collect the functions for each execution option for each task */
-        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> task_functions;
+        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
+            task_functions;
 
         auto& tasks = _application_spec.at("tasks").as_array();
         for (const auto& task : tasks) {
@@ -227,113 +248,122 @@ namespace wrench {
             }
         }
 
-        /* Do all the repeats */
-        for (int repeat = 0; repeat < _num_repeats; repeat++) {
-            /* (Re-)Create node on/off turners */
-            start_node_killers();
+        /* Loop over all the scheduling algorithms */
+        for (const auto& scheduler_name : _execution_spec.at("algorithms").at(scheduler_type).as_array()) {
+            WRENCH_INFO("** Running experiments with algorithm '%s' **", scheduler_name.as_string().c_str());
 
-            /* Create an alarm for the deadline */
-            auto alarm = Simulation::getCurrentSimulatedDate() + _deadline;
-            WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, alarm);
-            this->setTimer(alarm, "time_out:" + std::to_string(repeat));
+            /* Keep track of number of successes */
+            int num_successes = 0;
 
-            /* Create the map of hosts, where entries are either null (if idle) or
-             * a submitted job
-             */
-            std::map<std::string, std::shared_ptr<CompoundJob>> running_jobs;
-            for (const auto& item : _compute_services) {
-                running_jobs[item.first] = nullptr;;
-            }
+            /* Do all the repeats */
+            for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
+                start_node_killers(repeat == 0);
 
-            auto running_output_data_size = initial_data_size;
-            auto running_output_error_level = initial_error_level;
+                /* Create an alarm for the deadline */
+                auto alarm = Simulation::getCurrentSimulatedDate() + _deadline;
+                WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, alarm);
+                this->setTimer(alarm, "time_out:" + std::to_string(repeat));
 
-            // TODO: Hard coded in starting task is temporary
-            std::string current_task = "task_1";
-
-            /* Loop until the task completes successfully somewhere */
-            while (true) {
-                // Submit the task to each idle hosts
-                for (const auto& [hostname, job] : running_jobs) {
-                    if (job == nullptr) {
-                        auto new_job = job_manager->createCompoundJob("");
-                        std::string selected_exec_option = select_execution_option(task_functions[current_task],
-                            running_output_data_size, running_output_error_level,
-                            alarm - Simulation::getCurrentSimulatedDate());
-
-                        std::cout << "Selected execution option = " << selected_exec_option << std::endl;
-                        new_job->addSleepAction("",
-                            task_functions[current_task][selected_exec_option]["t_function"]
-                            (running_output_data_size, running_output_error_level));
-
-                        WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
-                        job_manager->submitJob(new_job, _compute_services.at(hostname));
-                        running_jobs[hostname] = new_job;
-                    }
+                /* Create the map of hosts, where entries are either null (if idle) or
+                 * a submitted job
+                 */
+                std::map<std::string, std::shared_ptr<CompoundJob>> running_jobs;
+                for (const auto& item : _compute_services) {
+                    running_jobs[item.first] = nullptr;;
                 }
 
-                // Here we could instead call waitForAndProcessNextEvent() and define the handling
-                // methods, in case this if-else-if thing becomes too unwieldly
-                auto event = this->waitForNextEvent();
-                if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
-                    auto hostname = success_event->compute_service->getHosts().at(0);
-                    std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
-                            Simulation::getCurrentSimulatedDate() << ")" << std::endl;
-                    num_successes++;
-                    /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
-                     * Realistically, should this be done with a forced restart of the other hosts?
-                     * Or would the other hosts be able to start on the new task and give up the old one instantly?
-                     * We also need to update the running input data size and input error level based on the
-                     * execution option that was successful
-                     */
-                    break;
-                }
-                else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
-                    // This is the catch-all timer-based stuff
-                    std::string timeout_prefix = "time_out";
-                    std::string hostup_prefix = "host_up";
-                    std::string hostdown_prefix = "host_down";
+                auto running_output_data_size = initial_data_size;
+                auto running_output_error_level = initial_error_level;
 
-                    // Is it a timeout?
-                    if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
-                        size_t pos = timer_event->message.find(':');
-                        // Check if the colon exists
-                        std::string repeat_id = timer_event->message.substr(pos + 1);
-                        if (repeat_id != std::to_string(repeat)) {
-                            continue; // Spurious timeout
+                // TODO: Hard coded in starting task is temporary
+                std::string current_task = "task_1";
+
+                /* Loop until the task completes successfully somewhere */
+                while (true) {
+                    // Submit the task to each idle hosts
+                    for (const auto& [hostname, job] : running_jobs) {
+                        if (job == nullptr) {
+                            auto new_job = job_manager->createCompoundJob("");
+                            std::string selected_exec_option = select_execution_option(task_functions[current_task],
+                                running_output_data_size, running_output_error_level,
+                                alarm - Simulation::getCurrentSimulatedDate());
+
+                            std::cout << "Selected execution option = " << selected_exec_option << std::endl;
+                            new_job->addSleepAction("",
+                                                    task_functions[current_task][selected_exec_option]["t_function"]
+                                                    (running_output_data_size, running_output_error_level));
+
+                            WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
+                            job_manager->submitJob(new_job, _compute_services.at(hostname));
+                            running_jobs[hostname] = new_job;
                         }
-                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" <<
+                    }
+
+                    // Here we could instead call waitForAndProcessNextEvent() and define the handling
+                    // methods, in case this if-else-if thing becomes too unwieldly
+                    auto event = this->waitForNextEvent();
+                    if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
+                        auto hostname = success_event->compute_service->getHosts().at(0);
+                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
                             Simulation::getCurrentSimulatedDate() << ")" << std::endl;
-                        WRENCH_INFO("Deadline reached :(");
+                        num_successes++;
+                        /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
+                         * Realistically, should this be done with a forced restart of the other hosts?
+                         * Or would the other hosts be able to start on the new task and give up the old one instantly?
+                         * We also need to update the running input data size and input error level based on the
+                         * execution option that was successful
+                         */
                         break;
                     }
+                    else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                        // This is the catch-all timer-based stuff
+                        std::string timeout_prefix = "time_out";
+                        std::string hostup_prefix = "host_up";
+                        std::string hostdown_prefix = "host_down";
 
-                    if (timer_event->message.compare(0, hostup_prefix.length(), hostup_prefix) == 0) {
-                        size_t pos = timer_event->message.find(':');
-                        std::string hostname = timer_event->message.substr(pos + 1);
-                        // Reset the host's entry to nullptr, so that we now know it's idle
-                        WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
-                        running_jobs[hostname] = nullptr;
-                        continue;
-                    }
+                        // Is it a timeout?
+                        if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
+                            size_t pos = timer_event->message.find(':');
+                            // Check if the colon exists
+                            std::string repeat_id = timer_event->message.substr(pos + 1);
+                            if (repeat_id != std::to_string(repeat)) {
+                                continue; // Spurious timeout
+                            }
+                            std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" <<
+                                Simulation::getCurrentSimulatedDate() << ")" << std::endl;
+                            WRENCH_INFO("Deadline reached :(");
+                            break;
+                        }
 
-                    if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
-                        size_t pos = timer_event->message.find(':');
-                        std::string hostname = timer_event->message.substr(pos + 1);
-                        // Cancel the job
-                        WRENCH_INFO("Was notified that %s is down... terminating job", hostname.c_str());
-                        job_manager->terminateJob(running_jobs[hostname]);
-                        // Leave the job in the map, so that we don't mistake the host as idle
-                        continue;
+                        if (timer_event->message.compare(0, hostup_prefix.length(), hostup_prefix) == 0) {
+                            size_t pos = timer_event->message.find(':');
+                            std::string hostname = timer_event->message.substr(pos + 1);
+                            // Reset the host's entry to nullptr, so that we now know it's idle
+                            WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
+                            running_jobs[hostname] = nullptr;
+                            continue;
+                        }
+
+                        if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
+                            size_t pos = timer_event->message.find(':');
+                            std::string hostname = timer_event->message.substr(pos + 1);
+                            // Cancel the job
+                            WRENCH_INFO("Was notified that %s is down... terminating job", hostname.c_str());
+                            job_manager->terminateJob(running_jobs[hostname]);
+                            // Leave the job in the map, so that we don't mistake the host as idle
+                            continue;
+                        }
                     }
                 }
-            }
-            // Cancel all pending jobs
-            for (const auto& [hostname, job] : running_jobs) {
-                if (job) {
-                    try {
-                        job_manager->terminateJob(job);
-                    } catch (ExecutionException& ignore) {
+                // Cancel all pending jobs
+                for (const auto& [hostname, job] : running_jobs) {
+                    if (job) {
+                        try {
+                            job_manager->terminateJob(job);
+                        }
+                        catch (ExecutionException& ignore) {
+                        }
                     }
                 }
             }
