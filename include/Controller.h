@@ -42,18 +42,18 @@ namespace wrench {
 
         int main() override;
         void start_node_killers(bool reset_seed);
-        void start_probability_computation(double lambda, double restart_overhead);
+        // void start_probability_computation(double lambda, double restart_overhead);
 
         std::shared_ptr<NodeKiller> start_node_killer(const std::string &victim, int seed);
-        std::string select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> &exec_options,
-            const double input_data_size, const double input_error_level, const double remaining_time);
-        double calculate_expected_error(double exec_option_error,
-                                        double probability_midpoint,
-                                        double probability_success,
-                                        long m_j,
-                                        long n,
-                                        double input_data_size,
-                                        double input_error_level);
+        // std::string select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> &exec_options,
+        //     const double input_data_size, const double input_error_level, const double remaining_time);
+        // double calculate_expected_error(double exec_option_error,
+        //                                 double probability_midpoint,
+        //                                 double probability_success,
+        //                                 long m_j,
+        //                                 long n,
+        //                                 double input_data_size,
+        //                                 double input_error_level);
 
         std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
         std::unique_ptr<ProbabilityComputation> _probability_computation;
