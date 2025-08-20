@@ -88,9 +88,14 @@
   "execution": {
     "num_repeats": 10000,
     "deadline": 10000,
-    "e_fail": 100.0,
+    "e_fail": 100.0
+  },
+  "scheduling": {
+    "delta_t": 1,
+    "delta_t_comment": "If < 0, then a good delta_t will be computed using the precision below",
+    "delta_t_precision": 0.001,
     "algorithms": {
-        "one_task": ["static", "dynamic"]
+      "one_task": ["static", "dynamic"]
     }
   }
 }

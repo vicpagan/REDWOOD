@@ -37,6 +37,7 @@ namespace wrench {
      * @param failure_spec: failure specifications
      * @param application_spec: application specifications
      * @param execution_spec: application specifications
+     * @param scheduling_spec: scheduling specifications
      * @param compute_services: a set of compute services available to run actions
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
@@ -45,6 +46,7 @@ namespace wrench {
                            const boost::json::object& failure_spec,
                            const boost::json::object& application_spec,
                            const boost::json::object& execution_spec,
+                           const boost::json::object& scheduling_spec,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
@@ -52,6 +54,7 @@ namespace wrench {
                                                           _failure_spec(failure_spec),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
+                                                          _scheduling_spec(scheduling_spec),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
         _io_read_bandwidth = wrench::UnitParser::parse_bandwidth(
@@ -64,6 +67,8 @@ namespace wrench {
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
         _seed = boost::json::value_to<int>(_failure_spec.at("seed"));
+        _delta_t = boost::json::value_to<double>(_scheduling_spec.at("delta_t"));
+        _delta_t_precision = boost::json::value_to<double>(_scheduling_spec.at("delta_t_precision"));
 
         if (_seed < 0) {
             _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
@@ -172,11 +177,11 @@ namespace wrench {
         }
 
         /* Loop over all the scheduling algorithms */
-        for (const auto& alg_name : _execution_spec.at("algorithms").at(scheduler_type).as_array()) {
+        for (const auto& alg_name : _scheduling_spec.at("algorithms").at(scheduler_type).as_array()) {
             WRENCH_INFO("** Running experiments with algorithm '%s' **", alg_name.as_string().c_str());
 
             auto algorithm =
-                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name));
+                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _delta_t, _delta_t_precision);
 
             /* Keep track of number of successes */
             int num_successes = 0;

@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
             json_input["failures"].as_object(),
             json_input["application"].as_object(),
             json_input["execution"].as_object(),
+            json_input["scheduling"].as_object(),
             compute_services, storage_service, "ControllerHost"));
 
     /* Launch the simulation */
