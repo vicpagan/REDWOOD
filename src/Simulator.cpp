@@ -11,11 +11,14 @@
 #include <iostream>
 #include <wrench-dev.h>
 #include <boost/json.hpp>
+#include <boost/program_options.hpp>
 
 #include "PlatformCreator.h"
 #include "Controller.h"
 
 namespace sg4 = simgrid::s4u;
+namespace po = boost::program_options;
+
 
 /**
  * @brief Helper function to read a JSON object from a file
@@ -56,20 +59,45 @@ int main(int argc, char** argv) {
     /* Initialize the simulation */
     simulation->init(&argc, argv);
 
-    /* Parse  the command-line arguments */
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] <<
-            " --json <JSON input (file)> --wrench-host-shutdown-simulation [--log=controller.threshold=info | --wrench-full-log]" << std::endl;
+    // Define command-line argument options
+    std::string json_input_arg;
+    po::options_description desc("Allowed arguments");
+    desc.add_options()
+    ("help",
+     "Show this help message\n")
+    ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON input (str or file path)>"),
+     "JSON input string or file path\n");
+
+    // Parse command-line arguments
+    po::variables_map vm;
+    po::store(
+        po::parse_command_line(argc, argv, desc),
+        vm
+    );
+
+    try {
+        // Print help message and exit if needed
+        if (vm.count("help")) {
+            std::cerr << desc;
+            exit(0);
+        }
+        // Throw whatever exception in case argument values are erroneous
+        po::notify(vm);
+    }
+    catch (std::exception& e) {
+        cerr << "Error: " << e.what() << "\n\n";
+        std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON input (file)> "
+            + "[--log=controller.threshold=info | --wrench-full-log]";
+        cerr << "Usage: " << usage_string << "\n";
         exit(1);
     }
 
-    /* Load the json input */
     boost::json::object json_input;
     if (argv[2][0] == '{') {
-        json_input = boost::json::parse(argv[2]).as_object();
+        json_input = boost::json::parse(json_input_arg).as_object();
     }
     else {
-        json_input = readJSONFromFile(argv[2]);
+        json_input = readJSONFromFile(json_input_arg);
     }
 
     /* Instantiating the platform */
@@ -85,7 +113,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_compute_nodes; i++) {
         std::string hostname = "ComputeHost_" + std::to_string(i);
         auto baremetal_service = simulation->add(new wrench::BareMetalComputeService(
-         "ControllerHost", {hostname}, "", {}, {}));
+            "ControllerHost", {hostname}, "", {}, {}));
         compute_services[hostname] = baremetal_service;
     }
 
@@ -94,7 +122,7 @@ int main(int argc, char** argv) {
         new wrench::Controller(
             json_input["failures"].as_object(),
             json_input["application"].as_object(),
-            json_input["execution"].as_object()["num_repeats"].as_int64(),
+            json_input["execution"].as_object(),
             compute_services, storage_service, "ControllerHost"));
 
     /* Launch the simulation */
