@@ -117,7 +117,8 @@ namespace wrench {
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
 
         // TODO: This hard-coded task_time is now temporary
-        auto task_time = 10;
+        double initial_data_x = 100;
+        double initial_error_y = 1;
 #ifdef COMPUTE_PROBABILITIES
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
@@ -128,6 +129,24 @@ namespace wrench {
 
         /* Keep track of number of successes */
         int num_successes = 0;
+
+        /* Collect the functions for each execution option for each task */
+        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> task_functions;
+
+        auto& tasks = _application_spec.at("tasks").as_array();
+        for (const auto& task : tasks) {
+            auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
+            auto& exec_options = task.as_object().at("execution_options").as_array();
+
+            for (const auto& option : exec_options) {
+                auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
+
+                for (auto function_name : {"t_function", "d_function", "e_function"}) {
+                    auto& function = option.as_object().at(function_name).as_object();
+                    task_functions[task_name][option_name][function_name] = FunctionGenerator::get_function(function);
+                }
+            }
+        }
 
         /* Do all the repeats */
         for (int repeat = 0; repeat < _num_repeats; repeat++) {
@@ -147,14 +166,18 @@ namespace wrench {
                 running_jobs[item.first] = nullptr;;
             }
 
+            auto running_output_data = initial_data_x;
+            auto running_output_error = initial_error_y;
+
+            std::cout << "TASK 1 OPTION 1 RUNNING TIME = " << task_functions["task1"]["option1"]["t_function"](running_output_data, running_output_error) << std::endl;
+
             /* Loop until the task completes successfully somewhere */
-            bool success = false;
             while (true) {
                 // Submit the task to each idle hosts
                 for (const auto& [hostname, job] : running_jobs) {
                     if (job == nullptr) {
                         auto new_job = job_manager->createCompoundJob("");
-                        new_job->addSleepAction("", task_time);
+                        new_job->addSleepAction("", task_functions["task1"]["option1"]["t_function"](running_output_data, running_output_error));
                         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
                         job_manager->submitJob(new_job, _compute_services.at(hostname));
                         running_jobs[hostname] = new_job;
@@ -168,7 +191,6 @@ namespace wrench {
                     auto hostname = success_event->compute_service->getHosts().at(0);
                     std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
                             Simulation::getCurrentSimulatedDate() << ")" << std::endl;
-                    success = true;
                     num_successes++;
                     break;
                 }
@@ -221,7 +243,6 @@ namespace wrench {
                     }
                 }
             }
-            // std::cout << "REPEAT " << repeat << ": " << (success ? "SUCCESS" : "FAILURE") << std::endl;
         }
 
 #ifdef COMPUTE_PROBABILITIES

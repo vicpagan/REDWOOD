@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 
-#include "ProbabilityComputation.h"
+#include "../include/ProbabilityComputation.h"
 
 int main (int argc, char *argv[]) {
 
