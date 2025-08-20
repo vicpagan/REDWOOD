@@ -117,9 +117,11 @@ namespace wrench {
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
         auto prob = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
 
-        // TODO: This hard-coded task_time is now temporary
-        double initial_data_x = 100;
-        double initial_error_y = 1;
+        /* Get initial x and y as well as e_fail from the JSON file */
+        auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
+        auto initial_error_level = boost::json::value_to<double>(_application_spec.at("initial_error_level"));
+        auto e_fail = boost::json::value_to<double>(_execution_spec.at("e_fail"));
+
 #ifdef COMPUTE_PROBABILITIES
         double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
         prob->set_delta_t(deltat_computation);
@@ -167,8 +169,10 @@ namespace wrench {
                 running_jobs[item.first] = nullptr;;
             }
 
-            double running_output_data = initial_data_x;
-            double running_output_error = initial_error_y;
+            auto running_output_data_size = initial_data_size;
+            auto running_output_error_level = initial_error_level;
+
+            // TODO: Hard coded in starting task is temporary
             std::string current_task = "task_1";
 
             /* Loop until the task completes successfully somewhere */
@@ -177,7 +181,10 @@ namespace wrench {
                 for (const auto& [hostname, job] : running_jobs) {
                     if (job == nullptr) {
                         auto new_job = job_manager->createCompoundJob("");
-                        new_job->addSleepAction("", task_functions[current_task]["option1"]["t_function"](running_output_data, running_output_error));
+                        new_job->addSleepAction("",
+                            task_functions[current_task]["option1"]["t_function"]
+                            (running_output_data_size, running_output_error_level));
+
                         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
                         job_manager->submitJob(new_job, _compute_services.at(hostname));
                         running_jobs[hostname] = new_job;
