@@ -1,4 +1,7 @@
 #include "SchedulingAlgorithm.h"
+
+#include <iostream>
+
 #include "ProbabilityComputation.h"
 
 
@@ -53,7 +56,7 @@ double SchedulingAlgorithm::calculate_expected_error(double exec_option_error,
  * DYNAMIC SCHEDULING ALGORITHM
  *
  * @brief Selects the best execution option based on the lowest E(x, y, n)
- *
+ * @param probability_computation The probability computation utility
  * @param exec_options Map of execution options for the current task
  * @param input_data_size This is our x
  * @param input_error_level This is our y
@@ -75,6 +78,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
         const auto exec_option_name = option_name;
         const auto exec_option_time = option_functions.at("t_function")(input_data_size, input_error_level);
         const auto exec_option_error = option_functions.at("e_function")(input_data_size, input_error_level);
+        // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << "\n";
 
         double deltat_computation = probability_computation->compute_best_deltat(
             exec_option_time, remaining_time, 1e-3);

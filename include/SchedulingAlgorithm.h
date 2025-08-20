@@ -6,6 +6,7 @@
 
 class SchedulingAlgorithm {
 public:
+    virtual ~SchedulingAlgorithm() = default;
     SchedulingAlgorithm() = default;
 
     virtual std::string select_execution_option(

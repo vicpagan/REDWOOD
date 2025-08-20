@@ -203,7 +203,7 @@ namespace wrench {
                 auto running_output_error_level = initial_error_level;
 
                 // TODO: Hard coded in starting task is temporary
-                std::string current_task = "task_1";
+                std::string current_task = "task1";
 
                 /* Loop until the task completes successfully somewhere */
                 while (true) {
@@ -211,9 +211,10 @@ namespace wrench {
                     for (const auto& [hostname, job] : running_jobs) {
                         if (job == nullptr) {
                             auto new_job = job_manager->createCompoundJob("");
+
                             std::string selected_exec_option = algorithm->select_execution_option(
                                 _probability_computation.get(),
-                                task_functions[current_task],
+                                task_functions.at(current_task),
                                 running_output_data_size, running_output_error_level,
                                 alarm - Simulation::getCurrentSimulatedDate(),
                                 _e_fail);
