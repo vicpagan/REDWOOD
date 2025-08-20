@@ -75,7 +75,7 @@ include_directories(include/ /usr/local/include/ /opt/local/include/ ${WRENCH_IN
 
 # Main executable
 set(MAIN_SOURCE_FILES
-        src/main.cpp
+        include/main.cpp
         src/ProbabilityComputation.cpp
         include/ProbabilityComputation.h
 )
@@ -88,10 +88,12 @@ set(SIMULATOR_SOURCE_FILES
         src/Simulator.cpp
         src/Controller.cpp
         src/ProbabilityComputation.cpp
+        src/FunctionGenerator.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
         include/Controller.h
         include/ProbabilityComputation.h
+        include/FunctionGenerator.h
 )
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 
