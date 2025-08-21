@@ -95,7 +95,8 @@ namespace wrench {
         std::string scheduling_type;
         if (_application_spec.at("tasks").as_array().size() == 1) {
             scheduling_type = "one_task";
-        } else {
+        }
+        else {
             throw std::invalid_argument("Multi-task applications not supported (yet)");
         }
         for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
@@ -152,23 +153,25 @@ namespace wrench {
                                                this->commport);
 
                 /* Create an alarm for the deadline */
-                auto alarm = Simulation::getCurrentSimulatedDate() + _deadline;
-                WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, alarm);
-                this->setTimer(alarm, "time_out:" + std::to_string(repeat));
+                auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _deadline;
+                // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
+                this->setTimer(time_to_deadline, "time_out:" + std::to_string(repeat));
 
-                /* Create the map of hosts, where entries are either null (if idle) or
+                /* Create the map of hosts, where entries are either null (if idle, as of now) or
                  * a submitted job
                  */
                 std::map<std::string, std::shared_ptr<CompoundJob>> running_jobs;
-                for (const auto& item : _compute_services) {
-                    running_jobs[item.first] = nullptr;;
+                for (const auto& [hostname, cs] : _compute_services) {
+                    running_jobs[hostname] = nullptr;;
                 }
 
+                /* Running values of output data size and error level */
                 auto running_output_data_size = initial_data_size;
                 auto running_output_error_level = initial_error_level;
 
-                // TODO: Hard coded in starting task is temporary
-                std::string current_task = "task1";
+                /* Current task is the first task */
+                auto current_task = std::string(_application_spec.at("tasks").as_array().
+                                                                  at(0).as_object().at("name").as_string().c_str());
 
                 /* Loop until the task completes successfully somewhere */
                 while (true) {
@@ -182,7 +185,7 @@ namespace wrench {
                                 _probability_computation.get(),
                                 _task_functions.at(current_task),
                                 running_output_data_size, running_output_error_level,
-                                alarm - Simulation::getCurrentSimulatedDate(), _restart_overhead,
+                                time_to_deadline - Simulation::getCurrentSimulatedDate(), _restart_overhead,
                                 _io_read_bandwidth, _io_write_bandwidth);
 
                             // std::cout << "Selected execution option = " << selected_exec_option <<
@@ -254,11 +257,13 @@ namespace wrench {
                         }
                     }
                 }
+
                 // Cancel all pending jobs
                 for (const auto& [hostname, job] : running_jobs) {
                     if (job) {
                         try {
                             job_manager->terminateJob(job);
+                            running_jobs[hostname] = nullptr;
                         }
                         catch (ExecutionException& ignore) {
                         }
