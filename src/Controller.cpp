@@ -104,6 +104,63 @@ namespace wrench {
                 boost::json::value_to<string>(alg_name),
                 _e_fail, _delta_t, _delta_t_precision));
         }
+
+        _storage_disk = _storage_service->getHost()->get_disks().at(0);
+    }
+
+    /**
+     * @brief Helper function to create and submit a job
+     * @param task_name The task name
+     * @param execution_option The execution option
+     * @param running_output_data_size The running data size
+     * @param running_output_error_level The running error
+     * @param hostname The hostname on which to start the job
+     * @return a job
+     */
+    std::shared_ptr<CompoundJob> Controller::create_and_submit_job(const std::string& task_name,
+                                                                   const std::string& execution_option,
+                                                                   double running_output_data_size,
+                                                                   double running_output_error_level,
+                                                                   const std::string& hostname) {
+        auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
+
+        auto read_input_action = job->addCustomAction("read", 0, 1,
+                                                      [this, running_output_data_size](
+                                                      const std::shared_ptr<wrench::ActionExecutor>& action_executor) {
+                                                          _storage_disk->write(
+                                                              static_cast<sg_size_t>(running_output_data_size));
+                                                      },
+                                                      [](const std::shared_ptr<wrench::ActionExecutor>&
+                                                      action_executor) {
+                                                      });
+
+        auto compute_action = job->addComputeAction("compute",
+                                                    _task_functions[task_name][execution_option]["t_function"]
+                                                    (running_output_data_size, running_output_error_level),
+                                                    0.0,
+                                                    1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
+
+        auto write_output_action = job->addCustomAction("write", 0, 1,
+                                                        [this, task_name, execution_option, running_output_data_size,
+                                                            running_output_error_level](
+                                                        const std::shared_ptr<wrench::ActionExecutor>&
+                                                        action_executor) {
+                                                            _storage_disk->read(static_cast<sg_size_t>(
+                                                                _task_functions[task_name][execution_option][
+                                                                    "d_function"]
+                                                                (running_output_data_size,
+                                                                 running_output_error_level)));
+                                                        },
+                                                        [](const std::shared_ptr<wrench::ActionExecutor>&
+                                                        action_executor) {
+                                                        });
+
+        job->addActionDependency(read_input_action, compute_action);
+        job->addActionDependency(compute_action, write_output_action);
+
+        WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
+        _job_manager->submitJob(job, _compute_services.at(hostname));
+        return job;
     }
 
     /**
@@ -117,7 +174,7 @@ namespace wrench {
         WRENCH_INFO("Controller starting");
 
         /* Create a job manager so that we can create/submit jobs */
-        auto job_manager = this->createJobManager();
+        _job_manager = this->createJobManager();
 
         /* Create the probability computation utility */
         _probability_computation = std::make_unique<ProbabilityComputation>(_lambda, _restart_overhead);
@@ -179,8 +236,6 @@ namespace wrench {
                     // Submit the task to each idle hosts
                     for (const auto& [hostname, job] : running_jobs) {
                         if (job == nullptr) {
-                            auto new_job = job_manager->createCompoundJob("");
-
                             // std::cout << "Selecting exec option for repeat " << repeat << std::endl;
                             std::string selected_exec_option = algorithm->select_execution_option(
                                 _probability_computation.get(),
@@ -192,13 +247,10 @@ namespace wrench {
                             // std::cout << "Selected execution option = " << selected_exec_option <<
                             //     "    with remaining time = " << alarm - Simulation::getCurrentSimulatedDate()<<
                             //         std::endl;
-                            new_job->addSleepAction("",
-                                                    _task_functions[current_task][selected_exec_option]["t_function"]
-                                                    (running_output_data_size, running_output_error_level));
-
-                            WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
-                            job_manager->submitJob(new_job, _compute_services.at(hostname));
-                            running_jobs[hostname] = new_job;
+                            running_jobs[hostname] = this->create_and_submit_job(current_task, selected_exec_option,
+                                running_output_data_size,
+                                running_output_error_level,
+                                hostname);
                         }
                     }
 
@@ -252,7 +304,7 @@ namespace wrench {
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Cancel the job
                             WRENCH_INFO("Was notified that %s is down... terminating job", hostname.c_str());
-                            job_manager->terminateJob(running_jobs[hostname]);
+                            _job_manager->terminateJob(running_jobs[hostname]);
                             // Leave the job in the map, so that we don't mistake the host as idle
                             continue;
                         }
@@ -263,7 +315,7 @@ namespace wrench {
                 for (const auto& [hostname, job] : running_jobs) {
                     if (job) {
                         try {
-                            job_manager->terminateJob(job);
+                            _job_manager->terminateJob(job);
                             running_jobs[hostname] = nullptr;
                         }
                         catch (ExecutionException& ignore) {
