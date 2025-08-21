@@ -110,7 +110,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
         const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
         const auto R = static_cast<long>(std::ceil(restart_overhead / selected_delta_t));
 
-        /* Precaculate probability of success and the list of failure probabilities for each value of u */
+        /* Precalculate probability of success and the list of failure probabilities for each value of u */
         const auto probability_success = exp(-lambda * m_j * selected_delta_t);
         auto probability_failures(std::vector<double>(m_j, 0.0));
         for (long u = 0; u < m_j; u++) {
