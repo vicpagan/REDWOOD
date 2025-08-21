@@ -181,7 +181,7 @@ namespace wrench {
             WRENCH_INFO("** Running experiments with algorithm '%s' **", alg_name.as_string().c_str());
 
             auto algorithm =
-                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _io_read_bandwidth, _io_write_bandwidth, _delta_t,  _delta_t_precision);
+                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _e_fail, _delta_t,  _delta_t_precision);
 
             /* Keep track of number of successes */
             int num_successes = 0;
@@ -222,8 +222,7 @@ namespace wrench {
                                 _probability_computation.get(),
                                 task_functions.at(current_task),
                                 running_output_data_size, running_output_error_level,
-                                alarm - Simulation::getCurrentSimulatedDate(),
-                                _e_fail);
+                                alarm - Simulation::getCurrentSimulatedDate(), _io_read_bandwidth, _io_write_bandwidth);
 
                             // std::cout << "Selected execution option = " << selected_exec_option <<
                             //     "    with remaining time = " << alarm - Simulation::getCurrentSimulatedDate()<<
