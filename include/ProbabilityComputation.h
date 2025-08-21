@@ -1,10 +1,8 @@
 #ifndef PROBABILITY_H
 #define PROBABILITY_H
 
-class ProbabilityComputation  {
-
+class ProbabilityComputation {
 public:
-
     explicit ProbabilityComputation(const double lambda, const double restart_overhead) {
         _lambda = lambda;
         _restart_overhead = restart_overhead;
@@ -12,6 +10,7 @@ public:
     }
 
     [[nodiscard]] double compute_probability_midpoint(double task_time, double time_to_deadline) const;
+
     [[nodiscard]] double compute_probability(double task_time, double time_to_deadline, bool lower_bound) const;
 
     double compute_best_deltat(double task_time, double time_to_deadline, double precision);
@@ -30,9 +29,10 @@ public:
 
 private:
     [[nodiscard]] double success_probability(long u) const;
+
     [[nodiscard]] double fail_probability(long u) const;
 
-    double compute_probability(std::vector<double>& dp, long m, long n, long R) const;
+    double compute_probability(std::vector<double> &dp, long m, long n, long R) const;
 
     double _lambda;
     double _restart_overhead;
@@ -40,4 +40,3 @@ private:
 };
 
 #endif
-
