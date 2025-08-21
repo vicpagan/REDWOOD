@@ -82,8 +82,6 @@ namespace wrench {
      * @return A node killer service
      */
     std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string &victim, const int seed) {
-        // Turn the host (back) on just in case
-        Simulation::turnOnHost(victim);
 
         // Start the NodeKiller service
         auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
