@@ -19,26 +19,41 @@ namespace wrench {
      *  @brief An Execution Controller implementation
      */
     class NodeKiller : public Service {
-
     public:
-
         // Constructor
         NodeKiller(
-            const std::default_random_engine rng,
-            const std::exponential_distribution<double> exponential_distribution,
-            const double restart_overhead,
+            std::default_random_engine rng,
+            std::exponential_distribution<double> exponential_distribution,
+            double restart_overhead,
             const std::string& victim_host,
-            S4U_CommPort *notify_commport,
+            S4U_CommPort* notify_commport,
             const std::string& hostname);
+
+        static void start_node_killers(Simulation* simulation,
+                                const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
+                                compute_services,
+                                int initial_seed,
+                                bool reset_seed,
+                                std::exponential_distribution<double> distribution,
+                                double restart_overhead,
+                                S4U_CommPort* notify_commport);
 
     private:
         [[noreturn]] int main() override;
+        static std::shared_ptr<NodeKiller> start_node_killer(Simulation* simulation,
+                                                             const std::string& victim,
+                                                             int seed,
+                                                             std::exponential_distribution<double> distribution,
+                                                             double restart_overhead,
+                                                             S4U_CommPort* notify_commport);
+
+        static std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
 
         std::default_random_engine _rng;
         std::exponential_distribution<double> _exponential_distribution;
         double _restart_overhead;
         std::string _victim_host;
-        S4U_CommPort *_notify_commport;
+        S4U_CommPort* _notify_commport;
     };
 } // namespace wrench
 #endif//NODE_KILLER_H

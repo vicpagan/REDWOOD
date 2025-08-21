@@ -63,6 +63,8 @@ namespace wrench {
             boost::json::value_to<string>(_platform_spec.at("io_write_bandwidth")));
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
         _deadline = boost::json::value_to<double>(_execution_spec.at("deadline"));
+        _restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
+
         _e_fail = boost::json::value_to<double>(_execution_spec.at("e_fail"));
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
@@ -75,46 +77,6 @@ namespace wrench {
         }
     }
 
-    /**
-     * @brief Method to start a node killer on a host
-     * @param victim: the victim's hostname
-     * @param seed: the seed for the RNG
-     * @return A node killer service
-     */
-    std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string &victim, const int seed) {
-
-        // Start the NodeKiller service
-        auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        auto murderer = std::make_shared<NodeKiller>(
-            std::default_random_engine(seed),
-            _exponential_distribution,
-            restart_overhead,
-            victim, this->commport,
-            "ControllerHost");
-        murderer->setSimulation(this->getSimulation());
-        murderer->start(murderer, true, false); // Daemonized, no auto-restart
-        return murderer;
-    }
-
-
-    /**
-     * @brief Start a node killer on each host
-     */
-    void Controller::start_node_killers(bool reset_seed) {
-        static int seed = _seed;
-        if (reset_seed) {
-            seed = _seed;
-        }
-        for (int i = 0; i < _compute_services.size(); i++) {
-            auto victim_hostname = "ComputeHost_" + std::to_string(i);
-            // Kill an existing node killer if any
-            if (_node_killers.find(victim_hostname) != _node_killers.end()) {
-                _node_killers[victim_hostname]->killActor(); // brutal
-            }
-            // Start a node killer (note the seed++ there)
-            _node_killers[victim_hostname] = this->start_node_killer(victim_hostname, seed++);
-        }
-    }
 
 
     /**
@@ -132,8 +94,7 @@ namespace wrench {
         auto job_manager = this->createJobManager();
 
         /* Calculate estimate deltat probability to compare to */
-        auto restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        _probability_computation = std::make_unique<ProbabilityComputation>(_lambda, restart_overhead);
+        _probability_computation = std::make_unique<ProbabilityComputation>(_lambda, _restart_overhead);
 
         /* Get initial x and y as well as e_fail from the JSON file */
         auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
@@ -187,7 +148,13 @@ namespace wrench {
             /* Do all the repeats */
             for (int repeat = 0; repeat < _num_repeats; repeat++) {
                 /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
-                start_node_killers(repeat == 0);
+                NodeKiller::start_node_killers(this->getSimulation(),
+                                _compute_services,
+                                _seed,
+                                (repeat == 0),
+                                _exponential_distribution,
+                                _restart_overhead,
+                                this->commport);
 
                 /* Create an alarm for the deadline */
                 auto alarm = Simulation::getCurrentSimulatedDate() + _deadline;
@@ -220,7 +187,7 @@ namespace wrench {
                                 _probability_computation.get(),
                                 task_functions.at(current_task),
                                 running_output_data_size, running_output_error_level,
-                                alarm - Simulation::getCurrentSimulatedDate(), restart_overhead,
+                                alarm - Simulation::getCurrentSimulatedDate(), _restart_overhead,
                                 _io_read_bandwidth, _io_write_bandwidth);
 
                             // std::cout << "Selected execution option = " << selected_exec_option <<
