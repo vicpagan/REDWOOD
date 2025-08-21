@@ -40,11 +40,7 @@ namespace wrench {
     private:
         int main() override;
 
-        void start_node_killers(bool reset_seed);
-
         // void start_probability_computation(double lambda, double restart_overhead);
-
-        std::shared_ptr<NodeKiller> start_node_killer(const std::string &victim, int seed);
 
         // std::string select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> &exec_options,
         //     const double input_data_size, const double input_error_level, const double remaining_time);
@@ -56,7 +52,6 @@ namespace wrench {
         //                                 double input_data_size,
         //                                 double input_error_level);
 
-        std::map<std::string, std::shared_ptr<NodeKiller> > _node_killers;
         std::unique_ptr<ProbabilityComputation> _probability_computation;
 
         const boost::json::object _platform_spec;
@@ -68,6 +63,7 @@ namespace wrench {
         const std::shared_ptr<SimpleStorageService> _storage_service;
 
         double _deadline;
+        double _restart_overhead;
         double _e_fail;
         long _num_repeats;
         double _lambda;
