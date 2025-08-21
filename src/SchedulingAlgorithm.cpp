@@ -8,6 +8,9 @@
 /**
 * @brief Instantiate a scheduling algorithm given its type/name
 * @param type: the algorithm's type/name
+* @param e_fail: the failure error level
+* @param delta_t: the delta_t
+* @param delta_t_precision: the precision used for computing delta_t
 */
 std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algorithm(
     const std::string &type, double e_fail, double delta_t, double delta_t_precision) {
@@ -110,7 +113,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
         const auto R = static_cast<long>(std::ceil(restart_overhead / selected_delta_t));
 
         /* Precalculate probability of success and the list of failure probabilities for each possible failure point in execution */
-        const auto probability_success = exp(-lambda * m_j * selected_delta_t);
+        const auto probability_success = exp(-lambda * static_cast<double>(m_j) * selected_delta_t);
         auto probability_failures(std::vector<double>(m_j, 0.0));
         for (long u = 0; u < m_j; u++) {
             probability_failures[u] = exp(-lambda * static_cast<double>(u) * selected_delta_t) - exp(
