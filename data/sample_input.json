@@ -86,7 +86,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 10000,
+    "num_repeats": 10,
     "deadline": 10000,
     "e_fail": 10.0
   },
