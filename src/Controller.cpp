@@ -181,7 +181,7 @@ namespace wrench {
             WRENCH_INFO("** Running experiments with algorithm '%s' **", alg_name.as_string().c_str());
 
             auto algorithm =
-                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _delta_t, _delta_t_precision);
+                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _io_read_bandwidth, _io_write_bandwidth, _delta_t,  _delta_t_precision);
 
             /* Keep track of number of successes */
             int num_successes = 0;
@@ -217,6 +217,7 @@ namespace wrench {
                         if (job == nullptr) {
                             auto new_job = job_manager->createCompoundJob("");
 
+                            // std::cout << "Selecting exec option for repeat " << repeat << std::endl;
                             std::string selected_exec_option = algorithm->select_execution_option(
                                 _probability_computation.get(),
                                 task_functions.at(current_task),
@@ -224,7 +225,9 @@ namespace wrench {
                                 alarm - Simulation::getCurrentSimulatedDate(),
                                 _e_fail);
 
-                            std::cout << "Selected execution option = " << selected_exec_option << std::endl;
+                            // std::cout << "Selected execution option = " << selected_exec_option <<
+                            //     "    with remaining time = " << alarm - Simulation::getCurrentSimulatedDate()<<
+                            //         std::endl;
                             new_job->addSleepAction("",
                                                     task_functions[current_task][selected_exec_option]["t_function"]
                                                     (running_output_data_size, running_output_error_level));

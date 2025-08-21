@@ -73,14 +73,6 @@ find_package(WRENCH REQUIRED)
 # include directories
 include_directories(include/ /usr/local/include/ /opt/local/include/ ${WRENCH_INCLUDE_DIR} ${SimGrid_INCLUDE_DIR} ${FSMOD_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 
-# Main executable
-set(MAIN_SOURCE_FILES
-        src/main.cpp
-        src/ProbabilityComputation.cpp
-        include/ProbabilityComputation.h
-)
-add_executable(redwood_main ${MAIN_SOURCE_FILES})
-
 # Simulator executable
 set(SIMULATOR_SOURCE_FILES
         src/PlatformCreator.cpp
@@ -119,5 +111,4 @@ else()
 endif()
 
 install(TARGETS redwood_sim DESTINATION bin)
-install(TARGETS redwood_main DESTINATION bin)
 

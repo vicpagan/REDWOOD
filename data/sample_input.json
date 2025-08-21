@@ -12,7 +12,7 @@
   },
   "application": {
     "initial_data_size": 100.0,
-    "initial_error_level": 0.0,
+    "initial_error_level": 1.0,
     "tasks": [
       {
         "name": "task1",
@@ -43,7 +43,7 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 1.5,
+                "c": 7.0,
                 "d": 0.0,
                 "e": 0.0
               }
@@ -56,7 +56,7 @@
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
-                "b": 10.0,
+                "b": 6.0,
                 "c": 0.0
               }
             },
@@ -88,14 +88,14 @@
   "execution": {
     "num_repeats": 10000,
     "deadline": 10000,
-    "e_fail": 100.0
+    "e_fail": 10.0
   },
   "scheduling": {
     "delta_t": 1,
     "delta_t_comment": "If < 0, then a good delta_t will be computed using the precision below",
     "delta_t_precision": 0.001,
     "algorithms": {
-      "one_task": ["static", "dynamic"]
+      "one_task": ["dynamic"]
     }
   }
 }
