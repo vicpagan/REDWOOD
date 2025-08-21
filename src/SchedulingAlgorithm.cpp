@@ -9,9 +9,9 @@
 * @brief Instantiate a scheduling algorithm given its type/name
 * @param type: the algorithm's type/name
 */
-std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algorithm(const std::string& type, double io_read_bandwidth, double io_write_bandwidht, double delta_t, double delta_t_precision) {
+std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algorithm(const std::string& type, double e_fail, double delta_t, double delta_t_precision) {
     if (type == "dynamic") {
-        return std::make_shared<SchedulingAlgorithmDynamic>(io_read_bandwidth, io_write_bandwidht, delta_t, delta_t_precision);
+        return std::make_shared<SchedulingAlgorithmDynamic>(e_fail, delta_t, delta_t_precision);
     }
     else {
         throw std::invalid_argument("Unknown scheduling algorithm '" + type + "'");
@@ -22,14 +22,11 @@ std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algo
  * @brief Calculates expected error recursively for one execution option for a single task
  *
  * @param dp Dynamic programming array
- * @param exec_option_error This is our e(x, y,) for this execution option
+ * @param exec_option_error This is our e(x, y) for this execution option
  * @param probability_failures This is our p_u
  * @param probability_success This is our e^(-lambda * m_j * delta)
  * @param m_j This is m_j in the paper
  * @param n THis is n in the paper
- * @param input_data_size This is our x
- * @param input_error_level This is our y
- * @param e_fail Failure penalty
  * @return The expected error for the selected execution option
  */
 double SchedulingAlgorithm::calculate_expected_error(std::vector<double> &dp,
@@ -37,12 +34,11 @@ double SchedulingAlgorithm::calculate_expected_error(std::vector<double> &dp,
                                                      double probability_success,
                                                      std::vector<double> &probability_failures,
                                                      long m_j,
-                                                     long n,
-                                                     double e_fail) {
+                                                     long n) {
 
     // Base cases: if less than m_j steps, we always fail
     for (long i = 0; i < m_j && i <= n; i++) {
-        dp[i] = e_fail;
+        dp[i] = _e_fail;
     }
 
     // Fill dp bottom-up
@@ -70,7 +66,8 @@ double SchedulingAlgorithm::calculate_expected_error(std::vector<double> &dp,
  * @param input_data_size This is our x
  * @param input_error_level This is our y
  * @param remaining_time This is our n, which is the remaining time until the deadline
- * @param e_fail The error level if failure
+ * @param io_read_bandwidth Bandwidth for reading input data in Bytes/sec
+ * @param io_write_bandwidth Bandwidth for writing output data in Bytes/sec
  * @return The name of the best execution option
  */
 std::string SchedulingAlgorithmDynamic::select_execution_option(
@@ -79,7 +76,8 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
     const double input_data_size,
     const double input_error_level,
     const double remaining_time,
-    const double e_fail) {
+    const double io_read_bandwidth,
+    const double io_write_bandwidth) {
 
     double min_error_level = std::numeric_limits<double>::max();
     std::string min_execution_option;
@@ -102,7 +100,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
         double selected_delta_t = probability_computation->get_delta_t();
         double lambda = probability_computation->get_lambda();
 
-        auto m_j = static_cast<long>(std::ceil(((input_data_size / _io_read_bandwidth) + exec_option_time + (exec_option_data / _io_write_bandwidth)) / selected_delta_t));
+        auto m_j = static_cast<long>(std::ceil(((input_data_size / io_read_bandwidth) + exec_option_time + (exec_option_data / io_write_bandwidth)) / selected_delta_t));
         auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
 
         auto probability_success = exp(-lambda * m_j * selected_delta_t);
@@ -113,7 +111,7 @@ std::string SchedulingAlgorithmDynamic::select_execution_option(
 
         auto dp(std::vector<double>(n + 1, 0.0));
         auto expected_error_option = calculate_expected_error(dp, exec_option_error, probability_success,
-            probability_failures, m_j, n, e_fail);
+            probability_failures, m_j, n);
 
         if (expected_error_option < min_error_level) {
             min_error_level = expected_error_option;

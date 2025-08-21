@@ -7,10 +7,7 @@
 class SchedulingAlgorithm {
 public:
     virtual ~SchedulingAlgorithm() = default;
-    SchedulingAlgorithm(const double io_read_bandwidth,
-        const double io_write_bandwidth,
-        const double delta_t,
-        const double delta_t_precision) : _io_read_bandwidth(io_read_bandwidth), _io_write_bandwidth(io_write_bandwidth), _delta_t(delta_t), _delta_t_precision(delta_t_precision) {};
+    SchedulingAlgorithm(const double e_fail, const double delta_t, const double delta_t_precision) : _e_fail(e_fail), _delta_t(delta_t), _delta_t_precision(delta_t_precision) {};
 
     virtual std::string select_execution_option(
         ProbabilityComputation* probability_computation,
@@ -18,13 +15,10 @@ public:
         double input_data_size,
         double input_error_level,
         double remaining_time,
-        double e_fail) = 0;
-
-    static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(const std::string& type,
         double io_read_bandwidth,
-        double io_write_bandwidth,
-        double delta_t,
-        double delta_t_precision);
+        double io_write_bandwidth) = 0;
+
+    static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(const std::string& type, double e_fail, double delta_t, double delta_t_precision);
 
 protected:
     double calculate_expected_error(std::vector<double> &dp,
@@ -32,11 +26,9 @@ protected:
                                     double probability_success,
                                     std::vector<double> &probability_failures,
                                     long m_j,
-                                    long n,
-                                    double e_fail);
+                                    long n);
 
-    double _io_read_bandwidth;
-    double _io_write_bandwidth;
+    double _e_fail;
     double _delta_t;
     double _delta_t_precision;
 };
@@ -44,10 +36,7 @@ protected:
 class SchedulingAlgorithmDynamic : public SchedulingAlgorithm {
 
 public:
-    SchedulingAlgorithmDynamic(const double io_read_bandwidth,
-        const double io_write_bandwidth,
-        const double delta_t,
-        const double delta_t_precision) : SchedulingAlgorithm(io_read_bandwidth, io_write_bandwidth, delta_t, delta_t_precision) {};
+    SchedulingAlgorithmDynamic(const double e_fail, const double delta_t, const double delta_t_precision) : SchedulingAlgorithm(e_fail, delta_t, delta_t_precision) {};
 
     std::string select_execution_option(
         ProbabilityComputation* probability_computation,
@@ -55,7 +44,8 @@ public:
         double input_data_size,
         double input_error_level,
         double remaining_time,
-        double e_fail) override;
+        double io_read_bandwidth,
+        double io_write_bandwidth) override;
 };
 
 #endif //SCHEDULINGALGORITHM_H
