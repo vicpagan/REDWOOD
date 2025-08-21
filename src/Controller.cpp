@@ -174,6 +174,7 @@ namespace wrench {
                                                                   at(0).as_object().at("name").as_string().c_str());
 
                 /* Loop until the task completes successfully somewhere */
+                /* (right now this assumes a single-task applications)  */
                 while (true) {
                     // Submit the task to each idle hosts
                     for (const auto& [hostname, job] : running_jobs) {
