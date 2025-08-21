@@ -8,8 +8,8 @@ class SchedulingAlgorithm {
 public:
     virtual ~SchedulingAlgorithm() = default;
 
-    SchedulingAlgorithm(const double e_fail, const double delta_t, const double delta_t_precision) : _e_fail(e_fail),
-        _delta_t(delta_t), _delta_t_precision(delta_t_precision) {
+    SchedulingAlgorithm(const double e_fail, const double delta_t, const double delta_t_precision, const std::string &name) : _e_fail(e_fail),
+        _delta_t(delta_t), _delta_t_precision(delta_t_precision), _name(name) {
     };
 
     virtual std::string select_execution_option(
@@ -25,6 +25,8 @@ public:
     static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(
         const std::string &type, double e_fail, double delta_t, double delta_t_precision);
 
+    std::string get_name() { return _name;}
+
 protected:
     double calculate_expected_error(std::vector<double> &dp,
                                     double exec_option_error,
@@ -37,13 +39,14 @@ protected:
     double _e_fail;
     double _delta_t;
     double _delta_t_precision;
+    std::string _name;
 };
 
 class SchedulingAlgorithmDynamic : public SchedulingAlgorithm {
 public:
     SchedulingAlgorithmDynamic(const double e_fail, const double delta_t,
                                const double delta_t_precision) : SchedulingAlgorithm(
-        e_fail, delta_t, delta_t_precision) {
+        e_fail, delta_t, delta_t_precision, "dynamic") {
     };
 
     std::string select_execution_option(

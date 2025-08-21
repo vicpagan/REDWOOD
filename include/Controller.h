@@ -16,6 +16,8 @@
 
 #include "ProbabilityComputation.h"
 
+class SchedulingAlgorithm;
+
 namespace wrench {
     class NodeKiller;
 
@@ -72,7 +74,10 @@ namespace wrench {
         int _seed;
         double _io_read_bandwidth;
         double _io_write_bandwidth;
+        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> _task_functions;
         std::exponential_distribution<double> _exponential_distribution;
+        std::vector<std::shared_ptr<SchedulingAlgorithm>> _scheduling_algorithms;
+
     };
 } // namespace wrench
 #endif//CONTROLLER_H
