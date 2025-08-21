@@ -222,7 +222,8 @@ namespace wrench {
                                 _probability_computation.get(),
                                 task_functions.at(current_task),
                                 running_output_data_size, running_output_error_level,
-                                alarm - Simulation::getCurrentSimulatedDate(), _io_read_bandwidth, _io_write_bandwidth);
+                                alarm - Simulation::getCurrentSimulatedDate(), restart_overhead,
+                                _io_read_bandwidth, _io_write_bandwidth);
 
                             // std::cout << "Selected execution option = " << selected_exec_option <<
                             //     "    with remaining time = " << alarm - Simulation::getCurrentSimulatedDate()<<

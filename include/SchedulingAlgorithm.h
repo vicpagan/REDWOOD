@@ -15,6 +15,7 @@ public:
         double input_data_size,
         double input_error_level,
         double remaining_time,
+        double restart_overhead,
         double io_read_bandwidth,
         double io_write_bandwidth) = 0;
 
@@ -24,9 +25,10 @@ protected:
     double calculate_expected_error(std::vector<double> &dp,
                                     double exec_option_error,
                                     double probability_success,
-                                    std::vector<double> &probability_failures,
+                                    const std::vector<double> &probability_failures,
                                     long m_j,
-                                    long n);
+                                    long n,
+                                    long R) const;
 
     double _e_fail;
     double _delta_t;
@@ -44,6 +46,7 @@ public:
         double input_data_size,
         double input_error_level,
         double remaining_time,
+        double restart_overhead,
         double io_read_bandwidth,
         double io_write_bandwidth) override;
 };
