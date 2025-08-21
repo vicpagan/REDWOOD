@@ -15,14 +15,17 @@ double inline ProbabilityComputation::fail_probability(const long u) const {
     return success_probability(u) - success_probability(u + 1);
 }
 
-double ProbabilityComputation::compute_probability(const double task_time, const double time_to_deadline, bool lower_bound) const {
+double ProbabilityComputation::compute_probability(const double task_time, const double time_to_deadline,
+                                                   bool lower_bound) const {
     // Sanity check
     if (_delta_t < 0) {
         throw std::invalid_argument("Use ProbabilityComputation::set_delta_t() to set delta_t to a >0 value");
     }
 
     // Discretize time
-    const long m = (lower_bound) ? static_cast<long>(ceil(task_time / _delta_t)) - 1 : static_cast<long>(ceil(task_time / _delta_t));
+    const long m = (lower_bound)
+                       ? static_cast<long>(ceil(task_time / _delta_t)) - 1
+                       : static_cast<long>(ceil(task_time / _delta_t));
     const long n = static_cast<long>(ceil(time_to_deadline / _delta_t));
     const long R = (_restart_overhead > 0.0) ? static_cast<long>(ceil(_restart_overhead / _delta_t)) : 0L;
 
@@ -36,8 +39,7 @@ double ProbabilityComputation::compute_probability(const double task_time, const
 }
 
 // Bottom up function P(m, n)
-double ProbabilityComputation::compute_probability(std::vector<double>& dp, long m, long n, long R) const {
-
+double ProbabilityComputation::compute_probability(std::vector<double> &dp, long m, long n, long R) const {
     // Bottom up DP
     for (long i = m; i <= n; ++i) {
         double probability = success_probability(m);
@@ -49,7 +51,8 @@ double ProbabilityComputation::compute_probability(std::vector<double>& dp, long
     return dp[n];
 }
 
-double ProbabilityComputation::compute_probability_midpoint(const double task_time, const double time_to_deadline) const {
+double ProbabilityComputation::compute_probability_midpoint(const double task_time,
+                                                            const double time_to_deadline) const {
     double result_upper_bound = compute_probability(task_time, time_to_deadline, false);
     double result_lower_bound = compute_probability(task_time, time_to_deadline, true);
     return ((result_upper_bound + result_lower_bound) / 2);
@@ -65,10 +68,10 @@ double ProbabilityComputation::compute_best_deltat(const double task_time, doubl
     // std::cout << "RESTART OVERHEAD = " << this->restart_overhead << std::endl;
 
     double lo = 1.0; // What to put here?
-    double hi = task_time;  // What to put here?
+    double hi = task_time; // What to put here?
     double best_deltat = lo;
 
-    while (std::abs(hi - lo) / hi  > precision) {
+    while (std::abs(hi - lo) / hi > precision) {
         // std::cerr << "HI=" << hi << "  LO=" <<  lo << std::endl;
         double mid = (lo + hi) / 2;
 
@@ -98,7 +101,4 @@ double ProbabilityComputation::compute_best_deltat(const double task_time, doubl
     _delta_t = current_delta_t;
 
     return best_deltat;
-
 }
-
-

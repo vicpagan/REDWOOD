@@ -42,14 +42,14 @@ namespace wrench {
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const boost::json::object& platform_spec,
-                           const boost::json::object& failure_spec,
-                           const boost::json::object& application_spec,
-                           const boost::json::object& execution_spec,
-                           const boost::json::object& scheduling_spec,
-                           const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
-                           const std::shared_ptr<SimpleStorageService>& storage_service,
-                           const std::string& hostname) : ExecutionController(hostname, "controller"),
+    Controller::Controller(const boost::json::object &platform_spec,
+                           const boost::json::object &failure_spec,
+                           const boost::json::object &application_spec,
+                           const boost::json::object &execution_spec,
+                           const boost::json::object &scheduling_spec,
+                           const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &compute_services,
+                           const std::shared_ptr<SimpleStorageService> &storage_service,
+                           const std::string &hostname) : ExecutionController(hostname, "controller"),
                                                           _platform_spec(platform_spec),
                                                           _failure_spec(failure_spec),
                                                           _application_spec(application_spec),
@@ -81,7 +81,7 @@ namespace wrench {
      * @param seed: the seed for the RNG
      * @return A node killer service
      */
-    std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string& victim, const int seed) {
+    std::shared_ptr<NodeKiller> Controller::start_node_killer(const std::string &victim, const int seed) {
         // Turn the host (back) on just in case
         Simulation::turnOnHost(victim);
 
@@ -152,36 +152,36 @@ namespace wrench {
         std::string scheduler_type;
         if (_application_spec.at("tasks").as_array().size() == 1) {
             scheduler_type = "one_task";
-        }
-        else {
+        } else {
             throw std::invalid_argument("Multi-task applications not supported (yet)");
         }
 
         /* Collect the functions for each execution option for each task */
-        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
-            task_functions;
+        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)> > > >
+                task_functions;
 
-        auto& tasks = _application_spec.at("tasks").as_array();
-        for (const auto& task : tasks) {
+        auto &tasks = _application_spec.at("tasks").as_array();
+        for (const auto &task: tasks) {
             auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
-            auto& exec_options = task.as_object().at("execution_options").as_array();
+            auto &exec_options = task.as_object().at("execution_options").as_array();
 
-            for (const auto& option : exec_options) {
+            for (const auto &option: exec_options) {
                 auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
 
-                for (auto function_name : {"t_function", "d_function", "e_function"}) {
-                    auto& function = option.as_object().at(function_name).as_object();
+                for (auto function_name: {"t_function", "d_function", "e_function"}) {
+                    auto &function = option.as_object().at(function_name).as_object();
                     task_functions[task_name][option_name][function_name] = FunctionGenerator::get_function(function);
                 }
             }
         }
 
         /* Loop over all the scheduling algorithms */
-        for (const auto& alg_name : _scheduling_spec.at("algorithms").at(scheduler_type).as_array()) {
+        for (const auto &alg_name: _scheduling_spec.at("algorithms").at(scheduler_type).as_array()) {
             WRENCH_INFO("** Running experiments with algorithm '%s' **", alg_name.as_string().c_str());
 
             auto algorithm =
-                SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _e_fail, _delta_t,  _delta_t_precision);
+                    SchedulingAlgorithm::create_scheduling_algorithm(boost::json::value_to<string>(alg_name), _e_fail,
+                                                                     _delta_t, _delta_t_precision);
 
             /* Keep track of number of successes */
             int num_successes = 0;
@@ -199,8 +199,8 @@ namespace wrench {
                 /* Create the map of hosts, where entries are either null (if idle) or
                  * a submitted job
                  */
-                std::map<std::string, std::shared_ptr<CompoundJob>> running_jobs;
-                for (const auto& item : _compute_services) {
+                std::map<std::string, std::shared_ptr<CompoundJob> > running_jobs;
+                for (const auto &item: _compute_services) {
                     running_jobs[item.first] = nullptr;;
                 }
 
@@ -213,7 +213,7 @@ namespace wrench {
                 /* Loop until the task completes successfully somewhere */
                 while (true) {
                     // Submit the task to each idle hosts
-                    for (const auto& [hostname, job] : running_jobs) {
+                    for (const auto &[hostname, job]: running_jobs) {
                         if (job == nullptr) {
                             auto new_job = job_manager->createCompoundJob("");
 
@@ -244,7 +244,7 @@ namespace wrench {
                     if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                         auto hostname = success_event->compute_service->getHosts().at(0);
                         std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
-                            Simulation::getCurrentSimulatedDate() << ")" << std::endl;
+                                Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                         num_successes++;
                         /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
                          * Realistically, should this be done with a forced restart of the other hosts?
@@ -253,8 +253,7 @@ namespace wrench {
                          * execution option that was successful
                          */
                         break;
-                    }
-                    else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                    } else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
                         // This is the catch-all timer-based stuff
                         std::string timeout_prefix = "time_out";
                         std::string hostup_prefix = "host_up";
@@ -269,7 +268,7 @@ namespace wrench {
                                 continue; // Spurious timeout
                             }
                             std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" <<
-                                Simulation::getCurrentSimulatedDate() << ")" << std::endl;
+                                    Simulation::getCurrentSimulatedDate() << ")" << std::endl;
                             WRENCH_INFO("Deadline reached :(");
                             break;
                         }
@@ -295,12 +294,11 @@ namespace wrench {
                     }
                 }
                 // Cancel all pending jobs
-                for (const auto& [hostname, job] : running_jobs) {
+                for (const auto &[hostname, job]: running_jobs) {
                     if (job) {
                         try {
                             job_manager->terminateJob(job);
-                        }
-                        catch (ExecutionException& ignore) {
+                        } catch (ExecutionException &ignore) {
                         }
                     }
                 }
@@ -310,13 +308,13 @@ namespace wrench {
 #ifdef COMPUTE_PROBABILITIES
         double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
         double relative_error = std::abs(probability_midpoint - experimental_probability) /
-            std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
+                                std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
 
         std::cout << std::endl << "TOTAL REPEATS = " << _num_repeats << "    TOTAL SUCCESSES = " << num_successes <<
-            std::endl;
+                std::endl;
         std::cout << "EXPERIMENTAL PROBABILITY = " << experimental_probability << std::endl;
         std::cout << "DELTA PROBABILITY = " << probability_midpoint << "    with deltat = " << prob->get_delta_t() <<
-            std::endl;
+                std::endl;
         std::cout << "IS THIS ACCURATE ENOUGH? " << (relative_error < 1e-2 ? "YES" : "NO") << std::endl;
 #endif
 
