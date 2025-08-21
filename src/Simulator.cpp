@@ -61,13 +61,18 @@ int main(int argc, char** argv) {
 
     // Define command-line argument options
     std::string json_input_arg;
+    unsigned long num_repeats;
+    double deadline;
     po::options_description desc("Allowed arguments");
     desc.add_options()
     ("help",
      "Show this help message\n")
     ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON input (str or file path)>"),
-     "JSON input string or file path\n");
-
+     "JSON input string or file path\n")
+    ("num_repeats", po::value<unsigned long>(&num_repeats)->value_name("<number of repeats>"),
+     "Number of repeats for each each experiment (i.e., for each algorithm) - will override JSON-provided value\n")
+    ("deadline", po::value<double>(&deadline)->value_name("<deadline>"),
+         "Application execution deadline - will override JSON-provided value\n");
     // Parse command-line arguments
     po::variables_map vm;
     po::store(
@@ -83,8 +88,7 @@ int main(int argc, char** argv) {
         }
         // Throw whatever exception in case argument values are erroneous
         po::notify(vm);
-    }
-    catch (std::exception& e) {
+    } catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
         std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON input (file)> "
             + "[--log=controller.threshold=info | --wrench-full-log]";
@@ -98,6 +102,14 @@ int main(int argc, char** argv) {
     }
     else {
         json_input = readJSONFromFile(json_input_arg);
+    }
+
+    /* Override JSON content if need be */
+    if (vm.count("num_repeats") == 1) {
+        json_input.at("execution").as_object().at("num_repeats") = num_repeats;
+    }
+    if (vm.count("deadline") == 1) {
+        json_input.at("execution").as_object().at("deadline") = deadline;
     }
 
     /* Instantiating the platform */
