@@ -83,6 +83,7 @@ set(SIMULATOR_SOURCE_FILES
         src/FunctionGenerator.cpp
         src/SchedulingAlgorithm.cpp
         src/RunningJob.cpp
+        src/RunningJobTracker.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
         include/Controller.h
@@ -90,6 +91,7 @@ set(SIMULATOR_SOURCE_FILES
         include/FunctionGenerator.h
         include/SchedulingAlgorithm.h
         include/RunningJob.h
+        include/RunningJobTracker.h
 )
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 
