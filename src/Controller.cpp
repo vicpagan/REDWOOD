@@ -236,7 +236,7 @@ namespace wrench {
                     // Submit the task to each idle hosts
                     for (const auto& entry : _compute_services) {
                         std::string hostname = entry.first;
-                        if (running_job_tracker->is_a_job_running(hostname)) {
+                        if (not running_job_tracker->is_a_job_running(hostname)) {
                             // std::cout << "Selecting exec option for repeat " << repeat << std::endl;
                             std::string selected_exec_option = algorithm->select_execution_option(
                                 _probability_computation.get(),
@@ -315,7 +315,7 @@ namespace wrench {
                     }
                 }
 
-                // Cancel all pending jobs
+                // Cancel all pending jobs as we're done
                 for (const auto& entry : _compute_services) {
                     std::string hostname = entry.first;
                     if (running_job_tracker->is_a_job_running(hostname)) {

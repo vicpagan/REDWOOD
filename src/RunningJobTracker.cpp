@@ -1,6 +1,8 @@
 #include "RunningJob.h"
 #include "RunningJobTracker.h"
 
+#include <iostream>
+
 namespace wrench {
     void RunningJobTracker::track_job(const std::shared_ptr<CompoundJob>& compound_job,
                                       const std::string& hostname,
