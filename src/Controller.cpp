@@ -323,7 +323,7 @@ namespace wrench {
                             _job_manager->terminateJob(
                                 running_job_tracker->get_running_job(hostname)->get_compound_job());
                         }
-                        catch (ExecutionException& ignore) {
+                        catch (ExecutionException&) {
                         }
                     }
                 }
