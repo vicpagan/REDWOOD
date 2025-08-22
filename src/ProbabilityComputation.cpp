@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include <ProbabilityComputation.h>
+#include "ProbabilityComputation.h"
 
 
 // This is e^(-u * lambda * delta_t)

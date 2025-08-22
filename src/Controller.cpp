@@ -27,6 +27,9 @@
 #include "SchedulingAlgorithm.h"
 #include <wrench/util/UnitParser.h>
 
+#include "RunningJob.h"
+#include "RunningJobTracker.h"
+
 WRENCH_LOG_CATEGORY(controller, "Log category for Controller");
 
 namespace wrench {
@@ -110,6 +113,7 @@ namespace wrench {
 
     /**
      * @brief Helper function to create and submit a job
+     * @param running_job_tracker The running job tracker
      * @param task_name The task name
      * @param execution_option The execution option
      * @param running_output_data_size The running data size
@@ -117,13 +121,13 @@ namespace wrench {
      * @param hostname The hostname on which to start the job
      * @return a job
      */
-    std::shared_ptr<CompoundJob> Controller::create_and_submit_job(const std::string& task_name,
-                                                                   const std::string& execution_option,
-                                                                   double running_output_data_size,
-                                                                   double running_output_error_level,
-                                                                   const std::string& hostname) {
-        static unsigned long seq = 0;
-        auto job = _job_manager->createCompoundJob("");
+    void Controller::submit_job(const std::shared_ptr<RunningJobTracker>& running_job_tracker,
+                                const std::string& task_name,
+                                const std::string& execution_option,
+                                double running_output_data_size,
+                                double running_output_error_level,
+                                const std::string& hostname) {
+        auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
 
         auto read_input_action = job->addCustomAction("read", 0, 1,
                                                       [this, running_output_data_size](
@@ -161,7 +165,7 @@ namespace wrench {
 
         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
         _job_manager->submitJob(job, _compute_services.at(hostname));
-        return job;
+        running_job_tracker->track_job(job, hostname, task_name, execution_option);
     }
 
     /**
@@ -215,13 +219,8 @@ namespace wrench {
                 // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
                 this->setTimer(time_to_deadline, "time_out:" + std::to_string(repeat));
 
-                /* Create the map of hosts, where entries are either (null,"","") (if idle, as of now) or
-                 * a submitted job
-                 */
-                std::map<std::string, std::tuple<std::shared_ptr<CompoundJob>, std::string, std::string>> running_jobs;
-                for (const auto& [hostname, cs] : _compute_services) {
-                    running_jobs[hostname] = std::make_tuple(nullptr, "", "");
-                }
+                /* Create the job tracker */
+                auto running_job_tracker = RunningJobTracker::create_tracker();
 
                 /* Running values of output data size and error level */
                 auto running_output_data_size = initial_data_size;
@@ -235,8 +234,9 @@ namespace wrench {
                 /* (right now this assumes a single-task applications)  */
                 while (true) {
                     // Submit the task to each idle hosts
-                    for (const auto& [hostname, job_tuple] : running_jobs) {
-                        if (std::get<0>(job_tuple) == nullptr) {
+                    for (const auto& entry : _compute_services) {
+                        std::string hostname = entry.first;
+                        if (not running_job_tracker->is_a_job_running(hostname)) {
                             // std::cout << "Selecting exec option for repeat " << repeat << std::endl;
                             std::string selected_exec_option = algorithm->select_execution_option(
                                 _probability_computation.get(),
@@ -248,11 +248,12 @@ namespace wrench {
                             // std::cout << "Selected execution option = " << selected_exec_option <<
                             //     "    with remaining time = " << alarm - Simulation::getCurrentSimulatedDate()<<
                             //         std::endl;
-                            auto new_job = this->create_and_submit_job(current_task, selected_exec_option,
-                                running_output_data_size,
-                                running_output_error_level,
-                                hostname);
-                            running_jobs[hostname] = std::make_tuple(new_job, current_task, selected_exec_option);
+                            this->submit_job(running_job_tracker,
+                                             current_task,
+                                             selected_exec_option,
+                                             running_output_data_size,
+                                             running_output_error_level,
+                                             hostname);
                         }
                     }
 
@@ -297,7 +298,7 @@ namespace wrench {
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Reset the host's entry to nullptr, so that we now know it's idle
                             WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
-                            running_jobs[hostname] = std::make_tuple(nullptr, "", "");
+                            running_job_tracker->untrack_job(hostname);
                             continue;
                         }
 
@@ -306,21 +307,23 @@ namespace wrench {
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Cancel the job
                             WRENCH_INFO("Was notified that %s is down... terminating job", hostname.c_str());
-                            _job_manager->terminateJob(std::get<0>(running_jobs[hostname]));
+                            _job_manager->terminateJob(
+                                running_job_tracker->get_running_job(hostname)->get_compound_job());
                             // Leave the job in the map, so that we don't mistake the host as idle
                             continue;
                         }
                     }
                 }
 
-                // Cancel all pending jobs
-                for (const auto& [hostname, running_job] : running_jobs) {
-                    auto job = std::get<0>(running_job);
-                    if (job) {
+                // Cancel all pending jobs as we're done
+                for (const auto& entry : _compute_services) {
+                    std::string hostname = entry.first;
+                    if (running_job_tracker->is_a_job_running(hostname)) {
                         try {
-                            _job_manager->terminateJob(job);
-                            running_jobs[hostname] = std::make_tuple(nullptr, "", "");
-                        } catch (ExecutionException& ignore) {
+                            _job_manager->terminateJob(
+                                running_job_tracker->get_running_job(hostname)->get_compound_job());
+                        }
+                        catch (ExecutionException&) {
                         }
                     }
                 }
@@ -340,6 +343,7 @@ namespace wrench {
         std::cout << "IS THIS ACCURATE ENOUGH? " << (relative_error < 1e-2 ? "YES" : "NO") << std::endl;
 #endif
 
-        return 0;
+        return
+            0;
     }
 } // namespace wrench

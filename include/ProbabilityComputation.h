@@ -1,6 +1,8 @@
 #ifndef PROBABILITY_H
 #define PROBABILITY_H
 
+#include <vector>
+
 class ProbabilityComputation {
 public:
     explicit ProbabilityComputation(const double lambda, const double restart_overhead) {
