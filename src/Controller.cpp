@@ -215,7 +215,7 @@ namespace wrench {
                 // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
                 this->setTimer(time_to_deadline, "time_out:" + std::to_string(repeat));
 
-                /* Create the map of hosts, where entries are either null (if idle, as of now) or
+                /* Create the map of hosts, where entries are either (null,"","") (if idle, as of now) or
                  * a submitted job
                  */
                 std::map<std::string, std::tuple<std::shared_ptr<CompoundJob>, std::string, std::string>> running_jobs;
