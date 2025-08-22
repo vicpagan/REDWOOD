@@ -20,6 +20,7 @@ class SchedulingAlgorithm;
 
 namespace wrench {
     class NodeKiller;
+    class RunningJobTracker;
 
     /**
      *  @brief An Execution Controller implementation
@@ -42,7 +43,8 @@ namespace wrench {
     private:
         int main() override;
 
-        std::shared_ptr<CompoundJob> create_and_submit_job(const std::string& task_name,
+        void submit_job(const std::shared_ptr<RunningJobTracker> &running_job_tracker,
+                                                           const std::string& task_name,
                                                            const std::string& execution_option,
                                                            double running_output_data_size,
                                                            double running_output_error_level,

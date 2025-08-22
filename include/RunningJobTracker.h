@@ -21,6 +21,7 @@ namespace wrench {
          void untrack_job(const std::shared_ptr<CompoundJob>& compound_job);
          void untrack_job(const std::string& hostname);
 
+         bool is_a_job_running(const std::string& hostname);
          std::shared_ptr<RunningJob> get_running_job(const std::shared_ptr<CompoundJob>& compound_job);
          std::shared_ptr<RunningJob> get_running_job(const std::string& hostname);
 
@@ -36,6 +37,10 @@ namespace wrench {
         std::map<std::string, std::shared_ptr<RunningJob>> _running_jobs;
         std::map<std::shared_ptr<CompoundJob>, std::shared_ptr<RunningJob>> _compound_job_to_running_job;
     };
+
+    inline bool RunningJobTracker::is_a_job_running(const std::string& hostname) {
+        return (_running_jobs.find(hostname) != _running_jobs.end());
+    }
 
 };
 
