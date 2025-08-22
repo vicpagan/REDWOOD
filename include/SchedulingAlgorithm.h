@@ -2,6 +2,9 @@
 #define SCHEDULINGALGORITHM_H
 
 #include <map>
+#include <string>
+#include <functional>
+#include <memory>
 #include "ProbabilityComputation.h"
 
 class SchedulingAlgorithm {
