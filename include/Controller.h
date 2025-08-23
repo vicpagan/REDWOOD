@@ -15,12 +15,13 @@
 #include <boost/json/object.hpp>
 
 #include "ProbabilityComputation.h"
+#include "SchedulingAlgorithm.h"
 
 class SchedulingAlgorithm;
 
 namespace wrench {
     class NodeKiller;
-    class RunningJobTracker;
+    class JobTracker;
 
     /**
      *  @brief An Execution Controller implementation
@@ -43,7 +44,7 @@ namespace wrench {
     private:
         int main() override;
 
-        void submit_job(const std::shared_ptr<RunningJobTracker> &running_job_tracker,
+        void submit_job(const std::shared_ptr<JobTracker> &job_tracker,
                                                            const std::string& task_name,
                                                            const std::string& execution_option,
                                                            double running_output_data_size,
@@ -87,7 +88,7 @@ namespace wrench {
         std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
         _task_functions;
         std::exponential_distribution<double> _exponential_distribution;
-        std::vector<std::shared_ptr<SchedulingAlgorithm>> _scheduling_algorithms;
+        std::vector<std::shared_ptr<wrench::SchedulingAlgorithm>> _scheduling_algorithms;
 
         simgrid::s4u::Disk *_storage_disk;
 
