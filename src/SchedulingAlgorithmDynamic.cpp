@@ -84,6 +84,7 @@ namespace wrench {
             }
         }
 
+        std::cerr << "DYNAMIC DECISION: " << min_execution_option << std::endl;
         return min_execution_option;
     }
 
