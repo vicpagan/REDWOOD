@@ -82,16 +82,18 @@ set(SIMULATOR_SOURCE_FILES
         src/ProbabilityComputation.cpp
         src/FunctionGenerator.cpp
         src/SchedulingAlgorithm.cpp
+        src/SchedulingAlgorithmDynamic.cpp
         src/RunningJob.cpp
-        src/RunningJobTracker.cpp
+        src/JobTracker.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
         include/Controller.h
         include/ProbabilityComputation.h
         include/FunctionGenerator.h
         include/SchedulingAlgorithm.h
+        include/SchedulingAlgorithmDynamic.h
         include/RunningJob.h
-        include/RunningJobTracker.h
+        include/JobTracker.h
 )
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 

@@ -16,7 +16,7 @@ namespace wrench {
         [[nodiscard]] std::shared_ptr<CompoundJob> get_compound_job() const { return _compound_job; }
 
     private:
-        friend class RunningJobTracker;
+        friend class JobTracker;
         RunningJob(const std::shared_ptr<CompoundJob>& compound_job,
                    std::string task_name,
                    std::string task_execution_option) : _compound_job(compound_job),
