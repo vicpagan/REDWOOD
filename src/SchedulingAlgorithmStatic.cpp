@@ -13,10 +13,7 @@ namespace wrench {
         const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,
         double input_data_size,
         double input_error_level,
-        double remaining_time,
-        double restart_overhead,
-        double io_read_bandwidth,
-        double io_write_bandwidth) const {
+        double remaining_time) const {
         /* Initialize min_error_level to +inf */
         double min_expected_error_level = std::numeric_limits<double>::max();
         std::string min_execution_option;
@@ -45,10 +42,10 @@ namespace wrench {
 
             /* Calculate m_j, n, and R */
             const auto m_j = static_cast<long>(std::ceil(
-                ((input_data_size / io_read_bandwidth) + exec_option_time + (exec_option_data / io_write_bandwidth)) /
+                ((input_data_size / _io_read_bandwidth) + exec_option_time + (exec_option_data / _io_write_bandwidth)) /
                 selected_delta_t));
             const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
-            const auto R = static_cast<long>(std::ceil(restart_overhead / selected_delta_t));
+            const auto R = static_cast<long>(std::ceil(_restart_overhead / selected_delta_t));
 
             /* Precalculate probability of success and the list of failure probabilities for each possible failure point in execution */
             const auto probability_success = exp(-lambda * static_cast<double>(m_j) * selected_delta_t);
@@ -79,10 +76,7 @@ namespace wrench {
         const string& task_to_schedule,
         double input_data_size,
         double input_error_level,
-        double remaining_time,
-        double restart_overhead,
-        double io_read_bandwidth,
-        double io_write_bandwidth) {
+        double remaining_time) {
         std::vector<SchedulingAlgorithm::SchedulingDecision> decisions;
 
         // Whatever the first decision is, it's always going to be the same one,
@@ -94,10 +88,7 @@ namespace wrench {
                 exec_options.at(task_to_schedule),
                 input_data_size,
                 input_error_level,
-                remaining_time,
-                restart_overhead,
-                io_read_bandwidth,
-                io_write_bandwidth);
+                remaining_time);
         }
 
         // Make a decision for each host that's currently idle

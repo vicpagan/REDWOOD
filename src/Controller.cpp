@@ -103,7 +103,8 @@ namespace wrench {
         for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
                             boost::json::value_to<string>(alg_name),
-                            _e_fail, _delta_t, _delta_t_precision);
+                            _e_fail, _delta_t, _delta_t_precision,
+                            _restart_overhead, _io_read_bandwidth, _io_write_bandwidth);
 
             _scheduling_algorithms.push_back(alg);
         }
@@ -246,8 +247,7 @@ namespace wrench {
                            _task_functions,
                            current_task,
                            running_output_data_size, running_output_error_level,
-                           time_to_deadline - Simulation::getCurrentSimulatedDate(), _restart_overhead,
-                           _io_read_bandwidth, _io_write_bandwidth);
+                           time_to_deadline - Simulation::getCurrentSimulatedDate());
 
                     // Implement the scheduling decisions
                     for (auto const &decision : decisions) {

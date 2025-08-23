@@ -17,11 +17,14 @@ namespace wrench {
     * @param delta_t_precision: the precision used for computing delta_t
     */
     std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algorithm(
-        const std::string &type, double e_fail, double delta_t, double delta_t_precision) {
+        const std::string &type, double e_fail, double delta_t, double delta_t_precision,
+        const double restart_overhead, const double io_read_bandwidth, const double io_write_bandwidth) {
         if (type == "dynamic") {
-            return std::make_shared<SchedulingAlgorithmDynamic>(e_fail, delta_t, delta_t_precision);
+            return std::make_shared<SchedulingAlgorithmDynamic>(e_fail, delta_t, delta_t_precision,
+                restart_overhead, io_read_bandwidth, io_write_bandwidth);
         } else if (type == "static") {
-                return std::make_shared<SchedulingAlgorithmStatic>(e_fail, delta_t, delta_t_precision);
+                return std::make_shared<SchedulingAlgorithmStatic>(e_fail, delta_t, delta_t_precision,
+                    restart_overhead, io_read_bandwidth, io_write_bandwidth);
         } else {
             throw std::invalid_argument("Unknown scheduling algorithm '" + type + "'");
         }
