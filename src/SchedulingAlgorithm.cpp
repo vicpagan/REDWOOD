@@ -15,6 +15,9 @@ namespace wrench {
     * @param e_fail: the failure error level
     * @param delta_t: the delta_t
     * @param delta_t_precision: the precision used for computing delta_t
+    * @param restart_overhead: the restart overhead
+    * @param io_read_bandwidth: the I/O read bandwidth
+    * @param io_write_bandwidth: the I/O write bandwidth
     */
     std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algorithm(
         const std::string &type, double e_fail, double delta_t, double delta_t_precision,
