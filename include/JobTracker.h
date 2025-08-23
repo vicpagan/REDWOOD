@@ -37,7 +37,7 @@ namespace wrench {
         auto end()   const { return _running_jobs.end(); }
 
     private:
-        JobTracker(std::vector<std::string> hostnames);
+        JobTracker(const std::vector<std::string>& hostnames);
 
         std::map<std::string, std::shared_ptr<RunningJob>> _running_jobs;
         std::map<std::shared_ptr<CompoundJob>, std::shared_ptr<RunningJob>> _compound_job_to_running_job;
