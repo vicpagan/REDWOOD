@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <utility>
 #include "ProbabilityComputation.h"
 #include "JobTracker.h"
 
@@ -18,9 +19,9 @@ namespace wrench {
         virtual ~SchedulingAlgorithm() = default;
 
         SchedulingAlgorithm(const double e_fail, const double delta_t, const double delta_t_precision,
-                            const std::string& name) : _e_fail(e_fail),
+                            std::string name) : _e_fail(e_fail),
                                                        _delta_t(delta_t), _delta_t_precision(delta_t_precision),
-                                                       _name(name) {
+                                                       _name(std::move(name)) {
         };
 
         struct SchedulingDecision {

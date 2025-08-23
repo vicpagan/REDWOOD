@@ -198,6 +198,7 @@ namespace wrench {
 
         /* Loop over all the scheduling algorithms */
         for (const auto& algorithm : _scheduling_algorithms) {
+            std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
             WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
 
             /* Keep track of number of successes */
@@ -205,6 +206,8 @@ namespace wrench {
 
             /* Do all the repeats */
             for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                double repeat_start_date = Simulation::getCurrentSimulatedDate();
+
                 /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
                 NodeKiller::start_node_killers(this->getSimulation(),
                                                _compute_services,
@@ -261,8 +264,8 @@ namespace wrench {
                     auto event = this->waitForNextEvent();
                     if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                         auto hostname = success_event->compute_service->getHosts().at(0);
-                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (time:" <<
-                            Simulation::getCurrentSimulatedDate() << ")" << std::endl;
+                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
+                            Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
                         num_successes++;
                         /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
                          * Realistically, should this be done with a forced restart of the other hosts?
@@ -286,8 +289,8 @@ namespace wrench {
                             if (repeat_id != std::to_string(repeat)) {
                                 continue; // Spurious timeout
                             }
-                            std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (time:" <<
-                                Simulation::getCurrentSimulatedDate() << ")" << std::endl;
+                            std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
+                                Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" << std::endl;
                             WRENCH_INFO("Deadline reached :(");
                             break;
                         }
