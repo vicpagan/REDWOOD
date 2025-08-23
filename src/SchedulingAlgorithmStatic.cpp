@@ -67,6 +67,7 @@ namespace wrench {
             }
         }
 
+        std::cerr << "STATIC DECISION: " << min_execution_option << std::endl;
         return min_execution_option;
     }
 

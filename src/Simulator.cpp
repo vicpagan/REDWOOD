@@ -65,6 +65,7 @@ int main(int argc, char** argv) {
     double deadline;
     int seed;
     double lambda;
+    double delta_t;
     po::options_description desc("Allowed arguments");
     desc.add_options()
     ("help",
@@ -78,7 +79,9 @@ int main(int argc, char** argv) {
     ("seed", po::value<int>(&seed)->value_name("<seed>"),
          "RNG seed - will override JSON-provided value\n")
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
-         "Parameter of the exponential distribution - will override JSON-provided value\n");
+         "Parameter of the exponential distribution - will override JSON-provided value\n")
+    ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
+         "delta_t value - will override JSON-provided value\n");
     // Parse command-line arguments
     po::variables_map vm;
     po::store(
@@ -122,6 +125,9 @@ int main(int argc, char** argv) {
     }
     if (vm.count("lambda") == 1) {
         json_input.at("failures").as_object().at("lambda") = lambda;
+    }
+    if (vm.count("delta_t") == 1) {
+        json_input.at("scheduling").as_object().at("delta_t") = delta_t;
     }
 
     /* Instantiating the platform */
