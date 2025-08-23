@@ -83,6 +83,7 @@ set(SIMULATOR_SOURCE_FILES
         src/FunctionGenerator.cpp
         src/SchedulingAlgorithm.cpp
         src/SchedulingAlgorithmDynamic.cpp
+        src/SchedulingAlgorithmStatic.cpp
         src/RunningJob.cpp
         src/JobTracker.cpp
         include/PlatformCreator.h
@@ -92,6 +93,7 @@ set(SIMULATOR_SOURCE_FILES
         include/FunctionGenerator.h
         include/SchedulingAlgorithm.h
         include/SchedulingAlgorithmDynamic.h
+        include/SchedulingAlgorithmStatic.h
         include/RunningJob.h
         include/JobTracker.h
 )

@@ -8,7 +8,7 @@
     "restart_overhead": 10,
     "lambda": 0.01,
     "seed_comment": "If seed value is negative a random seed will be used",
-    "seed": -1
+    "seed": 1
   },
   "application": {
     "initial_data_size": 100.0,
@@ -95,7 +95,7 @@
     "delta_t_comment": "If < 0, then a good delta_t will be computed using the precision below",
     "delta_t_precision": 0.001,
     "algorithms": {
-      "one_task": ["dynamic"]
+      "one_task": ["dynamic", "static"]
     }
   }
 }

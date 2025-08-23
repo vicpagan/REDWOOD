@@ -5,6 +5,7 @@
 #include "SchedulingAlgorithm.h"
 #include "ProbabilityComputation.h"
 #include "SchedulingAlgorithmDynamic.h"
+#include "SchedulingAlgorithmStatic.h"
 
 
 namespace wrench {
@@ -19,6 +20,8 @@ namespace wrench {
         const std::string &type, double e_fail, double delta_t, double delta_t_precision) {
         if (type == "dynamic") {
             return std::make_shared<SchedulingAlgorithmDynamic>(e_fail, delta_t, delta_t_precision);
+        } else if (type == "static") {
+                return std::make_shared<SchedulingAlgorithmStatic>(e_fail, delta_t, delta_t_precision);
         } else {
             throw std::invalid_argument("Unknown scheduling algorithm '" + type + "'");
         }

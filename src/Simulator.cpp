@@ -63,6 +63,8 @@ int main(int argc, char** argv) {
     std::string json_input_arg;
     unsigned long num_repeats;
     double deadline;
+    int seed;
+    double lambda;
     po::options_description desc("Allowed arguments");
     desc.add_options()
     ("help",
@@ -72,7 +74,11 @@ int main(int argc, char** argv) {
     ("num_repeats", po::value<unsigned long>(&num_repeats)->value_name("<number of repeats>"),
      "Number of repeats for each each experiment (i.e., for each algorithm) - will override JSON-provided value\n")
     ("deadline", po::value<double>(&deadline)->value_name("<deadline>"),
-         "Application execution deadline - will override JSON-provided value\n");
+         "Application execution deadline - will override JSON-provided value\n")
+    ("seed", po::value<int>(&seed)->value_name("<seed>"),
+         "RNG seed - will override JSON-provided value\n")
+    ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
+         "Parameter of the exponential distribution - will override JSON-provided value\n");
     // Parse command-line arguments
     po::variables_map vm;
     po::store(
@@ -110,6 +116,12 @@ int main(int argc, char** argv) {
     }
     if (vm.count("deadline") == 1) {
         json_input.at("execution").as_object().at("deadline") = deadline;
+    }
+    if (vm.count("seed") == 1) {
+        json_input.at("failures").as_object().at("seed") = seed;
+    }
+    if (vm.count("lambda") == 1) {
+        json_input.at("failures").as_object().at("lambda") = lambda;
     }
 
     /* Instantiating the platform */
