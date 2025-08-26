@@ -308,11 +308,11 @@ namespace wrench {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Cancel the job
-                            WRENCH_INFO("Was notified that %s is down... terminating job", hostname.c_str());
-                            _job_manager->terminateJob(
-                                job_tracker->get_running_job(hostname)->get_compound_job());
-                            // Leave the job in the map, so that we don't mistake the host as idle
-                            continue;
+                            WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());
+                            if (job_tracker->is_a_job_running(hostname)) {
+                                _job_manager->terminateJob(
+                                    job_tracker->get_running_job(hostname)->get_compound_job());
+                            }
                         }
                     }
                 }
