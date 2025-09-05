@@ -36,7 +36,6 @@ namespace wrench {
             exec_option_metrics.at(option_name).at("e_function") = option_functions.at("e_function")(input_data_size, input_error_level);
             // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
 
-<<<<<<< Updated upstream
             /* Select a delta based on the scheme */
             if (_delta_t_scheme == "fixed") {
                 // _delta_t_parameter is our fixed delta_t value
@@ -46,20 +45,10 @@ namespace wrench {
                 exec_option_metrics.at(option_name).at("t_function"), remaining_time, _delta_t_parameter));
             } else {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
-=======
-            /* Select a delta either through calculation or by a set default */
-            /* Use the smallest delta out of all exec options */
-            if (_delta_t < 0) {
-                selected_delta_t = std::min(probability_computation->compute_best_deltat(
-                    exec_option_metrics.at(option_name).at("t_function"), remaining_time, _delta_t_precision), selected_delta_t);
-            }
-            else {
-                selected_delta_t = _delta_t;
->>>>>>> Stashed changes
             }
         }
         probability_computation->set_delta_t(selected_delta_t);
-        
+
         /* Calculate m_js, n, and R */
         std::map<std::string, long> m_j;
         std::map<std::string, double> probability_success;
@@ -78,25 +67,6 @@ namespace wrench {
         }
         const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
         const auto R = static_cast<long>(std::ceil(_restart_overhead / selected_delta_t));
-
-        /* Calculate m_js, n, and R */
-        std::map<std::string, long> m_j;
-        std::map<std::string, double> probability_success;
-        std::map<std::string, std::vector<double>> probability_failures;
-        for (const auto& [option_name, option_functions] : exec_options) {
-            m_j.at(option_name) = static_cast<long>(std::ceil(
-            ((input_data_size / _io_read_bandwidth) + exec_option_metrics.at(option_name).at("t_function") + (exec_option_metrics.at(option_name).at("d_function") / _io_write_bandwidth)) /
-            selected_delta_t));
-
-            /* Precalculate probability of success and the list of failure probabilities for each possible failure point in execution */
-            probability_success.at(option_name) = exp(-lambda * static_cast<double>(m_j.at(option_name)) * selected_delta_t);
-            for (long u = 0; u < m_j.at(option_name); u++) {
-                probability_failures.at(option_name)[u] = exp(-lambda * static_cast<double>(u) * selected_delta_t) - exp(
-                    -lambda * static_cast<double>((u + 1)) * selected_delta_t);
-            }
-        }
-        long n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
-        long R = static_cast<long>(std::ceil(_restart_overhead / selected_delta_t));
 
         // std::cerr << "DYNAMIC DECISION: " << min_execution_option << std::endl;
         return calculate_expected_error();
