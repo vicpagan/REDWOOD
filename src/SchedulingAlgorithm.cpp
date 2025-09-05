@@ -45,27 +45,18 @@ namespace wrench {
      * @param R this is R in the paper
      * @return The expected error for the selected execution option
      */
-    double SchedulingAlgorithm::calculate_expected_error(std::vector<double> &dp,
-                                                         const double exec_option_error,
-                                                         const double probability_success,
-                                                         const std::vector<double> &probability_failures,
-                                                         const long m_j,
-                                                         const long n,
-                                                         const long R) const {
-        /* BASE CASE: If there are fewer than m_j time steps remaining, we fail */
-        for (long i = 0; i < m_j && i <= n; i++) {
-            dp[i] = _e_fail;
-        }
-
-        for (long k = m_j; k <= n; k++) {
-            double expected_error = probability_success * exec_option_error;
-            for (long u = 0; u < m_j; u++) {
-                expected_error += probability_failures[u] * dp[std::max((k - u - R - 1), 0L)];
+    double SchedulingAlgorithm::calculate_expected_error(std::map<std::string, double> &exec_option_errors,
+        std::map<std::string, long> &m_j,
+        long n,
+        long R,
+        std::map<std::string, double> &probability_success,
+        std::map<std::string, std::vector<double>> &probability_failures) const {
+        for (const auto& [option_name, option_error_level] : exec_option_errors) {
+            double expected_error = probability_success.at(option_name) * option_error_level;
+            for (long u = 0; u < m_j.at(option_name); u++) {
+                expected_error += probability_failures.at(option_name).at(u) * calculate_expected_error(std::max((n - u - R - 1), 0L));
             }
-            dp[k] = expected_error;
         }
-
-        return dp[n];
     }
 
 }
