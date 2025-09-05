@@ -37,14 +37,20 @@ namespace wrench {
             const auto exec_option_error = option_functions.at("e_function")(input_data_size, input_error_level);
             // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
 
-            /* Select a delta either through calculation or by a set default */
-            if (_delta_t < 0) {
+            /* Select a delta based on the scheme */
+            if (_delta_t_scheme == "fixed") {
+                // _delta_t_parameter is our fixed delta_t value
+                probability_computation->set_delta_t(_delta_t_parameter);
+            } else if (_delta_t_scheme == "compute_once") {
                 const double deltat_computation = probability_computation->compute_best_deltat(
-                    exec_option_time, remaining_time, _delta_t_precision);
+                    exec_option_time, remaining_time, _delta_t_parameter);
                 probability_computation->set_delta_t(deltat_computation);
-            }
-            else {
-                probability_computation->set_delta_t(_delta_t);
+            } else if (_delta_t_scheme == "compute_always") {
+                const double deltat_computation = probability_computation->compute_best_deltat(
+                    exec_option_time, remaining_time, _delta_t_parameter);
+                probability_computation->set_delta_t(deltat_computation);
+            } else {
+                throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
 
             /* Grab lambda and delta_t */
