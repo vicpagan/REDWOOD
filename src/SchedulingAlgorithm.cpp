@@ -20,13 +20,13 @@ namespace wrench {
     * @param io_write_bandwidth: the I/O write bandwidth
     */
     std::shared_ptr<SchedulingAlgorithm> SchedulingAlgorithm::create_scheduling_algorithm(
-        const std::string &type, double e_fail, double delta_t, double delta_t_precision,
+        const std::string &type, double e_fail, std::string delta_t_scheme, double delta_t_parameter,
         const double restart_overhead, const double io_read_bandwidth, const double io_write_bandwidth) {
         if (type == "dynamic") {
-            return std::make_shared<SchedulingAlgorithmDynamic>(e_fail, delta_t, delta_t_precision,
+            return std::make_shared<SchedulingAlgorithmDynamic>(e_fail, delta_t_scheme, delta_t_parameter,
                 restart_overhead, io_read_bandwidth, io_write_bandwidth);
         } else if (type == "static") {
-                return std::make_shared<SchedulingAlgorithmStatic>(e_fail, delta_t, delta_t_precision,
+                return std::make_shared<SchedulingAlgorithmStatic>(e_fail, delta_t_scheme, delta_t_parameter,
                     restart_overhead, io_read_bandwidth, io_write_bandwidth);
         } else {
             throw std::invalid_argument("Unknown scheduling algorithm '" + type + "'");

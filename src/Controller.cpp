@@ -15,8 +15,6 @@
 #define MBYTE (1000.0 * 1000.0)
 #define GBYTE (1000.0 * 1000.0 * 1000.0)
 
-// #define COMPUTE_PROBABILITIES 1
-
 #include <iostream>
 #include <wrench/util/UnitParser.h>
 
@@ -69,8 +67,8 @@ namespace wrench {
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
         _seed = boost::json::value_to<int>(_failure_spec.at("seed"));
-        _delta_t = boost::json::value_to<double>(_scheduling_spec.at("delta_t"));
-        _delta_t_precision = boost::json::value_to<double>(_scheduling_spec.at("delta_t_precision"));
+        _delta_t_scheme = boost::json::value_to<string>(_scheduling_spec.at("delta_t_scheme").as_object().at("scheme"));
+        _delta_t_parameter = boost::json::value_to<double>(_scheduling_spec.at("delta_t_scheme").as_object().at("parameter"));
 
         if (_seed < 0) {
             _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
@@ -103,7 +101,7 @@ namespace wrench {
         for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
                             boost::json::value_to<string>(alg_name),
-                            _e_fail, _delta_t, _delta_t_precision,
+                            _e_fail, _delta_t_scheme, _delta_t_parameter,
                             _restart_overhead, _io_read_bandwidth, _io_write_bandwidth);
 
             _scheduling_algorithms.push_back(alg);
@@ -188,14 +186,6 @@ namespace wrench {
         /* Get initial x (data size) and y (error) from the JSON file */
         auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
         auto initial_error_level = boost::json::value_to<double>(_application_spec.at("initial_error_level"));
-
-#ifdef COMPUTE_PROBABILITIES
-        double deltat_computation = prob->compute_best_deltat(task_time, _deadline, 1e-3);
-        prob->set_delta_t(deltat_computation);
-        double probability_upper_bound = prob->compute_probability(task_time, _deadline, false);
-        double probability_lower_bound = prob->compute_probability(task_time, _deadline, true);
-        double probability_midpoint = (probability_upper_bound + probability_lower_bound) / 2;
-#endif
 
         /* Loop over all the scheduling algorithms */
         for (const auto& algorithm : _scheduling_algorithms) {
@@ -331,21 +321,6 @@ namespace wrench {
                 }
             }
         }
-
-#ifdef COMPUTE_PROBABILITIES
-        double experimental_probability = static_cast<double>(num_successes) / static_cast<double>(_num_repeats);
-        double relative_error = std::abs(probability_midpoint - experimental_probability) /
-                                std::max(std::abs(probability_midpoint), std::abs(experimental_probability));
-
-        std::cout << std::endl << "TOTAL REPEATS = " << _num_repeats << "    TOTAL SUCCESSES = " << num_successes <<
-                std::endl;
-        std::cout << "EXPERIMENTAL PROBABILITY = " << experimental_probability << std::endl;
-        std::cout << "DELTA PROBABILITY = " << probability_midpoint << "    with deltat = " << prob->get_delta_t() <<
-                std::endl;
-        std::cout << "IS THIS ACCURATE ENOUGH? " << (relative_error < 1e-2 ? "YES" : "NO") << std::endl;
-#endif
-
-        return
-            0;
+        return 0;
     }
 } // namespace wrench
