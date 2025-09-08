@@ -98,7 +98,7 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["dynamic", "static"]
+      "one_task": ["static"]
     }
   }
 }

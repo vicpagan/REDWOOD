@@ -81,6 +81,7 @@ set(SIMULATOR_SOURCE_FILES
         src/Controller.cpp
         src/ProbabilityComputation.cpp
         src/FunctionGenerator.cpp
+        src/OptionComparatorFunction.cpp
         src/SchedulingAlgorithm.cpp
         src/SchedulingAlgorithmDynamic.cpp
         src/SchedulingAlgorithmStatic.cpp

@@ -126,9 +126,9 @@ namespace wrench {
                                 double running_output_data_size,
                                 double running_output_error_level,
                                 const std::string& hostname) {
-        auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
+        const auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
 
-        auto read_input_action = job->addCustomAction("read", 0, 1,
+        const auto read_input_action = job->addCustomAction("read", 0, 1,
                                                       [this, running_output_data_size](
                                                       const std::shared_ptr<wrench::ActionExecutor>& action_executor) {
                                                           _storage_disk->write(
@@ -138,13 +138,13 @@ namespace wrench {
                                                       action_executor) {
                                                       });
 
-        auto compute_action = job->addComputeAction("compute",
+        const auto compute_action = job->addComputeAction("compute",
                                                     _task_functions[task_name][execution_option]["t_function"]
                                                     (running_output_data_size, running_output_error_level),
                                                     0.0,
                                                     1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
 
-        auto write_output_action = job->addCustomAction("write", 0, 1,
+        const auto write_output_action = job->addCustomAction("write", 0, 1,
                                                         [this, task_name, execution_option, running_output_data_size,
                                                             running_output_error_level](
                                                         const std::shared_ptr<wrench::ActionExecutor>&
@@ -182,6 +182,9 @@ namespace wrench {
 
         /* Create the probability computation utility */
         _probability_computation = std::make_unique<ProbabilityComputation>(_lambda, _restart_overhead);
+
+        /* Create an execution option comparator function object */
+        _option_comparator = std::make_shared<ExpectedErrorComparator>(_io_read_bandwidth, _io_write_bandwidth, _e_fail);
 
         /* Get initial x (data size) and y (error) from the JSON file */
         auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
@@ -237,7 +240,8 @@ namespace wrench {
                            _task_functions,
                            current_task,
                            running_output_data_size, running_output_error_level,
-                           time_to_deadline - Simulation::getCurrentSimulatedDate());
+                           time_to_deadline - Simulation::getCurrentSimulatedDate(),
+                           _option_comparator.get(), true);
 
                     // Implement the scheduling decisions
                     for (auto const &decision : decisions) {
