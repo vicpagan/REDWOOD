@@ -28,3 +28,5 @@ std::function<double(double, double)> FunctionGenerator::get_function(const boos
     // Return the function (which is really a functor)
     return _function_registry[key];
 }
+
+

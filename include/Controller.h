@@ -16,6 +16,7 @@
 
 #include "ProbabilityComputation.h"
 #include "SchedulingAlgorithm.h"
+#include "OptionComparatorFunction.h"
 
 class SchedulingAlgorithm;
 
@@ -89,6 +90,7 @@ namespace wrench {
         _task_functions;
         std::exponential_distribution<double> _exponential_distribution;
         std::vector<std::shared_ptr<wrench::SchedulingAlgorithm>> _scheduling_algorithms;
+        std::shared_ptr<OptionComparatorFunction> _option_comparator;
 
         simgrid::s4u::Disk *_storage_disk;
 

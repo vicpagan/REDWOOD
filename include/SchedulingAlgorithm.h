@@ -6,8 +6,10 @@
 #include <functional>
 #include <memory>
 #include <utility>
+
 #include "ProbabilityComputation.h"
 #include "JobTracker.h"
+#include "OptionComparatorFunction.h"
 
 namespace wrench {
     class JobTracker;
@@ -39,13 +41,13 @@ namespace wrench {
         virtual std::vector<SchedulingDecision> make_decisions(
             JobTracker* job_tracker,
             ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<
-                               std::string, std::map<std::string, std::function<double(double, double)>>>>&
-            exec_options,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             const std::string& task_to_schedule,
             double input_data_size,
             double input_error_level,
-            double remaining_time) = 0;
+            double remaining_time,
+            OptionComparatorFunction* comparator_function,
+            bool minimize) = 0;
 
 
         static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(

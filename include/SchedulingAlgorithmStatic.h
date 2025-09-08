@@ -19,27 +19,31 @@ namespace wrench {
                                   const double restart_overhead,
                                   const double io_read_bandwidth,
                                   const double io_write_bandwidth) : SchedulingAlgorithm(
-            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth, io_write_bandwidth, "static") {
+            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth,
+            io_write_bandwidth, "static") {
         };
 
         std::vector<SchedulingDecision> make_decisions(
-            JobTracker* job_tracker,
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<
-                               std::string, std::map<std::string, std::function<double(double, double)>>>>&
-            exec_options,
-            const std::string& task_to_schedule,
+            JobTracker *job_tracker,
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
+                (double, double)> > > > &exec_options,
+            const std::string &task_to_schedule,
             double input_data_size,
             double input_error_level,
-            double remaining_time) override;
+            double remaining_time,
+            OptionComparatorFunction *comparator_function,
+            bool minimize) override;
 
     private:
         std::string pick_execution_option(
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::map<std::string, std::function<double(double, double)> > > &exec_options,
             double input_data_size,
             double input_error_level,
-            double remaining_time) const;
+            double remaining_time,
+            OptionComparatorFunction *comparator_function,
+            bool minimize) const;
     };
 }
 

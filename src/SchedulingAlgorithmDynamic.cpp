@@ -66,9 +66,9 @@ namespace wrench {
     std::string SchedulingAlgorithmDynamic::pick_execution_option(
         ProbabilityComputation* probability_computation,
         const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time) {
+        const double input_data_size,
+        const double input_error_level,
+        const double remaining_time) const {
         /* Initialize selected_delta_t to +inf */
         double selected_delta_t = std::numeric_limits<double>::max();
         std::map<std::string, std::map<std::string, double>> exec_option_metrics;
@@ -115,17 +115,9 @@ namespace wrench {
         const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
         const auto R = static_cast<long>(std::ceil(_restart_overhead / selected_delta_t));
 
-        std::map<std::string, std::vector<double>> dp;
-        for (const auto &[option_name, mj] : m_j) {
-            std::vector<double> errors(n + 1, -1.0);
-            for (long t = 0; t < mj && t <= n; ++t) {
-                errors[t] = _e_fail;
-            }
-            dp[option_name] = std::move(errors);
-        }
+        std::pair<std::string, double> best_option = calculate_expected_error(exec_option_metrics, probability_success, probability_failures,
+                                                   m_j, n, R);
 
-        std::pair<std::string, double> best_option = calculate_expected_error(dp, exec_option_metrics, probability_success, probability_failures,
-                                        m_j, n, R);
         std::cout<< "Best option is " << best_option.first << " with expected error " << best_option.second << std::endl;
         std::string min_execution_option = best_option.first;
         std::cerr << "DYNAMIC DECISION: " << min_execution_option << std::endl;
@@ -136,10 +128,12 @@ namespace wrench {
         JobTracker* job_tracker,
         ProbabilityComputation* probability_computation,
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        const string& task_to_schedule,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time) {
+        const std::string& task_to_schedule,
+        const double input_data_size,
+        const double input_error_level,
+        const double remaining_time,
+        OptionComparatorFunction* comparator_function,
+        const bool minimize) {
         std::vector<SchedulingDecision> decisions;
 
         // Make a decision for each host that's currently idle
@@ -147,7 +141,7 @@ namespace wrench {
         for (const auto& [hostname, job] : *job_tracker) {
             if (job) continue; // Host is not idle
 
-            auto execution_option = this->pick_execution_option(
+            const auto execution_option = this->pick_execution_option(
                 probability_computation,
                 exec_options.at(task_to_schedule),
                 input_data_size,

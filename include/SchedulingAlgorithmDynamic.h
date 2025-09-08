@@ -19,32 +19,36 @@ namespace wrench {
                                    const double restart_overhead,
                                    const double io_read_bandwidth,
                                    const double io_write_bandwidth) : SchedulingAlgorithm(
-            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth, io_write_bandwidth, "dynamic") {
+            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth,
+            io_write_bandwidth, "dynamic") {
         };
 
         std::vector<SchedulingDecision> make_decisions(
-            JobTracker* job_tracker,
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<
-                               std::string, std::map<std::string, std::function<double(double, double)>>>>&
-            exec_options,
-            const std::string& task_to_schedule,
+            JobTracker *job_tracker,
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
+                (double, double)> > > > &exec_options,
+            const std::string &task_to_schedule,
             double input_data_size,
             double input_error_level,
-            double remaining_time) override;
+            double remaining_time,
+            OptionComparatorFunction *comparator_function,
+            bool minimize) override;
 
     private:
-        [[nodiscard]] std::pair<std::string, double> calculate_expected_error(const std::map<std::string, std::map<std::string, double>> &exec_option_metrics,
-                                                                const std::map<std::string, double> &probability_success,
-                                                                const std::map<std::string, std::vector<double> > &probability_failures,
-                                                                const std::map<std::string, long> &m_j,
-                                                                long n, long R) const;
+        [[nodiscard]] std::pair<std::string, double> calculate_expected_error(
+            const std::map<std::string, std::map<std::string, double> > &exec_option_metrics,
+            const std::map<std::string, double> &probability_success,
+            const std::map<std::string, std::vector<double> > &probability_failures,
+            const std::map<std::string, long> &m_j,
+            long n, long R) const;
+
         std::string pick_execution_option(
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::map<std::string, std::function<double(double, double)> > > &exec_options,
             double input_data_size,
             double input_error_level,
-            double remaining_time);
+            double remaining_time) const;
     };
 }
 
