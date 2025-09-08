@@ -80,8 +80,8 @@ namespace wrench {
         double _e_fail;
         long _num_repeats;
         double _lambda;
-        double _delta_t;
-        double _delta_t_precision;
+        std::string _delta_t_scheme;
+        double _delta_t_parameter;
         int _seed;
         double _io_read_bandwidth;
         double _io_write_bandwidth;
