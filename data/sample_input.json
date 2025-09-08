@@ -6,7 +6,7 @@
   },
   "failures": {
     "restart_overhead": 10,
-    "lambda": 0.01,
+    "lambda": 0.005,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 1
   },
@@ -91,9 +91,12 @@
     "e_fail": 10.0
   },
   "scheduling": {
-    "delta_t": -1,
-    "delta_t_comment": "If < 0, then a good delta_t will be computed using the precision below",
-    "delta_t_precision": 0.001,
+    "delta_t_scheme_comments": "'fixed', 'compute'",
+    "delta_t_scheme": {
+      "scheme": "fixed",
+      "parameter_comments": "Either a fixed value or a precision value",
+      "parameter": 1.0
+    },
     "algorithms": {
       "one_task": ["dynamic", "static"]
     }

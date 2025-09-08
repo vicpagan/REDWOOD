@@ -34,6 +34,11 @@ namespace wrench {
             double remaining_time) override;
 
     private:
+        [[nodiscard]] std::pair<std::string, double> calculate_expected_error(const std::map<std::string, std::map<std::string, double>> &exec_option_metrics,
+                                                                const std::map<std::string, double> &probability_success,
+                                                                const std::map<std::string, std::vector<double> > &probability_failures,
+                                                                const std::map<std::string, long> &m_j,
+                                                                long n, long R) const;
         std::string pick_execution_option(
             ProbabilityComputation* probability_computation,
             const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,

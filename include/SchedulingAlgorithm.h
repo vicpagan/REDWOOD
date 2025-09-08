@@ -55,14 +55,6 @@ namespace wrench {
         std::string get_name() { return _name; }
 
     protected:
-        double calculate_expected_error(std::vector<double>& dp,
-                                        double exec_option_error,
-                                        double probability_success,
-                                        const std::vector<double>& probability_failures,
-                                        long m_j,
-                                        long n,
-                                        long R) const;
-
         double _e_fail;
         double _delta_t;
         std::string _delta_t_scheme;

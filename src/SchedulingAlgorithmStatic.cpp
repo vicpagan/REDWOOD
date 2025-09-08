@@ -14,7 +14,8 @@ namespace wrench {
         double input_data_size,
         double input_error_level,
         double remaining_time) const {
-        /* Initialize min_error_level to +inf */
+        /* Initialize min_error_level and selected_delta_t to +inf */
+        double selected_delta_t = std::numeric_limits<double>::max();
         double min_expected_error_level = std::numeric_limits<double>::max();
         std::string min_execution_option;
 
@@ -26,40 +27,28 @@ namespace wrench {
             const auto exec_option_error = option_functions.at("e_function")(input_data_size, input_error_level);
             // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
 
-            /* Select a delta either through calculation or by a set default */
-            if (_delta_t < 0) {
-                const double deltat_computation = probability_computation->compute_best_deltat(
-                    exec_option_time, remaining_time, _delta_t_precision);
-                probability_computation->set_delta_t(deltat_computation);
+            const double exec_option_time_total = (input_data_size / _io_read_bandwidth) + exec_option_time + (exec_option_data / _io_write_bandwidth);
+            /* Select a delta based on the scheme */
+            if (_delta_t_scheme == "fixed") {
+                // _delta_t_parameter is our fixed delta_t value
+                selected_delta_t = _delta_t_parameter;
+            } else if (_delta_t_scheme == "compute") {
+                selected_delta_t = std::min(selected_delta_t, probability_computation->compute_best_deltat(
+                exec_option_time_total, remaining_time, _delta_t_parameter));
+            } else {
+                throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
-            else {
-                probability_computation->set_delta_t(_delta_t);
-            }
+            probability_computation->set_delta_t(selected_delta_t);
 
-            /* Grab lambda and delta_t */
-            const double selected_delta_t = probability_computation->get_delta_t();
-            const double lambda = probability_computation->get_lambda();
-
-            /* Calculate m_j, n, and R */
-            const auto m_j = static_cast<long>(std::ceil(
-                ((input_data_size / _io_read_bandwidth) + exec_option_time + (exec_option_data / _io_write_bandwidth)) /
-                selected_delta_t));
-            const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
-            const auto R = static_cast<long>(std::ceil(_restart_overhead / selected_delta_t));
-
-            /* Precalculate probability of success and the list of failure probabilities for each possible failure point in execution */
-            const auto probability_success = exp(-lambda * static_cast<double>(m_j) * selected_delta_t);
-            auto probability_failures(std::vector<double>(m_j, 0.0));
-            for (long u = 0; u < m_j; u++) {
-                probability_failures[u] = exp(-lambda * static_cast<double>(u) * selected_delta_t) - exp(
-                    -lambda * static_cast<double>((u + 1)) * selected_delta_t);
-            }
-
-            const double expected_error = probability_success * exec_option_error + (1 - probability_success) * _e_fail;
+            /* Calculate the expected error for the current exec option */
+            const auto exec_option_probability_success = probability_computation->compute_probability(exec_option_time_total, remaining_time, false);
+            const auto expected_error_option = exec_option_probability_success * exec_option_error +
+                (1.0 - exec_option_probability_success) * _e_fail;
+            // std::cout << "EXEC OPTION " << exec_option_name << " EXPECTED ERROR: " << expected_error_option << std::endl;
 
             /* Take the minimum expected error of all the execution options */
-            if (expected_error < min_expected_error_level) {
-                min_expected_error_level = expected_error;
+            if (expected_error_option < min_expected_error_level) {
+                min_expected_error_level = expected_error_option;
                 min_execution_option = exec_option_name;
             }
         }
