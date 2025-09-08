@@ -14,12 +14,12 @@ namespace wrench {
     class SchedulingAlgorithmDynamic : public SchedulingAlgorithm {
     public:
         SchedulingAlgorithmDynamic(const double e_fail,
-                                   const double delta_t,
-                                   const double delta_t_precision,
+                                   std::string delta_t_scheme,
+                                   const double delta_t_parameter,
                                    const double restart_overhead,
                                    const double io_read_bandwidth,
                                    const double io_write_bandwidth) : SchedulingAlgorithm(
-            e_fail, delta_t, delta_t_precision, restart_overhead, io_read_bandwidth, io_write_bandwidth, "dynamic") {
+            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth, io_write_bandwidth, "dynamic") {
         };
 
         std::vector<SchedulingDecision> make_decisions(
@@ -34,6 +34,11 @@ namespace wrench {
             double remaining_time) override;
 
     private:
+        [[nodiscard]] std::pair<std::string, double> calculate_expected_error(const std::map<std::string, std::map<std::string, double>> &exec_option_metrics,
+                                                                const std::map<std::string, double> &probability_success,
+                                                                const std::map<std::string, std::vector<double> > &probability_failures,
+                                                                const std::map<std::string, long> &m_j,
+                                                                long n, long R) const;
         std::string pick_execution_option(
             ProbabilityComputation* probability_computation,
             const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,

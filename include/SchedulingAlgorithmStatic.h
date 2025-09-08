@@ -13,12 +13,13 @@
 namespace wrench {
     class SchedulingAlgorithmStatic : public SchedulingAlgorithm {
     public:
-        SchedulingAlgorithmStatic(const double e_fail, const double delta_t,
-                                  const double delta_t_precision,
+        SchedulingAlgorithmStatic(const double e_fail,
+                                  std::string delta_t_scheme,
+                                  const double delta_t_parameter,
                                   const double restart_overhead,
                                   const double io_read_bandwidth,
                                   const double io_write_bandwidth) : SchedulingAlgorithm(
-            e_fail, delta_t, delta_t_precision, restart_overhead, io_read_bandwidth, io_write_bandwidth, "static") {
+            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth, io_write_bandwidth, "static") {
         };
 
         std::vector<SchedulingDecision> make_decisions(

@@ -6,7 +6,7 @@
   },
   "failures": {
     "restart_overhead": 10,
-    "lambda": 0.01,
+    "lambda": 0.005,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 1
   },
@@ -91,7 +91,7 @@
     "e_fail": 10.0
   },
   "scheduling": {
-    "delta_t_scheme_comments": "'fixed', 'compute_once', 'compute_always'",
+    "delta_t_scheme_comments": "'fixed', 'compute'",
     "delta_t_scheme": {
       "scheme": "fixed",
       "parameter_comments": "Either a fixed value or a precision value",
