@@ -67,7 +67,7 @@ namespace wrench {
         _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
         _seed = boost::json::value_to<int>(_failure_spec.at("seed"));
-        _delta_t_scheme = boost::json::value_to<string>(_scheduling_spec.at("delta_t_scheme").as_object().at("scheme"));
+        _delta_t_scheme = boost::json::value_to<std::string>(_scheduling_spec.at("delta_t_scheme").as_object().at("scheme"));
         _delta_t_parameter = boost::json::value_to<double>(_scheduling_spec.at("delta_t_scheme").as_object().at("parameter"));
 
         if (_seed < 0) {
@@ -241,12 +241,15 @@ namespace wrench {
 
                     // Implement the scheduling decisions
                     for (auto const &decision : decisions) {
-                            this->submit_job(job_tracker,
-                                             decision.task,
-                                             decision.execution_option,
-                                             running_output_data_size,
-                                             running_output_error_level,
-                                             decision.hostname);
+                        // std::cerr << "Scheduling decision: run task " << decision.task <<
+                        //     " with option " << decision.execution_option <<
+                        //     " on host " << decision.hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
+                        this->submit_job(job_tracker,
+                                         decision.task,
+                                         decision.execution_option,
+                                         running_output_data_size,
+                                         running_output_error_level,
+                                         decision.hostname);
                     }
 
                     // Here we could instead call waitForAndProcessNextEvent() and define the handling
@@ -295,6 +298,7 @@ namespace wrench {
                         }
 
                         if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
+                            // std::cerr << "Host is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Cancel the job

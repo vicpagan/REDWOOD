@@ -33,30 +33,4 @@ namespace wrench {
         }
     }
 
-    /**
-     * @brief Calculates expected error recursively for one execution option for a single task
-     *
-     * @param dp Dynamic programming array
-     * @param exec_option_error This is our e(x, y) for this execution option
-     * @param probability_failures This is the list of our p_us
-     * @param probability_success This is our e^(-lambda * m_j * delta)
-     * @param m_j This is m_j in the paper
-     * @param n This is n in the paper
-     * @param R this is R in the paper
-     * @return The expected error for the selected execution option
-     */
-    double SchedulingAlgorithm::calculate_expected_error(std::map<std::string, double> &exec_option_errors,
-        std::map<std::string, long> &m_j,
-        long n,
-        long R,
-        std::map<std::string, double> &probability_success,
-        std::map<std::string, std::vector<double>> &probability_failures) const {
-        for (const auto& [option_name, option_error_level] : exec_option_errors) {
-            double expected_error = probability_success.at(option_name) * option_error_level;
-            for (long u = 0; u < m_j.at(option_name); u++) {
-                expected_error += probability_failures.at(option_name).at(u) * calculate_expected_error(std::max((n - u - R - 1), 0L));
-            }
-        }
-    }
-
 }
