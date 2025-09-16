@@ -2,7 +2,7 @@
 #include <limits>
 #include <cmath>
 
-#include "SchedulingAlgorithmStatic.h"
+#include "scheduling/SchedulingAlgorithmStatic.h"
 #include "ProbabilityComputation.h"
 #include "JobTracker.h"
 

@@ -79,12 +79,13 @@ set(SIMULATOR_SOURCE_FILES
         src/NodeKiller.cpp
         src/Simulator.cpp
         src/Controller.cpp
+        src/StateOfTheSystem.cpp
         src/ProbabilityComputation.cpp
         src/FunctionGenerator.cpp
-        src/OptionComparatorFunction.cpp
-        src/SchedulingAlgorithm.cpp
-        src/SchedulingAlgorithmDynamic.cpp
-        src/SchedulingAlgorithmStatic.cpp
+        src/scheduling/OptionComparatorFunction.cpp
+        src/scheduling/SchedulingAlgorithm.cpp
+        src/scheduling/SchedulingAlgorithmDynamic.cpp
+        src/scheduling/SchedulingAlgorithmStatic.cpp
         src/RunningJob.cpp
         src/JobTracker.cpp
         include/PlatformCreator.h
@@ -92,9 +93,9 @@ set(SIMULATOR_SOURCE_FILES
         include/Controller.h
         include/ProbabilityComputation.h
         include/FunctionGenerator.h
-        include/SchedulingAlgorithm.h
-        include/SchedulingAlgorithmDynamic.h
-        include/SchedulingAlgorithmStatic.h
+        include/scheduling/SchedulingAlgorithm.h
+        include/scheduling/SchedulingAlgorithmDynamic.h
+        include/scheduling/SchedulingAlgorithmStatic.h
         include/RunningJob.h
         include/JobTracker.h
 )

@@ -15,6 +15,7 @@
 
 #include "PlatformCreator.h"
 #include "Controller.h"
+#include "SystemSpecs.h"
 
 namespace sg4 = simgrid::s4u;
 namespace po = boost::program_options;
@@ -147,9 +148,14 @@ int main(int argc, char** argv) {
         compute_services[hostname] = baremetal_service;
     }
 
+    auto state_of_the_system = wrench::SystemSpecs::create_system_specs(json_input["platform"].as_object(),
+            json_input["failures"].as_object(),
+            json_input["execution"].as_object()
+        );
+
     /* Instantiate the execution controller */
     auto controller = simulation->add(
-        new wrench::Controller(
+        new wrench::Controller(state_of_the_system,
             json_input["platform"].as_object(),
             json_input["failures"].as_object(),
             json_input["application"].as_object(),
