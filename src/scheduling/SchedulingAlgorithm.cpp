@@ -2,10 +2,10 @@
 #include <limits>
 #include <cmath>
 
-#include "SchedulingAlgorithm.h"
+#include "scheduling/SchedulingAlgorithm.h"
 #include "ProbabilityComputation.h"
-#include "SchedulingAlgorithmDynamic.h"
-#include "SchedulingAlgorithmStatic.h"
+#include "scheduling/SchedulingAlgorithmDynamic.h"
+#include "scheduling/SchedulingAlgorithmStatic.h"
 
 
 namespace wrench {

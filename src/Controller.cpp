@@ -24,7 +24,8 @@
 #include "ProbabilityComputation.h"
 #include "RunningJob.h"
 #include "JobTracker.h"
-#include "SchedulingAlgorithm.h"
+#include "StateOfTheSystem.h"
+#include "scheduling/SchedulingAlgorithm.h"
 
 WRENCH_LOG_CATEGORY(controller, "Log category for Controller");
 
@@ -41,38 +42,22 @@ namespace wrench {
      * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const boost::json::object& platform_spec,
-                           const boost::json::object& failure_spec,
-                           const boost::json::object& application_spec,
+    Controller::Controller(const boost::json::object& application_spec,
                            const boost::json::object& execution_spec,
                            const boost::json::object& scheduling_spec,
+                           const std::shared_ptr<SystemSpecs>& system_specs,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
-                                                          _platform_spec(platform_spec),
-                                                          _failure_spec(failure_spec),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _scheduling_spec(scheduling_spec),
+                                                          _system_specs(system_specs),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
-        _io_read_bandwidth = wrench::UnitParser::parse_bandwidth(
-            boost::json::value_to<string>(_platform_spec.at("io_read_bandwidth")));
-        _io_write_bandwidth = wrench::UnitParser::parse_bandwidth(
-            boost::json::value_to<string>(_platform_spec.at("io_write_bandwidth")));
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
-        _deadline = boost::json::value_to<double>(_execution_spec.at("deadline"));
-        _restart_overhead = boost::json::value_to<double>(_failure_spec.at("restart_overhead"));
-        _e_fail = boost::json::value_to<double>(_execution_spec.at("e_fail"));
-        _lambda = boost::json::value_to<double>(_failure_spec.at("lambda"));
-        _exponential_distribution = std::exponential_distribution<double>(_lambda);
-        _seed = boost::json::value_to<int>(_failure_spec.at("seed"));
         _delta_t_scheme = boost::json::value_to<std::string>(_scheduling_spec.at("delta_t_scheme").as_object().at("scheme"));
         _delta_t_parameter = boost::json::value_to<double>(_scheduling_spec.at("delta_t_scheme").as_object().at("parameter"));
-
-        if (_seed < 0) {
-            _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
-        }
 
         /* Create the data structure that describes all task functions */
         for (const auto& task : _application_spec.at("tasks").as_array()) {
@@ -101,8 +86,9 @@ namespace wrench {
         for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
                             boost::json::value_to<string>(alg_name),
-                            _e_fail, _delta_t_scheme, _delta_t_parameter,
-                            _restart_overhead, _io_read_bandwidth, _io_write_bandwidth);
+                            _system_specs->get_e_fail(), _delta_t_scheme, _delta_t_parameter,
+                            _system_specs->get_restart_overhead(), _system_specs->get_io_read_bandwidth(),
+                            _system_specs->get_io_write_bandwidth());
 
             _scheduling_algorithms.push_back(alg);
         }
@@ -181,10 +167,10 @@ namespace wrench {
         _job_manager = this->createJobManager();
 
         /* Create the probability computation utility */
-        _probability_computation = std::make_unique<ProbabilityComputation>(_lambda, _restart_overhead);
+        _probability_computation = std::make_unique<ProbabilityComputation>(_system_specs->get_lambda(), _system_specs->get_restart_overhead());
 
         /* Create an execution option comparator function object */
-        _option_comparator = std::make_shared<ExpectedErrorComparator>(_io_read_bandwidth, _io_write_bandwidth, _e_fail);
+        _option_comparator = std::make_shared<ExpectedErrorComparator>(_system_specs->get_io_read_bandwidth(), _system_specs->get_io_write_bandwidth(), _system_specs->get_e_fail());
 
         /* Get initial x (data size) and y (error) from the JSON file */
         auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
@@ -205,14 +191,14 @@ namespace wrench {
                 /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
                 NodeKiller::start_node_killers(this->getSimulation(),
                                                _compute_services,
-                                               _seed,
+                                               _system_specs->get_seed(),
                                                (repeat == 0),
                                                _exponential_distribution,
-                                               _restart_overhead,
+                                               _system_specs->get_restart_overhead(),
                                                this->commport);
 
                 /* Create an alarm for the deadline */
-                auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _deadline;
+                auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _system_specs->get_deadline();
                 // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
                 this->setTimer(time_to_deadline, "time_out:" + std::to_string(repeat));
 

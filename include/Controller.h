@@ -15,8 +15,9 @@
 #include <boost/json/object.hpp>
 
 #include "ProbabilityComputation.h"
-#include "SchedulingAlgorithm.h"
-#include "OptionComparatorFunction.h"
+#include "SystemSpecs.h"
+#include "scheduling/SchedulingAlgorithm.h"
+#include "scheduling/OptionComparatorFunction.h"
 
 class SchedulingAlgorithm;
 
@@ -31,8 +32,7 @@ namespace wrench {
     public:
         // Constructor
         Controller(
-            const boost::json::object& platform_spec,
-            const boost::json::object& failure_spec,
+            const std::shared_ptr<SystemSpecs>& _state_of_the_system,
             const boost::json::object& application_spec,
             const boost::json::object& execution_spec,
             const boost::json::object& scheduling_spec,
@@ -52,22 +52,12 @@ namespace wrench {
                                                            double running_output_error_level,
                                                            const std::string& hostname);
 
-        // void start_probability_computation(double lambda, double restart_overhead);
-
-        // std::string select_execution_option(const map<std::string, map<std::string, std::function<double(double, double)>>> &exec_options,
-        //     const double input_data_size, const double input_error_level, const double remaining_time);
-        // double calculate_expected_error(double exec_option_error,
-        //                                 double probability_midpoint,
-        //                                 double probability_success,
-        //                                 long m_j,
-        //                                 long n,
-        //                                 double input_data_size,
-        //                                 double input_error_level);
+        std::shared_ptr<SystemSpecs> _system_specs;
 
         std::unique_ptr<ProbabilityComputation> _probability_computation;
 
-        const boost::json::object _platform_spec;
-        const boost::json::object _failure_spec;
+        std::shared_ptr<OptionComparatorFunction> _option_comparator;
+
         const boost::json::object _application_spec;
         const boost::json::object _execution_spec;
         const boost::json::object _scheduling_spec;
@@ -76,21 +66,14 @@ namespace wrench {
 
         std::shared_ptr<JobManager> _job_manager;
 
-        double _deadline;
-        double _restart_overhead;
-        double _e_fail;
         long _num_repeats;
-        double _lambda;
         std::string _delta_t_scheme;
         double _delta_t_parameter;
-        int _seed;
-        double _io_read_bandwidth;
-        double _io_write_bandwidth;
+
         std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
         _task_functions;
         std::exponential_distribution<double> _exponential_distribution;
         std::vector<std::shared_ptr<wrench::SchedulingAlgorithm>> _scheduling_algorithms;
-        std::shared_ptr<OptionComparatorFunction> _option_comparator;
 
         simgrid::s4u::Disk *_storage_disk;
 
