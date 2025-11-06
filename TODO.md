@@ -3,20 +3,9 @@
   - Temporal redundancy hack
     - For chain tasks, keep track of previous exec option in the recursion
     - Probably easier to do a decision tree instead of a table
-  - Implement multiple task
-  - Preprocess dynamic programming data for multiple tasks
-  - Keep preprocessed decisions in ApplicationSpecs
-    - Could still be useful for multiple hosts with certain heuristics
-  - Implement(?) multiple hosts
-    - To keep track of other hosts, add data structure for each host of
-      - Current task 
-      - Current exec option
-      - Start time of current task
-      - Completed tasks
   - Cancel useless runs of tasks upon a single host completing hack
-    - Can use above data structure
+    - Need to make sure hosts that are down still get properly reset and wait
   - Change delta calculation to squeeze on expected error
 
 BUGS:
-  - More success as lambda increases?
-  - Repetitions failing before the deadline is met with a high enough lambda
+  - Need to make sure hosts that are down still get properly reset and wait instead of skipping past the restart overhead

@@ -215,6 +215,7 @@ namespace wrench {
                 /* Running values of output data size and error level */
                 auto running_output_data_size = initial_data_size;
                 auto running_output_error_level = initial_error_level;
+                double best_error = _application_specs->get_e_fail();
 
                 /* Current task is the first task */
                 int current_task_counter = 0;
@@ -256,63 +257,73 @@ namespace wrench {
                     if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                         auto hostname = success_event->compute_service->getHosts().at(0);
                         auto job_task_name = success_event->job->getName();
-                        std::cout << "Current task: " << current_task << std::endl;
                         if (job_task_name.compare(0, current_task.length(), current_task)) {
                             std::cout << "Got a job success message for the wrong task." << std::endl;
-                            std::cout << "Message task: " << job_task_name << std::endl;
-                            std::cout << "Current task: " << current_task << std::endl;
                             continue;
                         }
-                        std::cout << "Task " << current_task << " has completed successfully on " << hostname << " at time "
-                                  << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                        std::cout << job_task_name << " completed successfully." << std::endl;
+
+                        std::string selected_option = job_task_name.substr(current_task.length() + 1);
+                        running_output_data_size = _task_functions.at(current_task).at(selected_option).at("d_function")(running_output_data_size, running_output_error_level);;
+                        running_output_error_level = _task_functions.at(current_task).at(selected_option).at("e_function")(running_output_data_size, running_output_error_level);
                         current_task_counter++;
                         current_task = _application_specs->get_task(current_task_counter);
+
                         if (current_task.empty()) {
                             // were done
-                            std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
-                                Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
-                            num_successes++;
-                            break;
-                        } else {
 
-                            for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
-                                std::string hostname_loop = "ComputeHost_" + std::to_string(i);
-                                std::cout << "Resetting host " << hostname_loop << std::endl;
-                                if (job_tracker->is_a_job_running(hostname_loop) && hostname_loop != hostname) {
-                                    std::cout << "Job is running on " << hostname_loop << ", terminating it" << std::endl;
-                                    try {
-                                        _job_manager->terminateJob(
-                                            job_tracker->get_running_job(hostname)->get_compound_job());
-                                    }
-                                    catch (ExecutionException&) {
-                                        std::cerr << "Tried to terminate job on down host: " << hostname_loop << std::endl;
-                                    }
-                                    job_tracker->untrack_job(hostname_loop);
-                                }
-                                _application_specs->reset_running_host(hostname_loop);
+                            if (best_error == _application_specs->get_e_fail()) {
+                                num_successes++;
+                                std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
+                                    Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
+                            } else {
+                                std::cout << "REPETITION " << std::to_string(repeat) << " HAS IMPROVED ITS ERROR LEVEL (after " <<
+                                    Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
                             }
-                            job_tracker->untrack_job(hostname);
+                            std::cout << "Previous error lvl: " << best_error << std::endl;
+                            std::cout << "New best error lvl: " << running_output_error_level << std::endl;
 
-                            NodeKiller::start_node_killers(this->getSimulation(),
+                            // reset running trackers
+                            best_error = running_output_error_level;
+                            running_output_data_size = initial_data_size;
+                            running_output_error_level = initial_error_level;
+                            current_task_counter = 0;
+                            current_task = _application_specs->get_task(current_task_counter);
+
+                            _application_specs->prune_decision_tree(best_error);
+                            if (_application_specs->decision_tree_empty()) {
+                                std::cout << "We cannot do better" << std::endl;
+                                break;
+                            }
+                            algorithm->reset_preprocessed_decisions();
+                        }
+
+                        for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
+                            std::string hostname_loop = "ComputeHost_" + std::to_string(i);
+                            std::cout << "Resetting host " << hostname_loop << std::endl;
+                            if (job_tracker->is_a_job_running(hostname_loop) && hostname_loop != hostname) {
+                                std::cout << "Job is running on " << hostname_loop << ", terminating it" << std::endl;
+                                try {
+                                    _job_manager->terminateJob(
+                                        job_tracker->get_running_job(hostname)->get_compound_job());
+                                }
+                                catch (ExecutionException&) {
+                                    std::cerr << "Tried to terminate job on down host: " << hostname_loop << std::endl;
+                                }
+                                job_tracker->untrack_job(hostname_loop);
+                            }
+                            _application_specs->reset_running_host(hostname_loop);
+                        }
+                        job_tracker->untrack_job(hostname);
+
+                        NodeKiller::start_node_killers(this->getSimulation(),
                                                _compute_services,
                                                _application_specs->get_seed(),
                                                false,
                                                _application_specs->get_exponential_distribution(),
                                                _application_specs->get_restart_overhead(),
                                                this->commport);
-                            // onto the next task
-                            // cancel all the rest? (heuristic dependent)
-                        }
-                        // std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
-                        //     Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
-                        // num_successes++;
-                        /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
-                         * Realistically, should this be done with a forced restart of the other hosts?
-                         * Or would the other hosts be able to start on the new task and give up the old one instantly?
-                         * We also need to update the running input data size and input error level based on the
-                         * execution option that was successful
-                         */
-                        continue;
+
                     }
                     else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
                         // This is the catch-all timer-based stuff
@@ -328,9 +339,11 @@ namespace wrench {
                             if (repeat_id != std::to_string(repeat)) {
                                 continue; // Spurious timeout
                             }
-                            std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
+                            if (best_error == _application_specs->get_e_fail()) {
+                                std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
                                 Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" << std::endl;
-                            WRENCH_INFO("Deadline reached :(");
+                            }
+                            WRENCH_INFO("Deadline reached");
                             _application_specs->reset_all_running_hosts();
                             break;
                         }

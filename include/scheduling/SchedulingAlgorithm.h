@@ -55,6 +55,10 @@ namespace wrench {
 
         std::string get_name() { return _name; }
 
+        void reset_preprocessed_decisions() {
+            _preprocessed_decisions.clear();
+        }
+
     protected:
         std::shared_ptr<ApplicationSpecs> _application_specs;
         double _e_fail;

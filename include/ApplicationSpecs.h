@@ -66,9 +66,15 @@ namespace wrench {
                 int task_index,
                 const std::shared_ptr<ExecOptionDecisionNode>& parent,
                 double running_error_factor);
+
+            void prune_tree(double best_error);
+
+            bool prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, double best_error);
         };
 
         void build_decision_tree(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options) const;
+        void prune_decision_tree(double best_error) const;
+        bool decision_tree_empty() const;
 
         std::shared_ptr<ExecOptionDecisionNode> get_decision_tree_root() const { return _exec_option_decision_tree->root; }
 

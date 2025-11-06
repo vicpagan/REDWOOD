@@ -24,8 +24,7 @@ namespace wrench {
             return dp[task_index][n].second;
         }
 
-        const std::string &task_name = _application_specs->get_task(task_index);
-        // std::cout << "TEST: REMAINING TASKS = " << remaining_tasks << ", TASK_INDEX = " << task_index << ", TASK_NAME = " << task_name << ", n = " << n << std::endl;
+        const std::string task_name = _application_specs->get_task(task_index);
         std::string best_option;
         double min_expected_error = std::numeric_limits<double>::infinity();
 

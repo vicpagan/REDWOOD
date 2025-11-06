@@ -6,7 +6,7 @@
   },
   "failures": {
     "restart_overhead": 10,
-    "lambda": 0.05,
+    "lambda": 0.3,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": -1
   },
@@ -157,7 +157,7 @@
   "execution": {
     "num_repeats": 1,
     "deadline": 10000,
-    "e_fail": 10.0
+    "e_fail": 20.0
   },
   "scheduling": {
     "delta_t_scheme_comments": "'fixed', 'compute'",
