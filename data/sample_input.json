@@ -1,17 +1,17 @@
 {
   "platform": {
-    "num_compute_nodes": 1,
+    "num_compute_nodes": 2,
     "io_read_bandwidth": "200MBps",
     "io_write_bandwidth": "200MBps"
   },
   "failures": {
     "restart_overhead": 10,
-    "lambda": 0.005,
+    "lambda": 0.05,
     "seed_comment": "If seed value is negative a random seed will be used",
-    "seed": 1
+    "seed": -1
   },
   "application": {
-    "initial_data_size": 100.0,
+    "initial_data_size": 5.0,
     "initial_error_level": 1.0,
     "tasks": [
       {
@@ -24,7 +24,7 @@
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
-                "b": 5.0,
+                "b": 1.0,
                 "c": 0.0
               }
             },
@@ -43,7 +43,7 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 700.0,
+                "c": 3.10,
                 "d": 0.0,
                 "e": 0.0
               }
@@ -56,7 +56,7 @@
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
-                "b": 6.0,
+                "b": 2.0,
                 "c": 0.0
               }
             },
@@ -77,7 +77,76 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 1.0
+                "c": 3.0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "task2",
+        "execution_options": [
+          {
+            "name": "option3",
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 1.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 2.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 3.10,
+                "d": 0.0,
+                "e": 0.0
+              }
+            }
+          },
+          {
+            "name": "option4",
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 2.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 0.0,
+                "b": 2.0,
+                "c": 0.0,
+                "d": 0.0,
+                "e": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 3.0
               }
             }
           }
@@ -86,7 +155,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 10,
+    "num_repeats": 1,
     "deadline": 10000,
     "e_fail": 10.0
   },
@@ -98,7 +167,8 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["static"]
+      "one_task": ["dynamic"],
+      "multi_task": ["dynamic"]
     }
   }
 }

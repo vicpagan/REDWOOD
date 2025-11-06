@@ -41,14 +41,18 @@ namespace wrench {
         TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_RED);
         WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
         while (true) {
-            Simulation::sleep(_exponential_distribution(_rng));
+            double sleep_time = _exponential_distribution(_rng);
+            std::cout << "Host " << _victim_host << " will run for " << sleep_time << " seconds" << std::endl;
+            Simulation::sleep(sleep_time);
             WRENCH_INFO("Turning host %s \"off\"", _victim_host.c_str());
             // Simulation::turnOffHost(_victim_host);
+            std::cout << "Host " << _victim_host << " got turned off" << std::endl;
             _notify_commport->dputMessage(new ExecutionControllerAlarmTimerMessage("host_down:" + _victim_host, 0));
 
             Simulation::sleep(_restart_overhead);
             WRENCH_INFO("Turning host %s \"on\"", _victim_host.c_str());
             // Simulation::turnOnHost(_victim_host);
+            std::cout << "Host " << _victim_host << " got turned on" << std::endl;
             _notify_commport->dputMessage(new ExecutionControllerAlarmTimerMessage("host_up:" + _victim_host, 0));
         }
     }

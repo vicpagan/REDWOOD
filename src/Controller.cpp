@@ -24,7 +24,6 @@
 #include "ProbabilityComputation.h"
 #include "RunningJob.h"
 #include "JobTracker.h"
-#include "StateOfTheSystem.h"
 #include "scheduling/SchedulingAlgorithm.h"
 
 WRENCH_LOG_CATEGORY(controller, "Log category for Controller");
@@ -45,22 +44,23 @@ namespace wrench {
     Controller::Controller(const boost::json::object& application_spec,
                            const boost::json::object& execution_spec,
                            const boost::json::object& scheduling_spec,
-                           const std::shared_ptr<SystemSpecs>& system_specs,
+                           const std::shared_ptr<ApplicationSpecs>& application_specs,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
                            const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
+                                                          _application_specs(application_specs),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _scheduling_spec(scheduling_spec),
-                                                          _system_specs(system_specs),
                                                           _compute_services(compute_services),
                                                           _storage_service(storage_service) {
+
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
-        _delta_t_scheme = boost::json::value_to<std::string>(_scheduling_spec.at("delta_t_scheme").as_object().at("scheme"));
-        _delta_t_parameter = boost::json::value_to<double>(_scheduling_spec.at("delta_t_scheme").as_object().at("parameter"));
 
         /* Create the data structure that describes all task functions */
         for (const auto& task : _application_spec.at("tasks").as_array()) {
+            std::vector<std::pair<std::string, std::function<double(double, double)>>> options_for_task;
+
             auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
             auto& exec_options = task.as_object().at("execution_options").as_array();
 
@@ -69,10 +69,18 @@ namespace wrench {
 
                 for (auto function_name : {"t_function", "d_function", "e_function"}) {
                     auto& function = option.as_object().at(function_name).as_object();
-                    _task_functions[task_name][option_name][function_name] = FunctionGenerator::get_function(function);
+                    auto func = FunctionGenerator::get_function(function);
+
+                    if (static_cast<std::string>(function_name) == "e_function") {
+                        options_for_task.emplace_back(option_name, func);
+                    }
+                    _task_functions[task_name][option_name][function_name] = func;
                 }
             }
         }
+
+        /* Build decision tree to use for temporal redundancy */
+        _application_specs->build_decision_tree(_task_functions);
 
         /* Determine the list of scheduling algorithms */
         /* Determine/validate the scheduling algorithms to use */
@@ -81,14 +89,11 @@ namespace wrench {
             scheduling_type = "one_task";
         }
         else {
-            throw std::invalid_argument("Multi-task applications not supported (yet)");
+            scheduling_type = "multi_task";
         }
         for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
-                            boost::json::value_to<string>(alg_name),
-                            _system_specs->get_e_fail(), _delta_t_scheme, _delta_t_parameter,
-                            _system_specs->get_restart_overhead(), _system_specs->get_io_read_bandwidth(),
-                            _system_specs->get_io_write_bandwidth());
+                            boost::json::value_to<string>(alg_name), _application_specs);
 
             _scheduling_algorithms.push_back(alg);
         }
@@ -167,10 +172,10 @@ namespace wrench {
         _job_manager = this->createJobManager();
 
         /* Create the probability computation utility */
-        _probability_computation = std::make_unique<ProbabilityComputation>(_system_specs->get_lambda(), _system_specs->get_restart_overhead());
+        _probability_computation = std::make_unique<ProbabilityComputation>(_application_specs);
 
         /* Create an execution option comparator function object */
-        _option_comparator = std::make_shared<ExpectedErrorComparator>(_system_specs->get_io_read_bandwidth(), _system_specs->get_io_write_bandwidth(), _system_specs->get_e_fail());
+        _option_comparator = std::make_shared<ExpectedErrorComparator>(_application_specs);
 
         /* Get initial x (data size) and y (error) from the JSON file */
         auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
@@ -191,14 +196,14 @@ namespace wrench {
                 /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
                 NodeKiller::start_node_killers(this->getSimulation(),
                                                _compute_services,
-                                               _system_specs->get_seed(),
+                                               _application_specs->get_seed(),
                                                (repeat == 0),
-                                               _exponential_distribution,
-                                               _system_specs->get_restart_overhead(),
+                                               _application_specs->get_exponential_distribution(),
+                                               _application_specs->get_restart_overhead(),
                                                this->commport);
 
                 /* Create an alarm for the deadline */
-                auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _system_specs->get_deadline();
+                auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _application_specs->get_deadline();
                 // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
                 this->setTimer(time_to_deadline, "time_out:" + std::to_string(repeat));
 
@@ -212,8 +217,8 @@ namespace wrench {
                 auto running_output_error_level = initial_error_level;
 
                 /* Current task is the first task */
-                auto current_task = std::string(_application_spec.at("tasks").as_array().
-                                                                  at(0).as_object().at("name").as_string().c_str());
+                int current_task_counter = 0;
+                auto current_task = _application_specs->get_task(current_task_counter);
 
                 /* Loop until the task completes successfully somewhere */
                 /* (right now this assumes a single-task applications)  */
@@ -234,6 +239,9 @@ namespace wrench {
                         // std::cerr << "Scheduling decision: run task " << decision.task <<
                         //     " with option " << decision.execution_option <<
                         //     " on host " << decision.hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
+                        _application_specs->update_running_host(decision.hostname, decision.task,
+                                                                decision.execution_option,
+                                                                Simulation::getCurrentSimulatedDate());
                         this->submit_job(job_tracker,
                                          decision.task,
                                          decision.execution_option,
@@ -247,16 +255,64 @@ namespace wrench {
                     auto event = this->waitForNextEvent();
                     if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
                         auto hostname = success_event->compute_service->getHosts().at(0);
-                        std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
-                            Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
-                        num_successes++;
+                        auto job_task_name = success_event->job->getName();
+                        std::cout << "Current task: " << current_task << std::endl;
+                        if (job_task_name.compare(0, current_task.length(), current_task)) {
+                            std::cout << "Got a job success message for the wrong task." << std::endl;
+                            std::cout << "Message task: " << job_task_name << std::endl;
+                            std::cout << "Current task: " << current_task << std::endl;
+                            continue;
+                        }
+                        std::cout << "Task " << current_task << " has completed successfully on " << hostname << " at time "
+                                  << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                        current_task_counter++;
+                        current_task = _application_specs->get_task(current_task_counter);
+                        if (current_task.empty()) {
+                            // were done
+                            std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
+                                Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
+                            num_successes++;
+                            break;
+                        } else {
+
+                            for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
+                                std::string hostname_loop = "ComputeHost_" + std::to_string(i);
+                                std::cout << "Resetting host " << hostname_loop << std::endl;
+                                if (job_tracker->is_a_job_running(hostname_loop) && hostname_loop != hostname) {
+                                    std::cout << "Job is running on " << hostname_loop << ", terminating it" << std::endl;
+                                    try {
+                                        _job_manager->terminateJob(
+                                            job_tracker->get_running_job(hostname)->get_compound_job());
+                                    }
+                                    catch (ExecutionException&) {
+                                        std::cerr << "Tried to terminate job on down host: " << hostname_loop << std::endl;
+                                    }
+                                    job_tracker->untrack_job(hostname_loop);
+                                }
+                                _application_specs->reset_running_host(hostname_loop);
+                            }
+                            job_tracker->untrack_job(hostname);
+
+                            NodeKiller::start_node_killers(this->getSimulation(),
+                                               _compute_services,
+                                               _application_specs->get_seed(),
+                                               false,
+                                               _application_specs->get_exponential_distribution(),
+                                               _application_specs->get_restart_overhead(),
+                                               this->commport);
+                            // onto the next task
+                            // cancel all the rest? (heuristic dependent)
+                        }
+                        // std::cout << "REPETITION " << std::to_string(repeat) << " HAS SUCCEEDED (after " <<
+                        //     Simulation::getCurrentSimulatedDate()  - repeat_start_date << " seconds)" << std::endl;
+                        // num_successes++;
                         /* TODO: With multiple tasks, we would want to proceed to the next one here, as well as cancel all the rest
                          * Realistically, should this be done with a forced restart of the other hosts?
                          * Or would the other hosts be able to start on the new task and give up the old one instantly?
                          * We also need to update the running input data size and input error level based on the
                          * execution option that was successful
                          */
-                        break;
+                        continue;
                     }
                     else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
                         // This is the catch-all timer-based stuff
@@ -275,6 +331,7 @@ namespace wrench {
                             std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
                                 Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" << std::endl;
                             WRENCH_INFO("Deadline reached :(");
+                            _application_specs->reset_all_running_hosts();
                             break;
                         }
 
@@ -282,15 +339,19 @@ namespace wrench {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Reset the host's entry to nullptr, so that we now know it's idle
+                            std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
                             WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
+                            // NOTE: Why does it not untrack the job immediately after terminating?
                             job_tracker->untrack_job(hostname);
                             continue;
                         }
 
                         if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
-                            // std::cerr << "Host is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
+                            std::cerr << "Host " << hostname.c_str() << " is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            _application_specs->reset_running_host(hostname);
+
                             // Cancel the job
                             WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());
                             if (job_tracker->is_a_job_running(hostname)) {

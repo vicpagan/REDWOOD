@@ -15,7 +15,7 @@
 #include <boost/json/object.hpp>
 
 #include "ProbabilityComputation.h"
-#include "SystemSpecs.h"
+#include "ApplicationSpecs.h"
 #include "scheduling/SchedulingAlgorithm.h"
 #include "scheduling/OptionComparatorFunction.h"
 
@@ -32,10 +32,10 @@ namespace wrench {
     public:
         // Constructor
         Controller(
-            const std::shared_ptr<SystemSpecs>& _state_of_the_system,
             const boost::json::object& application_spec,
             const boost::json::object& execution_spec,
             const boost::json::object& scheduling_spec,
+            const std::shared_ptr<ApplicationSpecs>& _application_specs,
             const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
             const std::shared_ptr<SimpleStorageService>& storage_service,
             const std::string& hostname);
@@ -52,7 +52,7 @@ namespace wrench {
                                                            double running_output_error_level,
                                                            const std::string& hostname);
 
-        std::shared_ptr<SystemSpecs> _system_specs;
+        std::shared_ptr<ApplicationSpecs> _application_specs;
 
         std::unique_ptr<ProbabilityComputation> _probability_computation;
 
@@ -67,11 +67,10 @@ namespace wrench {
         std::shared_ptr<JobManager> _job_manager;
 
         long _num_repeats;
-        std::string _delta_t_scheme;
-        double _delta_t_parameter;
 
         std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
         _task_functions;
+        std::vector<std::pair<std::vector<std::string>, double>> _execution_combinations;
         std::exponential_distribution<double> _exponential_distribution;
         std::vector<std::shared_ptr<wrench::SchedulingAlgorithm>> _scheduling_algorithms;
 

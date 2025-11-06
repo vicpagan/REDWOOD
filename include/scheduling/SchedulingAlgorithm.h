@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 
+#include "ApplicationSpecs.h"
 #include "ProbabilityComputation.h"
 #include "JobTracker.h"
 #include "OptionComparatorFunction.h"
@@ -18,18 +19,17 @@ namespace wrench {
     public:
         virtual ~SchedulingAlgorithm() = default;
 
-        SchedulingAlgorithm(const double e_fail, std::string delta_t_scheme, const double delta_t_parameter,
-                            const double restart_overhead, const double io_read_bandwidth,
-                            const double io_write_bandwidth,
-                            std::string name) : _e_fail(e_fail),
-                                                _delta_t(-1),
-                                                _delta_t_scheme(std::move(delta_t_scheme)),
-                                                _delta_t_parameter(delta_t_parameter),
-                                                _compute_always(delta_t_scheme == "compute_always"),
-                                                _restart_overhead(restart_overhead),
-                                                _io_read_bandwidth(io_read_bandwidth),
-                                                _io_write_bandwidth(io_write_bandwidth),
-                                                _name(std::move(name)) {
+        SchedulingAlgorithm(const std::shared_ptr<ApplicationSpecs> &application_specs, std::string name) :
+            _application_specs(application_specs),
+            _e_fail(application_specs->get_e_fail()),
+            _delta_t_scheme(application_specs->get_delta_t_scheme()),
+            _delta_t_parameter(application_specs->get_delta_t_parameter()),
+            _compute_always(application_specs->get_delta_t_scheme() == "compute_always"),
+            _restart_overhead(application_specs->get_restart_overhead()),
+            _io_read_bandwidth(application_specs->get_io_read_bandwidth()),
+            _io_write_bandwidth(application_specs->get_io_write_bandwidth()),
+            _delta_t(-1),
+            _name(std::move(name)) {
         };
 
         struct SchedulingDecision {
@@ -51,21 +51,23 @@ namespace wrench {
 
 
         static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(
-            const std::string& type, double e_fail, std::string delta_t_scheme, double delta_t_parameter,
-            double restart_overhead, double io_read_bandwidth, double io_write_bandwidth);
+            const std::string& type, const std::shared_ptr<ApplicationSpecs>& application_specs);
 
         std::string get_name() { return _name; }
 
     protected:
+        std::shared_ptr<ApplicationSpecs> _application_specs;
         double _e_fail;
-        double _delta_t;
         std::string _delta_t_scheme;
         double _delta_t_parameter;
         bool _compute_always;
         double _restart_overhead;
         double _io_read_bandwidth;
         double _io_write_bandwidth;
+        double _delta_t;
         std::string _name;
+
+        std::map<std::string, std::vector<std::string>> _preprocessed_decisions;
     };
 }
 

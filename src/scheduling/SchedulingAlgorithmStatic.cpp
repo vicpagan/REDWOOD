@@ -28,9 +28,9 @@ namespace wrench {
             const auto exec_option_name = option_name;
             const auto exec_option_time = option_functions.at("t_function")(input_data_size, input_error_level);
             const auto exec_option_data = option_functions.at("d_function")(input_data_size, input_error_level);
-            // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
+            std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
 
-            const double exec_option_time_total = (input_data_size / _io_read_bandwidth) + exec_option_time + (exec_option_data / _io_write_bandwidth);
+            const double exec_option_time_total = (input_data_size /  _application_specs->get_io_read_bandwidth()) + exec_option_time + (exec_option_data /  _application_specs->get_io_write_bandwidth());
             /* Select a delta based on the scheme */
             if (_delta_t_scheme == "fixed") {
                 // _delta_t_parameter is our fixed delta_t value
@@ -53,7 +53,7 @@ namespace wrench {
             }
         }
 
-        // std::cerr << "STATIC DECISION: " << best_option << std::endl;
+        std::cerr << "STATIC DECISION: " << best_option << std::endl;
         return best_option;
     }
 

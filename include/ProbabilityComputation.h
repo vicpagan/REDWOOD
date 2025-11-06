@@ -3,13 +3,19 @@
 
 #include <vector>
 
+#include "ApplicationSpecs.h"
+
 class ProbabilityComputation {
 public:
-    explicit ProbabilityComputation(const double lambda, const double restart_overhead) {
-        _lambda = lambda;
-        _restart_overhead = restart_overhead;
+    explicit ProbabilityComputation(const std::shared_ptr<wrench::ApplicationSpecs>& application_specs) {
+        _lambda = application_specs->get_lambda();
+        _restart_overhead = application_specs->get_restart_overhead();
         _delta_t = -1.0;
     }
+
+    [[nodiscard]] double success_probability(long u) const;
+
+    [[nodiscard]] double fail_probability(long u) const;
 
     [[nodiscard]] double compute_probability_midpoint(double task_time, double time_to_deadline) const;
 
@@ -30,9 +36,6 @@ public:
     }
 
 private:
-    [[nodiscard]] double success_probability(long u) const;
-
-    [[nodiscard]] double fail_probability(long u) const;
 
     double compute_probability(std::vector<double> &dp, long m, long n, long R) const;
 

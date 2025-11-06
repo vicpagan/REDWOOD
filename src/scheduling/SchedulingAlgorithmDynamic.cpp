@@ -8,49 +8,96 @@
 
 namespace wrench {
 
-    /**
-     * @brief Calculates minimum expected error with its corresponding execution option decision iteratively
-     *        for each execution option for a single task
-     *
-     * @param exec_option_metrics This is a list of the function metrics for each execution option
-     * @param probability_failures This is the list of our p_us for each execution option
-     * @param probability_success This is our e^(-lambda * m_j * delta) for each execution option
-     * @param m_j This is m_j in the paper for each execution option
-     * @param n This is n in the paper
-     * @param R this is R in the paper
-     * @return The expected error for the selected execution option
-     */
-    std::pair<std::string, double> SchedulingAlgorithmDynamic::calculate_expected_error(
-        const std::map<std::string, std::map<std::string, double>> &exec_option_metrics,
-        const std::map<std::string, double> &probability_success,
-        const std::map<std::string, std::vector<double> > &probability_failures,
-        const std::map<std::string, long> &m_j,
+    double SchedulingAlgorithmDynamic::calculate_expected_error(
+        int remaining_tasks,
+        int task_index,
+        double running_input_data_size,
+        double running_input_error_level,
+        double selected_delta_t,
+        std::vector<std::vector<std::pair<std::string, double>>> &dp,
+        ProbabilityComputation* probability_computation,
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &exec_option_metrics,
+        const std::shared_ptr<ApplicationSpecs::ExecOptionDecisionNode>& current_task_node,
         const long n, const long R) const {
 
-        std::vector<std::pair<std::string, double>> dp(n+1, std::make_pair("", 0.0));
+        if (dp[task_index][n] != std::make_pair("impossible", -1.0)) {
+            return dp[task_index][n].second;
+        }
 
-        for (int i = 0; i <= n; i++) {
-            std::string best_option;
-            double min_expected_error = std::numeric_limits<double>::infinity();
-            for (const auto &[option_name, option_functions]: exec_option_metrics) {
-                double expected_error;
-                if (i < m_j.at(option_name)) {
-                    expected_error = _e_fail;
+        const std::string &task_name = _application_specs->get_task(task_index);
+        // std::cout << "TEST: REMAINING TASKS = " << remaining_tasks << ", TASK_INDEX = " << task_index << ", TASK_NAME = " << task_name << ", n = " << n << std::endl;
+        std::string best_option;
+        double min_expected_error = std::numeric_limits<double>::infinity();
+
+        int num_options = current_task_node->num_children;
+        for (int i = 0; i < num_options; i++) {
+            auto current_child_node = current_task_node->children[i];
+            const std::string option_name = current_child_node->execution_option;
+
+            auto option_functions = exec_option_metrics.at(task_name).at(option_name);
+
+            long exec_time = static_cast<long>(option_functions.at("t_function")(running_input_data_size, running_input_error_level) / selected_delta_t);
+            double expected_error;
+
+            if (n < exec_time) {
+                expected_error = _application_specs->get_e_fail();
+            } else {
+                double updated_input_size = option_functions.at("d_function")(running_input_data_size, running_input_error_level);
+                double updated_error_level = option_functions.at("e_function")(running_input_data_size, running_input_error_level);
+
+                // Task success
+                if (remaining_tasks == 0) {
+                    expected_error = probability_computation->success_probability(exec_time) * updated_error_level;
                 } else {
-                    expected_error = probability_success.at(option_name) * option_functions.at("e_function");
-                    for (long u = 0; u < m_j.at(option_name); u++) {
-                        expected_error += probability_failures.at(option_name).at(u) * dp[std::max(i - u - R - 1,0L)].second;
-                    }
+                    double next_task_error = calculate_expected_error(
+                        remaining_tasks - 1,
+                        task_index + 1,
+                        updated_input_size,
+                        updated_error_level,
+                        selected_delta_t,
+                        dp,
+                        probability_computation,
+                        exec_option_metrics,
+                        current_child_node,
+                        n - exec_time,
+                        R
+                    );
+
+                    expected_error = probability_computation->success_probability(exec_time) * next_task_error;
                 }
-                if (expected_error < min_expected_error) {
-                    min_expected_error = expected_error;
-                    best_option = option_name;
+
+                // Task failure
+                for (long u = 0; u < exec_time; u++) {
+                    double retry_task_error = calculate_expected_error(
+                        remaining_tasks,
+                        task_index,
+                        running_input_data_size,
+                        running_input_error_level,
+                        selected_delta_t,
+                        dp,
+                        probability_computation,
+                        exec_option_metrics,
+                        current_task_node,
+                        std::max(n - u - R - 1, 0L),
+                        R
+                    );
+                    expected_error += probability_computation->fail_probability(u) * retry_task_error;
                 }
             }
-            dp[i] = std::make_pair(best_option, min_expected_error);
+
+            if (expected_error < min_expected_error) {
+                min_expected_error = expected_error;
+                best_option = option_name;
+            }
         }
-        return dp[n];
+
+        // std::cout << "Best option: " << best_option << " at time "<< n << " for task number " << task_index << std::endl;
+        dp[task_index][n] = std::make_pair(best_option, min_expected_error);
+        return min_expected_error;
     }
+
+
+
 
     /**
      * DYNAMIC SCHEDULING ALGORITHM
@@ -63,21 +110,16 @@ namespace wrench {
      * @param remaining_time This is our n, which is the remaining time until the deadline
      * @return The name of the best execution option
      */
-    std::string SchedulingAlgorithmDynamic::pick_execution_option(
+    void SchedulingAlgorithmDynamic::pick_execution_option(
         ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const double input_data_size,
         const double input_error_level,
-        const double remaining_time) const {
+        const double remaining_time) {
         /* Initialize selected_delta_t to +inf */
         double selected_delta_t = std::numeric_limits<double>::max();
-        std::map<std::string, std::map<std::string, double>> exec_option_metrics;
         const double lambda = probability_computation->get_lambda();
         for (const auto& [option_name, option_functions] : exec_options) {
-            /* Grab all the necessary info about the execution option */
-            exec_option_metrics[option_name]["t_function"] = option_functions.at("t_function")(input_data_size, input_error_level);
-            exec_option_metrics[option_name]["d_function"] = option_functions.at("d_function")(input_data_size, input_error_level);
-            exec_option_metrics[option_name]["e_function"] = option_functions.at("e_function")(input_data_size, input_error_level);
             // std::cerr << "LOOKING AT OPTION_NAME = " << option_name << std::endl;
 
             /* Select a delta based on the scheme */
@@ -86,42 +128,42 @@ namespace wrench {
                 selected_delta_t = _delta_t_parameter;
             } else if (_delta_t_scheme == "compute") {
                 // _delta_t_parameter is our precision for calculating a good enough delta_t
-                selected_delta_t = std::min(selected_delta_t, probability_computation->compute_best_deltat(
-                exec_option_metrics.at(option_name).at("t_function"), remaining_time, _delta_t_parameter));
+                // selected_delta_t = std::min(selected_delta_t, probability_computation->compute_best_deltat(
+                // exec_option_metrics.at(option_name).at("t_function"), remaining_time, _delta_t_parameter));
+                throw std::invalid_argument("Dynamic scheduling does not support 'compute' delta_t_scheme for multitask yet");
             } else {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
         }
         probability_computation->set_delta_t(selected_delta_t);
 
-        /* Calculate m_js, n, and R */
-        std::map<std::string, long> m_j;
-        std::map<std::string, double> probability_success;
-        std::map<std::string, std::vector<double> > probability_failures;
-        for (const auto &[option_name, option_functions]: exec_options) {
-            m_j[option_name] = static_cast<long>(std::ceil(
-                ((input_data_size / _io_read_bandwidth) + exec_option_metrics.at(option_name).at("t_function") +
-                (exec_option_metrics.at(option_name).at("d_function") / _io_write_bandwidth)) /
-                selected_delta_t));
-
-            /* Precalculate probability of success and the list of failure probabilities for each possible failure point in execution */
-            probability_success[option_name] = exp(-lambda * static_cast<double>(m_j.at(option_name)) * selected_delta_t);
-            probability_failures[option_name].resize(m_j.at(option_name));
-            for (long u = 0; u < m_j.at(option_name); u++) {
-                probability_failures[option_name][u] = exp(-lambda * static_cast<double>(u) * selected_delta_t) -
-                    exp(-lambda * static_cast<double>((u + 1)) * selected_delta_t);
-            }
-        }
         const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
-        const auto R = static_cast<long>(std::ceil(_restart_overhead / selected_delta_t));
+        const auto R = static_cast<long>(std::ceil(_application_specs->get_restart_overhead() / selected_delta_t));
 
-        std::pair<std::string, double> best_option = calculate_expected_error(exec_option_metrics, probability_success, probability_failures,
-                                                   m_j, n, R);
+        std::vector<std::vector<std::pair<std::string, double>>> dp(static_cast<int>(exec_options.size()),
+            std::vector<std::pair<std::string, double>>(n + 1, std::make_pair("impossible", -1.0))
+        );
 
-        std::cout<< "Best option is " << best_option.first << " with expected error " << best_option.second << std::endl;
-        std::string min_execution_option = best_option.first;
-        std::cerr << "DYNAMIC DECISION: " << min_execution_option << std::endl;
-        return min_execution_option;
+        // FIXME: Not a big fan of this brute forcing but whatever
+        for (long i = n; i >= 0; i--) {
+            calculate_expected_error(static_cast<int>(exec_options.size()) - 1, 0, input_data_size, input_error_level, selected_delta_t, dp,
+                                 probability_computation, exec_options, _application_specs->get_decision_tree_root(), i, R);
+        }
+
+        // for (int i = 0; i < dp.size(); i++) {
+        //     for (int j = 0; j < dp[i].size(); j++) {
+        //         std::cout << "dp[" << i << "][" << j << "] = (" << dp[i][j].first << ", " << dp[i][j].second << ")" << std::endl;
+        //     }
+        // }
+
+        for (int i = 0; i < dp.size(); i++) {
+            std::vector<std::string> exec_option_decisions(n+1, "");
+            std::string task_name = _application_specs->get_task(i);
+            for (int j = 0; j < dp[i].size(); j++) {
+                exec_option_decisions[j] = dp[i][j].first;
+            }
+            _preprocessed_decisions.emplace(task_name, std::move(exec_option_decisions));
+        }
     }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmDynamic::make_decisions(
@@ -141,13 +183,19 @@ namespace wrench {
         for (const auto& [hostname, job] : *job_tracker) {
             if (job) continue; // Host is not idle
 
-            const auto execution_option = this->pick_execution_option(
+            if (_preprocessed_decisions.empty()) {
+                std::cout << "Preprocessing decisions for task " << task_to_schedule << " with remaining time " << remaining_time << std::endl;
+                this->pick_execution_option(
                 probability_computation,
-                exec_options.at(task_to_schedule),
+                exec_options,
                 input_data_size,
                 input_error_level,
                 remaining_time);
-
+            }
+            const int n = static_cast<int>(std::floor(remaining_time / probability_computation->get_delta_t()));
+            const std::string execution_option = _preprocessed_decisions.at(task_to_schedule).at(n);
+            // std::cout << "Selected execution_option " << execution_option << " for task " << task_to_schedule <<
+            //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
         }
         return decisions;
