@@ -1,10 +1,22 @@
-  - [VP] Implement the "pick the next execution option" based on recurcive expected error computation
+  - [VP]
+  - Make sure that the ApplicationSpecs part works properly and updates with the rest of this list
+  - Temporal redundancy hack
+    - For chain tasks, keep track of previous exec option in the recursion
+    - Probably easier to do a decision tree instead of a table
+  - Implement multiple task
+  - Preprocess dynamic programming data for multiple tasks
+  - Keep preprocessed decisions in ApplicationSpecs
+    - Could still be useful for multiple hosts with certain heuristics
+  - Implement(?) multiple hosts
+    - To keep track of other hosts, add data structure for each host of
+      - Current task 
+      - Current exec option
+      - Start time of current task
+      - Completed tasks
+  - Cancel useless runs of tasks upon a single host completing hack
+    - Can use above data structure
+  - Change delta calculation to squeeze on expected error
 
-  - [HC] Implement the functions ("affine", etc.) in a convenient data structure in src/FunctionDefinitions.cpp
-        parse json to find: function type and parameter values
-            std::function<double, double> global_functionmap.add_function(json_spec (defines "a", "b", "c")
-            std::map<boost::json_object, std::function<double>>
-            FunctionGenerator class
-
-  - [HC] Modify the simulator to use a scheduling algorithm, loop over algorithms, and reset the RNG
-
+BUGS:
+  - More success as lambda increases?
+  - Repetitions failing before the deadline is met with a high enough lambda

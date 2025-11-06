@@ -6,86 +6,112 @@
 #include <functional>
 #include "ProbabilityComputation.h"
 
-class OptionComparatorFunction {
-public:
-    virtual ~OptionComparatorFunction() = default;
+namespace wrench {
+    class OptionComparatorFunction {
+    public:
 
-    virtual double comp_value(
-        ProbabilityComputation *probability_computation,
-        const std::map<std::string, std::function<double(double, double)> > &option_functions,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time
-    ) const = 0;
-};
+        explicit OptionComparatorFunction(const std::shared_ptr<ApplicationSpecs> &application_specs, std::string name)
+            : _application_specs(application_specs), _name(std::move(name)) {}
 
-class ExpectedErrorComparator : public OptionComparatorFunction {
-public:
-    ExpectedErrorComparator(double io_read_bandwidth,
-                            double io_write_bandwidth,
-                            double e_fail);
+        virtual ~OptionComparatorFunction() = default;
 
-    double comp_value(
-        ProbabilityComputation *probability_computation,
-        const std::map<std::string, std::function<double(double, double)> > &option_functions,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time) const override;
+        virtual double comp_value(
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::function<double(double, double)> > &option_functions,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time
+        ) const = 0;
+        
+        static std::shared_ptr<OptionComparatorFunction> create_scheduling_algorithm(
+            const std::string& type, std::shared_ptr<ApplicationSpecs> application_specs);
 
-private:
-    double _io_read_bandwidth;
-    double _io_write_bandwidth;
-    double _e_fail;
-};
+        std::string get_name() { return _name; }
 
-class ProbabilitySuccessComparator : public OptionComparatorFunction {
-public:
-    ProbabilitySuccessComparator(double io_read_bandwidth,
-                      double io_write_bandwidth);
+    protected:
+        std::shared_ptr<ApplicationSpecs> _application_specs;
+        std::string _name;
+    };
 
-    double comp_value(
-        ProbabilityComputation *probability_computation,
-        const std::map<std::string, std::function<double(double, double)> > &option_functions,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time) const override;
+    class ExpectedErrorComparator : public OptionComparatorFunction {
+    public:
+        explicit ExpectedErrorComparator(const std::shared_ptr<ApplicationSpecs> &application_specs) : OptionComparatorFunction(application_specs, "expected_error"),
+                                                                                           _io_read_bandwidth(application_specs->get_io_read_bandwidth()),
+                                                                                           _io_write_bandwidth(application_specs->get_io_write_bandwidth()),
+                                                                                           _e_fail(application_specs->get_e_fail()) {
+        }
 
-private:
-    double _io_read_bandwidth;
-    double _io_write_bandwidth;
-};
+        double comp_value(
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::function<double(double, double)> > &option_functions,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) const override;
 
-class ErrorLevelComparator : public OptionComparatorFunction {
-public:
-    ErrorLevelComparator(double io_read_bandwidth, double io_write_bandwidth, double prob_success_threshold);
+    private:
+        double _io_read_bandwidth;
+        double _io_write_bandwidth;
+        double _e_fail;
+    };
 
-    double comp_value(
-        ProbabilityComputation *probability_computation,
-        const std::map<std::string, std::function<double(double, double)> > &option_functions,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time) const override;
+    class ProbabilitySuccessComparator : public OptionComparatorFunction {
+    public:
+        explicit ProbabilitySuccessComparator(const std::shared_ptr<ApplicationSpecs> &application_specs) : OptionComparatorFunction(application_specs, "probability_success"),
+                                                                                   _io_read_bandwidth(application_specs->get_io_read_bandwidth()),
+                                                                                   _io_write_bandwidth(application_specs->get_io_write_bandwidth()) {
+        }
 
-private:
-    double _io_read_bandwidth;
-    double _io_write_bandwidth;
-    double _prob_success_threshold;
-};
+        double comp_value(
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::function<double(double, double)> > &option_functions,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) const override;
 
-class SuccessErrorRatioComparator : public OptionComparatorFunction {
-public:
-    SuccessErrorRatioComparator(double io_read_bandwidth, double io_write_bandwidth);
+    private:
+        double _io_read_bandwidth;
+        double _io_write_bandwidth;
+    };
 
-    double comp_value(
-        ProbabilityComputation *probability_computation,
-        const std::map<std::string, std::function<double(double, double)> > &option_functions,
-        double input_data_size,
-        double input_error_level,
-        double remaining_time) const override;
+    class ErrorLevelComparator : public OptionComparatorFunction {
+    public:
+        explicit ErrorLevelComparator(const std::shared_ptr<ApplicationSpecs> &application_specs) : OptionComparatorFunction(application_specs, "error_level"),
+                                                                                   _io_read_bandwidth(application_specs->get_io_read_bandwidth()),
+                                                                                   _io_write_bandwidth(application_specs->get_io_write_bandwidth()),
+                                                                                   _prob_success_threshold(0.95) {
+        }
 
-private:
-    double _io_read_bandwidth;
-    double _io_write_bandwidth;
-};
+        double comp_value(
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::function<double(double, double)> > &option_functions,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) const override;
+
+    private:
+        double _io_read_bandwidth;
+        double _io_write_bandwidth;
+        double _prob_success_threshold;
+    };
+
+    class SuccessErrorRatioComparator : public OptionComparatorFunction {
+    public:
+        explicit SuccessErrorRatioComparator(const std::shared_ptr<ApplicationSpecs> &application_specs) : OptionComparatorFunction(application_specs, "success_error_ratio"),
+                                                                                   _io_read_bandwidth(application_specs->get_io_read_bandwidth()),
+                                                                                   _io_write_bandwidth(application_specs->get_io_write_bandwidth()) {
+        }
+
+        double comp_value(
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::function<double(double, double)> > &option_functions,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) const override;
+
+    private:
+        double _io_read_bandwidth;
+        double _io_write_bandwidth;
+    };
+}
 
 #endif //REDWOOD_OPTIONCOMPARATORFUNCTION_H

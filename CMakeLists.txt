@@ -79,7 +79,7 @@ set(SIMULATOR_SOURCE_FILES
         src/NodeKiller.cpp
         src/Simulator.cpp
         src/Controller.cpp
-        src/StateOfTheSystem.cpp
+        src/ApplicationSpecs.cpp
         src/ProbabilityComputation.cpp
         src/FunctionGenerator.cpp
         src/scheduling/OptionComparatorFunction.cpp

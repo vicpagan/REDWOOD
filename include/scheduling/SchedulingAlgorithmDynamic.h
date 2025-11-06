@@ -13,14 +13,8 @@
 namespace wrench {
     class SchedulingAlgorithmDynamic : public SchedulingAlgorithm {
     public:
-        SchedulingAlgorithmDynamic(const double e_fail,
-                                   std::string delta_t_scheme,
-                                   const double delta_t_parameter,
-                                   const double restart_overhead,
-                                   const double io_read_bandwidth,
-                                   const double io_write_bandwidth) : SchedulingAlgorithm(
-            e_fail, std::move(delta_t_scheme), delta_t_parameter, restart_overhead, io_read_bandwidth,
-            io_write_bandwidth, "dynamic") {
+        explicit SchedulingAlgorithmDynamic(const std::shared_ptr<ApplicationSpecs> &application_specs) : SchedulingAlgorithm(
+            application_specs, "dynamic") {
         };
 
         std::vector<SchedulingDecision> make_decisions(
@@ -36,19 +30,25 @@ namespace wrench {
             bool minimize) override;
 
     private:
-        [[nodiscard]] std::pair<std::string, double> calculate_expected_error(
-            const std::map<std::string, std::map<std::string, double> > &exec_option_metrics,
-            const std::map<std::string, double> &probability_success,
-            const std::map<std::string, std::vector<double> > &probability_failures,
-            const std::map<std::string, long> &m_j,
+
+        double calculate_expected_error(
+            int remaining_tasks,
+            int task_index,
+            double running_input_data_size,
+            double running_input_error_level,
+            double selected_delta_t,
+            std::vector<std::vector<std::pair<std::string, double>>> &dp,
+            ProbabilityComputation* probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &exec_option_metrics,
+            const std::shared_ptr<ApplicationSpecs::ExecOptionDecisionNode> &current_task_node,
             long n, long R) const;
 
-        std::string pick_execution_option(
+        void pick_execution_option(
             ProbabilityComputation *probability_computation,
-            const std::map<std::string, std::map<std::string, std::function<double(double, double)> > > &exec_options,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             double input_data_size,
             double input_error_level,
-            double remaining_time) const;
+            double remaining_time);
     };
 }
 
