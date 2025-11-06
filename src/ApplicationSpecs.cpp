@@ -101,6 +101,17 @@ namespace wrench {
         _exec_option_decision_tree->build_tree(exec_options);
     }
 
+    void ApplicationSpecs::prune_decision_tree(const double best_error) const {
+        _exec_option_decision_tree->prune_tree(best_error);
+    }
+
+    bool ApplicationSpecs::decision_tree_empty() const {
+        if (_exec_option_decision_tree->root == nullptr) {
+            return true;
+        }
+        return false;
+    }
+
     void ApplicationSpecs::ExecOptionDecisionTree::build_tree(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options) {
         if (application_specs->_num_tasks == 0) {
             std::cerr << "No tasks!" << std::endl;
@@ -134,5 +145,37 @@ namespace wrench {
         }
 
     }
+
+    void ApplicationSpecs::ExecOptionDecisionTree::prune_tree(const double best_error) {
+        if (prune_tree_helper(root, best_error)) {
+            application_specs->_exec_option_decision_tree->root = nullptr;
+        }
+    }
+
+    bool ApplicationSpecs::ExecOptionDecisionTree::prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, const double best_error) {
+        if (!node) {
+            return true;
+        }
+
+        // If this is a leaf node
+        if (node->children.empty()) {
+            return node->cumulative_error_factor >= best_error;
+        }
+
+        // Otherwise, recursively prune children
+        auto& children = node->children;
+        for (auto child_iterator = children.begin(); child_iterator != children.end(); ) {
+            if (prune_tree_helper(*child_iterator, best_error)) {
+                child_iterator = children.erase(child_iterator); // remove child
+                node->num_children--;
+            } else {
+                ++child_iterator;
+            }
+        }
+
+        // If after pruning all children are gone, prune this node as well
+        return children.empty();
+    }
+
 
 }
