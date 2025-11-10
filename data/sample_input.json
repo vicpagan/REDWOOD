@@ -6,7 +6,7 @@
   },
   "failures": {
     "restart_overhead": 10,
-    "lambda": 0.3,
+    "lambda": 0.5,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": -1
   },
@@ -155,7 +155,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 1,
+    "num_repeats": 10,
     "deadline": 10000,
     "e_fail": 20.0
   },
@@ -169,6 +169,10 @@
     "algorithms": {
       "one_task": ["dynamic"],
       "multi_task": ["dynamic"]
+    },
+    "hacks": {
+      "temporal_redundancy": true,
+      "stop_running_jobs": true
     }
   }
 }

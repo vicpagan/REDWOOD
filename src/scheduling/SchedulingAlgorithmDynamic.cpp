@@ -183,7 +183,7 @@ namespace wrench {
             if (job) continue; // Host is not idle
 
             if (_preprocessed_decisions.empty()) {
-                std::cout << "Preprocessing decisions for task " << task_to_schedule << " with remaining time " << remaining_time << std::endl;
+                // std::cout << "Preprocessing decisions for task " << task_to_schedule << " with remaining time " << remaining_time << std::endl;
                 this->pick_execution_option(
                 probability_computation,
                 exec_options,
