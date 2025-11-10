@@ -5,6 +5,8 @@
 #include <random>
 #include <boost/json/object.hpp>
 #include <utility>
+#include <memory>
+#include <variant>
 
 
 namespace wrench {

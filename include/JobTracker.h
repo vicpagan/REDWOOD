@@ -2,6 +2,7 @@
 #define RUNNINGJOBTRACKER_H
 
 #include <map>
+#include <vector>
 #include <string>
 #include <utility>
 

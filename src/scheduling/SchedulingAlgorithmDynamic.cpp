@@ -20,7 +20,7 @@ namespace wrench {
         const std::shared_ptr<ApplicationSpecs::ExecOptionDecisionNode>& current_task_node,
         const long n, const long R) const {
 
-        if (dp[task_index][n] != std::make_pair("impossible", -1.0)) {
+        if (dp[task_index][n] != std::make_pair(std::string("impossible"), -1.0)) {
             return dp[task_index][n].second;
         }
 
