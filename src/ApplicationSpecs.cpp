@@ -3,6 +3,7 @@
 #include "ApplicationSpecs.h"
 
 #include <iostream>
+#include <boost/json/value_to.hpp>
 
 namespace wrench {
 
