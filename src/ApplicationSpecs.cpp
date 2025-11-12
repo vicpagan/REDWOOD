@@ -148,9 +148,7 @@ namespace wrench {
     }
 
     void ApplicationSpecs::ExecOptionDecisionTree::prune_tree(const double best_error) {
-        if (prune_tree_helper(root, best_error)) {
-            application_specs->_exec_option_decision_tree->root = nullptr;
-        }
+        prune_tree_helper(root, best_error);
     }
 
     bool ApplicationSpecs::ExecOptionDecisionTree::prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, const double best_error) {
