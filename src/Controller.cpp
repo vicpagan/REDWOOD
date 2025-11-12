@@ -81,9 +81,6 @@ namespace wrench {
             }
         }
 
-        /* Build decision tree to use for temporal redundancy */
-        _application_specs->build_decision_tree(_task_functions);
-
         /* Determine the list of scheduling algorithms */
         /* Determine/validate the scheduling algorithms to use */
         std::string scheduling_type;
@@ -224,6 +221,10 @@ namespace wrench {
                 /* Current task is the first task */
                 int current_task_counter = 0;
                 auto current_task = _application_specs->get_task(current_task_counter);
+
+                /* Build/reset decision tree to use for temporal redundancy */
+                _application_specs->prune_decision_tree(0.0);
+                _application_specs->build_decision_tree(_task_functions);
 
                 /* Loop until the task completes successfully somewhere */
                 /* (right now this assumes a single-task applications)  */

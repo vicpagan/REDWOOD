@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
         json_input = readJSONFromFile(json_input_arg);
     }
 
+
     /* Override JSON content if need be */
     if (vm.count("num_repeats") == 1) {
         json_input.at("execution").as_object().at("num_repeats") = num_repeats;
