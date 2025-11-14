@@ -13,12 +13,51 @@
 #include <boost/json.hpp>
 #include <boost/program_options.hpp>
 
-#include "PlatformCreator.h"
-#include "Controller.h"
+#include "ProbabilityComputation.h"
+#include "scheduling/OptionComparatorFunction.h"
+#include "ApplicationSpecs.h"
 #include "Utils.h"
 
-namespace sg4 = simgrid::s4u;
 namespace po = boost::program_options;
+
+
+unsigned long determine_max_num_compute_nodes(boost::json::object json_data_parallel_input) {
+   unsigned long max_size = 0;
+    for (const auto& [key, value] : json_data_parallel_input) {
+        boost::json::array const& arr = value.as_array();
+        max_size = std::max(max_size, arr.size());
+    }
+    return max_size;
+}
+
+double compute_expected_error(std::shared_ptr<wrench::ApplicationSpecs> application_specs,
+              boost::json::object json_input,
+              boost::json::object json_data_parallel_input,
+              unsigned long num_compute_nodes) {
+
+    /* Create the probability computation utility */
+    auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
+
+    /* Create an execution option comparator function object */
+    auto option_comparator = std::make_shared<wrench::ExpectedErrorComparator>(application_specs);
+
+    return 1.0;
+}
+
+/**
+ * @brief Function to evaluate data parallel options
+ */
+void evaluate(std::shared_ptr<wrench::ApplicationSpecs> application_specs,
+              boost::json::object json_input,
+              boost::json::object json_data_parallel_input) {
+
+    auto max_num_compute_nodes = determine_max_num_compute_nodes(json_data_parallel_input);
+    for (unsigned long i = 0; i < max_num_compute_nodes; i++) {
+        compute_expected_error(application_specs, json_input, json_data_parallel_input, i);
+    }
+    return;
+}
+
 
 
 /**
@@ -29,14 +68,10 @@ namespace po = boost::program_options;
  * @return 0 on success, non-zero otherwise
  */
 int main(int argc, char** argv) {
-    /* Create a WRENCH simulation object */
-    auto simulation = wrench::Simulation::createSimulation();
-
-    /* Initialize the simulation */
-    simulation->init(&argc, argv);
 
     // Define command-line argument options
     std::string json_input_arg;
+    std::string json_data_parallel_input_arg;
     unsigned long num_repeats;
     double deadline;
     int seed;
@@ -46,14 +81,12 @@ int main(int argc, char** argv) {
     desc.add_options()
     ("help",
      "Show this help message\n")
-    ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON input (str or file path)>"),
+    ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
      "JSON input string or file path\n")
-    ("num_repeats", po::value<unsigned long>(&num_repeats)->value_name("<number of repeats>"),
-     "Number of repeats for each each experiment (i.e., for each algorithm) - will override JSON-provided value\n")
+    ("json_data_parallel", po::value<std::string>(&json_data_parallel_input_arg)->required()->value_name("<JSON speedup input (str or file path)>"),
+ "JSON input string or file path\n")
     ("deadline", po::value<double>(&deadline)->value_name("<deadline>"),
          "Application execution deadline - will override JSON-provided value\n")
-    ("seed", po::value<int>(&seed)->value_name("<seed>"),
-         "RNG seed - will override JSON-provided value\n")
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
          "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
@@ -75,7 +108,8 @@ int main(int argc, char** argv) {
         po::notify(vm);
     } catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
-        std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON input (file)> "
+        std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON spec input (file)> "
+            + "--json_data_parallel <JSON speedup input (str or file path)> "
             + "[--log=controller.threshold=info | --wrench-full-log]";
         cerr << "Usage: " << usage_string << "\n";
         exit(1);
@@ -88,40 +122,23 @@ int main(int argc, char** argv) {
     else {
         json_input = readJSONFromFile(json_input_arg);
     }
-
-
-    /* Override JSON content if need be */
-    if (vm.count("num_repeats") == 1) {
-        json_input.at("execution").as_object().at("num_repeats") = num_repeats;
+    boost::json::object json_data_parallel_input;
+    if (json_data_parallel_input_arg[0] == '{') {
+        json_data_parallel_input = boost::json::parse(json_data_parallel_input_arg).as_object();
     }
+    else {
+        json_data_parallel_input = readJSONFromFile(json_data_parallel_input_arg);
+    }
+
     if (vm.count("deadline") == 1) {
         json_input.at("execution").as_object().at("deadline") = deadline;
     }
-    if (vm.count("seed") == 1) {
-        json_input.at("failures").as_object().at("seed") = seed;
-    }
+
     if (vm.count("lambda") == 1) {
         json_input.at("failures").as_object().at("lambda") = lambda;
     }
     if (vm.count("delta_t") == 1) {
         json_input.at("scheduling").as_object().at("delta_t") = delta_t;
-    }
-
-    /* Instantiating the platform */
-    simulation->instantiatePlatform(PlatformCreator(json_input["platform"].as_object()));
-
-    /* Instantiate a storage service on the ControllerHost */
-    auto storage_service = simulation->add(wrench::SimpleStorageService::createSimpleStorageService(
-        "ControllerHost", {"/"}, {}, {}));
-
-    /* Instantiate a bare-metal compute service on each host of the platform */
-    auto num_compute_nodes = boost::json::value_to<int>(json_input.at("platform").at("num_compute_nodes"));
-    std::map<std::string, std::shared_ptr<wrench::BareMetalComputeService>> compute_services;
-    for (int i = 0; i < num_compute_nodes; i++) {
-        std::string hostname = "ComputeHost_" + std::to_string(i);
-        auto baremetal_service = simulation->add(new wrench::BareMetalComputeService(
-            "ControllerHost", {hostname}, "", {}, {}));
-        compute_services[hostname] = baremetal_service;
     }
 
     auto application_specs = wrench::ApplicationSpecs::create_application_specs(
@@ -131,17 +148,7 @@ int main(int argc, char** argv) {
         json_input["execution"].as_object(),
         json_input["scheduling"].as_object());
 
-    /* Instantiate the execution controller */
-    auto controller = simulation->add(
-        new wrench::Controller(
-            json_input["application"].as_object(),
-            json_input["execution"].as_object(),
-            json_input["scheduling"].as_object(),
-            application_specs,
-            compute_services, storage_service, "ControllerHost"));
-
-    /* Launch the simulation */
-    simulation->launch();
+    evaluate(application_specs, json_input, json_data_parallel_input);
 
     return 0;
 }
