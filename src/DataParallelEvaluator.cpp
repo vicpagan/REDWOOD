@@ -114,6 +114,8 @@ double compute_expected_error(boost::json::object json_input,
     double initial_data_size = json_input.at("application").as_object().at("initial_data_size").as_double();
     double initial_error_level = json_input.at("application").as_object().at("initial_error_level").as_double();
 
+    application_specs->prune_decision_tree(0.0);
+    application_specs->build_decision_tree(task_functions);
     algorithm->preprocess_decisions(probability_computation.get(),
                                     task_functions,
                                     initial_data_size,
