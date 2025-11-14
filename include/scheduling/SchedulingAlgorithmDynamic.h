@@ -29,6 +29,14 @@ namespace wrench {
             OptionComparatorFunction *comparator_function,
             bool minimize) override;
 
+        double get_optimal_expected_error() const override;
+
+        void preprocess_decisions(ProbabilityComputation* probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            double initial_data_size,
+            double initial_error_level,
+            double deadline) override;
+
     private:
 
         double calculate_expected_error(

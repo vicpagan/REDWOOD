@@ -182,7 +182,7 @@ namespace wrench {
 
         /* Loop over all the scheduling algorithms */
         for (const auto& algorithm : _scheduling_algorithms) {
-            // std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
+            std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
             WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
 
             /* Keep track of number of successes */
@@ -225,6 +225,10 @@ namespace wrench {
                 /* Build/reset decision tree to use for temporal redundancy */
                 _application_specs->prune_decision_tree(0.0);
                 _application_specs->build_decision_tree(_task_functions);
+                algorithm->preprocess_decisions(_probability_computation.get(),
+                                _task_functions,
+                                initial_data_size, initial_error_level,
+                                _application_specs->get_deadline());
 
                 /* Loop until the task completes successfully somewhere */
                 /* (right now this assumes a single-task applications)  */
@@ -280,6 +284,8 @@ namespace wrench {
                                 num_successes++;
                             }
 
+                            // std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
+
                             if (!_temporal_redundancy) {
                                 break;
                             }
@@ -298,6 +304,10 @@ namespace wrench {
                                 break;
                             }
                             algorithm->reset_preprocessed_decisions();
+                            algorithm->preprocess_decisions(_probability_computation.get(),
+                                _task_functions,
+                                initial_data_size, initial_error_level,
+                                _application_specs->get_deadline());
                         }
 
                         for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {

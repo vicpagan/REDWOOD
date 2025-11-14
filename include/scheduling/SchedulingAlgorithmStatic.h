@@ -17,6 +17,14 @@ namespace wrench {
             application_specs, "static") {
         };
 
+        double get_optimal_expected_error() const override { return 0.0; }
+
+        void preprocess_decisions(ProbabilityComputation* probability_computation,
+                                  const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+                                  double input_data_size,
+                                  double input_error_level,
+                                  double remaining_time) override {}
+
         std::vector<SchedulingDecision> make_decisions(
             JobTracker *job_tracker,
             ProbabilityComputation *probability_computation,
