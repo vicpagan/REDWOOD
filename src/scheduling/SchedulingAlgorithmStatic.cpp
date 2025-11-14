@@ -28,7 +28,7 @@ namespace wrench {
             const auto exec_option_name = option_name;
             const auto exec_option_time = option_functions.at("t_function")(input_data_size, input_error_level);
             const auto exec_option_data = option_functions.at("d_function")(input_data_size, input_error_level);
-            std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
+            // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
 
             const double exec_option_time_total = (input_data_size /  _application_specs->get_io_read_bandwidth()) + exec_option_time + (exec_option_data /  _application_specs->get_io_write_bandwidth());
             /* Select a delta based on the scheme */
@@ -36,8 +36,7 @@ namespace wrench {
                 // _delta_t_parameter is our fixed delta_t value
                 selected_delta_t = _delta_t_parameter;
             } else if (_delta_t_scheme == "compute") {
-                selected_delta_t = probability_computation->compute_best_deltat(
-                exec_option_time_total, remaining_time, _delta_t_parameter);
+                throw std::invalid_argument("Dynamic scheduling does not support 'compute' delta_t_scheme for multitask yet");
             } else {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
@@ -46,14 +45,14 @@ namespace wrench {
             const double comp_value = comparator_function->comp_value(probability_computation, option_functions, input_data_size, input_error_level,
                                                                      remaining_time);
 
-            /* Take the minimum expected error of all the execution options */
+            /* Select the option with the optimal metric were focusing on */
             if ((minimize && comp_value < best_option_value) || (!minimize && comp_value > best_option_value)) {
                 best_option_value = comp_value;
                 best_option = option_name;
             }
         }
 
-        std::cerr << "STATIC DECISION: " << best_option << std::endl;
+        // std::cerr << "STATIC DECISION: " << best_option << std::endl;
         return best_option;
     }
 
@@ -66,8 +65,7 @@ namespace wrench {
         const double input_error_level,
         const double remaining_time,
         OptionComparatorFunction* comparator_function,
-        const bool minimize
-    ) {
+        const bool minimize ) {
         std::vector<SchedulingAlgorithm::SchedulingDecision> decisions;
 
         static std::map<std::string, std::string> task_exec_option_decisions;

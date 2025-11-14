@@ -1,6 +1,6 @@
 {
   "platform": {
-    "num_compute_nodes": 2,
+    "num_compute_nodes": 1,
     "io_read_bandwidth": "200MBps",
     "io_write_bandwidth": "200MBps"
   },
@@ -155,7 +155,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 10,
+    "num_repeats": 100,
     "deadline": 10000,
     "e_fail": 20.0
   },
