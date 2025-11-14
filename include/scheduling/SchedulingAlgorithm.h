@@ -38,6 +38,14 @@ namespace wrench {
             std::string execution_option;
         };
 
+        virtual double get_optimal_expected_error() const = 0;
+
+        virtual void preprocess_decisions(ProbabilityComputation* probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) = 0;
+
         virtual std::vector<SchedulingDecision> make_decisions(
             JobTracker* job_tracker,
             ProbabilityComputation* probability_computation,
@@ -59,6 +67,8 @@ namespace wrench {
             _preprocessed_decisions.clear();
         }
 
+
+
     protected:
         std::shared_ptr<ApplicationSpecs> _application_specs;
         double _e_fail;
@@ -71,7 +81,7 @@ namespace wrench {
         double _delta_t;
         std::string _name;
 
-        std::map<std::string, std::vector<std::string>> _preprocessed_decisions;
+        std::map<std::string, std::vector<std::pair<std::string, double>>> _preprocessed_decisions;
     };
 }
 
