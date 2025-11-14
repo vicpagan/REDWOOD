@@ -88,9 +88,11 @@ set(SIMULATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/RunningJob.cpp
         src/JobTracker.cpp
+        src/Utils.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
         include/Controller.h
+        include/ApplicationSpecs.h
         include/ProbabilityComputation.h
         include/FunctionGenerator.h
         include/scheduling/SchedulingAlgorithm.h
@@ -98,27 +100,38 @@ set(SIMULATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithmStatic.h
         include/RunningJob.h
         include/JobTracker.h
+        include/Utils.h
 )
+
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 
-# Specify libraries to link
-if (ENABLE_BATSCHED)
-    target_link_libraries(redwood_sim
-            ${WRENCH_LIBRARY}
-            ${SimGrid_LIBRARY}
-            ${FSMOD_LIBRARY}
-            ${Boost_LIBRARIES}
-            ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-            -lzmq)
-else()
-    target_link_libraries(redwood_sim
-            ${WRENCH_LIBRARY}
-            ${SimGrid_LIBRARY}
-            ${FSMOD_LIBRARY}
-            ${Boost_LIBRARIES}
-            ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-    )
-endif()
+target_link_libraries(redwood_sim
+        ${WRENCH_LIBRARY}
+        ${SimGrid_LIBRARY}
+        ${FSMOD_LIBRARY}
+        ${Boost_LIBRARIES}
+        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
+)
+
+set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
+        src/DataParallelEvaluator.cpp
+        src/ApplicationSpecs.cpp
+        src/Utils.cpp
+        include/ApplicationSpecs.h
+        include/Utils.h
+)
+
+add_executable(data_parallel_evaluator ${DATA_PARALLEL_EVALUATOR_SOURCE_FILES})
+
+target_link_libraries(data_parallel_evaluator
+        ${WRENCH_LIBRARY}   # For UnitParser :)
+        ${Boost_LIBRARIES}
+        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
+)
+
+
+
 
 install(TARGETS redwood_sim DESTINATION bin)
+install(TARGETS data_parallel_evaluator DESTINATION bin)
 
