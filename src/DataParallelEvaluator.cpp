@@ -82,8 +82,6 @@ double compute_expected_error(boost::json::object json_input,
         json_input.at("scheduling").as_object());
 
     // Create the task functions
-    // TODO: THIS IS ESSENTIALLY COPY-PASTED FROM SCHEDULER CODE, WOULD
-    // TODO: BE NICE TO FACTOR IT OUT
     std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
         task_functions;
     for (const auto& task : json_input.at("application").at("tasks").as_array()) {
@@ -113,18 +111,17 @@ double compute_expected_error(boost::json::object json_input,
     // Create a probability computation object
     auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
 
-    // Grad tbe initial data size and error level from the JSON
     double initial_data_size = json_input.at("application").as_object().at("initial_data_size").as_double();
     double initial_error_level = json_input.at("application").as_object().at("initial_error_level").as_double();
 
-    // Initialize the scheduling algorithm
+    application_specs->prune_decision_tree(0.0);
+    application_specs->build_decision_tree(task_functions);
     algorithm->preprocess_decisions(probability_computation.get(),
                                     task_functions,
                                     initial_data_size,
                                     initial_error_level,
                                     application_specs->get_deadline());
 
-    // Get the optimal error
     auto optimal_error = algorithm->get_optimal_expected_error();
     std::cerr << "WITH " << num_compute_nodes << " NODES ERROR IS: " << optimal_error << std::endl;
     return optimal_error;
