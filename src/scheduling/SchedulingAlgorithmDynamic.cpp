@@ -18,6 +18,7 @@ namespace wrench {
         const double initial_error_level,
         const double deadline) {
 
+        _preprocessed_decisions.clear();
         this->pick_execution_option(probability_computation, exec_options, initial_data_size, initial_error_level, deadline);
     }
 
