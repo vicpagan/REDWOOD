@@ -117,8 +117,18 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/DataParallelEvaluator.cpp
         src/ApplicationSpecs.cpp
         src/Utils.cpp
+        src/scheduling/SchedulingAlgorithm.cpp
+        src/scheduling/SchedulingAlgorithmDynamic.cpp
+        src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/FunctionGenerator.cpp
+        src/ProbabilityComputation.cpp
         include/ApplicationSpecs.h
         include/Utils.h
+        include/scheduling/SchedulingAlgorithm.h
+        include/scheduling/SchedulingAlgorithmDynamic.h
+        include/scheduling/SchedulingAlgorithmStatic.h
+        include/FunctionGenerator.h
+        include/ProbabilityComputation.h
 )
 
 add_executable(data_parallel_evaluator ${DATA_PARALLEL_EVALUATOR_SOURCE_FILES})
