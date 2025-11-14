@@ -8,6 +8,19 @@
 
 namespace wrench {
 
+    double SchedulingAlgorithmDynamic::get_optimal_expected_error() const {
+        return _preprocessed_decisions.at(_application_specs->get_task(0)).at(static_cast<size_t>(_application_specs->get_deadline())).second;
+    }
+
+    void SchedulingAlgorithmDynamic::preprocess_decisions(ProbabilityComputation* probability_computation,
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+        const double initial_data_size,
+        const double initial_error_level,
+        const double deadline) {
+
+        this->pick_execution_option(probability_computation, exec_options, initial_data_size, initial_error_level, deadline);
+    }
+
     double SchedulingAlgorithmDynamic::calculate_expected_error(
         int remaining_tasks,
         int task_index,
@@ -97,7 +110,6 @@ namespace wrench {
 
 
 
-
     /**
      * DYNAMIC SCHEDULING ALGORITHM
      *
@@ -156,10 +168,10 @@ namespace wrench {
         // }
 
         for (int i = 0; i < dp.size(); i++) {
-            std::vector<std::string> exec_option_decisions(n+1, "");
+            std::vector<std::pair<std::string,double>> exec_option_decisions(n+1, std::make_pair("", 0.0));
             std::string task_name = _application_specs->get_task(i);
             for (int j = 0; j < dp[i].size(); j++) {
-                exec_option_decisions[j] = dp[i][j].first;
+                exec_option_decisions[j] = dp[i][j];
             }
             _preprocessed_decisions.emplace(task_name, std::move(exec_option_decisions));
         }
@@ -183,16 +195,11 @@ namespace wrench {
             if (job) continue; // Host is not idle
 
             if (_preprocessed_decisions.empty()) {
-                // std::cout << "Preprocessing decisions for task " << task_to_schedule << " with remaining time " << remaining_time << std::endl;
-                this->pick_execution_option(
-                probability_computation,
-                exec_options,
-                input_data_size,
-                input_error_level,
-                remaining_time);
+                throw std::invalid_argument("Preprocessed decisions are not available");
             }
+
             const int n = static_cast<int>(std::floor(remaining_time / probability_computation->get_delta_t()));
-            const std::string execution_option = _preprocessed_decisions.at(task_to_schedule).at(n);
+            const std::string execution_option = _preprocessed_decisions.at(task_to_schedule).at(n).first;
             // std::cout << "Selected execution_option " << execution_option << " for task " << task_to_schedule <<
             //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
