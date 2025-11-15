@@ -48,7 +48,7 @@ double compute_expected_error(boost::json::object json_input,
 
     // std::cerr << "ORIGINAL " << json_input << "\n\n";
 
-    // Tweak the json_input spec to implement the parallel speedup
+    // Tweak the task descriptions in json_input spec to implement the parallel speedup
     auto& tasks = json_input["application"].get_object()["tasks"].get_array();
 
     // Find the task by name
@@ -71,6 +71,11 @@ double compute_expected_error(boost::json::object json_input,
             }
         }
     }
+
+    // Tweak the lambda value in json_input to scale up the failure rate
+    double lambda = json_input["failures"].get_object()["lambda"].as_double();
+    json_input["failures"].get_object()["lambda"] = num_compute_nodes * lambda;
+
 
     // std::cerr << "TWEAKED " << json_input << "\n";
 
