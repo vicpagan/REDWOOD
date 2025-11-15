@@ -24,12 +24,18 @@ namespace po = boost::program_options;
 
 
 unsigned long determine_max_num_compute_nodes(const boost::json::object& json_data_parallel_input) {
-    unsigned long max_size = 0;
+    unsigned long size = 0;
     for (const auto& [key, value] : json_data_parallel_input) {
         boost::json::array const& arr = value.as_array();
-        max_size = std::max(max_size, arr.size());
+        if (size == 0) {
+            size = arr.size();
+        } else {
+            if (arr.size() != size) {
+                throw std::invalid_argument("The data-parallel speedup vectors for all tasks must have the number number of elements");
+            }
+        }
     }
-    return max_size;
+    return size;
 }
 
 double compute_expected_error(boost::json::object json_input,
