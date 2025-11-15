@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
          "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
-         "Error associated to an failed execution - will override JSON-provided value\n")
+         "Error associated to a failed execution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
          "delta_t value - will override JSON-provided value\n");
     // Parse command-line arguments
