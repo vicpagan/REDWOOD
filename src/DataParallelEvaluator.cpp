@@ -160,6 +160,7 @@ int main(int argc, char** argv) {
     double deadline;
     int seed;
     double lambda;
+    double e_fail;
     double delta_t;
     po::options_description desc("Allowed arguments");
     desc.add_options()
@@ -175,6 +176,8 @@ int main(int argc, char** argv) {
      "Application execution deadline - will override JSON-provided value\n")
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
+    ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
+         "Error associated to a failed execution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
      "delta_t value - will override JSON-provided value\n");
     // Parse command-line arguments
@@ -220,9 +223,11 @@ int main(int argc, char** argv) {
     if (vm.count("deadline") == 1) {
         json_input.at("execution").as_object().at("deadline") = deadline;
     }
-
     if (vm.count("lambda") == 1) {
         json_input.at("failures").as_object().at("lambda") = lambda;
+    }
+    if (vm.count("e_fail") == 1) {
+        json_input.at("execution").as_object().at("e_fail") = e_fail;
     }
     if (vm.count("delta_t") == 1) {
         json_input.at("scheduling").as_object().at("delta_t") = delta_t;
