@@ -43,6 +43,7 @@ unsigned long wrench::DataParallelEvaluator::determine_max_num_compute_nodes() {
             }
         }
     }
+    std::cerr << "SIZE = " << size << std::endl;
     return size;
 }
 
@@ -144,8 +145,9 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
  * @brief Function to evaluate data parallel options
  */
 std::vector<double> wrench::DataParallelEvaluator::evaluate() {
-    std::vector<double> errors(max_num_compute_nodes);
-    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= max_num_compute_nodes; num_compute_nodes++) {
+    std::vector<double> errors;
+    errors.reserve(this->max_num_compute_nodes);
+    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes++) {
         errors.push_back(compute_expected_error(num_compute_nodes));
     }
     return errors;
