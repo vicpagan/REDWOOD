@@ -12,6 +12,7 @@
 #include <wrench-dev.h>
 #include <boost/json.hpp>
 #include <boost/program_options.hpp>
+#include <utility>
 
 #include "ProbabilityComputation.h"
 #include "scheduling/OptionComparatorFunction.h"
@@ -19,40 +20,42 @@
 #include "FunctionGenerator.h"
 #include "Utils.h"
 #include "scheduling/SchedulingAlgorithmDynamic.h"
+#include "DataParallelEvaluator.h"
 
 namespace po = boost::program_options;
 
+wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_input,
+                                                     boost::json::object data_parallel_input) :
+    json_input(std::move(json_input)), data_parallel_input(std::move(data_parallel_input)) {
+    this->max_num_compute_nodes = this->determine_max_num_compute_nodes();
+}
 
-unsigned long determine_max_num_compute_nodes(const boost::json::object& json_data_parallel_input) {
+unsigned long wrench::DataParallelEvaluator::determine_max_num_compute_nodes() {
     unsigned long size = 0;
-    for (const auto& [key, value] : json_data_parallel_input) {
+    for (const auto& [key, value] : this->data_parallel_input) {
         boost::json::array const& arr = value.as_array();
         if (size == 0) {
             size = arr.size();
         } else {
             if (arr.size() != size) {
-                throw std::invalid_argument("The data-parallel speedup vectors for all tasks must have the number number of elements");
+                throw std::invalid_argument(
+                    "The data-parallel speedup vectors for all tasks must have the number number of elements");
             }
         }
     }
     return size;
 }
 
-double compute_expected_error(boost::json::object json_input,
-                              const boost::json::object& json_data_parallel_input,
-                              unsigned long num_compute_nodes) {
-
+double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_compute_nodes) {
     // std::cerr << "TWEAKING: NUM_COMPUTE NODES = " << num_compute_nodes << "\n";
 
     // Compute the acceleration factor for each task
     std::map<std::string, double> speedups;
-    for (const auto& [task_name, value] : json_data_parallel_input) {
+    for (const auto& [task_name, value] : this->data_parallel_input) {
         boost::json::array const& arr = value.as_array();
         double parallel_speedup = arr[std::min(num_compute_nodes - 1, arr.size() - 1)].as_double();
         speedups[std::string(task_name)] = parallel_speedup;
     }
-
-    // std::cerr << "ORIGINAL " << json_input << "\n\n";
 
     // Tweak the task descriptions in json_input spec to implement the parallel speedup
     auto& tasks = json_input["application"].get_object()["tasks"].get_array();
@@ -61,7 +64,7 @@ double compute_expected_error(boost::json::object json_input,
     for (auto& task : tasks) {
         std::string task_name(task.at("name").as_string().c_str());
         auto speedup = speedups[task_name];
-        auto &task_options = task.get_object()["execution_options"].get_array();
+        auto& task_options = task.get_object()["execution_options"].get_array();
 
         for (auto& option : task_options) {
             // Get the parameters object (not array!)
@@ -134,20 +137,18 @@ double compute_expected_error(boost::json::object json_input,
                                     application_specs->get_deadline());
 
     auto optimal_error = algorithm->get_optimal_expected_error();
-    std::cerr << "WITH " << num_compute_nodes << " NODES ERROR IS: " << optimal_error << std::endl;
     return optimal_error;
 }
 
 /**
  * @brief Function to evaluate data parallel options
  */
-void evaluate(const boost::json::object& json_input,
-              const boost::json::object& json_data_parallel_input) {
-    auto max_num_compute_nodes = determine_max_num_compute_nodes(json_data_parallel_input);
-    for (unsigned long i = 1; i <= max_num_compute_nodes; i++) {
-        compute_expected_error(json_input, json_data_parallel_input, i);
+std::vector<double> wrench::DataParallelEvaluator::evaluate() {
+    std::vector<double> errors(max_num_compute_nodes);
+    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= max_num_compute_nodes; num_compute_nodes++) {
+        errors.push_back(compute_expected_error(num_compute_nodes));
     }
-    return;
+    return errors;
 }
 
 
@@ -183,7 +184,7 @@ int main(int argc, char** argv) {
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
-         "Error associated to a failed execution - will override JSON-provided value\n")
+     "Error associated to a failed execution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
      "delta_t value - will override JSON-provided value\n");
     // Parse command-line arguments
@@ -239,8 +240,11 @@ int main(int argc, char** argv) {
         json_input.at("scheduling").as_object().at("delta_t") = delta_t;
     }
 
-
-    evaluate(json_input, json_data_parallel_input);
+    auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, json_data_parallel_input);
+    auto results = evaluator->evaluate();
+    for (int i = 0; i < results.size(); ++i) {
+        std::cerr << (i+1) << " nodes:  e = " << results.at(i) << std::endl;
+    }
 
     return 0;
 }
