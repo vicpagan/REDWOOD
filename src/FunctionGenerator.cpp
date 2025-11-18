@@ -11,16 +11,16 @@ std::function<double(double, double)> FunctionGenerator::get_function(const boos
         auto function_type = boost::json::value_to<std::string>(spec.at("type"));
         if (function_type == "affine") {
             _function_registry[key] = FunctionGenerator::AffineFunctor(
-                spec.at("parameters").as_object().at("a").as_double(),
-                spec.at("parameters").as_object().at("b").as_double(),
-                spec.at("parameters").as_object().at("c").as_double());
+                spec.at("parameters").as_object().at("a").to_number<double>(),
+                spec.at("parameters").as_object().at("b").to_number<double>(),
+                spec.at("parameters").as_object().at("c").to_number<double>());
         } else if (function_type == "quadratic") {
             _function_registry[key] = FunctionGenerator::QuadraticFunctor(
-                spec.at("parameters").as_object().at("a").as_double(),
-                spec.at("parameters").as_object().at("b").as_double(),
-                spec.at("parameters").as_object().at("c").as_double(),
-                spec.at("parameters").as_object().at("d").as_double(),
-                spec.at("parameters").as_object().at("e").as_double());
+                spec.at("parameters").as_object().at("a").to_number<double>(),
+                spec.at("parameters").as_object().at("b").to_number<double>(),
+                spec.at("parameters").as_object().at("c").to_number<double>(),
+                spec.at("parameters").as_object().at("d").to_number<double>(),
+                spec.at("parameters").as_object().at("e").to_number<double>());
         } else {
             throw std::invalid_argument("Unknown function type '" + function_type + "'");
         }

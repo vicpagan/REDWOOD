@@ -19,6 +19,7 @@
         "execution_options": [
           {
             "name": "option1",
+            "parallel_efficiency": 0.999,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -51,6 +52,7 @@
           },
           {
             "name": "option2",
+            "parallel_efficiency": 0.999,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -88,6 +90,7 @@
         "execution_options": [
           {
             "name": "option3",
+            "parallel_efficiency": 0.999,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -120,6 +123,7 @@
           },
           {
             "name": "option4",
+            "parallel_efficiency": 0.9,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",

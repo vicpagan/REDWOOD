@@ -28,9 +28,7 @@ namespace wrench {
     class DataParallelEvaluator  {
     public:
         // Constructor
-        DataParallelEvaluator(
-            boost::json::object json_input,
-            boost::json::object data_parallel_input);
+        DataParallelEvaluator(boost::json::object json_input, unsigned long max_num_compute_nodes);
 
         std::vector<double> evaluate();
 
@@ -40,13 +38,8 @@ namespace wrench {
         unsigned long determine_max_num_compute_nodes();
         double compute_expected_error(unsigned long num_compute_nodes);
 
-
         boost::json::object json_input;
-        boost::json::object data_parallel_input;
         unsigned long max_num_compute_nodes;
-
-
-
 
     };
 } // namespace wrench
