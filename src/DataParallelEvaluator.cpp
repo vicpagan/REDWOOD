@@ -89,7 +89,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
             // Collect parameter keys, values
             std::map<std::string, double> key_value_pairs;
             for (auto& [key, val] : t_params) {
-                key_value_pairs[key.to_string()] = val.as_double() / speedups[task_name].at(i);
+                key_value_pairs[std::string(key)] = val.as_double() / speedups[task_name].at(i);
             }
 
             for (const auto& [key, val] : key_value_pairs) {
