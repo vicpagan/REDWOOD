@@ -250,16 +250,29 @@ int main(int argc, char** argv) {
         json_input.at("scheduling").get_object().at("delta_t_scheme").get_object().at("parameter") = delta_t;
     }
 
+    // Compute results
+    std::map<double, std::vector<double>> results;
     for (double deadline = min_deadline; deadline <= max_deadline; deadline = deadline + step_deadline) {
+        std::cerr << "." << std::flush;
         json_input.at("execution").get_object().at("deadline") = deadline;
         auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, max_num_nodes);
-        auto results = evaluator->evaluate();
-        std::cout << deadline << ": ";
-        for (int i = 0; i < results.size(); ++i) {
-            std::cout << results.at(i) << " ";
-        }
-        std::cout << std::endl;
+        results[deadline] = evaluator->evaluate();
     }
+    std::cerr << std::endl;
+
+    // Output them in JSON
+    boost::json::object json_obj;
+    for (const auto& [key, vec] : results) {
+        boost::json::array json_array;
+        for (double val : vec) {
+            json_array.push_back(val);
+        }
+        json_obj[std::to_string(key)] = json_array;
+    }
+
+    // Convert to string
+    std::string json_string = boost::json::serialize(json_obj);
+    std::cout << json_string << std::endl;
 
     return 0;
 }
