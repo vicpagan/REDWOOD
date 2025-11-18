@@ -1,0 +1,107 @@
+{
+  "platform": {
+    "num_compute_nodes": 1,
+    "io_read_bandwidth": "200MBps",
+    "io_write_bandwidth": "200MBps"
+  },
+  "failures": {
+    "restart_overhead": 0,
+    "lambda": 0.8,
+    "seed_comment": "If seed value is negative a random seed will be used",
+    "seed": -1
+  },
+  "application": {
+    "initial_data_size": 50.0,
+    "initial_error_level": 1.0,
+    "tasks": [
+      {
+        "name": "task1",
+        "execution_options": [
+          {
+            "name": "option1",
+            "parallel_efficiency": 0.65,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1.0,
+                "b": 1.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 1.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.0
+              }
+            }
+          },
+          {
+            "name": "option2",
+            "parallel_efficiency": 0.7,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1.0,
+                "b": 0.5,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 1.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 2.0
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "execution": {
+    "num_repeats": 100,
+    "deadline": 10000,
+    "e_fail": 20.0
+  },
+  "scheduling": {
+    "delta_t_scheme_comments": "'fixed', 'compute'",
+    "delta_t_scheme": {
+      "scheme": "fixed",
+      "parameter_comments": "Either a fixed value or a precision value",
+      "parameter": 1.0
+    },
+    "algorithms": {
+      "one_task": ["dynamic"],
+      "multi_task": ["dynamic"]
+    },
+    "hacks": {
+      "temporal_redundancy": true,
+      "stop_running_jobs": true
+    }
+  }
+}
