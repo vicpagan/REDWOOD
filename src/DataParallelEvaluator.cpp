@@ -30,11 +30,13 @@ wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_in
 }
 
 double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_compute_nodes) {
-    // std::cerr << "TWEAKING: NUM_COMPUTE NODES = " << num_compute_nodes << "\n";
 
-    // Compute the acceleration factor for each task
+    // Make a copy of the object
+    auto input = this->json_input;
+
+    // Compute the speedup factor for each task
     std::map<std::string, std::vector<double>> speedups;
-    for (const auto& task : json_input["application"].get_object()["tasks"].as_array()) {
+    for (const auto& task : input["application"].get_object()["tasks"].as_array()) {
         auto task_name = std::string(task.as_object().at("name").as_string().c_str());
         speedups[task_name] = {};
         auto& task_options = task.as_object().at("execution_options").as_array();
@@ -42,16 +44,28 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
             auto opt_obj = option.as_object();
             double parallel_speedup;
             if (opt_obj.contains("speedup_measurements") && opt_obj.contains("parallel_efficiency")) {
-                throw std::invalid_argument("Speedup spec for an option of task " + task_name + " contains both a 'speedup_measurements' and a 'parallel efficiency' key, which is not allowed");
+                throw std::invalid_argument(
+                    "Speedup spec for an option of task " + task_name +
+                    " contains both a 'speedup_measurements' and a 'parallel efficiency' key, which is not allowed");
             }
             if (opt_obj.contains("speedup_measurements")) {
                 auto speedup_array = opt_obj["speedup_measurements"].as_array();
+                if (speedup_array.at(0) != 1.0) {
+                    throw std::invalid_argument(
+                        "Speedup spec for an option of task " + task_name + ": vector's first element should be 1.0 ");
+                }
                 parallel_speedup = speedup_array[std::min(num_compute_nodes - 1, speedup_array.size() - 1)].
                     to_number<double>();
-            } else if (opt_obj.contains("parallel_efficiency")) {
+            }
+            else if (opt_obj.contains("parallel_efficiency")) {
                 auto parallel_efficiency = opt_obj["parallel_efficiency"].to_number<double>();
-                parallel_speedup = static_cast<double>(num_compute_nodes) * parallel_efficiency;
-            } else {
+                if (num_compute_nodes == 1) {
+                    parallel_speedup = 1.0;
+                } else {
+                    parallel_speedup = static_cast<double>(num_compute_nodes) * parallel_efficiency;
+                }
+            }
+            else {
                 throw std::invalid_argument("Speedup spec invalid/missing for an option of task " + task_name);
             }
             speedups[task_name].push_back(parallel_speedup);
@@ -59,47 +73,49 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     }
 
     // Tweak the task descriptions in json_input spec to implement the parallel speedup
-    auto& tasks = json_input["application"].get_object()["tasks"].get_array();
+    auto& tasks = input["application"].get_object()["tasks"].get_array();
 
     // Find the task by name
     for (auto& task : tasks) {
         std::string task_name(task.at("name").as_string().c_str());
         auto& task_options = task.get_object()["execution_options"].get_array();
 
-        for (int i=0; i<task_options.size(); i++) {
-            auto option = task_options[i];
+        for (int i = 0; i < task_options.size(); i++) {
             // Get the parameters object (not array!)
-            boost::json::object& opt_obj = option.get_object();
+            boost::json::object& opt_obj = task_options[i].get_object();
             boost::json::object& t_func = opt_obj["t_function"].get_object();
             boost::json::object& t_params = t_func["parameters"].get_object();
 
-            // Modify parameters in place
+            // Collect parameter keys, values
+            std::map<std::string, double> key_value_pairs;
             for (auto& [key, val] : t_params) {
-                // Modify val directly using emplace or by getting the mapped value
-                double new_value = val.to_number<double>() / speedups[task_name].at(i);
-                val = new_value;
+                key_value_pairs[key.to_string()] = val.as_double() / speedups[task_name].at(i);
+            }
+
+            for (const auto& [key, val] : key_value_pairs) {
+                t_params[key] = val;
             }
         }
     }
 
-    // Tweak the lambda value in json_input to scale up the failure rate
-    double lambda = json_input["failures"].get_object()["lambda"].to_number<double>();
-    json_input["failures"].get_object()["lambda"] = static_cast<double>(num_compute_nodes) * lambda;
 
+    // Tweak the lambda value in input to scale up the failure rate
+    double lambda = input["failures"].get_object()["lambda"].to_number<double>();
+    input["failures"].get_object()["lambda"] = static_cast<double>(num_compute_nodes) * lambda;
 
-    // std::cerr << "TWEAKED " << json_input << "\n";
+    // std::cerr << "TWEAKED " << input << "\n";
 
     auto application_specs = wrench::ApplicationSpecs::create_application_specs(
-        json_input.at("platform").as_object(),
-        json_input.at("failures").as_object(),
-        json_input.at("application").as_object(),
-        json_input.at("execution").as_object(),
-        json_input.at("scheduling").as_object());
+        input.at("platform").as_object(),
+        input.at("failures").as_object(),
+        input.at("application").as_object(),
+        input.at("execution").as_object(),
+        input.at("scheduling").as_object());
 
     // Create the task functions
     std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
         task_functions;
-    for (const auto& task : json_input.at("application").at("tasks").as_array()) {
+    for (const auto& task : input.at("application").at("tasks").as_array()) {
         std::vector<std::pair<std::string, std::function<double(double, double)>>> options_for_task;
 
         auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
@@ -126,8 +142,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     // Create a probability computation object
     auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
 
-    double initial_data_size = json_input.at("application").as_object().at("initial_data_size").to_number<double>();
-    double initial_error_level = json_input.at("application").as_object().at("initial_error_level").to_number<double>();
+    double initial_data_size = input.at("application").as_object().at("initial_data_size").to_number<double>();
+    double initial_error_level = input.at("application").as_object().at("initial_error_level").to_number<double>();
 
     application_specs->prune_decision_tree(0.0);
     application_specs->build_decision_tree(task_functions);
@@ -165,9 +181,8 @@ int main(int argc, char** argv) {
     // Define command-line argument options
     std::string json_input_arg;
     std::string json_data_parallel_input_arg;
-    unsigned long num_repeats;
-    double deadline;
-    int seed;
+    unsigned long max_num_nodes;
+    double min_deadline, max_deadline, step_deadline;
     double lambda;
     double e_fail;
     double delta_t;
@@ -177,8 +192,14 @@ int main(int argc, char** argv) {
      "Show this help message\n")
     ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
      "JSON input string or file path\n")
-    ("deadline", po::value<double>(&deadline)->value_name("<deadline>"),
-     "Application execution deadline - will override JSON-provided value\n")
+    ("max_num_nodes", po::value<unsigned long>(&max_num_nodes)->required()->value_name("<max number of nodes>"),
+     "Maximum number of compute nodes\n")
+    ("min_deadline", po::value<double>(&min_deadline)->required()->value_name("<min deadline>"),
+     "Minimum deadline\n")
+    ("max_deadline", po::value<double>(&max_deadline)->required()->value_name("<max deadline>"),
+     "Maximum deadline\n")
+    ("step_deadline", po::value<double>(&step_deadline)->required()->value_name("<step deadline>"),
+     "Step deadline\n")
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
@@ -218,23 +239,26 @@ int main(int argc, char** argv) {
         json_input = readJSONFromFile(json_input_arg);
     }
 
-    if (vm.count("deadline") == 1) {
-        json_input.at("execution").as_object().at("deadline") = deadline;
-    }
     if (vm.count("lambda") == 1) {
-        json_input.at("failures").as_object().at("lambda") = lambda;
+        json_input.at("failures").get_object().at("lambda") = lambda;
     }
     if (vm.count("e_fail") == 1) {
-        json_input.at("execution").as_object().at("e_fail") = e_fail;
+        json_input.at("execution").get_object().at("e_fail") = e_fail;
     }
     if (vm.count("delta_t") == 1) {
-        json_input.at("scheduling").as_object().at("delta_t") = delta_t;
+        json_input.at("scheduling").get_object().at("delta_t_scheme").get_object().at("scheme") = "fixed";
+        json_input.at("scheduling").get_object().at("delta_t_scheme").get_object().at("parameter") = delta_t;
     }
 
-    auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, 20);
-    auto results = evaluator->evaluate();
-    for (int i = 0; i < results.size(); ++i) {
-        std::cerr << (i + 1) << " nodes:  e = " << results.at(i) << std::endl;
+    for (double deadline = min_deadline; deadline <= max_deadline; deadline = deadline + step_deadline) {
+        json_input.at("execution").get_object().at("deadline") = deadline;
+        auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, max_num_nodes);
+        auto results = evaluator->evaluate();
+        std::cout << deadline << ": ";
+        for (int i = 0; i < results.size(); ++i) {
+            std::cout << results.at(i) << " ";
+        }
+        std::cout << std::endl;
     }
 
     return 0;
