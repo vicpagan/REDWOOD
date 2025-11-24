@@ -8,7 +8,7 @@
     "restart_overhead": 10,
     "lambda": 0.7,
     "seed_comment": "If seed value is negative a random seed will be used",
-    "seed": -1
+    "seed": 31212342
   },
   "application": {
     "initial_data_size": 5.0,
@@ -175,7 +175,7 @@
       "multi_task": ["dynamic"]
     },
     "hacks": {
-      "temporal_redundancy": true,
+      "temporal_redundancy": false,
       "stop_running_jobs": true
     }
   }

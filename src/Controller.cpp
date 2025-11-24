@@ -286,12 +286,17 @@ namespace wrench {
 
                             // std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
 
+                            best_error = running_output_error_level;
                             if (!_temporal_redundancy) {
+                                // std::cout << "Best error: " << best_error << std::endl;
+                                cumulative_error_level += best_error;
+                                algorithm->reset_preprocessed_decisions();
+                                _application_specs->reset_all_running_hosts();
                                 break;
                             }
 
                             // reset running trackers
-                            best_error = running_output_error_level;
+                            // best_error = running_output_error_level;
                             running_output_data_size = initial_data_size;
                             running_output_error_level = initial_error_level;
                             current_task_counter = 0;
@@ -356,6 +361,7 @@ namespace wrench {
                                 // Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" << std::endl;
                             }
                             WRENCH_INFO("Deadline reached");
+                            // std::cout << "Best error: " << best_error << std::endl;
                             cumulative_error_level += best_error;
                             algorithm->reset_preprocessed_decisions();
                             _application_specs->reset_all_running_hosts();
