@@ -215,6 +215,9 @@ class ExperimentRunner:
             for repeat_idx in range(num_repeats):
                 seed = config_id * 10000 + repeat_idx  # Unique seed for each run
 
+                if (repeat_idx + 1) % 5 == 0:
+                    print(f"  Repeat {repeat_idx + 1}/{num_repeats}...", end='\r', flush=True)
+
                 if (repeat_idx + 1) % 100 == 0:
                     print(f"  Repeat {repeat_idx + 1}/{num_repeats}...", end=' ')
 
