@@ -215,11 +215,8 @@ class ExperimentRunner:
             for repeat_idx in range(num_repeats):
                 seed = config_id * 10000 + repeat_idx  # Unique seed for each run
 
-                if (repeat_idx + 1) % 5 == 0:
-                    print(f"  Repeat {repeat_idx + 1}/{num_repeats}...", end='\r', flush=True)
-
-                if (repeat_idx + 1) % 100 == 0:
-                    print(f"  Repeat {repeat_idx + 1}/{num_repeats}...", end=' ')
+                # Show progress more frequently
+                print(f"  Repeat {repeat_idx + 1}/{num_repeats}...", end='\r', flush=True)
 
                 result = self.run_experiment(config, params, config_id, seed, executor_path)
                 result['temporal_redundancy'] = params['scheduling.hacks.temporal_redundancy']
@@ -331,11 +328,11 @@ if __name__ == "__main__":
         'application.initial_error_level': (0.1, 2.0)  # Will be rounded to whole number
     }
 
-    # Run 100 different configurations, each repeated 1000 times with different seeds
+    # Run 100 different configurations, each repeated 10 times with different seeds
     # This will run TWICE: once with temporal_redundancy=False, once with temporal_redundancy=True
     results = runner.run_all_experiments(
         param_grid=param_grid,
         executor_path='./build/redwood_sim',
         num_configs=100,
-        num_repeats=1000
+        num_repeats=10
     )
