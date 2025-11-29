@@ -92,57 +92,95 @@ class ExperimentRunner:
         return configs
 
     def _configure_single_host_task(self, config):
-        """Configure the system to use a single host with a single task."""
-        # Ensure we have exactly 1 host
-        if len(config['hosts']) > 1:
-            config['hosts'] = [config['hosts'][0]]
+        """Configure the system to use a single task with 2 execution options."""
+        # Ensure we have exactly 1 task with 2 execution options
+        if 'application' in config and 'tasks' in config['application']:
+            # Keep only the first task
+            if len(config['application']['tasks']) > 1:
+                config['application']['tasks'] = [config['application']['tasks'][0]]
 
-        # Ensure we have exactly 1 task with 2 implementations
-        if len(config['application']['tasks']) > 1:
-            config['application']['tasks'] = [config['application']['tasks'][0]]
+            task = config['application']['tasks'][0]
 
-        task = config['application']['tasks'][0]
+            # Set error level to always start at 1
+            config['application']['initial_error_level'] = 1.0
 
-        # Set error level to always start at 1
-        config['application']['initial_error_level'] = 1
-
-        # Configure 2 implementations for the task
-        # Implementation 1: Shorter time, higher error reduction (use at beginning when error is high)
-        # Implementation 2: Longer time, lower error reduction (use near end when error is low)
-        task['implementations'] = [
-            {
-                "host": 0,
-                "mean_service_time": 800,  # Shorter
-                "error_reduction": 1.2     # Higher error reduction
-            },
-            {
-                "host": 0,
-                "mean_service_time": 1200, # Longer
-                "error_reduction": 0.6     # Lower error reduction
-            }
-        ]
+            # Configure 2 execution options for the task
+            # Option 1: Shorter time, lower error increase (use at beginning when error is low)
+            # Option 2: Longer time, higher error increase (use when error is already high)
+            task['execution_options'] = [
+                {
+                    "name": "option1",
+                    "parallel_efficiency": 0.999,
+                    "t_function": {
+                        "type": "affine",
+                        "parameters": {
+                            "a": 0.0,
+                            "b": 1.0,  # Will be modified by task_time_slope
+                            "c": 0.0
+                        }
+                    },
+                    "d_function": {
+                        "type": "affine",
+                        "parameters": {
+                            "a": 0.0,
+                            "b": 2.0,
+                            "c": 0.0
+                        }
+                    },
+                    "e_function": {
+                        "type": "affine",
+                        "parameters": {
+                            "a": 0.0,
+                            "b": 0.0,
+                            "c": 1.5  # Lower error increase (error * 1.5)
+                        }
+                    }
+                },
+                {
+                    "name": "option2",
+                    "parallel_efficiency": 0.999,
+                    "t_function": {
+                        "type": "affine",
+                        "parameters": {
+                            "a": 0.0,
+                            "b": 1.5,  # Longer time (will be modified by task_time_slope)
+                            "c": 0.0
+                        }
+                    },
+                    "d_function": {
+                        "type": "affine",
+                        "parameters": {
+                            "a": 0.0,
+                            "b": 2.0,
+                            "c": 0.0
+                        }
+                    },
+                    "e_function": {
+                        "type": "affine",
+                        "parameters": {
+                            "a": 0.0,
+                            "b": 0.0,
+                            "c": 2.5  # Higher error increase (error * 2.5)
+                        }
+                    }
+                }
+            ]
 
     def _set_task_function(self, config, slope=None, intercept=None):
-        """Set the linear function parameters for the task."""
+        """Set the linear function parameters for the task's t_function (time)."""
         task = config['application']['tasks'][0]
 
-        # Initialize with defaults if not exists
-        if 'function' not in task:
-            task['function'] = {
-                "name": "linear",
-                "params": {
-                    "slope": 1.0,
-                    "intercept": 0.0
-                }
-            }
+        # Update both execution options' t_function parameters
+        if 'execution_options' in task:
+            for option in task['execution_options']:
+                if 't_function' in option and 'parameters' in option['t_function']:
+                    # Update slope (b parameter) if provided
+                    if slope is not None:
+                        option['t_function']['parameters']['b'] = slope
 
-        # Update slope if provided
-        if slope is not None:
-            task['function']['params']['slope'] = slope
-
-        # Update intercept if provided
-        if intercept is not None:
-            task['function']['params']['intercept'] = intercept
+                    # Update intercept (a parameter) if provided
+                    if intercept is not None:
+                        option['t_function']['parameters']['a'] = intercept
 
     def _set_nested_value(self, config, key_path, value):
         """Set a nested dictionary value using dot notation."""
