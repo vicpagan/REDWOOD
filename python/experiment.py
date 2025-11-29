@@ -317,6 +317,9 @@ class ExperimentRunner:
         self._save_and_analyze_results(results_true, suffix="temporal_true")
         self._save_and_analyze_results(self.results, suffix="combined")
 
+        # Generate comparison analysis
+        self._compare_temporal_redundancy(results_false, results_true)
+
         return self.results
 
     def _run_config_set_parallel(self, configs, executor_path, num_repeats, label, num_workers):
@@ -351,13 +354,26 @@ class ExperimentRunner:
             if matching_config:
                 result['temporal_redundancy'] = matching_config[1]['scheduling.hacks.temporal_redundancy']
 
+        # Count successful experiments
+        successful_count = sum(1 for r in results if r['success'])
+        failed_count = len(results) - successful_count
+
+        print(f"\nCompleted: {successful_count} successful, {failed_count} failed")
+
         # Print summary statistics per configuration
         print(f"\n{'='*60}")
         print(f"CONFIGURATION SUMMARIES (Temporal={label})")
         print(f"{'='*60}")
 
-        for config, params, config_id in configs:
+        config_ids = sorted(set(c[2] for c in configs))
+        for config_id in config_ids:
+            matching_config = next((c for c in configs if c[2] == config_id), None)
+            if not matching_config:
+                continue
+
+            params = matching_config[1]
             config_results = [r for r in results if r['config_id'] == config_id and r['success']]
+
             if config_results:
                 success_rates = [r['output'].get('success_rate', 0) for r in config_results if r['output']]
                 avg_errors = [r['output'].get('avg_error_level', 0) for r in config_results if r['output']]
@@ -445,6 +461,92 @@ class ExperimentRunner:
                 print(f"  Across all configs - Mean of means: {summary_df[mean_col].mean():.4f}")
                 print(f"  Across all configs - Std of means: {summary_df[mean_col].std():.4f}")
                 print(f"  Average within-config std: {summary_df[std_col].mean():.4f}")
+
+    def _compare_temporal_redundancy(self, results_false, results_true):
+        """Generate comparison analysis between temporal redundancy settings."""
+        print(f"\n{'='*80}")
+        print(f"TEMPORAL REDUNDANCY COMPARISON")
+        print(f"{'='*80}")
+
+        # Convert both result sets to DataFrames
+        data_false = []
+        for result in results_false:
+            if result['success'] and result['output']:
+                row = {'config_id': result['config_id']}
+                row.update(result['params'])
+                row.update(result['output'])
+                data_false.append(row)
+
+        data_true = []
+        for result in results_true:
+            if result['success'] and result['output']:
+                row = {'config_id': result['config_id']}
+                row.update(result['params'])
+                row.update(result['output'])
+                data_true.append(row)
+
+        df_false = pd.DataFrame(data_false)
+        df_true = pd.DataFrame(data_true)
+
+        if df_false.empty or df_true.empty:
+            print("Insufficient data for comparison!")
+            return
+
+        # Calculate aggregate statistics
+        metrics = ['success_rate', 'avg_error_level', 'num_successes']
+
+        print("\nOVERALL COMPARISON:")
+        print(f"{'Metric':<25} {'False':<20} {'True':<20} {'Difference':<15}")
+        print("-" * 80)
+
+        for metric in metrics:
+            if metric in df_false.columns and metric in df_true.columns:
+                mean_false = df_false[metric].mean()
+                std_false = df_false[metric].std()
+                mean_true = df_true[metric].mean()
+                std_true = df_true[metric].std()
+                diff = mean_true - mean_false
+
+                print(f"{metric:<25} {mean_false:>7.4f} ± {std_false:<7.4f} {mean_true:>7.4f} ± {std_true:<7.4f} {diff:>+7.4f}")
+
+        # Per-configuration comparison
+        print(f"\n{'='*80}")
+        print("PER-CONFIGURATION COMPARISON (Top 10 by improvement):")
+        print(f"{'='*80}")
+
+        comparisons = []
+        for config_id in df_false['config_id'].unique():
+            if config_id in df_true['config_id'].values:
+                config_false = df_false[df_false['config_id'] == config_id]
+                config_true = df_true[df_true['config_id'] == config_id]
+
+                sr_false = config_false['success_rate'].mean()
+                sr_true = config_true['success_rate'].mean()
+                improvement = sr_true - sr_false
+
+                params = {k: v for k, v in config_false.iloc[0].items()
+                          if k not in ['config_id', 'success_rate', 'avg_error_level', 'num_successes', 'total_repeats']}
+
+                comparisons.append({
+                    'config_id': config_id,
+                    'params': params,
+                    'sr_false': sr_false,
+                    'sr_true': sr_true,
+                    'improvement': improvement
+                })
+
+        # Sort by improvement and show top 10
+        comparisons.sort(key=lambda x: x['improvement'], reverse=True)
+
+        for i, comp in enumerate(comparisons[:10]):
+            print(f"\n{i+1}. Config {comp['config_id'] + 1}: {comp['params']}")
+            print(f"   Success rate: {comp['sr_false']:.4f} → {comp['sr_true']:.4f} (Δ {comp['improvement']:+.4f})")
+
+        # Save comparison to CSV
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        comparison_file = self.output_dir / f"temporal_comparison_{timestamp}.csv"
+        pd.DataFrame(comparisons).to_csv(comparison_file, index=False)
+        print(f"\nFull comparison saved to: {comparison_file}")
 
 
 def _run_single_experiment_wrapper(task):
