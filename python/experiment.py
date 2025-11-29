@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 from datetime import datetime
 import numpy as np
+from multiprocessing import Pool, cpu_count
+from functools import partial
 
 class ExperimentRunner:
     def __init__(self, base_config_path, output_dir="experiments"):
@@ -25,7 +27,7 @@ class ExperimentRunner:
         {
             'failures.lambda': (0.3, 1.0),  # (min, max) for uniform sampling - rounded to 2 decimals
             'execution.deadline': (3000, 20000),  # integers
-            'application.initial_error_level': (0.1, 2.0)  # integers or rounded
+            'task_time_slope': (0.5, 2.0)  # slope parameter for linear time function
         }
         """
         configs = []
@@ -46,6 +48,9 @@ class ExperimentRunner:
                     if 'lambda' in key.lower():
                         # Lambda: round to 2 decimal places
                         value = round(float(value), 2)
+                    elif 'slope' in key.lower() or 'intercept' in key.lower():
+                        # Task function parameters: round to 2 decimal places
+                        value = round(float(value), 2)
                     else:
                         # Other parameters: round to whole numbers
                         value = int(round(float(value)))
@@ -63,8 +68,20 @@ class ExperimentRunner:
                 elif isinstance(value, np.ndarray):
                     value = value.tolist()
 
-                self._set_nested_value(config, key, value)
+                # Handle special keys
+                if key == 'task_time_slope':
+                    # Set the slope for linear time function
+                    self._set_task_function(config, slope=value)
+                elif key == 'task_time_intercept':
+                    # Set the intercept for linear time function
+                    self._set_task_function(config, intercept=value)
+                else:
+                    self._set_nested_value(config, key, value)
+
                 params[key] = value
+
+            # Configure single host with single task
+            self._configure_single_host_task(config)
 
             # Set temporal redundancy
             self._set_nested_value(config, 'scheduling.hacks.temporal_redundancy', temporal_redundancy)
@@ -73,6 +90,59 @@ class ExperimentRunner:
             configs.append((config, params, i))
 
         return configs
+
+    def _configure_single_host_task(self, config):
+        """Configure the system to use a single host with a single task."""
+        # Ensure we have exactly 1 host
+        if len(config['hosts']) > 1:
+            config['hosts'] = [config['hosts'][0]]
+
+        # Ensure we have exactly 1 task with 2 implementations
+        if len(config['application']['tasks']) > 1:
+            config['application']['tasks'] = [config['application']['tasks'][0]]
+
+        task = config['application']['tasks'][0]
+
+        # Set error level to always start at 1
+        config['application']['initial_error_level'] = 1
+
+        # Configure 2 implementations for the task
+        # Implementation 1: Shorter time, higher error reduction (use at beginning when error is high)
+        # Implementation 2: Longer time, lower error reduction (use near end when error is low)
+        task['implementations'] = [
+            {
+                "host": 0,
+                "mean_service_time": 800,  # Shorter
+                "error_reduction": 1.2     # Higher error reduction
+            },
+            {
+                "host": 0,
+                "mean_service_time": 1200, # Longer
+                "error_reduction": 0.6     # Lower error reduction
+            }
+        ]
+
+    def _set_task_function(self, config, slope=None, intercept=None):
+        """Set the linear function parameters for the task."""
+        task = config['application']['tasks'][0]
+
+        # Initialize with defaults if not exists
+        if 'function' not in task:
+            task['function'] = {
+                "name": "linear",
+                "params": {
+                    "slope": 1.0,
+                    "intercept": 0.0
+                }
+            }
+
+        # Update slope if provided
+        if slope is not None:
+            task['function']['params']['slope'] = slope
+
+        # Update intercept if provided
+        if intercept is not None:
+            task['function']['params']['intercept'] = intercept
 
     def _set_nested_value(self, config, key_path, value):
         """Set a nested dictionary value using dot notation."""
@@ -172,22 +242,34 @@ class ExperimentRunner:
 
         return data
 
-    def run_all_experiments(self, param_grid, executor_path, num_configs=100, num_repeats=1000):
-        """Run all experiment configurations with multiple seeds, for both temporal redundancy settings."""
+    def run_all_experiments(self, param_grid, executor_path, num_configs=100, num_repeats=1000, num_workers=None):
+        """Run all experiment configurations with multiple seeds, for both temporal redundancy settings.
+
+        Args:
+            param_grid: Dictionary of parameter ranges
+            executor_path: Path to the executable
+            num_configs: Number of different configurations to generate
+            num_repeats: Number of times to repeat each configuration with different seeds
+            num_workers: Number of parallel worker processes (defaults to CPU count)
+        """
+        if num_workers is None:
+            num_workers = cpu_count()
+
+        print(f"Using {num_workers} worker processes for parallel execution")
 
         # Run experiments with temporal_redundancy = False
         print(f"\n{'='*80}")
         print(f"RUNNING EXPERIMENTS WITH TEMPORAL REDUNDANCY = FALSE")
         print(f"{'='*80}")
         configs_false = self.generate_config_variations(param_grid, num_configs, temporal_redundancy=False)
-        results_false = self._run_config_set(configs_false, executor_path, num_repeats, "FALSE")
+        results_false = self._run_config_set_parallel(configs_false, executor_path, num_repeats, "FALSE", num_workers)
 
         # Run experiments with temporal_redundancy = True (same configs, different flag)
         print(f"\n{'='*80}")
         print(f"RUNNING EXPERIMENTS WITH TEMPORAL REDUNDANCY = TRUE")
         print(f"{'='*80}")
         configs_true = self.generate_config_variations(param_grid, num_configs, temporal_redundancy=True)
-        results_true = self._run_config_set(configs_true, executor_path, num_repeats, "TRUE")
+        results_true = self._run_config_set_parallel(configs_true, executor_path, num_repeats, "TRUE", num_workers)
 
         # Combine results
         self.results = results_false + results_true
@@ -199,41 +281,55 @@ class ExperimentRunner:
 
         return self.results
 
-    def _run_config_set(self, configs, executor_path, num_repeats, label):
-        """Run a set of configurations and return results."""
-        results = []
+    def _run_config_set_parallel(self, configs, executor_path, num_repeats, label, num_workers):
+        """Run a set of configurations in parallel and return results."""
 
         print(f"Running {len(configs)} different configurations, each with {num_repeats} different seeds...")
         print(f"Total experiments: {len(configs) * num_repeats}")
 
-        for config_idx, (config, params, config_id) in enumerate(configs):
-            print(f"\n{'-'*60}")
-            print(f"Configuration {config_idx + 1}/{len(configs)} (Temporal={label})")
-            print(f"Parameters: {params}")
-            print(f"{'-'*60}")
-
+        # Create all experiment tasks (config_id, seed pairs)
+        tasks = []
+        for config, params, config_id in configs:
             for repeat_idx in range(num_repeats):
-                seed = config_id * 10000 + repeat_idx  # Unique seed for each run
+                seed = config_id * 10000 + repeat_idx
+                tasks.append({
+                    'config': config,
+                    'params': params,
+                    'config_id': config_id,
+                    'seed': seed,
+                    'executor_path': executor_path,
+                    'output_dir': str(self.output_dir)
+                })
 
-                # Show progress more frequently
-                print(f"  Repeat {repeat_idx + 1}/{num_repeats}...", end='\r', flush=True)
+        # Run experiments in parallel
+        print(f"Starting parallel execution with {num_workers} workers...")
+        with Pool(processes=num_workers) as pool:
+            results = pool.map(_run_single_experiment_wrapper, tasks)
 
-                result = self.run_experiment(config, params, config_id, seed, executor_path)
-                result['temporal_redundancy'] = params['scheduling.hacks.temporal_redundancy']
-                results.append(result)
+        # Add temporal redundancy flag to results
+        for result in results:
+            # Find the matching config to get temporal redundancy value
+            matching_config = next((c for c in configs if c[2] == result['config_id']), None)
+            if matching_config:
+                result['temporal_redundancy'] = matching_config[1]['scheduling.hacks.temporal_redundancy']
 
-                if not result['success']:
-                    print(f"\n  ✗ Failed at repeat {repeat_idx + 1}: {result.get('error', 'Unknown error')}")
+        # Print summary statistics per configuration
+        print(f"\n{'='*60}")
+        print(f"CONFIGURATION SUMMARIES (Temporal={label})")
+        print(f"{'='*60}")
 
-            # Quick summary for this config
+        for config, params, config_id in configs:
             config_results = [r for r in results if r['config_id'] == config_id and r['success']]
             if config_results:
                 success_rates = [r['output'].get('success_rate', 0) for r in config_results if r['output']]
                 avg_errors = [r['output'].get('avg_error_level', 0) for r in config_results if r['output']]
+
+                print(f"\nConfig {config_id + 1}: {params}")
                 if success_rates:
-                    print(f"  Mean success rate: {np.mean(success_rates):.4f} ± {np.std(success_rates):.4f}")
+                    print(f"  Success rate: {np.mean(success_rates):.4f} ± {np.std(success_rates):.4f}")
                 if avg_errors:
-                    print(f"  Mean error level: {np.mean(avg_errors):.4f} ± {np.std(avg_errors):.4f}")
+                    print(f"  Error level: {np.mean(avg_errors):.4f} ± {np.std(avg_errors):.4f}")
+                print(f"  Completed: {len(config_results)}/{num_repeats}")
 
         return results
 
@@ -313,6 +409,95 @@ class ExperimentRunner:
                 print(f"  Average within-config std: {summary_df[std_col].mean():.4f}")
 
 
+def _run_single_experiment_wrapper(task):
+    """
+    Wrapper function for running a single experiment in a multiprocessing context.
+    This needs to be a module-level function for pickling.
+    """
+    config = task['config']
+    params = task['params']
+    config_id = task['config_id']
+    seed = task['seed']
+    executor_path = task['executor_path']
+    output_dir = Path(task['output_dir'])
+
+    # Set the seed in the config
+    config['execution']['seed'] = seed
+
+    # Create temporary config file with unique name
+    config_file = output_dir / f"temp_config_{config_id}_{seed}_{os.getpid()}.json"
+
+    # Save configuration temporarily
+    try:
+        with open(config_file, 'w') as f:
+            json.dump(config, f, indent=2)
+
+        # Run the application
+        result = subprocess.run(
+            [executor_path, '--json', str(config_file)],
+            capture_output=True,
+            text=True,
+            timeout=300  # 5 minute timeout
+        )
+
+        # Parse output
+        output_data = _parse_output(result.stdout)
+
+        # Clean up temporary config file
+        config_file.unlink()
+
+        return {
+            'config_id': config_id,
+            'seed': seed,
+            'params': params,
+            'success': result.returncode == 0,
+            'output': output_data
+        }
+
+    except subprocess.TimeoutExpired:
+        config_file.unlink(missing_ok=True)
+        return {
+            'config_id': config_id,
+            'seed': seed,
+            'params': params,
+            'success': False,
+            'output': None,
+            'error': 'Timeout'
+        }
+    except Exception as e:
+        config_file.unlink(missing_ok=True)
+        return {
+            'config_id': config_id,
+            'seed': seed,
+            'params': params,
+            'success': False,
+            'output': None,
+            'error': str(e)
+        }
+
+
+def _parse_output(stdout):
+    """
+    Parse the output from redwood_sim application.
+    Module-level function for multiprocessing.
+    """
+    data = {}
+    lines = stdout.strip().split('\n')
+
+    for line in lines:
+        if ':' in line:
+            key, value = line.split(':', 1)
+            key = key.strip().lower().replace(' ', '_')
+            value = value.strip()
+
+            try:
+                data[key] = float(value)
+            except ValueError:
+                data[key] = value
+
+    return data
+
+
 # Example usage
 if __name__ == "__main__":
     # Initialize the experiment runner
@@ -321,18 +506,20 @@ if __name__ == "__main__":
         output_dir="experiments"
     )
 
-    # Define parameter ranges for sampling (exclude temporal_redundancy from param_grid)
+    # Define parameter ranges for sampling
     param_grid = {
-        'failures.lambda': (0.3, 1.0),  # Will be rounded to 2 decimal places
+        'failures.lambda': (0.3, 1.0),        # Will be rounded to 2 decimal places
         'execution.deadline': (3000, 20000),  # Will be rounded to whole number
-        'application.initial_error_level': (0.1, 2.0)  # Will be rounded to whole number
+        'task_time_slope': (0.5, 2.0)         # Linear function slope (2 decimal places)
     }
 
     # Run 100 different configurations, each repeated 10 times with different seeds
     # This will run TWICE: once with temporal_redundancy=False, once with temporal_redundancy=True
+    # Uses all available CPU cores for parallel execution
     results = runner.run_all_experiments(
         param_grid=param_grid,
         executor_path='./build/redwood_sim',
         num_configs=100,
-        num_repeats=10
+        num_repeats=10,
+        num_workers=None  # None = use all CPU cores, or set to specific number like 4, 8, etc.
     )
