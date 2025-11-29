@@ -502,8 +502,8 @@ def _parse_output(stdout):
 if __name__ == "__main__":
     # Initialize the experiment runner
     runner = ExperimentRunner(
-        base_config_path="data/sample_input.json",
-        output_dir="experiments"
+        base_config_path="../data/sample_input.json",
+        output_dir="../experiments"
     )
 
     # Define parameter ranges for sampling
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     # Uses all available CPU cores for parallel execution
     results = runner.run_all_experiments(
         param_grid=param_grid,
-        executor_path='./build/redwood_sim',
+        executor_path='../build/redwood_sim',
         num_configs=100,
         num_repeats=10,
         num_workers=None  # None = use all CPU cores, or set to specific number like 4, 8, etc.
