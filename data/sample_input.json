@@ -84,77 +84,6 @@
             }
           }
         ]
-      },
-      {
-        "name": "task2",
-        "execution_options": [
-          {
-            "name": "option3",
-            "parallel_efficiency": 0.999,
-            "t_function": {
-              "type":"affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 0.0,
-                "b": 1.0,
-                "c": 0.0
-              }
-            },
-            "d_function": {
-              "type":"affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 0.0,
-                "b": 2.0,
-                "c": 0.0
-              }
-            },
-            "e_function": {
-              "type":"quadratic",
-              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
-              "parameters": {
-                "a": 0.0,
-                "b": 0.0,
-                "c": 3.10,
-                "d": 0.0,
-                "e": 0.0
-              }
-            }
-          },
-          {
-            "name": "option4",
-            "parallel_efficiency": 0.9,
-            "t_function": {
-              "type":"affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 0.0,
-                "b": 2.0,
-                "c": 0.0
-              }
-            },
-            "d_function": {
-              "type":"quadratic",
-              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
-              "parameters": {
-                "a": 0.0,
-                "b": 2.0,
-                "c": 0.0,
-                "d": 0.0,
-                "e": 0.0
-              }
-            },
-            "e_function": {
-              "type":"affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 0.0,
-                "b": 0.0,
-                "c": 3.0
-              }
-            }
-          }
-        ]
       }
     ]
   },
@@ -175,7 +104,7 @@
       "multi_task": ["dynamic"]
     },
     "hacks": {
-      "temporal_redundancy": false,
+      "temporal_redundancy": true,
       "stop_running_jobs": true
     }
   }

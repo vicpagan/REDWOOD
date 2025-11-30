@@ -118,6 +118,9 @@ namespace wrench {
                                 const std::string& hostname) {
         const auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
 
+        // std::cout << "Submitting job for task " << task_name << " with execution option " << execution_option <<
+        //     " on host " << hostname << std::endl;
+
         const auto read_input_action = job->addCustomAction("read", 0, 1,
                                                       [this, running_output_data_size](
                                                       const std::shared_ptr<wrench::ActionExecutor>& action_executor) {
@@ -154,7 +157,9 @@ namespace wrench {
 
         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
         _job_manager->submitJob(job, _compute_services.at(hostname));
+
         job_tracker->track_job(job, hostname, task_name, execution_option);
+
     }
 
     /**
@@ -278,6 +283,8 @@ namespace wrench {
                         current_task_counter++;
                         current_task = _application_specs->get_task(current_task_counter);
 
+                        // std::cout << "New current task: " << current_task << std::endl;
+
                         if (current_task.empty()) {
                             // were done
                             if (best_error == _application_specs->get_e_fail()) {
@@ -296,7 +303,6 @@ namespace wrench {
                             }
 
                             // reset running trackers
-                            // best_error = running_output_error_level;
                             running_output_data_size = initial_data_size;
                             running_output_error_level = initial_error_level;
                             current_task_counter = 0;
