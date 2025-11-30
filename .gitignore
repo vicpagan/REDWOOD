@@ -7,5 +7,9 @@ build/*
 # Executable
 main
 
+# Experiments
+experiments/*
+experiments_temporal/*
+
 # Object files
 *.o

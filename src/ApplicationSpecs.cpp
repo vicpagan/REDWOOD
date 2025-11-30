@@ -107,7 +107,7 @@ namespace wrench {
     }
 
     bool ApplicationSpecs::decision_tree_empty() const {
-        if (_exec_option_decision_tree->root == nullptr) {
+        if (_exec_option_decision_tree->root == nullptr || _exec_option_decision_tree->root->num_children == 0) {
             return true;
         }
         return false;
