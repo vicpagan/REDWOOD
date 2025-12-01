@@ -1,6 +1,6 @@
 {
   "platform": {
-    "num_compute_nodes": 1,
+    "num_compute_nodes": 2,
     "io_read_bandwidth": "200MBps",
     "io_write_bandwidth": "200MBps"
   },
@@ -16,6 +16,77 @@
     "tasks": [
       {
         "name": "task1",
+        "execution_options": [
+          {
+            "name": "option1",
+            "parallel_efficiency": 0.999,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 1.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 2.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 3.10,
+                "d": 0.0,
+                "e": 0.0
+              }
+            }
+          },
+          {
+            "name": "option2",
+            "parallel_efficiency": 0.999,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 2.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 0.0,
+                "b": 2.0,
+                "c": 0.0,
+                "d": 0.0,
+                "e": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 3.0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "task2",
         "execution_options": [
           {
             "name": "option1",
@@ -105,7 +176,7 @@
     },
     "hacks": {
       "temporal_redundancy": true,
-      "stop_running_jobs": true
+      "stop_running_jobs": false
     }
   }
 }

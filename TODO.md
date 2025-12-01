@@ -23,9 +23,14 @@ BUGS:
   - Need to make sure hosts that are down still get properly reset and wait instead of skipping past the restart overhead
 
 EXPERIMENTS:
-    - Test temporal redundancy hack correctly lol
     - Test cancel useless runs of tasks upon a single host completing hack
     - Test delta squeeze vs execution speed
     - Test one task vs chain?
     - Test basic heuristics on one host and one task/chain with temp redundancy
       - Graph would look like different colored sets of dots for each heuristic and best fit lines to compare them
+
+NOTES:
+    - With the stop_running_jobs hack, the difference in NodeKiller calls changes the timing of when hosts are killed
+      - This means there's a difference between runs with and without the hack
+      - Does this matter in the case of comparing the results of runs with and without the hack?
+        - Probably not, since with enough runs the differences should average out

@@ -1,0 +1,3637 @@
+Using 96 worker processes for parallel execution
+
+Generating 2500 random seeds for all experiments...
+Seeds: [534895719, 199900596, 862061405, 787846415, 996406379, 127521864, 423734973, 415968277, 670094951, 841095290]... (showing first 10)
+
+================================================================================
+RUNNING EXPERIMENTS WITH TEMPORAL REDUNDANCY = FALSE
+================================================================================
+Running 250 different configurations, each with 2500 different seeds...
+Total experiments: 625000
+Starting parallel execution with 96 workers...
+
+Parallel execution completed. Processing 625000 results...
+Completed: 625000 successful, 0 failed
+
+============================================================
+CONFIGURATION SUMMARIES (Temporal=FALSE)
+============================================================
+
+Config 1: {'failures.lambda': 0.59, 'execution.deadline': 7754, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0848 ± 0.2786
+  Error level: 18.8128 ± 3.9002
+  Completed: 2500/2500
+
+Config 2: {'failures.lambda': 0.7, 'execution.deadline': 3780, 'task_time_factor': 1.07, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0080 ± 0.0891
+  Error level: 19.8880 ± 1.2472
+  Completed: 2500/2500
+
+Config 3: {'failures.lambda': 0.43, 'execution.deadline': 7331, 'task_time_factor': 1.82, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.6044 ± 0.4890
+  Error level: 11.5384 ± 6.8457
+  Completed: 2500/2500
+
+Config 4: {'failures.lambda': 0.75, 'execution.deadline': 3103, 'task_time_factor': 2.45, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 5: {'failures.lambda': 0.82, 'execution.deadline': 4062, 'task_time_factor': 1.11, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 6: {'failures.lambda': 0.49, 'execution.deadline': 4521, 'task_time_factor': 1.69, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2188 ± 0.4134
+  Error level: 16.9368 ± 5.7881
+  Completed: 2500/2500
+
+Config 7: {'failures.lambda': 0.62, 'execution.deadline': 4456, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0308 ± 0.1728
+  Error level: 19.5688 ± 2.4189
+  Completed: 2500/2500
+
+Config 8: {'failures.lambda': 0.47, 'execution.deadline': 4461, 'task_time_factor': 1.42, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2756 ± 0.4468
+  Error level: 16.1416 ± 6.2554
+  Completed: 2500/2500
+
+Config 9: {'failures.lambda': 0.63, 'execution.deadline': 6926, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0432 ± 0.2033
+  Error level: 19.3952 ± 2.8463
+  Completed: 2500/2500
+
+Config 10: {'failures.lambda': 0.66, 'execution.deadline': 5962, 'task_time_factor': 0.88, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0228 ± 0.1493
+  Error level: 19.6808 ± 2.0897
+  Completed: 2500/2500
+
+Config 11: {'failures.lambda': 0.7, 'execution.deadline': 3853, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0088 ± 0.0934
+  Error level: 19.8768 ± 1.3075
+  Completed: 2500/2500
+
+Config 12: {'failures.lambda': 0.87, 'execution.deadline': 7828, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 13: {'failures.lambda': 0.55, 'execution.deadline': 3488, 'task_time_factor': 1.96, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0688 ± 0.2531
+  Error level: 19.0368 ± 3.5436
+  Completed: 2500/2500
+
+Config 14: {'failures.lambda': 0.62, 'execution.deadline': 3610, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0240 ± 0.1530
+  Error level: 19.6640 ± 2.1427
+  Completed: 2500/2500
+
+Config 15: {'failures.lambda': 0.42, 'execution.deadline': 7547, 'task_time_factor': 1.24, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.6760 ± 0.4680
+  Error level: 10.5360 ± 6.5520
+  Completed: 2500/2500
+
+Config 16: {'failures.lambda': 0.73, 'execution.deadline': 4559, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0052 ± 0.0719
+  Error level: 19.9272 ± 1.0069
+  Completed: 2500/2500
+
+Config 17: {'failures.lambda': 0.67, 'execution.deadline': 3924, 'task_time_factor': 2.45, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0116 ± 0.1071
+  Error level: 19.8376 ± 1.4991
+  Completed: 2500/2500
+
+Config 18: {'failures.lambda': 0.79, 'execution.deadline': 7697, 'task_time_factor': 2.32, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 19: {'failures.lambda': 0.7, 'execution.deadline': 7609, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0156 ± 0.1239
+  Error level: 19.7816 ± 1.7349
+  Completed: 2500/2500
+
+Config 20: {'failures.lambda': 0.5, 'execution.deadline': 3226, 'task_time_factor': 1.35, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1400 ± 0.3470
+  Error level: 18.0400 ± 4.8578
+  Completed: 2500/2500
+
+Config 21: {'failures.lambda': 0.59, 'execution.deadline': 4357, 'task_time_factor': 2.21, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0440 ± 0.2051
+  Error level: 19.3840 ± 2.8713
+  Completed: 2500/2500
+
+Config 22: {'failures.lambda': 0.58, 'execution.deadline': 4405, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0520 ± 0.2220
+  Error level: 19.2720 ± 3.1084
+  Completed: 2500/2500
+
+Config 23: {'failures.lambda': 0.47, 'execution.deadline': 7011, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4016 ± 0.4902
+  Error level: 14.3776 ± 6.8631
+  Completed: 2500/2500
+
+Config 24: {'failures.lambda': 0.89, 'execution.deadline': 6861, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 25: {'failures.lambda': 0.4, 'execution.deadline': 7077, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.7476 ± 0.4344
+  Error level: 9.5336 ± 6.0815
+  Completed: 2500/2500
+
+Config 26: {'failures.lambda': 0.76, 'execution.deadline': 6856, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0044 ± 0.0662
+  Error level: 19.9384 ± 0.9266
+  Completed: 2500/2500
+
+Config 27: {'failures.lambda': 0.58, 'execution.deadline': 3579, 'task_time_factor': 2.27, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0400 ± 0.1960
+  Error level: 19.4400 ± 2.7434
+  Completed: 2500/2500
+
+Config 28: {'failures.lambda': 0.71, 'execution.deadline': 4654, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0084 ± 0.0913
+  Error level: 19.8824 ± 1.2777
+  Completed: 2500/2500
+
+Config 29: {'failures.lambda': 0.56, 'execution.deadline': 4626, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0768 ± 0.2663
+  Error level: 18.9248 ± 3.7278
+  Completed: 2500/2500
+
+Config 30: {'failures.lambda': 0.72, 'execution.deadline': 7436, 'task_time_factor': 1.6, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0116 ± 0.1071
+  Error level: 19.8376 ± 1.4991
+  Completed: 2500/2500
+
+Config 31: {'failures.lambda': 0.46, 'execution.deadline': 6566, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4196 ± 0.4935
+  Error level: 14.1256 ± 6.9089
+  Completed: 2500/2500
+
+Config 32: {'failures.lambda': 0.68, 'execution.deadline': 6855, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0184 ± 0.1344
+  Error level: 19.7424 ± 1.8815
+  Completed: 2500/2500
+
+Config 33: {'failures.lambda': 0.66, 'execution.deadline': 5138, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0172 ± 0.1300
+  Error level: 19.7592 ± 1.8202
+  Completed: 2500/2500
+
+Config 34: {'failures.lambda': 0.45, 'execution.deadline': 3157, 'task_time_factor': 1.88, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2524 ± 0.4344
+  Error level: 16.4664 ± 6.0815
+  Completed: 2500/2500
+
+Config 35: {'failures.lambda': 0.56, 'execution.deadline': 5543, 'task_time_factor': 2.34, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0900 ± 0.2862
+  Error level: 18.7400 ± 4.0065
+  Completed: 2500/2500
+
+Config 36: {'failures.lambda': 0.52, 'execution.deadline': 5052, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1576 ± 0.3644
+  Error level: 17.7936 ± 5.1011
+  Completed: 2500/2500
+
+Config 37: {'failures.lambda': 0.51, 'execution.deadline': 3385, 'task_time_factor': 1.29, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1300 ± 0.3363
+  Error level: 18.1800 ± 4.7082
+  Completed: 2500/2500
+
+Config 38: {'failures.lambda': 0.48, 'execution.deadline': 7648, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3800 ± 0.4854
+  Error level: 14.6800 ± 6.7954
+  Completed: 2500/2500
+
+Config 39: {'failures.lambda': 0.72, 'execution.deadline': 7357, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0116 ± 0.1071
+  Error level: 19.8376 ± 1.4991
+  Completed: 2500/2500
+
+Config 40: {'failures.lambda': 0.49, 'execution.deadline': 7463, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3324 ± 0.4711
+  Error level: 15.3464 ± 6.5950
+  Completed: 2500/2500
+
+Config 41: {'failures.lambda': 0.8, 'execution.deadline': 7480, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 42: {'failures.lambda': 0.46, 'execution.deadline': 4140, 'task_time_factor': 1.53, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2896 ± 0.4536
+  Error level: 15.9456 ± 6.3501
+  Completed: 2500/2500
+
+Config 43: {'failures.lambda': 0.81, 'execution.deadline': 7304, 'task_time_factor': 0.81, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 44: {'failures.lambda': 0.66, 'execution.deadline': 5087, 'task_time_factor': 1.18, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0172 ± 0.1300
+  Error level: 19.7592 ± 1.8202
+  Completed: 2500/2500
+
+Config 45: {'failures.lambda': 0.46, 'execution.deadline': 4688, 'task_time_factor': 2.4, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3176 ± 0.4655
+  Error level: 15.5536 ± 6.5176
+  Completed: 2500/2500
+
+Config 46: {'failures.lambda': 0.56, 'execution.deadline': 5594, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0908 ± 0.2873
+  Error level: 18.7288 ± 4.0225
+  Completed: 2500/2500
+
+Config 47: {'failures.lambda': 0.58, 'execution.deadline': 7859, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1008 ± 0.3011
+  Error level: 18.5888 ± 4.2149
+  Completed: 2500/2500
+
+Config 48: {'failures.lambda': 0.53, 'execution.deadline': 5486, 'task_time_factor': 1.31, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1436 ± 0.3507
+  Error level: 17.9896 ± 4.9096
+  Completed: 2500/2500
+
+Config 49: {'failures.lambda': 0.54, 'execution.deadline': 3184, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0764 ± 0.2656
+  Error level: 18.9304 ± 3.7189
+  Completed: 2500/2500
+
+Config 50: {'failures.lambda': 0.65, 'execution.deadline': 3257, 'task_time_factor': 1.27, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 51: {'failures.lambda': 0.85, 'execution.deadline': 4198, 'task_time_factor': 1.05, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 52: {'failures.lambda': 0.64, 'execution.deadline': 7928, 'task_time_factor': 1.21, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0392 ± 0.1941
+  Error level: 19.4512 ± 2.7170
+  Completed: 2500/2500
+
+Config 53: {'failures.lambda': 0.74, 'execution.deadline': 6808, 'task_time_factor': 1.2, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 54: {'failures.lambda': 0.76, 'execution.deadline': 4839, 'task_time_factor': 1.87, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 55: {'failures.lambda': 0.72, 'execution.deadline': 5679, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0100 ± 0.0995
+  Error level: 19.8600 ± 1.3930
+  Completed: 2500/2500
+
+Config 56: {'failures.lambda': 0.82, 'execution.deadline': 4604, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 57: {'failures.lambda': 0.42, 'execution.deadline': 5954, 'task_time_factor': 1.95, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.5732 ± 0.4946
+  Error level: 11.9752 ± 6.9246
+  Completed: 2500/2500
+
+Config 58: {'failures.lambda': 0.41, 'execution.deadline': 5560, 'task_time_factor': 1.19, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.6044 ± 0.4890
+  Error level: 11.5384 ± 6.8457
+  Completed: 2500/2500
+
+Config 59: {'failures.lambda': 0.72, 'execution.deadline': 3872, 'task_time_factor': 1.97, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 60: {'failures.lambda': 0.59, 'execution.deadline': 7684, 'task_time_factor': 1.03, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0848 ± 0.2786
+  Error level: 18.8128 ± 3.9002
+  Completed: 2500/2500
+
+Config 61: {'failures.lambda': 0.57, 'execution.deadline': 3567, 'task_time_factor': 2.37, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0500 ± 0.2179
+  Error level: 19.3000 ± 3.0512
+  Completed: 2500/2500
+
+Config 62: {'failures.lambda': 0.84, 'execution.deadline': 4290, 'task_time_factor': 1.92, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0012 ± 0.0346
+  Error level: 19.9832 ± 0.4847
+  Completed: 2500/2500
+
+Config 63: {'failures.lambda': 0.81, 'execution.deadline': 5776, 'task_time_factor': 1.7, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 64: {'failures.lambda': 0.52, 'execution.deadline': 3466, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1148 ± 0.3188
+  Error level: 18.3928 ± 4.4629
+  Completed: 2500/2500
+
+Config 65: {'failures.lambda': 0.85, 'execution.deadline': 6166, 'task_time_factor': 1.38, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 66: {'failures.lambda': 0.57, 'execution.deadline': 6630, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0972 ± 0.2962
+  Error level: 18.6392 ± 4.1472
+  Completed: 2500/2500
+
+Config 67: {'failures.lambda': 0.84, 'execution.deadline': 6899, 'task_time_factor': 1.89, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 68: {'failures.lambda': 0.44, 'execution.deadline': 3808, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3336 ± 0.4715
+  Error level: 15.3296 ± 6.6010
+  Completed: 2500/2500
+
+Config 69: {'failures.lambda': 0.7, 'execution.deadline': 3046, 'task_time_factor': 0.97, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0072 ± 0.0845
+  Error level: 19.8992 ± 1.1837
+  Completed: 2500/2500
+
+Config 70: {'failures.lambda': 0.73, 'execution.deadline': 3025, 'task_time_factor': 1.07, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0052 ± 0.0719
+  Error level: 19.9272 ± 1.0069
+  Completed: 2500/2500
+
+Config 71: {'failures.lambda': 0.67, 'execution.deadline': 6459, 'task_time_factor': 1.91, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0200 ± 0.1400
+  Error level: 19.7200 ± 1.9600
+  Completed: 2500/2500
+
+Config 72: {'failures.lambda': 0.51, 'execution.deadline': 6561, 'task_time_factor': 1.2, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2344 ± 0.4236
+  Error level: 16.7184 ± 5.9307
+  Completed: 2500/2500
+
+Config 73: {'failures.lambda': 0.56, 'execution.deadline': 6732, 'task_time_factor': 1.9, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1160 ± 0.3202
+  Error level: 18.3760 ± 4.4831
+  Completed: 2500/2500
+
+Config 74: {'failures.lambda': 0.82, 'execution.deadline': 6288, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 75: {'failures.lambda': 0.45, 'execution.deadline': 4839, 'task_time_factor': 1.25, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3592 ± 0.4798
+  Error level: 14.9712 ± 6.7167
+  Completed: 2500/2500
+
+Config 76: {'failures.lambda': 0.52, 'execution.deadline': 7865, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2396 ± 0.4268
+  Error level: 16.6456 ± 5.9758
+  Completed: 2500/2500
+
+Config 77: {'failures.lambda': 0.85, 'execution.deadline': 6156, 'task_time_factor': 2.15, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 78: {'failures.lambda': 0.65, 'execution.deadline': 5885, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0240 ± 0.1530
+  Error level: 19.6640 ± 2.1427
+  Completed: 2500/2500
+
+Config 79: {'failures.lambda': 0.5, 'execution.deadline': 6612, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2704 ± 0.4442
+  Error level: 16.2144 ± 6.2183
+  Completed: 2500/2500
+
+Config 80: {'failures.lambda': 0.41, 'execution.deadline': 6227, 'task_time_factor': 1.1, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.6416 ± 0.4795
+  Error level: 11.0176 ± 6.7134
+  Completed: 2500/2500
+
+Config 81: {'failures.lambda': 0.87, 'execution.deadline': 7770, 'task_time_factor': 2.36, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 82: {'failures.lambda': 0.59, 'execution.deadline': 3077, 'task_time_factor': 2.38, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0292 ± 0.1684
+  Error level: 19.5912 ± 2.3571
+  Completed: 2500/2500
+
+Config 83: {'failures.lambda': 0.61, 'execution.deadline': 7833, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0672 ± 0.2504
+  Error level: 19.0592 ± 3.5052
+  Completed: 2500/2500
+
+Config 84: {'failures.lambda': 0.83, 'execution.deadline': 4472, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 85: {'failures.lambda': 0.83, 'execution.deadline': 4585, 'task_time_factor': 1.09, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 86: {'failures.lambda': 0.68, 'execution.deadline': 7681, 'task_time_factor': 1.98, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0204 ± 0.1414
+  Error level: 19.7144 ± 1.9791
+  Completed: 2500/2500
+
+Config 87: {'failures.lambda': 0.69, 'execution.deadline': 3486, 'task_time_factor': 1.85, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0076 ± 0.0868
+  Error level: 19.8936 ± 1.2158
+  Completed: 2500/2500
+
+Config 88: {'failures.lambda': 0.9, 'execution.deadline': 3700, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 89: {'failures.lambda': 0.84, 'execution.deadline': 6704, 'task_time_factor': 1.98, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 90: {'failures.lambda': 0.75, 'execution.deadline': 4797, 'task_time_factor': 1.3, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 91: {'failures.lambda': 0.8, 'execution.deadline': 7051, 'task_time_factor': 2.27, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 92: {'failures.lambda': 0.86, 'execution.deadline': 5557, 'task_time_factor': 1.65, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 93: {'failures.lambda': 0.8, 'execution.deadline': 6250, 'task_time_factor': 1.99, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 94: {'failures.lambda': 0.8, 'execution.deadline': 7450, 'task_time_factor': 1.37, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 95: {'failures.lambda': 0.59, 'execution.deadline': 3470, 'task_time_factor': 1.78, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0336 ± 0.1802
+  Error level: 19.5296 ± 2.5228
+  Completed: 2500/2500
+
+Config 96: {'failures.lambda': 0.42, 'execution.deadline': 5328, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.5348 ± 0.4988
+  Error level: 12.5128 ± 6.9830
+  Completed: 2500/2500
+
+Config 97: {'failures.lambda': 0.54, 'execution.deadline': 5954, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1360 ± 0.3428
+  Error level: 18.0960 ± 4.7990
+  Completed: 2500/2500
+
+Config 98: {'failures.lambda': 0.42, 'execution.deadline': 7113, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.6568 ± 0.4748
+  Error level: 10.8048 ± 6.6469
+  Completed: 2500/2500
+
+Config 99: {'failures.lambda': 0.46, 'execution.deadline': 5611, 'task_time_factor': 2.11, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3648 ± 0.4814
+  Error level: 14.8928 ± 6.7392
+  Completed: 2500/2500
+
+Config 100: {'failures.lambda': 0.51, 'execution.deadline': 6114, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2192 ± 0.4137
+  Error level: 16.9312 ± 5.7919
+  Completed: 2500/2500
+
+Config 101: {'failures.lambda': 0.43, 'execution.deadline': 5657, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.5012 ± 0.5000
+  Error level: 12.9832 ± 7.0000
+  Completed: 2500/2500
+
+Config 102: {'failures.lambda': 0.72, 'execution.deadline': 6630, 'task_time_factor': 2.46, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0104 ± 0.1014
+  Error level: 19.8544 ± 1.4203
+  Completed: 2500/2500
+
+Config 103: {'failures.lambda': 0.66, 'execution.deadline': 4615, 'task_time_factor': 2.15, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0160 ± 0.1255
+  Error level: 19.7760 ± 1.7567
+  Completed: 2500/2500
+
+Config 104: {'failures.lambda': 0.54, 'execution.deadline': 5195, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1184 ± 0.3231
+  Error level: 18.3424 ± 4.5231
+  Completed: 2500/2500
+
+Config 105: {'failures.lambda': 0.41, 'execution.deadline': 7813, 'task_time_factor': 2.22, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.7364 ± 0.4406
+  Error level: 9.6904 ± 6.1682
+  Completed: 2500/2500
+
+Config 106: {'failures.lambda': 0.75, 'execution.deadline': 5045, 'task_time_factor': 1.09, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 107: {'failures.lambda': 0.48, 'execution.deadline': 4251, 'task_time_factor': 1.73, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2384 ± 0.4261
+  Error level: 16.6624 ± 5.9655
+  Completed: 2500/2500
+
+Config 108: {'failures.lambda': 0.76, 'execution.deadline': 6301, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0040 ± 0.0631
+  Error level: 19.9440 ± 0.8837
+  Completed: 2500/2500
+
+Config 109: {'failures.lambda': 0.88, 'execution.deadline': 6689, 'task_time_factor': 1.74, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 110: {'failures.lambda': 0.71, 'execution.deadline': 5098, 'task_time_factor': 1.22, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0088 ± 0.0934
+  Error level: 19.8768 ± 1.3075
+  Completed: 2500/2500
+
+Config 111: {'failures.lambda': 0.58, 'execution.deadline': 6789, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0872 ± 0.2821
+  Error level: 18.7792 ± 3.9498
+  Completed: 2500/2500
+
+Config 112: {'failures.lambda': 0.46, 'execution.deadline': 3230, 'task_time_factor': 0.87, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2316 ± 0.4219
+  Error level: 16.7576 ± 5.9060
+  Completed: 2500/2500
+
+Config 113: {'failures.lambda': 0.83, 'execution.deadline': 6518, 'task_time_factor': 1.61, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 114: {'failures.lambda': 0.45, 'execution.deadline': 5458, 'task_time_factor': 1.6, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3936 ± 0.4885
+  Error level: 14.4896 ± 6.8397
+  Completed: 2500/2500
+
+Config 115: {'failures.lambda': 0.49, 'execution.deadline': 5169, 'task_time_factor': 1.48, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2448 ± 0.4300
+  Error level: 16.5728 ± 6.0196
+  Completed: 2500/2500
+
+Config 116: {'failures.lambda': 0.71, 'execution.deadline': 6175, 'task_time_factor': 0.88, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 117: {'failures.lambda': 0.59, 'execution.deadline': 6129, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0672 ± 0.2504
+  Error level: 19.0592 ± 3.5052
+  Completed: 2500/2500
+
+Config 118: {'failures.lambda': 0.83, 'execution.deadline': 6293, 'task_time_factor': 1.08, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 119: {'failures.lambda': 0.44, 'execution.deadline': 6212, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4820 ± 0.4997
+  Error level: 13.2520 ± 6.9955
+  Completed: 2500/2500
+
+Config 120: {'failures.lambda': 0.69, 'execution.deadline': 7701, 'task_time_factor': 1.78, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0176 ± 0.1315
+  Error level: 19.7536 ± 1.8409
+  Completed: 2500/2500
+
+Config 121: {'failures.lambda': 0.59, 'execution.deadline': 6216, 'task_time_factor': 1.58, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0680 ± 0.2517
+  Error level: 19.0480 ± 3.5244
+  Completed: 2500/2500
+
+Config 122: {'failures.lambda': 0.67, 'execution.deadline': 7707, 'task_time_factor': 1.46, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0232 ± 0.1505
+  Error level: 19.6752 ± 2.1075
+  Completed: 2500/2500
+
+Config 123: {'failures.lambda': 0.88, 'execution.deadline': 7527, 'task_time_factor': 1.13, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 124: {'failures.lambda': 0.43, 'execution.deadline': 3504, 'task_time_factor': 0.83, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3468 ± 0.4760
+  Error level: 15.1448 ± 6.6633
+  Completed: 2500/2500
+
+Config 125: {'failures.lambda': 0.45, 'execution.deadline': 6415, 'task_time_factor': 0.92, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4468 ± 0.4972
+  Error level: 13.7448 ± 6.9603
+  Completed: 2500/2500
+
+Config 126: {'failures.lambda': 0.56, 'execution.deadline': 7224, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1224 ± 0.3277
+  Error level: 18.2864 ± 4.5885
+  Completed: 2500/2500
+
+Config 127: {'failures.lambda': 0.81, 'execution.deadline': 4409, 'task_time_factor': 1.0, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 128: {'failures.lambda': 0.75, 'execution.deadline': 6145, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0052 ± 0.0719
+  Error level: 19.9272 ± 1.0069
+  Completed: 2500/2500
+
+Config 129: {'failures.lambda': 0.77, 'execution.deadline': 7017, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0040 ± 0.0631
+  Error level: 19.9440 ± 0.8837
+  Completed: 2500/2500
+
+Config 130: {'failures.lambda': 0.49, 'execution.deadline': 6753, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3120 ± 0.4633
+  Error level: 15.6320 ± 6.4863
+  Completed: 2500/2500
+
+Config 131: {'failures.lambda': 0.9, 'execution.deadline': 5063, 'task_time_factor': 1.43, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 132: {'failures.lambda': 0.79, 'execution.deadline': 4704, 'task_time_factor': 2.38, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 133: {'failures.lambda': 0.83, 'execution.deadline': 5145, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 134: {'failures.lambda': 0.78, 'execution.deadline': 3516, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 135: {'failures.lambda': 0.65, 'execution.deadline': 7132, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0268 ± 0.1615
+  Error level: 19.6248 ± 2.2610
+  Completed: 2500/2500
+
+Config 136: {'failures.lambda': 0.85, 'execution.deadline': 4946, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 137: {'failures.lambda': 0.85, 'execution.deadline': 3456, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 138: {'failures.lambda': 0.88, 'execution.deadline': 7753, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 139: {'failures.lambda': 0.72, 'execution.deadline': 5242, 'task_time_factor': 1.3, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0072 ± 0.0845
+  Error level: 19.8992 ± 1.1837
+  Completed: 2500/2500
+
+Config 140: {'failures.lambda': 0.56, 'execution.deadline': 6363, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1088 ± 0.3114
+  Error level: 18.4768 ± 4.3594
+  Completed: 2500/2500
+
+Config 141: {'failures.lambda': 0.8, 'execution.deadline': 6948, 'task_time_factor': 0.96, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 142: {'failures.lambda': 0.65, 'execution.deadline': 3288, 'task_time_factor': 1.73, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 143: {'failures.lambda': 0.62, 'execution.deadline': 7439, 'task_time_factor': 1.4, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0540 ± 0.2260
+  Error level: 19.2440 ± 3.1642
+  Completed: 2500/2500
+
+Config 144: {'failures.lambda': 0.46, 'execution.deadline': 3715, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2628 ± 0.4402
+  Error level: 16.3208 ± 6.1622
+  Completed: 2500/2500
+
+Config 145: {'failures.lambda': 0.71, 'execution.deadline': 3506, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 146: {'failures.lambda': 0.75, 'execution.deadline': 3364, 'task_time_factor': 2.2, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 147: {'failures.lambda': 0.75, 'execution.deadline': 3407, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 148: {'failures.lambda': 0.89, 'execution.deadline': 4871, 'task_time_factor': 1.43, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 149: {'failures.lambda': 0.81, 'execution.deadline': 7736, 'task_time_factor': 2.48, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 150: {'failures.lambda': 0.78, 'execution.deadline': 4881, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 151: {'failures.lambda': 0.79, 'execution.deadline': 5792, 'task_time_factor': 1.52, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 152: {'failures.lambda': 0.85, 'execution.deadline': 3556, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 153: {'failures.lambda': 0.41, 'execution.deadline': 5343, 'task_time_factor': 0.9, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.5896 ± 0.4919
+  Error level: 11.7456 ± 6.8867
+  Completed: 2500/2500
+
+Config 154: {'failures.lambda': 0.46, 'execution.deadline': 3588, 'task_time_factor': 1.9, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2556 ± 0.4362
+  Error level: 16.4216 ± 6.1068
+  Completed: 2500/2500
+
+Config 155: {'failures.lambda': 0.77, 'execution.deadline': 5917, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 156: {'failures.lambda': 0.59, 'execution.deadline': 4429, 'task_time_factor': 2.28, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0464 ± 0.2103
+  Error level: 19.3504 ± 2.9449
+  Completed: 2500/2500
+
+Config 157: {'failures.lambda': 0.51, 'execution.deadline': 7816, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2684 ± 0.4431
+  Error level: 16.2424 ± 6.2038
+  Completed: 2500/2500
+
+Config 158: {'failures.lambda': 0.88, 'execution.deadline': 3216, 'task_time_factor': 2.31, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 159: {'failures.lambda': 0.66, 'execution.deadline': 7965, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0280 ± 0.1650
+  Error level: 19.6080 ± 2.3096
+  Completed: 2500/2500
+
+Config 160: {'failures.lambda': 0.68, 'execution.deadline': 7847, 'task_time_factor': 1.69, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0204 ± 0.1414
+  Error level: 19.7144 ± 1.9791
+  Completed: 2500/2500
+
+Config 161: {'failures.lambda': 0.71, 'execution.deadline': 6479, 'task_time_factor': 1.57, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0124 ± 0.1107
+  Error level: 19.8264 ± 1.5493
+  Completed: 2500/2500
+
+Config 162: {'failures.lambda': 0.71, 'execution.deadline': 5922, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 163: {'failures.lambda': 0.42, 'execution.deadline': 4405, 'task_time_factor': 2.42, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4724 ± 0.4992
+  Error level: 13.3864 ± 6.9893
+  Completed: 2500/2500
+
+Config 164: {'failures.lambda': 0.85, 'execution.deadline': 5278, 'task_time_factor': 1.85, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 165: {'failures.lambda': 0.54, 'execution.deadline': 3941, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0904 ± 0.2868
+  Error level: 18.7344 ± 4.0146
+  Completed: 2500/2500
+
+Config 166: {'failures.lambda': 0.58, 'execution.deadline': 5918, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0732 ± 0.2605
+  Error level: 18.9752 ± 3.6465
+  Completed: 2500/2500
+
+Config 167: {'failures.lambda': 0.89, 'execution.deadline': 7931, 'task_time_factor': 1.99, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 168: {'failures.lambda': 0.67, 'execution.deadline': 4548, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0132 ± 0.1141
+  Error level: 19.8152 ± 1.5978
+  Completed: 2500/2500
+
+Config 169: {'failures.lambda': 0.74, 'execution.deadline': 3813, 'task_time_factor': 2.35, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0040 ± 0.0631
+  Error level: 19.9440 ± 0.8837
+  Completed: 2500/2500
+
+Config 170: {'failures.lambda': 0.81, 'execution.deadline': 7749, 'task_time_factor': 2.03, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 171: {'failures.lambda': 0.71, 'execution.deadline': 5091, 'task_time_factor': 2.39, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0088 ± 0.0934
+  Error level: 19.8768 ± 1.3075
+  Completed: 2500/2500
+
+Config 172: {'failures.lambda': 0.83, 'execution.deadline': 3226, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 173: {'failures.lambda': 0.59, 'execution.deadline': 7053, 'task_time_factor': 2.48, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0760 ± 0.2650
+  Error level: 18.9360 ± 3.7100
+  Completed: 2500/2500
+
+Config 174: {'failures.lambda': 0.48, 'execution.deadline': 5971, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3116 ± 0.4631
+  Error level: 15.6376 ± 6.4841
+  Completed: 2500/2500
+
+Config 175: {'failures.lambda': 0.88, 'execution.deadline': 7211, 'task_time_factor': 2.23, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 176: {'failures.lambda': 0.63, 'execution.deadline': 5074, 'task_time_factor': 1.26, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0292 ± 0.1684
+  Error level: 19.5912 ± 2.3571
+  Completed: 2500/2500
+
+Config 177: {'failures.lambda': 0.43, 'execution.deadline': 7324, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.6044 ± 0.4890
+  Error level: 11.5384 ± 6.8457
+  Completed: 2500/2500
+
+Config 178: {'failures.lambda': 0.9, 'execution.deadline': 7983, 'task_time_factor': 1.74, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 179: {'failures.lambda': 0.78, 'execution.deadline': 7724, 'task_time_factor': 2.24, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 180: {'failures.lambda': 0.52, 'execution.deadline': 5253, 'task_time_factor': 1.02, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1652 ± 0.3714
+  Error level: 17.6872 ± 5.1991
+  Completed: 2500/2500
+
+Config 181: {'failures.lambda': 0.88, 'execution.deadline': 6031, 'task_time_factor': 1.19, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 182: {'failures.lambda': 0.74, 'execution.deadline': 6091, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0060 ± 0.0772
+  Error level: 19.9160 ± 1.0812
+  Completed: 2500/2500
+
+Config 183: {'failures.lambda': 0.46, 'execution.deadline': 6358, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4056 ± 0.4910
+  Error level: 14.3216 ± 6.8741
+  Completed: 2500/2500
+
+Config 184: {'failures.lambda': 0.79, 'execution.deadline': 5601, 'task_time_factor': 2.25, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 185: {'failures.lambda': 0.68, 'execution.deadline': 5805, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0168 ± 0.1285
+  Error level: 19.7648 ± 1.7993
+  Completed: 2500/2500
+
+Config 186: {'failures.lambda': 0.6, 'execution.deadline': 3670, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0304 ± 0.1717
+  Error level: 19.5744 ± 2.4036
+  Completed: 2500/2500
+
+Config 187: {'failures.lambda': 0.78, 'execution.deadline': 6102, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 188: {'failures.lambda': 0.51, 'execution.deadline': 3682, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1412 ± 0.3482
+  Error level: 18.0232 ± 4.8752
+  Completed: 2500/2500
+
+Config 189: {'failures.lambda': 0.58, 'execution.deadline': 5950, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0744 ± 0.2624
+  Error level: 18.9584 ± 3.6739
+  Completed: 2500/2500
+
+Config 190: {'failures.lambda': 0.62, 'execution.deadline': 7521, 'task_time_factor': 1.39, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0548 ± 0.2276
+  Error level: 19.2328 ± 3.1863
+  Completed: 2500/2500
+
+Config 191: {'failures.lambda': 0.66, 'execution.deadline': 6918, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0248 ± 0.1555
+  Error level: 19.6528 ± 2.1772
+  Completed: 2500/2500
+
+Config 192: {'failures.lambda': 0.71, 'execution.deadline': 7312, 'task_time_factor': 2.41, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0140 ± 0.1175
+  Error level: 19.8040 ± 1.6449
+  Completed: 2500/2500
+
+Config 193: {'failures.lambda': 0.47, 'execution.deadline': 7633, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4196 ± 0.4935
+  Error level: 14.1256 ± 6.9089
+  Completed: 2500/2500
+
+Config 194: {'failures.lambda': 0.53, 'execution.deadline': 5296, 'task_time_factor': 2.47, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1408 ± 0.3478
+  Error level: 18.0288 ± 4.8694
+  Completed: 2500/2500
+
+Config 195: {'failures.lambda': 0.65, 'execution.deadline': 4644, 'task_time_factor': 1.88, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0176 ± 0.1315
+  Error level: 19.7536 ± 1.8409
+  Completed: 2500/2500
+
+Config 196: {'failures.lambda': 0.52, 'execution.deadline': 3379, 'task_time_factor': 1.02, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1120 ± 0.3154
+  Error level: 18.4320 ± 4.4151
+  Completed: 2500/2500
+
+Config 197: {'failures.lambda': 0.46, 'execution.deadline': 3760, 'task_time_factor': 1.04, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2652 ± 0.4414
+  Error level: 16.2872 ± 6.1802
+  Completed: 2500/2500
+
+Config 198: {'failures.lambda': 0.72, 'execution.deadline': 3909, 'task_time_factor': 1.39, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 199: {'failures.lambda': 0.85, 'execution.deadline': 5370, 'task_time_factor': 1.93, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 200: {'failures.lambda': 0.49, 'execution.deadline': 3961, 'task_time_factor': 0.87, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1944 ± 0.3957
+  Error level: 17.2784 ± 5.5403
+  Completed: 2500/2500
+
+Config 201: {'failures.lambda': 0.48, 'execution.deadline': 4393, 'task_time_factor': 1.1, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2436 ± 0.4293
+  Error level: 16.5896 ± 6.0096
+  Completed: 2500/2500
+
+Config 202: {'failures.lambda': 0.44, 'execution.deadline': 3603, 'task_time_factor': 1.58, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3188 ± 0.4660
+  Error level: 15.5368 ± 6.5242
+  Completed: 2500/2500
+
+Config 203: {'failures.lambda': 0.5, 'execution.deadline': 4821, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2036 ± 0.4027
+  Error level: 17.1496 ± 5.6374
+  Completed: 2500/2500
+
+Config 204: {'failures.lambda': 0.75, 'execution.deadline': 3197, 'task_time_factor': 2.16, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 205: {'failures.lambda': 0.71, 'execution.deadline': 3409, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 206: {'failures.lambda': 0.86, 'execution.deadline': 3305, 'task_time_factor': 1.27, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 207: {'failures.lambda': 0.8, 'execution.deadline': 6741, 'task_time_factor': 1.11, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 208: {'failures.lambda': 0.5, 'execution.deadline': 4852, 'task_time_factor': 1.62, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2036 ± 0.4027
+  Error level: 17.1496 ± 5.6374
+  Completed: 2500/2500
+
+Config 209: {'failures.lambda': 0.71, 'execution.deadline': 4845, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0084 ± 0.0913
+  Error level: 19.8824 ± 1.2777
+  Completed: 2500/2500
+
+Config 210: {'failures.lambda': 0.77, 'execution.deadline': 3183, 'task_time_factor': 1.23, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 211: {'failures.lambda': 0.76, 'execution.deadline': 7476, 'task_time_factor': 1.67, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0048 ± 0.0691
+  Error level: 19.9328 ± 0.9676
+  Completed: 2500/2500
+
+Config 212: {'failures.lambda': 0.67, 'execution.deadline': 3536, 'task_time_factor': 1.56, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0096 ± 0.0975
+  Error level: 19.8656 ± 1.3651
+  Completed: 2500/2500
+
+Config 213: {'failures.lambda': 0.67, 'execution.deadline': 4212, 'task_time_factor': 1.26, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 214: {'failures.lambda': 0.59, 'execution.deadline': 3100, 'task_time_factor': 1.35, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0296 ± 0.1695
+  Error level: 19.5856 ± 2.3727
+  Completed: 2500/2500
+
+Config 215: {'failures.lambda': 0.51, 'execution.deadline': 4637, 'task_time_factor': 1.0, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1700 ± 0.3756
+  Error level: 17.6200 ± 5.2589
+  Completed: 2500/2500
+
+Config 216: {'failures.lambda': 0.85, 'execution.deadline': 5968, 'task_time_factor': 1.95, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 217: {'failures.lambda': 0.79, 'execution.deadline': 5492, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 218: {'failures.lambda': 0.67, 'execution.deadline': 5934, 'task_time_factor': 2.07, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0192 ± 0.1372
+  Error level: 19.7312 ± 1.9212
+  Completed: 2500/2500
+
+Config 219: {'failures.lambda': 0.62, 'execution.deadline': 3638, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0244 ± 0.1543
+  Error level: 19.6584 ± 2.1600
+  Completed: 2500/2500
+
+Config 220: {'failures.lambda': 0.58, 'execution.deadline': 6230, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0804 ± 0.2719
+  Error level: 18.8744 ± 3.8068
+  Completed: 2500/2500
+
+Config 221: {'failures.lambda': 0.58, 'execution.deadline': 7933, 'task_time_factor': 1.83, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1020 ± 0.3026
+  Error level: 18.5720 ± 4.2371
+  Completed: 2500/2500
+
+Config 222: {'failures.lambda': 0.52, 'execution.deadline': 3509, 'task_time_factor': 1.06, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1156 ± 0.3197
+  Error level: 18.3816 ± 4.4764
+  Completed: 2500/2500
+
+Config 223: {'failures.lambda': 0.52, 'execution.deadline': 3803, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1272 ± 0.3332
+  Error level: 18.2192 ± 4.6648
+  Completed: 2500/2500
+
+Config 224: {'failures.lambda': 0.54, 'execution.deadline': 3867, 'task_time_factor': 2.32, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0900 ± 0.2862
+  Error level: 18.7400 ± 4.0065
+  Completed: 2500/2500
+
+Config 225: {'failures.lambda': 0.44, 'execution.deadline': 5623, 'task_time_factor': 1.5, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.4492 ± 0.4974
+  Error level: 13.7112 ± 6.9638
+  Completed: 2500/2500
+
+Config 226: {'failures.lambda': 0.89, 'execution.deadline': 3560, 'task_time_factor': 1.48, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 227: {'failures.lambda': 0.88, 'execution.deadline': 7328, 'task_time_factor': 2.19, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 228: {'failures.lambda': 0.53, 'execution.deadline': 3854, 'task_time_factor': 1.94, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1076 ± 0.3099
+  Error level: 18.4936 ± 4.3382
+  Completed: 2500/2500
+
+Config 229: {'failures.lambda': 0.86, 'execution.deadline': 5784, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 230: {'failures.lambda': 0.54, 'execution.deadline': 6847, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1620 ± 0.3685
+  Error level: 17.7320 ± 5.1583
+  Completed: 2500/2500
+
+Config 231: {'failures.lambda': 0.56, 'execution.deadline': 5127, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0844 ± 0.2780
+  Error level: 18.8184 ± 3.8918
+  Completed: 2500/2500
+
+Config 232: {'failures.lambda': 0.52, 'execution.deadline': 3574, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1196 ± 0.3245
+  Error level: 18.3256 ± 4.5429
+  Completed: 2500/2500
+
+Config 233: {'failures.lambda': 0.54, 'execution.deadline': 5906, 'task_time_factor': 1.06, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1356 ± 0.3424
+  Error level: 18.1016 ± 4.7931
+  Completed: 2500/2500
+
+Config 234: {'failures.lambda': 0.64, 'execution.deadline': 5663, 'task_time_factor': 0.89, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0292 ± 0.1684
+  Error level: 19.5912 ± 2.3571
+  Completed: 2500/2500
+
+Config 235: {'failures.lambda': 0.57, 'execution.deadline': 3672, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0516 ± 0.2212
+  Error level: 19.2776 ± 3.0971
+  Completed: 2500/2500
+
+Config 236: {'failures.lambda': 0.89, 'execution.deadline': 4612, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 237: {'failures.lambda': 0.53, 'execution.deadline': 6408, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1724 ± 0.3777
+  Error level: 17.5864 ± 5.2882
+  Completed: 2500/2500
+
+Config 238: {'failures.lambda': 0.7, 'execution.deadline': 5358, 'task_time_factor': 1.5, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0112 ± 0.1052
+  Error level: 19.8432 ± 1.4733
+  Completed: 2500/2500
+
+Config 239: {'failures.lambda': 0.57, 'execution.deadline': 7648, 'task_time_factor': 2.21, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1132 ± 0.3168
+  Error level: 18.4152 ± 4.4357
+  Completed: 2500/2500
+
+Config 240: {'failures.lambda': 0.88, 'execution.deadline': 3621, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 241: {'failures.lambda': 0.87, 'execution.deadline': 3906, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 242: {'failures.lambda': 0.77, 'execution.deadline': 5872, 'task_time_factor': 2.23, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 243: {'failures.lambda': 0.47, 'execution.deadline': 6976, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.3996 ± 0.4898
+  Error level: 14.4056 ± 6.8574
+  Completed: 2500/2500
+
+Config 244: {'failures.lambda': 0.48, 'execution.deadline': 3821, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2136 ± 0.4098
+  Error level: 17.0096 ± 5.7379
+  Completed: 2500/2500
+
+Config 245: {'failures.lambda': 0.73, 'execution.deadline': 5615, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0076 ± 0.0868
+  Error level: 19.8936 ± 1.2158
+  Completed: 2500/2500
+
+Config 246: {'failures.lambda': 0.84, 'execution.deadline': 4962, 'task_time_factor': 2.19, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0012 ± 0.0346
+  Error level: 19.9832 ± 0.4847
+  Completed: 2500/2500
+
+Config 247: {'failures.lambda': 0.62, 'execution.deadline': 4885, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0328 ± 0.1781
+  Error level: 19.5408 ± 2.4936
+  Completed: 2500/2500
+
+Config 248: {'failures.lambda': 0.55, 'execution.deadline': 6738, 'task_time_factor': 1.65, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.1376 ± 0.3445
+  Error level: 18.0736 ± 4.8227
+  Completed: 2500/2500
+
+Config 249: {'failures.lambda': 0.52, 'execution.deadline': 7498, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.2276 ± 0.4193
+  Error level: 16.8136 ± 5.8700
+  Completed: 2500/2500
+
+Config 250: {'failures.lambda': 0.67, 'execution.deadline': 7532, 'task_time_factor': 1.86, 'scheduling.hacks.temporal_redundancy': False}
+  Success rate: 0.0232 ± 0.1505
+  Error level: 19.6752 ± 2.1075
+  Completed: 2500/2500
+
+================================================================================
+RUNNING EXPERIMENTS WITH TEMPORAL REDUNDANCY = TRUE
+================================================================================
+Running 250 different configurations, each with 2500 different seeds...
+Total experiments: 625000
+Starting parallel execution with 96 workers...
+
+Parallel execution completed. Processing 625000 results...
+Completed: 625000 successful, 0 failed
+
+============================================================
+CONFIGURATION SUMMARIES (Temporal=TRUE)
+============================================================
+
+Config 1: {'failures.lambda': 0.59, 'execution.deadline': 7754, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0848 ± 0.2786
+  Error level: 18.8128 ± 3.9002
+  Completed: 2500/2500
+
+Config 2: {'failures.lambda': 0.7, 'execution.deadline': 3780, 'task_time_factor': 1.07, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0080 ± 0.0891
+  Error level: 19.8880 ± 1.2472
+  Completed: 2500/2500
+
+Config 3: {'failures.lambda': 0.43, 'execution.deadline': 7331, 'task_time_factor': 1.82, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.6044 ± 0.4890
+  Error level: 11.5224 ± 6.8615
+  Completed: 2500/2500
+
+Config 4: {'failures.lambda': 0.75, 'execution.deadline': 3103, 'task_time_factor': 2.45, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 5: {'failures.lambda': 0.82, 'execution.deadline': 4062, 'task_time_factor': 1.11, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 6: {'failures.lambda': 0.49, 'execution.deadline': 4521, 'task_time_factor': 1.69, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2188 ± 0.4134
+  Error level: 16.9348 ± 5.7923
+  Completed: 2500/2500
+
+Config 7: {'failures.lambda': 0.62, 'execution.deadline': 4456, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0308 ± 0.1728
+  Error level: 19.5688 ± 2.4189
+  Completed: 2500/2500
+
+Config 8: {'failures.lambda': 0.47, 'execution.deadline': 4461, 'task_time_factor': 1.42, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2756 ± 0.4468
+  Error level: 16.1386 ± 6.2609
+  Completed: 2500/2500
+
+Config 9: {'failures.lambda': 0.63, 'execution.deadline': 6926, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0432 ± 0.2033
+  Error level: 19.3952 ± 2.8463
+  Completed: 2500/2500
+
+Config 10: {'failures.lambda': 0.66, 'execution.deadline': 5962, 'task_time_factor': 0.88, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0228 ± 0.1493
+  Error level: 19.6808 ± 2.0897
+  Completed: 2500/2500
+
+Config 11: {'failures.lambda': 0.7, 'execution.deadline': 3853, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0088 ± 0.0934
+  Error level: 19.8768 ± 1.3075
+  Completed: 2500/2500
+
+Config 12: {'failures.lambda': 0.87, 'execution.deadline': 7828, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 13: {'failures.lambda': 0.55, 'execution.deadline': 3488, 'task_time_factor': 1.96, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0688 ± 0.2531
+  Error level: 19.0368 ± 3.5436
+  Completed: 2500/2500
+
+Config 14: {'failures.lambda': 0.62, 'execution.deadline': 3610, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0240 ± 0.1530
+  Error level: 19.6640 ± 2.1427
+  Completed: 2500/2500
+
+Config 15: {'failures.lambda': 0.42, 'execution.deadline': 7547, 'task_time_factor': 1.24, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.6760 ± 0.4680
+  Error level: 10.5170 ± 6.5687
+  Completed: 2500/2500
+
+Config 16: {'failures.lambda': 0.73, 'execution.deadline': 4559, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0052 ± 0.0719
+  Error level: 19.9272 ± 1.0069
+  Completed: 2500/2500
+
+Config 17: {'failures.lambda': 0.67, 'execution.deadline': 3924, 'task_time_factor': 2.45, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0116 ± 0.1071
+  Error level: 19.8376 ± 1.4991
+  Completed: 2500/2500
+
+Config 18: {'failures.lambda': 0.79, 'execution.deadline': 7697, 'task_time_factor': 2.32, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 19: {'failures.lambda': 0.7, 'execution.deadline': 7609, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0156 ± 0.1239
+  Error level: 19.7816 ± 1.7349
+  Completed: 2500/2500
+
+Config 20: {'failures.lambda': 0.5, 'execution.deadline': 3226, 'task_time_factor': 1.35, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1400 ± 0.3470
+  Error level: 18.0400 ± 4.8578
+  Completed: 2500/2500
+
+Config 21: {'failures.lambda': 0.59, 'execution.deadline': 4357, 'task_time_factor': 2.21, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0440 ± 0.2051
+  Error level: 19.3840 ± 2.8713
+  Completed: 2500/2500
+
+Config 22: {'failures.lambda': 0.58, 'execution.deadline': 4405, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0520 ± 0.2220
+  Error level: 19.2720 ± 3.1084
+  Completed: 2500/2500
+
+Config 23: {'failures.lambda': 0.47, 'execution.deadline': 7011, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4016 ± 0.4902
+  Error level: 14.3726 ± 6.8701
+  Completed: 2500/2500
+
+Config 24: {'failures.lambda': 0.89, 'execution.deadline': 6861, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 25: {'failures.lambda': 0.4, 'execution.deadline': 7077, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.7476 ± 0.4344
+  Error level: 9.4996 ± 6.1080
+  Completed: 2500/2500
+
+Config 26: {'failures.lambda': 0.76, 'execution.deadline': 6856, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0044 ± 0.0662
+  Error level: 19.9384 ± 0.9266
+  Completed: 2500/2500
+
+Config 27: {'failures.lambda': 0.58, 'execution.deadline': 3579, 'task_time_factor': 2.27, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0400 ± 0.1960
+  Error level: 19.4400 ± 2.7434
+  Completed: 2500/2500
+
+Config 28: {'failures.lambda': 0.71, 'execution.deadline': 4654, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0084 ± 0.0913
+  Error level: 19.8824 ± 1.2777
+  Completed: 2500/2500
+
+Config 29: {'failures.lambda': 0.56, 'execution.deadline': 4626, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0768 ± 0.2663
+  Error level: 18.9248 ± 3.7278
+  Completed: 2500/2500
+
+Config 30: {'failures.lambda': 0.72, 'execution.deadline': 7436, 'task_time_factor': 1.6, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0116 ± 0.1071
+  Error level: 19.8376 ± 1.4991
+  Completed: 2500/2500
+
+Config 31: {'failures.lambda': 0.46, 'execution.deadline': 6566, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4196 ± 0.4935
+  Error level: 14.1206 ± 6.9157
+  Completed: 2500/2500
+
+Config 32: {'failures.lambda': 0.68, 'execution.deadline': 6855, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0184 ± 0.1344
+  Error level: 19.7424 ± 1.8815
+  Completed: 2500/2500
+
+Config 33: {'failures.lambda': 0.66, 'execution.deadline': 5138, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0172 ± 0.1300
+  Error level: 19.7592 ± 1.8202
+  Completed: 2500/2500
+
+Config 34: {'failures.lambda': 0.45, 'execution.deadline': 3157, 'task_time_factor': 1.88, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2524 ± 0.4344
+  Error level: 16.4634 ± 6.0872
+  Completed: 2500/2500
+
+Config 35: {'failures.lambda': 0.56, 'execution.deadline': 5543, 'task_time_factor': 2.34, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0900 ± 0.2862
+  Error level: 18.7400 ± 4.0065
+  Completed: 2500/2500
+
+Config 36: {'failures.lambda': 0.52, 'execution.deadline': 5052, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1576 ± 0.3644
+  Error level: 17.7936 ± 5.1011
+  Completed: 2500/2500
+
+Config 37: {'failures.lambda': 0.51, 'execution.deadline': 3385, 'task_time_factor': 1.29, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1300 ± 0.3363
+  Error level: 18.1800 ± 4.7082
+  Completed: 2500/2500
+
+Config 38: {'failures.lambda': 0.48, 'execution.deadline': 7648, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3800 ± 0.4854
+  Error level: 14.6750 ± 6.8027
+  Completed: 2500/2500
+
+Config 39: {'failures.lambda': 0.72, 'execution.deadline': 7357, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0116 ± 0.1071
+  Error level: 19.8376 ± 1.4991
+  Completed: 2500/2500
+
+Config 40: {'failures.lambda': 0.49, 'execution.deadline': 7463, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3324 ± 0.4711
+  Error level: 15.3424 ± 6.6015
+  Completed: 2500/2500
+
+Config 41: {'failures.lambda': 0.8, 'execution.deadline': 7480, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 42: {'failures.lambda': 0.46, 'execution.deadline': 4140, 'task_time_factor': 1.53, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2896 ± 0.4536
+  Error level: 15.9436 ± 6.3536
+  Completed: 2500/2500
+
+Config 43: {'failures.lambda': 0.81, 'execution.deadline': 7304, 'task_time_factor': 0.81, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 44: {'failures.lambda': 0.66, 'execution.deadline': 5087, 'task_time_factor': 1.18, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0172 ± 0.1300
+  Error level: 19.7592 ± 1.8202
+  Completed: 2500/2500
+
+Config 45: {'failures.lambda': 0.46, 'execution.deadline': 4688, 'task_time_factor': 2.4, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3176 ± 0.4655
+  Error level: 15.5506 ± 6.5226
+  Completed: 2500/2500
+
+Config 46: {'failures.lambda': 0.56, 'execution.deadline': 5594, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0908 ± 0.2873
+  Error level: 18.7288 ± 4.0225
+  Completed: 2500/2500
+
+Config 47: {'failures.lambda': 0.58, 'execution.deadline': 7859, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1008 ± 0.3011
+  Error level: 18.5888 ± 4.2149
+  Completed: 2500/2500
+
+Config 48: {'failures.lambda': 0.53, 'execution.deadline': 5486, 'task_time_factor': 1.31, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1436 ± 0.3507
+  Error level: 17.9896 ± 4.9096
+  Completed: 2500/2500
+
+Config 49: {'failures.lambda': 0.54, 'execution.deadline': 3184, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0764 ± 0.2656
+  Error level: 18.9304 ± 3.7189
+  Completed: 2500/2500
+
+Config 50: {'failures.lambda': 0.65, 'execution.deadline': 3257, 'task_time_factor': 1.27, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 51: {'failures.lambda': 0.85, 'execution.deadline': 4198, 'task_time_factor': 1.05, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 52: {'failures.lambda': 0.64, 'execution.deadline': 7928, 'task_time_factor': 1.21, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0392 ± 0.1941
+  Error level: 19.4512 ± 2.7170
+  Completed: 2500/2500
+
+Config 53: {'failures.lambda': 0.74, 'execution.deadline': 6808, 'task_time_factor': 1.2, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 54: {'failures.lambda': 0.76, 'execution.deadline': 4839, 'task_time_factor': 1.87, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 55: {'failures.lambda': 0.72, 'execution.deadline': 5679, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0100 ± 0.0995
+  Error level: 19.8600 ± 1.3930
+  Completed: 2500/2500
+
+Config 56: {'failures.lambda': 0.82, 'execution.deadline': 4604, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 57: {'failures.lambda': 0.42, 'execution.deadline': 5954, 'task_time_factor': 1.95, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.5732 ± 0.4946
+  Error level: 11.9602 ± 6.9402
+  Completed: 2500/2500
+
+Config 58: {'failures.lambda': 0.41, 'execution.deadline': 5560, 'task_time_factor': 1.19, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.6044 ± 0.4890
+  Error level: 11.5204 ± 6.8635
+  Completed: 2500/2500
+
+Config 59: {'failures.lambda': 0.72, 'execution.deadline': 3872, 'task_time_factor': 1.97, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 60: {'failures.lambda': 0.59, 'execution.deadline': 7684, 'task_time_factor': 1.03, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0848 ± 0.2786
+  Error level: 18.8128 ± 3.9002
+  Completed: 2500/2500
+
+Config 61: {'failures.lambda': 0.57, 'execution.deadline': 3567, 'task_time_factor': 2.37, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0500 ± 0.2179
+  Error level: 19.3000 ± 3.0512
+  Completed: 2500/2500
+
+Config 62: {'failures.lambda': 0.84, 'execution.deadline': 4290, 'task_time_factor': 1.92, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0012 ± 0.0346
+  Error level: 19.9832 ± 0.4847
+  Completed: 2500/2500
+
+Config 63: {'failures.lambda': 0.81, 'execution.deadline': 5776, 'task_time_factor': 1.7, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 64: {'failures.lambda': 0.52, 'execution.deadline': 3466, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1148 ± 0.3188
+  Error level: 18.3928 ± 4.4629
+  Completed: 2500/2500
+
+Config 65: {'failures.lambda': 0.85, 'execution.deadline': 6166, 'task_time_factor': 1.38, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 66: {'failures.lambda': 0.57, 'execution.deadline': 6630, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0972 ± 0.2962
+  Error level: 18.6392 ± 4.1472
+  Completed: 2500/2500
+
+Config 67: {'failures.lambda': 0.84, 'execution.deadline': 6899, 'task_time_factor': 1.89, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 68: {'failures.lambda': 0.44, 'execution.deadline': 3808, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3336 ± 0.4715
+  Error level: 15.3256 ± 6.6074
+  Completed: 2500/2500
+
+Config 69: {'failures.lambda': 0.7, 'execution.deadline': 3046, 'task_time_factor': 0.97, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0072 ± 0.0845
+  Error level: 19.8992 ± 1.1837
+  Completed: 2500/2500
+
+Config 70: {'failures.lambda': 0.73, 'execution.deadline': 3025, 'task_time_factor': 1.07, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0052 ± 0.0719
+  Error level: 19.9272 ± 1.0069
+  Completed: 2500/2500
+
+Config 71: {'failures.lambda': 0.67, 'execution.deadline': 6459, 'task_time_factor': 1.91, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0200 ± 0.1400
+  Error level: 19.7200 ± 1.9600
+  Completed: 2500/2500
+
+Config 72: {'failures.lambda': 0.51, 'execution.deadline': 6561, 'task_time_factor': 1.2, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2344 ± 0.4236
+  Error level: 16.7174 ± 5.9327
+  Completed: 2500/2500
+
+Config 73: {'failures.lambda': 0.56, 'execution.deadline': 6732, 'task_time_factor': 1.9, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1160 ± 0.3202
+  Error level: 18.3760 ± 4.4831
+  Completed: 2500/2500
+
+Config 74: {'failures.lambda': 0.82, 'execution.deadline': 6288, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 75: {'failures.lambda': 0.45, 'execution.deadline': 4839, 'task_time_factor': 1.25, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3592 ± 0.4798
+  Error level: 14.9662 ± 6.7243
+  Completed: 2500/2500
+
+Config 76: {'failures.lambda': 0.52, 'execution.deadline': 7865, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2396 ± 0.4268
+  Error level: 16.6456 ± 5.9758
+  Completed: 2500/2500
+
+Config 77: {'failures.lambda': 0.85, 'execution.deadline': 6156, 'task_time_factor': 2.15, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 78: {'failures.lambda': 0.65, 'execution.deadline': 5885, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0240 ± 0.1530
+  Error level: 19.6640 ± 2.1427
+  Completed: 2500/2500
+
+Config 79: {'failures.lambda': 0.5, 'execution.deadline': 6612, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2704 ± 0.4442
+  Error level: 16.2134 ± 6.2202
+  Completed: 2500/2500
+
+Config 80: {'failures.lambda': 0.41, 'execution.deadline': 6227, 'task_time_factor': 1.1, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.6416 ± 0.4795
+  Error level: 10.9976 ± 6.7320
+  Completed: 2500/2500
+
+Config 81: {'failures.lambda': 0.87, 'execution.deadline': 7770, 'task_time_factor': 2.36, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 82: {'failures.lambda': 0.59, 'execution.deadline': 3077, 'task_time_factor': 2.38, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0292 ± 0.1684
+  Error level: 19.5912 ± 2.3571
+  Completed: 2500/2500
+
+Config 83: {'failures.lambda': 0.61, 'execution.deadline': 7833, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0672 ± 0.2504
+  Error level: 19.0592 ± 3.5052
+  Completed: 2500/2500
+
+Config 84: {'failures.lambda': 0.83, 'execution.deadline': 4472, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 85: {'failures.lambda': 0.83, 'execution.deadline': 4585, 'task_time_factor': 1.09, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 86: {'failures.lambda': 0.68, 'execution.deadline': 7681, 'task_time_factor': 1.98, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0204 ± 0.1414
+  Error level: 19.7144 ± 1.9791
+  Completed: 2500/2500
+
+Config 87: {'failures.lambda': 0.69, 'execution.deadline': 3486, 'task_time_factor': 1.85, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0076 ± 0.0868
+  Error level: 19.8936 ± 1.2158
+  Completed: 2500/2500
+
+Config 88: {'failures.lambda': 0.9, 'execution.deadline': 3700, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 89: {'failures.lambda': 0.84, 'execution.deadline': 6704, 'task_time_factor': 1.98, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 90: {'failures.lambda': 0.75, 'execution.deadline': 4797, 'task_time_factor': 1.3, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 91: {'failures.lambda': 0.8, 'execution.deadline': 7051, 'task_time_factor': 2.27, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 92: {'failures.lambda': 0.86, 'execution.deadline': 5557, 'task_time_factor': 1.65, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 93: {'failures.lambda': 0.8, 'execution.deadline': 6250, 'task_time_factor': 1.99, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 94: {'failures.lambda': 0.8, 'execution.deadline': 7450, 'task_time_factor': 1.37, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0032 ± 0.0565
+  Error level: 19.9552 ± 0.7907
+  Completed: 2500/2500
+
+Config 95: {'failures.lambda': 0.59, 'execution.deadline': 3470, 'task_time_factor': 1.78, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0336 ± 0.1802
+  Error level: 19.5296 ± 2.5228
+  Completed: 2500/2500
+
+Config 96: {'failures.lambda': 0.42, 'execution.deadline': 5328, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.5348 ± 0.4988
+  Error level: 12.5008 ± 6.9963
+  Completed: 2500/2500
+
+Config 97: {'failures.lambda': 0.54, 'execution.deadline': 5954, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1360 ± 0.3428
+  Error level: 18.0960 ± 4.7990
+  Completed: 2500/2500
+
+Config 98: {'failures.lambda': 0.42, 'execution.deadline': 7113, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.6568 ± 0.4748
+  Error level: 10.7858 ± 6.6641
+  Completed: 2500/2500
+
+Config 99: {'failures.lambda': 0.46, 'execution.deadline': 5611, 'task_time_factor': 2.11, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3648 ± 0.4814
+  Error level: 14.8888 ± 6.7453
+  Completed: 2500/2500
+
+Config 100: {'failures.lambda': 0.51, 'execution.deadline': 6114, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2192 ± 0.4137
+  Error level: 16.9312 ± 5.7919
+  Completed: 2500/2500
+
+Config 101: {'failures.lambda': 0.43, 'execution.deadline': 5657, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.5012 ± 0.5000
+  Error level: 12.9702 ± 7.0152
+  Completed: 2500/2500
+
+Config 102: {'failures.lambda': 0.72, 'execution.deadline': 6630, 'task_time_factor': 2.46, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0104 ± 0.1014
+  Error level: 19.8544 ± 1.4203
+  Completed: 2500/2500
+
+Config 103: {'failures.lambda': 0.66, 'execution.deadline': 4615, 'task_time_factor': 2.15, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0160 ± 0.1255
+  Error level: 19.7760 ± 1.7567
+  Completed: 2500/2500
+
+Config 104: {'failures.lambda': 0.54, 'execution.deadline': 5195, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1184 ± 0.3231
+  Error level: 18.3424 ± 4.5231
+  Completed: 2500/2500
+
+Config 105: {'failures.lambda': 0.41, 'execution.deadline': 7813, 'task_time_factor': 2.22, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.7364 ± 0.4406
+  Error level: 9.6634 ± 6.1897
+  Completed: 2500/2500
+
+Config 106: {'failures.lambda': 0.75, 'execution.deadline': 5045, 'task_time_factor': 1.09, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 107: {'failures.lambda': 0.48, 'execution.deadline': 4251, 'task_time_factor': 1.73, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2384 ± 0.4261
+  Error level: 16.6604 ± 5.9695
+  Completed: 2500/2500
+
+Config 108: {'failures.lambda': 0.76, 'execution.deadline': 6301, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0040 ± 0.0631
+  Error level: 19.9440 ± 0.8837
+  Completed: 2500/2500
+
+Config 109: {'failures.lambda': 0.88, 'execution.deadline': 6689, 'task_time_factor': 1.74, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 110: {'failures.lambda': 0.71, 'execution.deadline': 5098, 'task_time_factor': 1.22, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0088 ± 0.0934
+  Error level: 19.8768 ± 1.3075
+  Completed: 2500/2500
+
+Config 111: {'failures.lambda': 0.58, 'execution.deadline': 6789, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0872 ± 0.2821
+  Error level: 18.7792 ± 3.9498
+  Completed: 2500/2500
+
+Config 112: {'failures.lambda': 0.46, 'execution.deadline': 3230, 'task_time_factor': 0.87, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2316 ± 0.4219
+  Error level: 16.7556 ± 5.9100
+  Completed: 2500/2500
+
+Config 113: {'failures.lambda': 0.83, 'execution.deadline': 6518, 'task_time_factor': 1.61, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 114: {'failures.lambda': 0.45, 'execution.deadline': 5458, 'task_time_factor': 1.6, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3936 ± 0.4885
+  Error level: 14.4826 ± 6.8496
+  Completed: 2500/2500
+
+Config 115: {'failures.lambda': 0.49, 'execution.deadline': 5169, 'task_time_factor': 1.48, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2448 ± 0.4300
+  Error level: 16.5708 ± 6.0235
+  Completed: 2500/2500
+
+Config 116: {'failures.lambda': 0.71, 'execution.deadline': 6175, 'task_time_factor': 0.88, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 117: {'failures.lambda': 0.59, 'execution.deadline': 6129, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0672 ± 0.2504
+  Error level: 19.0592 ± 3.5052
+  Completed: 2500/2500
+
+Config 118: {'failures.lambda': 0.83, 'execution.deadline': 6293, 'task_time_factor': 1.08, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 119: {'failures.lambda': 0.44, 'execution.deadline': 6212, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4820 ± 0.4997
+  Error level: 13.2410 ± 7.0088
+  Completed: 2500/2500
+
+Config 120: {'failures.lambda': 0.69, 'execution.deadline': 7701, 'task_time_factor': 1.78, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0176 ± 0.1315
+  Error level: 19.7536 ± 1.8409
+  Completed: 2500/2500
+
+Config 121: {'failures.lambda': 0.59, 'execution.deadline': 6216, 'task_time_factor': 1.58, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0680 ± 0.2517
+  Error level: 19.0480 ± 3.5244
+  Completed: 2500/2500
+
+Config 122: {'failures.lambda': 0.67, 'execution.deadline': 7707, 'task_time_factor': 1.46, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0232 ± 0.1505
+  Error level: 19.6752 ± 2.1075
+  Completed: 2500/2500
+
+Config 123: {'failures.lambda': 0.88, 'execution.deadline': 7527, 'task_time_factor': 1.13, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 124: {'failures.lambda': 0.43, 'execution.deadline': 3504, 'task_time_factor': 0.83, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3468 ± 0.4760
+  Error level: 15.1408 ± 6.6696
+  Completed: 2500/2500
+
+Config 125: {'failures.lambda': 0.45, 'execution.deadline': 6415, 'task_time_factor': 0.92, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4468 ± 0.4972
+  Error level: 13.7378 ± 6.9693
+  Completed: 2500/2500
+
+Config 126: {'failures.lambda': 0.56, 'execution.deadline': 7224, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1224 ± 0.3277
+  Error level: 18.2864 ± 4.5885
+  Completed: 2500/2500
+
+Config 127: {'failures.lambda': 0.81, 'execution.deadline': 4409, 'task_time_factor': 1.0, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 128: {'failures.lambda': 0.75, 'execution.deadline': 6145, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0052 ± 0.0719
+  Error level: 19.9272 ± 1.0069
+  Completed: 2500/2500
+
+Config 129: {'failures.lambda': 0.77, 'execution.deadline': 7017, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0040 ± 0.0631
+  Error level: 19.9440 ± 0.8837
+  Completed: 2500/2500
+
+Config 130: {'failures.lambda': 0.49, 'execution.deadline': 6753, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3120 ± 0.4633
+  Error level: 15.6280 ± 6.4930
+  Completed: 2500/2500
+
+Config 131: {'failures.lambda': 0.9, 'execution.deadline': 5063, 'task_time_factor': 1.43, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 132: {'failures.lambda': 0.79, 'execution.deadline': 4704, 'task_time_factor': 2.38, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 133: {'failures.lambda': 0.83, 'execution.deadline': 5145, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 134: {'failures.lambda': 0.78, 'execution.deadline': 3516, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 135: {'failures.lambda': 0.65, 'execution.deadline': 7132, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0268 ± 0.1615
+  Error level: 19.6248 ± 2.2610
+  Completed: 2500/2500
+
+Config 136: {'failures.lambda': 0.85, 'execution.deadline': 4946, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 137: {'failures.lambda': 0.85, 'execution.deadline': 3456, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 138: {'failures.lambda': 0.88, 'execution.deadline': 7753, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 139: {'failures.lambda': 0.72, 'execution.deadline': 5242, 'task_time_factor': 1.3, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0072 ± 0.0845
+  Error level: 19.8992 ± 1.1837
+  Completed: 2500/2500
+
+Config 140: {'failures.lambda': 0.56, 'execution.deadline': 6363, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1088 ± 0.3114
+  Error level: 18.4768 ± 4.3594
+  Completed: 2500/2500
+
+Config 141: {'failures.lambda': 0.8, 'execution.deadline': 6948, 'task_time_factor': 0.96, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 142: {'failures.lambda': 0.65, 'execution.deadline': 3288, 'task_time_factor': 1.73, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 143: {'failures.lambda': 0.62, 'execution.deadline': 7439, 'task_time_factor': 1.4, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0540 ± 0.2260
+  Error level: 19.2440 ± 3.1642
+  Completed: 2500/2500
+
+Config 144: {'failures.lambda': 0.46, 'execution.deadline': 3715, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2628 ± 0.4402
+  Error level: 16.3188 ± 6.1659
+  Completed: 2500/2500
+
+Config 145: {'failures.lambda': 0.71, 'execution.deadline': 3506, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 146: {'failures.lambda': 0.75, 'execution.deadline': 3364, 'task_time_factor': 2.2, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 147: {'failures.lambda': 0.75, 'execution.deadline': 3407, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 148: {'failures.lambda': 0.89, 'execution.deadline': 4871, 'task_time_factor': 1.43, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 149: {'failures.lambda': 0.81, 'execution.deadline': 7736, 'task_time_factor': 2.48, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 150: {'failures.lambda': 0.78, 'execution.deadline': 4881, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 151: {'failures.lambda': 0.79, 'execution.deadline': 5792, 'task_time_factor': 1.52, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 152: {'failures.lambda': 0.85, 'execution.deadline': 3556, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 153: {'failures.lambda': 0.41, 'execution.deadline': 5343, 'task_time_factor': 0.9, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.5896 ± 0.4919
+  Error level: 11.7306 ± 6.9019
+  Completed: 2500/2500
+
+Config 154: {'failures.lambda': 0.46, 'execution.deadline': 3588, 'task_time_factor': 1.9, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2556 ± 0.4362
+  Error level: 16.4196 ± 6.1106
+  Completed: 2500/2500
+
+Config 155: {'failures.lambda': 0.77, 'execution.deadline': 5917, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 156: {'failures.lambda': 0.59, 'execution.deadline': 4429, 'task_time_factor': 2.28, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0464 ± 0.2103
+  Error level: 19.3504 ± 2.9449
+  Completed: 2500/2500
+
+Config 157: {'failures.lambda': 0.51, 'execution.deadline': 7816, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2684 ± 0.4431
+  Error level: 16.2414 ± 6.2056
+  Completed: 2500/2500
+
+Config 158: {'failures.lambda': 0.88, 'execution.deadline': 3216, 'task_time_factor': 2.31, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 159: {'failures.lambda': 0.66, 'execution.deadline': 7965, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0280 ± 0.1650
+  Error level: 19.6080 ± 2.3096
+  Completed: 2500/2500
+
+Config 160: {'failures.lambda': 0.68, 'execution.deadline': 7847, 'task_time_factor': 1.69, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0204 ± 0.1414
+  Error level: 19.7144 ± 1.9791
+  Completed: 2500/2500
+
+Config 161: {'failures.lambda': 0.71, 'execution.deadline': 6479, 'task_time_factor': 1.57, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0124 ± 0.1107
+  Error level: 19.8264 ± 1.5493
+  Completed: 2500/2500
+
+Config 162: {'failures.lambda': 0.71, 'execution.deadline': 5922, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 163: {'failures.lambda': 0.42, 'execution.deadline': 4405, 'task_time_factor': 2.42, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4724 ± 0.4992
+  Error level: 13.3794 ± 6.9980
+  Completed: 2500/2500
+
+Config 164: {'failures.lambda': 0.85, 'execution.deadline': 5278, 'task_time_factor': 1.85, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 165: {'failures.lambda': 0.54, 'execution.deadline': 3941, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0904 ± 0.2868
+  Error level: 18.7344 ± 4.0146
+  Completed: 2500/2500
+
+Config 166: {'failures.lambda': 0.58, 'execution.deadline': 5918, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0732 ± 0.2605
+  Error level: 18.9752 ± 3.6465
+  Completed: 2500/2500
+
+Config 167: {'failures.lambda': 0.89, 'execution.deadline': 7931, 'task_time_factor': 1.99, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 168: {'failures.lambda': 0.67, 'execution.deadline': 4548, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0132 ± 0.1141
+  Error level: 19.8152 ± 1.5978
+  Completed: 2500/2500
+
+Config 169: {'failures.lambda': 0.74, 'execution.deadline': 3813, 'task_time_factor': 2.35, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0040 ± 0.0631
+  Error level: 19.9440 ± 0.8837
+  Completed: 2500/2500
+
+Config 170: {'failures.lambda': 0.81, 'execution.deadline': 7749, 'task_time_factor': 2.03, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 171: {'failures.lambda': 0.71, 'execution.deadline': 5091, 'task_time_factor': 2.39, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0088 ± 0.0934
+  Error level: 19.8768 ± 1.3075
+  Completed: 2500/2500
+
+Config 172: {'failures.lambda': 0.83, 'execution.deadline': 3226, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0016 ± 0.0400
+  Error level: 19.9776 ± 0.5596
+  Completed: 2500/2500
+
+Config 173: {'failures.lambda': 0.59, 'execution.deadline': 7053, 'task_time_factor': 2.48, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0760 ± 0.2650
+  Error level: 18.9360 ± 3.7100
+  Completed: 2500/2500
+
+Config 174: {'failures.lambda': 0.48, 'execution.deadline': 5971, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3116 ± 0.4631
+  Error level: 15.6336 ± 6.4908
+  Completed: 2500/2500
+
+Config 175: {'failures.lambda': 0.88, 'execution.deadline': 7211, 'task_time_factor': 2.23, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 176: {'failures.lambda': 0.63, 'execution.deadline': 5074, 'task_time_factor': 1.26, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0292 ± 0.1684
+  Error level: 19.5912 ± 2.3571
+  Completed: 2500/2500
+
+Config 177: {'failures.lambda': 0.43, 'execution.deadline': 7324, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.6044 ± 0.4890
+  Error level: 11.5224 ± 6.8615
+  Completed: 2500/2500
+
+Config 178: {'failures.lambda': 0.9, 'execution.deadline': 7983, 'task_time_factor': 1.74, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 179: {'failures.lambda': 0.78, 'execution.deadline': 7724, 'task_time_factor': 2.24, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 180: {'failures.lambda': 0.52, 'execution.deadline': 5253, 'task_time_factor': 1.02, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1652 ± 0.3714
+  Error level: 17.6872 ± 5.1991
+  Completed: 2500/2500
+
+Config 181: {'failures.lambda': 0.88, 'execution.deadline': 6031, 'task_time_factor': 1.19, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 182: {'failures.lambda': 0.74, 'execution.deadline': 6091, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0060 ± 0.0772
+  Error level: 19.9160 ± 1.0812
+  Completed: 2500/2500
+
+Config 183: {'failures.lambda': 0.46, 'execution.deadline': 6358, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4056 ± 0.4910
+  Error level: 14.3176 ± 6.8797
+  Completed: 2500/2500
+
+Config 184: {'failures.lambda': 0.79, 'execution.deadline': 5601, 'task_time_factor': 2.25, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 185: {'failures.lambda': 0.68, 'execution.deadline': 5805, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0168 ± 0.1285
+  Error level: 19.7648 ± 1.7993
+  Completed: 2500/2500
+
+Config 186: {'failures.lambda': 0.6, 'execution.deadline': 3670, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0304 ± 0.1717
+  Error level: 19.5744 ± 2.4036
+  Completed: 2500/2500
+
+Config 187: {'failures.lambda': 0.78, 'execution.deadline': 6102, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 188: {'failures.lambda': 0.51, 'execution.deadline': 3682, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1412 ± 0.3482
+  Error level: 18.0232 ± 4.8752
+  Completed: 2500/2500
+
+Config 189: {'failures.lambda': 0.58, 'execution.deadline': 5950, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0744 ± 0.2624
+  Error level: 18.9584 ± 3.6739
+  Completed: 2500/2500
+
+Config 190: {'failures.lambda': 0.62, 'execution.deadline': 7521, 'task_time_factor': 1.39, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0548 ± 0.2276
+  Error level: 19.2328 ± 3.1863
+  Completed: 2500/2500
+
+Config 191: {'failures.lambda': 0.66, 'execution.deadline': 6918, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0248 ± 0.1555
+  Error level: 19.6528 ± 2.1772
+  Completed: 2500/2500
+
+Config 192: {'failures.lambda': 0.71, 'execution.deadline': 7312, 'task_time_factor': 2.41, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0140 ± 0.1175
+  Error level: 19.8040 ± 1.6449
+  Completed: 2500/2500
+
+Config 193: {'failures.lambda': 0.47, 'execution.deadline': 7633, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4196 ± 0.4935
+  Error level: 14.1206 ± 6.9157
+  Completed: 2500/2500
+
+Config 194: {'failures.lambda': 0.53, 'execution.deadline': 5296, 'task_time_factor': 2.47, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1408 ± 0.3478
+  Error level: 18.0288 ± 4.8694
+  Completed: 2500/2500
+
+Config 195: {'failures.lambda': 0.65, 'execution.deadline': 4644, 'task_time_factor': 1.88, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0176 ± 0.1315
+  Error level: 19.7536 ± 1.8409
+  Completed: 2500/2500
+
+Config 196: {'failures.lambda': 0.52, 'execution.deadline': 3379, 'task_time_factor': 1.02, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1120 ± 0.3154
+  Error level: 18.4320 ± 4.4151
+  Completed: 2500/2500
+
+Config 197: {'failures.lambda': 0.46, 'execution.deadline': 3760, 'task_time_factor': 1.04, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2652 ± 0.4414
+  Error level: 16.2852 ± 6.1839
+  Completed: 2500/2500
+
+Config 198: {'failures.lambda': 0.72, 'execution.deadline': 3909, 'task_time_factor': 1.39, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 199: {'failures.lambda': 0.85, 'execution.deadline': 5370, 'task_time_factor': 1.93, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 200: {'failures.lambda': 0.49, 'execution.deadline': 3961, 'task_time_factor': 0.87, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1944 ± 0.3957
+  Error level: 17.2764 ± 5.5449
+  Completed: 2500/2500
+
+Config 201: {'failures.lambda': 0.48, 'execution.deadline': 4393, 'task_time_factor': 1.1, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2436 ± 0.4293
+  Error level: 16.5876 ± 6.0135
+  Completed: 2500/2500
+
+Config 202: {'failures.lambda': 0.44, 'execution.deadline': 3603, 'task_time_factor': 1.58, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3188 ± 0.4660
+  Error level: 15.5328 ± 6.5308
+  Completed: 2500/2500
+
+Config 203: {'failures.lambda': 0.5, 'execution.deadline': 4821, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2036 ± 0.4027
+  Error level: 17.1496 ± 5.6374
+  Completed: 2500/2500
+
+Config 204: {'failures.lambda': 0.75, 'execution.deadline': 3197, 'task_time_factor': 2.16, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0036 ± 0.0599
+  Error level: 19.9496 ± 0.8385
+  Completed: 2500/2500
+
+Config 205: {'failures.lambda': 0.71, 'execution.deadline': 3409, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0064 ± 0.0797
+  Error level: 19.9104 ± 1.1164
+  Completed: 2500/2500
+
+Config 206: {'failures.lambda': 0.86, 'execution.deadline': 3305, 'task_time_factor': 1.27, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 207: {'failures.lambda': 0.8, 'execution.deadline': 6741, 'task_time_factor': 1.11, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 208: {'failures.lambda': 0.5, 'execution.deadline': 4852, 'task_time_factor': 1.62, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2036 ± 0.4027
+  Error level: 17.1496 ± 5.6374
+  Completed: 2500/2500
+
+Config 209: {'failures.lambda': 0.71, 'execution.deadline': 4845, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0084 ± 0.0913
+  Error level: 19.8824 ± 1.2777
+  Completed: 2500/2500
+
+Config 210: {'failures.lambda': 0.77, 'execution.deadline': 3183, 'task_time_factor': 1.23, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0020 ± 0.0447
+  Error level: 19.9720 ± 0.6255
+  Completed: 2500/2500
+
+Config 211: {'failures.lambda': 0.76, 'execution.deadline': 7476, 'task_time_factor': 1.67, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0048 ± 0.0691
+  Error level: 19.9328 ± 0.9676
+  Completed: 2500/2500
+
+Config 212: {'failures.lambda': 0.67, 'execution.deadline': 3536, 'task_time_factor': 1.56, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0096 ± 0.0975
+  Error level: 19.8656 ± 1.3651
+  Completed: 2500/2500
+
+Config 213: {'failures.lambda': 0.67, 'execution.deadline': 4212, 'task_time_factor': 1.26, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0120 ± 0.1089
+  Error level: 19.8320 ± 1.5244
+  Completed: 2500/2500
+
+Config 214: {'failures.lambda': 0.59, 'execution.deadline': 3100, 'task_time_factor': 1.35, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0296 ± 0.1695
+  Error level: 19.5856 ± 2.3727
+  Completed: 2500/2500
+
+Config 215: {'failures.lambda': 0.51, 'execution.deadline': 4637, 'task_time_factor': 1.0, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1700 ± 0.3756
+  Error level: 17.6200 ± 5.2589
+  Completed: 2500/2500
+
+Config 216: {'failures.lambda': 0.85, 'execution.deadline': 5968, 'task_time_factor': 1.95, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 217: {'failures.lambda': 0.79, 'execution.deadline': 5492, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0024 ± 0.0489
+  Error level: 19.9664 ± 0.6850
+  Completed: 2500/2500
+
+Config 218: {'failures.lambda': 0.67, 'execution.deadline': 5934, 'task_time_factor': 2.07, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0192 ± 0.1372
+  Error level: 19.7312 ± 1.9212
+  Completed: 2500/2500
+
+Config 219: {'failures.lambda': 0.62, 'execution.deadline': 3638, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0244 ± 0.1543
+  Error level: 19.6584 ± 2.1600
+  Completed: 2500/2500
+
+Config 220: {'failures.lambda': 0.58, 'execution.deadline': 6230, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0804 ± 0.2719
+  Error level: 18.8744 ± 3.8068
+  Completed: 2500/2500
+
+Config 221: {'failures.lambda': 0.58, 'execution.deadline': 7933, 'task_time_factor': 1.83, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1020 ± 0.3026
+  Error level: 18.5720 ± 4.2371
+  Completed: 2500/2500
+
+Config 222: {'failures.lambda': 0.52, 'execution.deadline': 3509, 'task_time_factor': 1.06, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1156 ± 0.3197
+  Error level: 18.3816 ± 4.4764
+  Completed: 2500/2500
+
+Config 223: {'failures.lambda': 0.52, 'execution.deadline': 3803, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1272 ± 0.3332
+  Error level: 18.2192 ± 4.6648
+  Completed: 2500/2500
+
+Config 224: {'failures.lambda': 0.54, 'execution.deadline': 3867, 'task_time_factor': 2.32, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0900 ± 0.2862
+  Error level: 18.7400 ± 4.0065
+  Completed: 2500/2500
+
+Config 225: {'failures.lambda': 0.44, 'execution.deadline': 5623, 'task_time_factor': 1.5, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.4492 ± 0.4974
+  Error level: 13.7002 ± 6.9779
+  Completed: 2500/2500
+
+Config 226: {'failures.lambda': 0.89, 'execution.deadline': 3560, 'task_time_factor': 1.48, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 227: {'failures.lambda': 0.88, 'execution.deadline': 7328, 'task_time_factor': 2.19, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 228: {'failures.lambda': 0.53, 'execution.deadline': 3854, 'task_time_factor': 1.94, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1076 ± 0.3099
+  Error level: 18.4936 ± 4.3382
+  Completed: 2500/2500
+
+Config 229: {'failures.lambda': 0.86, 'execution.deadline': 5784, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0008 ± 0.0283
+  Error level: 19.9888 ± 0.3958
+  Completed: 2500/2500
+
+Config 230: {'failures.lambda': 0.54, 'execution.deadline': 6847, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1620 ± 0.3685
+  Error level: 17.7320 ± 5.1583
+  Completed: 2500/2500
+
+Config 231: {'failures.lambda': 0.56, 'execution.deadline': 5127, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0844 ± 0.2780
+  Error level: 18.8184 ± 3.8918
+  Completed: 2500/2500
+
+Config 232: {'failures.lambda': 0.52, 'execution.deadline': 3574, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1196 ± 0.3245
+  Error level: 18.3256 ± 4.5429
+  Completed: 2500/2500
+
+Config 233: {'failures.lambda': 0.54, 'execution.deadline': 5906, 'task_time_factor': 1.06, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1356 ± 0.3424
+  Error level: 18.1016 ± 4.7931
+  Completed: 2500/2500
+
+Config 234: {'failures.lambda': 0.64, 'execution.deadline': 5663, 'task_time_factor': 0.89, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0292 ± 0.1684
+  Error level: 19.5912 ± 2.3571
+  Completed: 2500/2500
+
+Config 235: {'failures.lambda': 0.57, 'execution.deadline': 3672, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0516 ± 0.2212
+  Error level: 19.2776 ± 3.0971
+  Completed: 2500/2500
+
+Config 236: {'failures.lambda': 0.89, 'execution.deadline': 4612, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 237: {'failures.lambda': 0.53, 'execution.deadline': 6408, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1724 ± 0.3777
+  Error level: 17.5864 ± 5.2882
+  Completed: 2500/2500
+
+Config 238: {'failures.lambda': 0.7, 'execution.deadline': 5358, 'task_time_factor': 1.5, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0112 ± 0.1052
+  Error level: 19.8432 ± 1.4733
+  Completed: 2500/2500
+
+Config 239: {'failures.lambda': 0.57, 'execution.deadline': 7648, 'task_time_factor': 2.21, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1132 ± 0.3168
+  Error level: 18.4152 ± 4.4357
+  Completed: 2500/2500
+
+Config 240: {'failures.lambda': 0.88, 'execution.deadline': 3621, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0000 ± 0.0000
+  Error level: 20.0000 ± 0.0000
+  Completed: 2500/2500
+
+Config 241: {'failures.lambda': 0.87, 'execution.deadline': 3906, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0004 ± 0.0200
+  Error level: 19.9944 ± 0.2799
+  Completed: 2500/2500
+
+Config 242: {'failures.lambda': 0.77, 'execution.deadline': 5872, 'task_time_factor': 2.23, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0028 ± 0.0528
+  Error level: 19.9608 ± 0.7398
+  Completed: 2500/2500
+
+Config 243: {'failures.lambda': 0.47, 'execution.deadline': 6976, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.3996 ± 0.4898
+  Error level: 14.4006 ± 6.8645
+  Completed: 2500/2500
+
+Config 244: {'failures.lambda': 0.48, 'execution.deadline': 3821, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2136 ± 0.4098
+  Error level: 17.0076 ± 5.7421
+  Completed: 2500/2500
+
+Config 245: {'failures.lambda': 0.73, 'execution.deadline': 5615, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0076 ± 0.0868
+  Error level: 19.8936 ± 1.2158
+  Completed: 2500/2500
+
+Config 246: {'failures.lambda': 0.84, 'execution.deadline': 4962, 'task_time_factor': 2.19, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0012 ± 0.0346
+  Error level: 19.9832 ± 0.4847
+  Completed: 2500/2500
+
+Config 247: {'failures.lambda': 0.62, 'execution.deadline': 4885, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0328 ± 0.1781
+  Error level: 19.5408 ± 2.4936
+  Completed: 2500/2500
+
+Config 248: {'failures.lambda': 0.55, 'execution.deadline': 6738, 'task_time_factor': 1.65, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.1376 ± 0.3445
+  Error level: 18.0736 ± 4.8227
+  Completed: 2500/2500
+
+Config 249: {'failures.lambda': 0.52, 'execution.deadline': 7498, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.2276 ± 0.4193
+  Error level: 16.8136 ± 5.8700
+  Completed: 2500/2500
+
+Config 250: {'failures.lambda': 0.67, 'execution.deadline': 7532, 'task_time_factor': 1.86, 'scheduling.hacks.temporal_redundancy': True}
+  Success rate: 0.0232 ± 0.1505
+  Error level: 19.6752 ± 2.1075
+  Completed: 2500/2500
+
+============================================================
+Results saved to: ../experiments/results_temporal_false_20251130_172421.json
+Summary statistics saved to: ../experiments/summary_temporal_false_20251130_172421.csv
+
+============================================================
+SUMMARY STATISTICS - TEMPORAL_FALSE
+============================================================
+Total configurations: 250
+Total successful runs: 625000
+
+Success Rate:
+  Across all configs - Mean of means: 0.1069
+  Across all configs - Std of means: 0.1641
+  Average within-config std: 0.2037
+
+Avg Error Level:
+  Across all configs - Mean of means: 18.5029
+  Across all configs - Std of means: 2.2969
+  Average within-config std: 2.8515
+
+Num Successes:
+  Across all configs - Mean of means: 0.1069
+  Across all configs - Std of means: 0.1641
+  Average within-config std: 0.2037
+
+Total Repeats:
+  Across all configs - Mean of means: 1.0000
+  Across all configs - Std of means: 0.0000
+  Average within-config std: 0.0000
+
+============================================================
+Results saved to: ../experiments/results_temporal_true_20251130_172436.json
+Summary statistics saved to: ../experiments/summary_temporal_true_20251130_172436.csv
+
+============================================================
+SUMMARY STATISTICS - TEMPORAL_TRUE
+============================================================
+Total configurations: 250
+Total successful runs: 625000
+
+Success Rate:
+  Across all configs - Mean of means: 0.1069
+  Across all configs - Std of means: 0.1641
+  Average within-config std: 0.2037
+
+Avg Error Level:
+  Across all configs - Mean of means: 18.5014
+  Across all configs - Std of means: 2.3007
+  Average within-config std: 2.8532
+
+Num Successes:
+  Across all configs - Mean of means: 0.1069
+  Across all configs - Std of means: 0.1641
+  Average within-config std: 0.2037
+
+Total Repeats:
+  Across all configs - Mean of means: 1.0000
+  Across all configs - Std of means: 0.0000
+  Average within-config std: 0.0000
+
+============================================================
+Results saved to: ../experiments/results_combined_20251130_172450.json
+Summary statistics saved to: ../experiments/summary_combined_20251130_172450.csv
+
+============================================================
+SUMMARY STATISTICS - COMBINED
+============================================================
+Total configurations: 250
+Total successful runs: 1250000
+
+Success Rate:
+  Across all configs - Mean of means: 0.1069
+  Across all configs - Std of means: 0.1641
+  Average within-config std: 0.2037
+
+Avg Error Level:
+  Across all configs - Mean of means: 18.5021
+  Across all configs - Std of means: 2.2988
+  Average within-config std: 2.8520
+
+Num Successes:
+  Across all configs - Mean of means: 0.1069
+  Across all configs - Std of means: 0.1641
+  Average within-config std: 0.2037
+
+Total Repeats:
+  Across all configs - Mean of means: 1.0000
+  Across all configs - Std of means: 0.0000
+  Average within-config std: 0.0000
+
+================================================================================
+TEMPORAL REDUNDANCY COMPARISON
+================================================================================
+
+OVERALL COMPARISON:
+Metric                    False                True                 Difference
+--------------------------------------------------------------------------------
+success_rate               0.1069 ± 0.3090   0.1069 ± 0.3090  +0.0000
+avg_error_level           18.5029 ± 4.3265  18.5014 ± 4.3311  -0.0015
+num_successes              0.1069 ± 0.3090   0.1069 ± 0.3090  +0.0000
+
+================================================================================
+PER-CONFIGURATION COMPARISON (sorted by error improvement):
+================================================================================
+
+1. Config 25: {'failures.lambda': 0.4, 'execution.deadline': 7077, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.7476 → 0.7476  (+0.0000)
+   Error level: 9.5336 → 9.4996  (+0.0340)
+
+2. Config 105: {'failures.lambda': 0.41, 'execution.deadline': 7813, 'task_time_factor': 2.22, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.7364 → 0.7364  (+0.0000)
+   Error level: 9.6904 → 9.6634  (+0.0270)
+
+3. Config 80: {'failures.lambda': 0.41, 'execution.deadline': 6227, 'task_time_factor': 1.1, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.6416 → 0.6416  (+0.0000)
+   Error level: 11.0176 → 10.9976  (+0.0200)
+
+4. Config 15: {'failures.lambda': 0.42, 'execution.deadline': 7547, 'task_time_factor': 1.24, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.6760 → 0.6760  (+0.0000)
+   Error level: 10.5360 → 10.5170  (+0.0190)
+
+5. Config 98: {'failures.lambda': 0.42, 'execution.deadline': 7113, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.6568 → 0.6568  (+0.0000)
+   Error level: 10.8048 → 10.7858  (+0.0190)
+
+6. Config 58: {'failures.lambda': 0.41, 'execution.deadline': 5560, 'task_time_factor': 1.19, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.6044 → 0.6044  (+0.0000)
+   Error level: 11.5384 → 11.5204  (+0.0180)
+
+7. Config 3: {'failures.lambda': 0.43, 'execution.deadline': 7331, 'task_time_factor': 1.82, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.6044 → 0.6044  (+0.0000)
+   Error level: 11.5384 → 11.5224  (+0.0160)
+
+8. Config 177: {'failures.lambda': 0.43, 'execution.deadline': 7324, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.6044 → 0.6044  (+0.0000)
+   Error level: 11.5384 → 11.5224  (+0.0160)
+
+9. Config 57: {'failures.lambda': 0.42, 'execution.deadline': 5954, 'task_time_factor': 1.95, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.5732 → 0.5732  (+0.0000)
+   Error level: 11.9752 → 11.9602  (+0.0150)
+
+10. Config 153: {'failures.lambda': 0.41, 'execution.deadline': 5343, 'task_time_factor': 0.9, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.5896 → 0.5896  (+0.0000)
+   Error level: 11.7456 → 11.7306  (+0.0150)
+
+11. Config 101: {'failures.lambda': 0.43, 'execution.deadline': 5657, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.5012 → 0.5012  (+0.0000)
+   Error level: 12.9832 → 12.9702  (+0.0130)
+
+12. Config 96: {'failures.lambda': 0.42, 'execution.deadline': 5328, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.5348 → 0.5348  (+0.0000)
+   Error level: 12.5128 → 12.5008  (+0.0120)
+
+13. Config 119: {'failures.lambda': 0.44, 'execution.deadline': 6212, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4820 → 0.4820  (+0.0000)
+   Error level: 13.2520 → 13.2410  (+0.0110)
+
+14. Config 225: {'failures.lambda': 0.44, 'execution.deadline': 5623, 'task_time_factor': 1.5, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4492 → 0.4492  (+0.0000)
+   Error level: 13.7112 → 13.7002  (+0.0110)
+
+15. Config 114: {'failures.lambda': 0.45, 'execution.deadline': 5458, 'task_time_factor': 1.6, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3936 → 0.3936  (+0.0000)
+   Error level: 14.4896 → 14.4826  (+0.0070)
+
+16. Config 125: {'failures.lambda': 0.45, 'execution.deadline': 6415, 'task_time_factor': 0.92, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4468 → 0.4468  (+0.0000)
+   Error level: 13.7448 → 13.7378  (+0.0070)
+
+17. Config 163: {'failures.lambda': 0.42, 'execution.deadline': 4405, 'task_time_factor': 2.42, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4724 → 0.4724  (+0.0000)
+   Error level: 13.3864 → 13.3794  (+0.0070)
+
+18. Config 31: {'failures.lambda': 0.46, 'execution.deadline': 6566, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4196 → 0.4196  (+0.0000)
+   Error level: 14.1256 → 14.1206  (+0.0050)
+
+19. Config 193: {'failures.lambda': 0.47, 'execution.deadline': 7633, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4196 → 0.4196  (+0.0000)
+   Error level: 14.1256 → 14.1206  (+0.0050)
+
+20. Config 23: {'failures.lambda': 0.47, 'execution.deadline': 7011, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4016 → 0.4016  (+0.0000)
+   Error level: 14.3776 → 14.3726  (+0.0050)
+
+21. Config 38: {'failures.lambda': 0.48, 'execution.deadline': 7648, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3800 → 0.3800  (+0.0000)
+   Error level: 14.6800 → 14.6750  (+0.0050)
+
+22. Config 75: {'failures.lambda': 0.45, 'execution.deadline': 4839, 'task_time_factor': 1.25, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3592 → 0.3592  (+0.0000)
+   Error level: 14.9712 → 14.9662  (+0.0050)
+
+23. Config 243: {'failures.lambda': 0.47, 'execution.deadline': 6976, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3996 → 0.3996  (+0.0000)
+   Error level: 14.4056 → 14.4006  (+0.0050)
+
+24. Config 174: {'failures.lambda': 0.48, 'execution.deadline': 5971, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3116 → 0.3116  (+0.0000)
+   Error level: 15.6376 → 15.6336  (+0.0040)
+
+25. Config 40: {'failures.lambda': 0.49, 'execution.deadline': 7463, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3324 → 0.3324  (+0.0000)
+   Error level: 15.3464 → 15.3424  (+0.0040)
+
+26. Config 68: {'failures.lambda': 0.44, 'execution.deadline': 3808, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3336 → 0.3336  (+0.0000)
+   Error level: 15.3296 → 15.3256  (+0.0040)
+
+27. Config 99: {'failures.lambda': 0.46, 'execution.deadline': 5611, 'task_time_factor': 2.11, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3648 → 0.3648  (+0.0000)
+   Error level: 14.8928 → 14.8888  (+0.0040)
+
+28. Config 124: {'failures.lambda': 0.43, 'execution.deadline': 3504, 'task_time_factor': 0.83, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3468 → 0.3468  (+0.0000)
+   Error level: 15.1448 → 15.1408  (+0.0040)
+
+29. Config 130: {'failures.lambda': 0.49, 'execution.deadline': 6753, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3120 → 0.3120  (+0.0000)
+   Error level: 15.6320 → 15.6280  (+0.0040)
+
+30. Config 183: {'failures.lambda': 0.46, 'execution.deadline': 6358, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.4056 → 0.4056  (+0.0000)
+   Error level: 14.3216 → 14.3176  (+0.0040)
+
+31. Config 202: {'failures.lambda': 0.44, 'execution.deadline': 3603, 'task_time_factor': 1.58, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3188 → 0.3188  (+0.0000)
+   Error level: 15.5368 → 15.5328  (+0.0040)
+
+32. Config 8: {'failures.lambda': 0.47, 'execution.deadline': 4461, 'task_time_factor': 1.42, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2756 → 0.2756  (+0.0000)
+   Error level: 16.1416 → 16.1386  (+0.0030)
+
+33. Config 34: {'failures.lambda': 0.45, 'execution.deadline': 3157, 'task_time_factor': 1.88, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2524 → 0.2524  (+0.0000)
+   Error level: 16.4664 → 16.4634  (+0.0030)
+
+34. Config 45: {'failures.lambda': 0.46, 'execution.deadline': 4688, 'task_time_factor': 2.4, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.3176 → 0.3176  (+0.0000)
+   Error level: 15.5536 → 15.5506  (+0.0030)
+
+35. Config 6: {'failures.lambda': 0.49, 'execution.deadline': 4521, 'task_time_factor': 1.69, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2188 → 0.2188  (+0.0000)
+   Error level: 16.9368 → 16.9348  (+0.0020)
+
+36. Config 107: {'failures.lambda': 0.48, 'execution.deadline': 4251, 'task_time_factor': 1.73, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2384 → 0.2384  (+0.0000)
+   Error level: 16.6624 → 16.6604  (+0.0020)
+
+37. Config 115: {'failures.lambda': 0.49, 'execution.deadline': 5169, 'task_time_factor': 1.48, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2448 → 0.2448  (+0.0000)
+   Error level: 16.5728 → 16.5708  (+0.0020)
+
+38. Config 154: {'failures.lambda': 0.46, 'execution.deadline': 3588, 'task_time_factor': 1.9, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2556 → 0.2556  (+0.0000)
+   Error level: 16.4216 → 16.4196  (+0.0020)
+
+39. Config 200: {'failures.lambda': 0.49, 'execution.deadline': 3961, 'task_time_factor': 0.87, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1944 → 0.1944  (+0.0000)
+   Error level: 17.2784 → 17.2764  (+0.0020)
+
+40. Config 201: {'failures.lambda': 0.48, 'execution.deadline': 4393, 'task_time_factor': 1.1, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2436 → 0.2436  (+0.0000)
+   Error level: 16.5896 → 16.5876  (+0.0020)
+
+41. Config 42: {'failures.lambda': 0.46, 'execution.deadline': 4140, 'task_time_factor': 1.53, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2896 → 0.2896  (+0.0000)
+   Error level: 15.9456 → 15.9436  (+0.0020)
+
+42. Config 112: {'failures.lambda': 0.46, 'execution.deadline': 3230, 'task_time_factor': 0.87, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2316 → 0.2316  (+0.0000)
+   Error level: 16.7576 → 16.7556  (+0.0020)
+
+43. Config 144: {'failures.lambda': 0.46, 'execution.deadline': 3715, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2628 → 0.2628  (+0.0000)
+   Error level: 16.3208 → 16.3188  (+0.0020)
+
+44. Config 197: {'failures.lambda': 0.46, 'execution.deadline': 3760, 'task_time_factor': 1.04, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2652 → 0.2652  (+0.0000)
+   Error level: 16.2872 → 16.2852  (+0.0020)
+
+45. Config 244: {'failures.lambda': 0.48, 'execution.deadline': 3821, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2136 → 0.2136  (+0.0000)
+   Error level: 17.0096 → 17.0076  (+0.0020)
+
+46. Config 79: {'failures.lambda': 0.5, 'execution.deadline': 6612, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2704 → 0.2704  (+0.0000)
+   Error level: 16.2144 → 16.2134  (+0.0010)
+
+47. Config 157: {'failures.lambda': 0.51, 'execution.deadline': 7816, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2684 → 0.2684  (+0.0000)
+   Error level: 16.2424 → 16.2414  (+0.0010)
+
+48. Config 72: {'failures.lambda': 0.51, 'execution.deadline': 6561, 'task_time_factor': 1.2, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2344 → 0.2344  (+0.0000)
+   Error level: 16.7184 → 16.7174  (+0.0010)
+
+49. Config 1: {'failures.lambda': 0.59, 'execution.deadline': 7754, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0848 → 0.0848  (+0.0000)
+   Error level: 18.8128 → 18.8128  (+0.0000)
+
+50. Config 2: {'failures.lambda': 0.7, 'execution.deadline': 3780, 'task_time_factor': 1.07, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0080 → 0.0080  (+0.0000)
+   Error level: 19.8880 → 19.8880  (+0.0000)
+
+51. Config 4: {'failures.lambda': 0.75, 'execution.deadline': 3103, 'task_time_factor': 2.45, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+52. Config 5: {'failures.lambda': 0.82, 'execution.deadline': 4062, 'task_time_factor': 1.11, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+53. Config 7: {'failures.lambda': 0.62, 'execution.deadline': 4456, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0308 → 0.0308  (+0.0000)
+   Error level: 19.5688 → 19.5688  (+0.0000)
+
+54. Config 9: {'failures.lambda': 0.63, 'execution.deadline': 6926, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0432 → 0.0432  (+0.0000)
+   Error level: 19.3952 → 19.3952  (+0.0000)
+
+55. Config 10: {'failures.lambda': 0.66, 'execution.deadline': 5962, 'task_time_factor': 0.88, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0228 → 0.0228  (+0.0000)
+   Error level: 19.6808 → 19.6808  (+0.0000)
+
+56. Config 11: {'failures.lambda': 0.7, 'execution.deadline': 3853, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0088 → 0.0088  (+0.0000)
+   Error level: 19.8768 → 19.8768  (+0.0000)
+
+57. Config 12: {'failures.lambda': 0.87, 'execution.deadline': 7828, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+58. Config 13: {'failures.lambda': 0.55, 'execution.deadline': 3488, 'task_time_factor': 1.96, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0688 → 0.0688  (+0.0000)
+   Error level: 19.0368 → 19.0368  (+0.0000)
+
+59. Config 14: {'failures.lambda': 0.62, 'execution.deadline': 3610, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0240 → 0.0240  (+0.0000)
+   Error level: 19.6640 → 19.6640  (+0.0000)
+
+60. Config 16: {'failures.lambda': 0.73, 'execution.deadline': 4559, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0052 → 0.0052  (+0.0000)
+   Error level: 19.9272 → 19.9272  (+0.0000)
+
+61. Config 17: {'failures.lambda': 0.67, 'execution.deadline': 3924, 'task_time_factor': 2.45, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0116 → 0.0116  (+0.0000)
+   Error level: 19.8376 → 19.8376  (+0.0000)
+
+62. Config 18: {'failures.lambda': 0.79, 'execution.deadline': 7697, 'task_time_factor': 2.32, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0032 → 0.0032  (+0.0000)
+   Error level: 19.9552 → 19.9552  (+0.0000)
+
+63. Config 19: {'failures.lambda': 0.7, 'execution.deadline': 7609, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0156 → 0.0156  (+0.0000)
+   Error level: 19.7816 → 19.7816  (+0.0000)
+
+64. Config 20: {'failures.lambda': 0.5, 'execution.deadline': 3226, 'task_time_factor': 1.35, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1400 → 0.1400  (+0.0000)
+   Error level: 18.0400 → 18.0400  (+0.0000)
+
+65. Config 21: {'failures.lambda': 0.59, 'execution.deadline': 4357, 'task_time_factor': 2.21, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0440 → 0.0440  (+0.0000)
+   Error level: 19.3840 → 19.3840  (+0.0000)
+
+66. Config 22: {'failures.lambda': 0.58, 'execution.deadline': 4405, 'task_time_factor': 1.72, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0520 → 0.0520  (+0.0000)
+   Error level: 19.2720 → 19.2720  (+0.0000)
+
+67. Config 24: {'failures.lambda': 0.89, 'execution.deadline': 6861, 'task_time_factor': 1.14, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+68. Config 26: {'failures.lambda': 0.76, 'execution.deadline': 6856, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0044 → 0.0044  (+0.0000)
+   Error level: 19.9384 → 19.9384  (+0.0000)
+
+69. Config 27: {'failures.lambda': 0.58, 'execution.deadline': 3579, 'task_time_factor': 2.27, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0400 → 0.0400  (+0.0000)
+   Error level: 19.4400 → 19.4400  (+0.0000)
+
+70. Config 28: {'failures.lambda': 0.71, 'execution.deadline': 4654, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0084 → 0.0084  (+0.0000)
+   Error level: 19.8824 → 19.8824  (+0.0000)
+
+71. Config 29: {'failures.lambda': 0.56, 'execution.deadline': 4626, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0768 → 0.0768  (+0.0000)
+   Error level: 18.9248 → 18.9248  (+0.0000)
+
+72. Config 30: {'failures.lambda': 0.72, 'execution.deadline': 7436, 'task_time_factor': 1.6, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0116 → 0.0116  (+0.0000)
+   Error level: 19.8376 → 19.8376  (+0.0000)
+
+73. Config 32: {'failures.lambda': 0.68, 'execution.deadline': 6855, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0184 → 0.0184  (+0.0000)
+   Error level: 19.7424 → 19.7424  (+0.0000)
+
+74. Config 33: {'failures.lambda': 0.66, 'execution.deadline': 5138, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0172 → 0.0172  (+0.0000)
+   Error level: 19.7592 → 19.7592  (+0.0000)
+
+75. Config 35: {'failures.lambda': 0.56, 'execution.deadline': 5543, 'task_time_factor': 2.34, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0900 → 0.0900  (+0.0000)
+   Error level: 18.7400 → 18.7400  (+0.0000)
+
+76. Config 36: {'failures.lambda': 0.52, 'execution.deadline': 5052, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1576 → 0.1576  (+0.0000)
+   Error level: 17.7936 → 17.7936  (+0.0000)
+
+77. Config 37: {'failures.lambda': 0.51, 'execution.deadline': 3385, 'task_time_factor': 1.29, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1300 → 0.1300  (+0.0000)
+   Error level: 18.1800 → 18.1800  (+0.0000)
+
+78. Config 39: {'failures.lambda': 0.72, 'execution.deadline': 7357, 'task_time_factor': 2.17, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0116 → 0.0116  (+0.0000)
+   Error level: 19.8376 → 19.8376  (+0.0000)
+
+79. Config 41: {'failures.lambda': 0.8, 'execution.deadline': 7480, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0032 → 0.0032  (+0.0000)
+   Error level: 19.9552 → 19.9552  (+0.0000)
+
+80. Config 43: {'failures.lambda': 0.81, 'execution.deadline': 7304, 'task_time_factor': 0.81, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+81. Config 44: {'failures.lambda': 0.66, 'execution.deadline': 5087, 'task_time_factor': 1.18, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0172 → 0.0172  (+0.0000)
+   Error level: 19.7592 → 19.7592  (+0.0000)
+
+82. Config 46: {'failures.lambda': 0.56, 'execution.deadline': 5594, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0908 → 0.0908  (+0.0000)
+   Error level: 18.7288 → 18.7288  (+0.0000)
+
+83. Config 47: {'failures.lambda': 0.58, 'execution.deadline': 7859, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1008 → 0.1008  (+0.0000)
+   Error level: 18.5888 → 18.5888  (+0.0000)
+
+84. Config 48: {'failures.lambda': 0.53, 'execution.deadline': 5486, 'task_time_factor': 1.31, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1436 → 0.1436  (+0.0000)
+   Error level: 17.9896 → 17.9896  (+0.0000)
+
+85. Config 49: {'failures.lambda': 0.54, 'execution.deadline': 3184, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0764 → 0.0764  (+0.0000)
+   Error level: 18.9304 → 18.9304  (+0.0000)
+
+86. Config 50: {'failures.lambda': 0.65, 'execution.deadline': 3257, 'task_time_factor': 1.27, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0120 → 0.0120  (+0.0000)
+   Error level: 19.8320 → 19.8320  (+0.0000)
+
+87. Config 51: {'failures.lambda': 0.85, 'execution.deadline': 4198, 'task_time_factor': 1.05, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+88. Config 52: {'failures.lambda': 0.64, 'execution.deadline': 7928, 'task_time_factor': 1.21, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0392 → 0.0392  (+0.0000)
+   Error level: 19.4512 → 19.4512  (+0.0000)
+
+89. Config 53: {'failures.lambda': 0.74, 'execution.deadline': 6808, 'task_time_factor': 1.2, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0064 → 0.0064  (+0.0000)
+   Error level: 19.9104 → 19.9104  (+0.0000)
+
+90. Config 54: {'failures.lambda': 0.76, 'execution.deadline': 4839, 'task_time_factor': 1.87, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0024 → 0.0024  (+0.0000)
+   Error level: 19.9664 → 19.9664  (+0.0000)
+
+91. Config 55: {'failures.lambda': 0.72, 'execution.deadline': 5679, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0100 → 0.0100  (+0.0000)
+   Error level: 19.8600 → 19.8600  (+0.0000)
+
+92. Config 56: {'failures.lambda': 0.82, 'execution.deadline': 4604, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+93. Config 59: {'failures.lambda': 0.72, 'execution.deadline': 3872, 'task_time_factor': 1.97, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0064 → 0.0064  (+0.0000)
+   Error level: 19.9104 → 19.9104  (+0.0000)
+
+94. Config 60: {'failures.lambda': 0.59, 'execution.deadline': 7684, 'task_time_factor': 1.03, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0848 → 0.0848  (+0.0000)
+   Error level: 18.8128 → 18.8128  (+0.0000)
+
+95. Config 61: {'failures.lambda': 0.57, 'execution.deadline': 3567, 'task_time_factor': 2.37, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0500 → 0.0500  (+0.0000)
+   Error level: 19.3000 → 19.3000  (+0.0000)
+
+96. Config 62: {'failures.lambda': 0.84, 'execution.deadline': 4290, 'task_time_factor': 1.92, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0012 → 0.0012  (+0.0000)
+   Error level: 19.9832 → 19.9832  (+0.0000)
+
+97. Config 63: {'failures.lambda': 0.81, 'execution.deadline': 5776, 'task_time_factor': 1.7, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0020 → 0.0020  (+0.0000)
+   Error level: 19.9720 → 19.9720  (+0.0000)
+
+98. Config 64: {'failures.lambda': 0.52, 'execution.deadline': 3466, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1148 → 0.1148  (+0.0000)
+   Error level: 18.3928 → 18.3928  (+0.0000)
+
+99. Config 65: {'failures.lambda': 0.85, 'execution.deadline': 6166, 'task_time_factor': 1.38, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+100. Config 66: {'failures.lambda': 0.57, 'execution.deadline': 6630, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0972 → 0.0972  (+0.0000)
+   Error level: 18.6392 → 18.6392  (+0.0000)
+
+101. Config 67: {'failures.lambda': 0.84, 'execution.deadline': 6899, 'task_time_factor': 1.89, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+102. Config 69: {'failures.lambda': 0.7, 'execution.deadline': 3046, 'task_time_factor': 0.97, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0072 → 0.0072  (+0.0000)
+   Error level: 19.8992 → 19.8992  (+0.0000)
+
+103. Config 70: {'failures.lambda': 0.73, 'execution.deadline': 3025, 'task_time_factor': 1.07, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0052 → 0.0052  (+0.0000)
+   Error level: 19.9272 → 19.9272  (+0.0000)
+
+104. Config 71: {'failures.lambda': 0.67, 'execution.deadline': 6459, 'task_time_factor': 1.91, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0200 → 0.0200  (+0.0000)
+   Error level: 19.7200 → 19.7200  (+0.0000)
+
+105. Config 73: {'failures.lambda': 0.56, 'execution.deadline': 6732, 'task_time_factor': 1.9, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1160 → 0.1160  (+0.0000)
+   Error level: 18.3760 → 18.3760  (+0.0000)
+
+106. Config 74: {'failures.lambda': 0.82, 'execution.deadline': 6288, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0024 → 0.0024  (+0.0000)
+   Error level: 19.9664 → 19.9664  (+0.0000)
+
+107. Config 76: {'failures.lambda': 0.52, 'execution.deadline': 7865, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2396 → 0.2396  (+0.0000)
+   Error level: 16.6456 → 16.6456  (+0.0000)
+
+108. Config 77: {'failures.lambda': 0.85, 'execution.deadline': 6156, 'task_time_factor': 2.15, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+109. Config 78: {'failures.lambda': 0.65, 'execution.deadline': 5885, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0240 → 0.0240  (+0.0000)
+   Error level: 19.6640 → 19.6640  (+0.0000)
+
+110. Config 81: {'failures.lambda': 0.87, 'execution.deadline': 7770, 'task_time_factor': 2.36, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+111. Config 82: {'failures.lambda': 0.59, 'execution.deadline': 3077, 'task_time_factor': 2.38, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0292 → 0.0292  (+0.0000)
+   Error level: 19.5912 → 19.5912  (+0.0000)
+
+112. Config 83: {'failures.lambda': 0.61, 'execution.deadline': 7833, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0672 → 0.0672  (+0.0000)
+   Error level: 19.0592 → 19.0592  (+0.0000)
+
+113. Config 84: {'failures.lambda': 0.83, 'execution.deadline': 4472, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+114. Config 85: {'failures.lambda': 0.83, 'execution.deadline': 4585, 'task_time_factor': 1.09, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+115. Config 86: {'failures.lambda': 0.68, 'execution.deadline': 7681, 'task_time_factor': 1.98, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0204 → 0.0204  (+0.0000)
+   Error level: 19.7144 → 19.7144  (+0.0000)
+
+116. Config 87: {'failures.lambda': 0.69, 'execution.deadline': 3486, 'task_time_factor': 1.85, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0076 → 0.0076  (+0.0000)
+   Error level: 19.8936 → 19.8936  (+0.0000)
+
+117. Config 88: {'failures.lambda': 0.9, 'execution.deadline': 3700, 'task_time_factor': 1.68, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+118. Config 89: {'failures.lambda': 0.84, 'execution.deadline': 6704, 'task_time_factor': 1.98, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+119. Config 90: {'failures.lambda': 0.75, 'execution.deadline': 4797, 'task_time_factor': 1.3, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+120. Config 91: {'failures.lambda': 0.8, 'execution.deadline': 7051, 'task_time_factor': 2.27, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0032 → 0.0032  (+0.0000)
+   Error level: 19.9552 → 19.9552  (+0.0000)
+
+121. Config 92: {'failures.lambda': 0.86, 'execution.deadline': 5557, 'task_time_factor': 1.65, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+122. Config 93: {'failures.lambda': 0.8, 'execution.deadline': 6250, 'task_time_factor': 1.99, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+123. Config 94: {'failures.lambda': 0.8, 'execution.deadline': 7450, 'task_time_factor': 1.37, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0032 → 0.0032  (+0.0000)
+   Error level: 19.9552 → 19.9552  (+0.0000)
+
+124. Config 95: {'failures.lambda': 0.59, 'execution.deadline': 3470, 'task_time_factor': 1.78, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0336 → 0.0336  (+0.0000)
+   Error level: 19.5296 → 19.5296  (+0.0000)
+
+125. Config 97: {'failures.lambda': 0.54, 'execution.deadline': 5954, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1360 → 0.1360  (+0.0000)
+   Error level: 18.0960 → 18.0960  (+0.0000)
+
+126. Config 100: {'failures.lambda': 0.51, 'execution.deadline': 6114, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2192 → 0.2192  (+0.0000)
+   Error level: 16.9312 → 16.9312  (+0.0000)
+
+127. Config 102: {'failures.lambda': 0.72, 'execution.deadline': 6630, 'task_time_factor': 2.46, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0104 → 0.0104  (+0.0000)
+   Error level: 19.8544 → 19.8544  (+0.0000)
+
+128. Config 103: {'failures.lambda': 0.66, 'execution.deadline': 4615, 'task_time_factor': 2.15, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0160 → 0.0160  (+0.0000)
+   Error level: 19.7760 → 19.7760  (+0.0000)
+
+129. Config 104: {'failures.lambda': 0.54, 'execution.deadline': 5195, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1184 → 0.1184  (+0.0000)
+   Error level: 18.3424 → 18.3424  (+0.0000)
+
+130. Config 106: {'failures.lambda': 0.75, 'execution.deadline': 5045, 'task_time_factor': 1.09, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+131. Config 108: {'failures.lambda': 0.76, 'execution.deadline': 6301, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0040 → 0.0040  (+0.0000)
+   Error level: 19.9440 → 19.9440  (+0.0000)
+
+132. Config 109: {'failures.lambda': 0.88, 'execution.deadline': 6689, 'task_time_factor': 1.74, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+133. Config 110: {'failures.lambda': 0.71, 'execution.deadline': 5098, 'task_time_factor': 1.22, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0088 → 0.0088  (+0.0000)
+   Error level: 19.8768 → 19.8768  (+0.0000)
+
+134. Config 111: {'failures.lambda': 0.58, 'execution.deadline': 6789, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0872 → 0.0872  (+0.0000)
+   Error level: 18.7792 → 18.7792  (+0.0000)
+
+135. Config 113: {'failures.lambda': 0.83, 'execution.deadline': 6518, 'task_time_factor': 1.61, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0020 → 0.0020  (+0.0000)
+   Error level: 19.9720 → 19.9720  (+0.0000)
+
+136. Config 116: {'failures.lambda': 0.71, 'execution.deadline': 6175, 'task_time_factor': 0.88, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0120 → 0.0120  (+0.0000)
+   Error level: 19.8320 → 19.8320  (+0.0000)
+
+137. Config 117: {'failures.lambda': 0.59, 'execution.deadline': 6129, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0672 → 0.0672  (+0.0000)
+   Error level: 19.0592 → 19.0592  (+0.0000)
+
+138. Config 118: {'failures.lambda': 0.83, 'execution.deadline': 6293, 'task_time_factor': 1.08, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0020 → 0.0020  (+0.0000)
+   Error level: 19.9720 → 19.9720  (+0.0000)
+
+139. Config 120: {'failures.lambda': 0.69, 'execution.deadline': 7701, 'task_time_factor': 1.78, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0176 → 0.0176  (+0.0000)
+   Error level: 19.7536 → 19.7536  (+0.0000)
+
+140. Config 121: {'failures.lambda': 0.59, 'execution.deadline': 6216, 'task_time_factor': 1.58, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0680 → 0.0680  (+0.0000)
+   Error level: 19.0480 → 19.0480  (+0.0000)
+
+141. Config 122: {'failures.lambda': 0.67, 'execution.deadline': 7707, 'task_time_factor': 1.46, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0232 → 0.0232  (+0.0000)
+   Error level: 19.6752 → 19.6752  (+0.0000)
+
+142. Config 123: {'failures.lambda': 0.88, 'execution.deadline': 7527, 'task_time_factor': 1.13, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+143. Config 126: {'failures.lambda': 0.56, 'execution.deadline': 7224, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1224 → 0.1224  (+0.0000)
+   Error level: 18.2864 → 18.2864  (+0.0000)
+
+144. Config 127: {'failures.lambda': 0.81, 'execution.deadline': 4409, 'task_time_factor': 1.0, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+145. Config 128: {'failures.lambda': 0.75, 'execution.deadline': 6145, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0052 → 0.0052  (+0.0000)
+   Error level: 19.9272 → 19.9272  (+0.0000)
+
+146. Config 129: {'failures.lambda': 0.77, 'execution.deadline': 7017, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0040 → 0.0040  (+0.0000)
+   Error level: 19.9440 → 19.9440  (+0.0000)
+
+147. Config 131: {'failures.lambda': 0.9, 'execution.deadline': 5063, 'task_time_factor': 1.43, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+148. Config 132: {'failures.lambda': 0.79, 'execution.deadline': 4704, 'task_time_factor': 2.38, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+149. Config 133: {'failures.lambda': 0.83, 'execution.deadline': 5145, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+150. Config 134: {'failures.lambda': 0.78, 'execution.deadline': 3516, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+151. Config 135: {'failures.lambda': 0.65, 'execution.deadline': 7132, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0268 → 0.0268  (+0.0000)
+   Error level: 19.6248 → 19.6248  (+0.0000)
+
+152. Config 136: {'failures.lambda': 0.85, 'execution.deadline': 4946, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+153. Config 137: {'failures.lambda': 0.85, 'execution.deadline': 3456, 'task_time_factor': 1.34, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+154. Config 138: {'failures.lambda': 0.88, 'execution.deadline': 7753, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+155. Config 139: {'failures.lambda': 0.72, 'execution.deadline': 5242, 'task_time_factor': 1.3, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0072 → 0.0072  (+0.0000)
+   Error level: 19.8992 → 19.8992  (+0.0000)
+
+156. Config 140: {'failures.lambda': 0.56, 'execution.deadline': 6363, 'task_time_factor': 2.08, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1088 → 0.1088  (+0.0000)
+   Error level: 18.4768 → 18.4768  (+0.0000)
+
+157. Config 141: {'failures.lambda': 0.8, 'execution.deadline': 6948, 'task_time_factor': 0.96, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+158. Config 142: {'failures.lambda': 0.65, 'execution.deadline': 3288, 'task_time_factor': 1.73, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0120 → 0.0120  (+0.0000)
+   Error level: 19.8320 → 19.8320  (+0.0000)
+
+159. Config 143: {'failures.lambda': 0.62, 'execution.deadline': 7439, 'task_time_factor': 1.4, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0540 → 0.0540  (+0.0000)
+   Error level: 19.2440 → 19.2440  (+0.0000)
+
+160. Config 145: {'failures.lambda': 0.71, 'execution.deadline': 3506, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0064 → 0.0064  (+0.0000)
+   Error level: 19.9104 → 19.9104  (+0.0000)
+
+161. Config 146: {'failures.lambda': 0.75, 'execution.deadline': 3364, 'task_time_factor': 2.2, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+162. Config 147: {'failures.lambda': 0.75, 'execution.deadline': 3407, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+163. Config 148: {'failures.lambda': 0.89, 'execution.deadline': 4871, 'task_time_factor': 1.43, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+164. Config 149: {'failures.lambda': 0.81, 'execution.deadline': 7736, 'task_time_factor': 2.48, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+165. Config 150: {'failures.lambda': 0.78, 'execution.deadline': 4881, 'task_time_factor': 0.94, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+166. Config 151: {'failures.lambda': 0.79, 'execution.deadline': 5792, 'task_time_factor': 1.52, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0024 → 0.0024  (+0.0000)
+   Error level: 19.9664 → 19.9664  (+0.0000)
+
+167. Config 152: {'failures.lambda': 0.85, 'execution.deadline': 3556, 'task_time_factor': 1.64, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+168. Config 155: {'failures.lambda': 0.77, 'execution.deadline': 5917, 'task_time_factor': 2.44, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+169. Config 156: {'failures.lambda': 0.59, 'execution.deadline': 4429, 'task_time_factor': 2.28, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0464 → 0.0464  (+0.0000)
+   Error level: 19.3504 → 19.3504  (+0.0000)
+
+170. Config 158: {'failures.lambda': 0.88, 'execution.deadline': 3216, 'task_time_factor': 2.31, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+171. Config 159: {'failures.lambda': 0.66, 'execution.deadline': 7965, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0280 → 0.0280  (+0.0000)
+   Error level: 19.6080 → 19.6080  (+0.0000)
+
+172. Config 160: {'failures.lambda': 0.68, 'execution.deadline': 7847, 'task_time_factor': 1.69, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0204 → 0.0204  (+0.0000)
+   Error level: 19.7144 → 19.7144  (+0.0000)
+
+173. Config 161: {'failures.lambda': 0.71, 'execution.deadline': 6479, 'task_time_factor': 1.57, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0124 → 0.0124  (+0.0000)
+   Error level: 19.8264 → 19.8264  (+0.0000)
+
+174. Config 162: {'failures.lambda': 0.71, 'execution.deadline': 5922, 'task_time_factor': 2.33, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0120 → 0.0120  (+0.0000)
+   Error level: 19.8320 → 19.8320  (+0.0000)
+
+175. Config 164: {'failures.lambda': 0.85, 'execution.deadline': 5278, 'task_time_factor': 1.85, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+176. Config 165: {'failures.lambda': 0.54, 'execution.deadline': 3941, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0904 → 0.0904  (+0.0000)
+   Error level: 18.7344 → 18.7344  (+0.0000)
+
+177. Config 166: {'failures.lambda': 0.58, 'execution.deadline': 5918, 'task_time_factor': 0.93, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0732 → 0.0732  (+0.0000)
+   Error level: 18.9752 → 18.9752  (+0.0000)
+
+178. Config 167: {'failures.lambda': 0.89, 'execution.deadline': 7931, 'task_time_factor': 1.99, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+179. Config 168: {'failures.lambda': 0.67, 'execution.deadline': 4548, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0132 → 0.0132  (+0.0000)
+   Error level: 19.8152 → 19.8152  (+0.0000)
+
+180. Config 169: {'failures.lambda': 0.74, 'execution.deadline': 3813, 'task_time_factor': 2.35, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0040 → 0.0040  (+0.0000)
+   Error level: 19.9440 → 19.9440  (+0.0000)
+
+181. Config 170: {'failures.lambda': 0.81, 'execution.deadline': 7749, 'task_time_factor': 2.03, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+182. Config 171: {'failures.lambda': 0.71, 'execution.deadline': 5091, 'task_time_factor': 2.39, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0088 → 0.0088  (+0.0000)
+   Error level: 19.8768 → 19.8768  (+0.0000)
+
+183. Config 172: {'failures.lambda': 0.83, 'execution.deadline': 3226, 'task_time_factor': 0.84, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0016 → 0.0016  (+0.0000)
+   Error level: 19.9776 → 19.9776  (+0.0000)
+
+184. Config 173: {'failures.lambda': 0.59, 'execution.deadline': 7053, 'task_time_factor': 2.48, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0760 → 0.0760  (+0.0000)
+   Error level: 18.9360 → 18.9360  (+0.0000)
+
+185. Config 175: {'failures.lambda': 0.88, 'execution.deadline': 7211, 'task_time_factor': 2.23, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+186. Config 176: {'failures.lambda': 0.63, 'execution.deadline': 5074, 'task_time_factor': 1.26, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0292 → 0.0292  (+0.0000)
+   Error level: 19.5912 → 19.5912  (+0.0000)
+
+187. Config 178: {'failures.lambda': 0.9, 'execution.deadline': 7983, 'task_time_factor': 1.74, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+188. Config 179: {'failures.lambda': 0.78, 'execution.deadline': 7724, 'task_time_factor': 2.24, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+189. Config 180: {'failures.lambda': 0.52, 'execution.deadline': 5253, 'task_time_factor': 1.02, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1652 → 0.1652  (+0.0000)
+   Error level: 17.6872 → 17.6872  (+0.0000)
+
+190. Config 181: {'failures.lambda': 0.88, 'execution.deadline': 6031, 'task_time_factor': 1.19, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+191. Config 182: {'failures.lambda': 0.74, 'execution.deadline': 6091, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0060 → 0.0060  (+0.0000)
+   Error level: 19.9160 → 19.9160  (+0.0000)
+
+192. Config 184: {'failures.lambda': 0.79, 'execution.deadline': 5601, 'task_time_factor': 2.25, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0024 → 0.0024  (+0.0000)
+   Error level: 19.9664 → 19.9664  (+0.0000)
+
+193. Config 185: {'failures.lambda': 0.68, 'execution.deadline': 5805, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0168 → 0.0168  (+0.0000)
+   Error level: 19.7648 → 19.7648  (+0.0000)
+
+194. Config 186: {'failures.lambda': 0.6, 'execution.deadline': 3670, 'task_time_factor': 0.85, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0304 → 0.0304  (+0.0000)
+   Error level: 19.5744 → 19.5744  (+0.0000)
+
+195. Config 187: {'failures.lambda': 0.78, 'execution.deadline': 6102, 'task_time_factor': 2.0, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+196. Config 188: {'failures.lambda': 0.51, 'execution.deadline': 3682, 'task_time_factor': 0.82, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1412 → 0.1412  (+0.0000)
+   Error level: 18.0232 → 18.0232  (+0.0000)
+
+197. Config 189: {'failures.lambda': 0.58, 'execution.deadline': 5950, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0744 → 0.0744  (+0.0000)
+   Error level: 18.9584 → 18.9584  (+0.0000)
+
+198. Config 190: {'failures.lambda': 0.62, 'execution.deadline': 7521, 'task_time_factor': 1.39, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0548 → 0.0548  (+0.0000)
+   Error level: 19.2328 → 19.2328  (+0.0000)
+
+199. Config 191: {'failures.lambda': 0.66, 'execution.deadline': 6918, 'task_time_factor': 1.47, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0248 → 0.0248  (+0.0000)
+   Error level: 19.6528 → 19.6528  (+0.0000)
+
+200. Config 192: {'failures.lambda': 0.71, 'execution.deadline': 7312, 'task_time_factor': 2.41, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0140 → 0.0140  (+0.0000)
+   Error level: 19.8040 → 19.8040  (+0.0000)
+
+201. Config 194: {'failures.lambda': 0.53, 'execution.deadline': 5296, 'task_time_factor': 2.47, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1408 → 0.1408  (+0.0000)
+   Error level: 18.0288 → 18.0288  (+0.0000)
+
+202. Config 195: {'failures.lambda': 0.65, 'execution.deadline': 4644, 'task_time_factor': 1.88, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0176 → 0.0176  (+0.0000)
+   Error level: 19.7536 → 19.7536  (+0.0000)
+
+203. Config 196: {'failures.lambda': 0.52, 'execution.deadline': 3379, 'task_time_factor': 1.02, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1120 → 0.1120  (+0.0000)
+   Error level: 18.4320 → 18.4320  (+0.0000)
+
+204. Config 198: {'failures.lambda': 0.72, 'execution.deadline': 3909, 'task_time_factor': 1.39, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0064 → 0.0064  (+0.0000)
+   Error level: 19.9104 → 19.9104  (+0.0000)
+
+205. Config 199: {'failures.lambda': 0.85, 'execution.deadline': 5370, 'task_time_factor': 1.93, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+206. Config 203: {'failures.lambda': 0.5, 'execution.deadline': 4821, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2036 → 0.2036  (+0.0000)
+   Error level: 17.1496 → 17.1496  (+0.0000)
+
+207. Config 204: {'failures.lambda': 0.75, 'execution.deadline': 3197, 'task_time_factor': 2.16, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0036 → 0.0036  (+0.0000)
+   Error level: 19.9496 → 19.9496  (+0.0000)
+
+208. Config 205: {'failures.lambda': 0.71, 'execution.deadline': 3409, 'task_time_factor': 2.29, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0064 → 0.0064  (+0.0000)
+   Error level: 19.9104 → 19.9104  (+0.0000)
+
+209. Config 206: {'failures.lambda': 0.86, 'execution.deadline': 3305, 'task_time_factor': 1.27, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+210. Config 207: {'failures.lambda': 0.8, 'execution.deadline': 6741, 'task_time_factor': 1.11, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+211. Config 208: {'failures.lambda': 0.5, 'execution.deadline': 4852, 'task_time_factor': 1.62, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2036 → 0.2036  (+0.0000)
+   Error level: 17.1496 → 17.1496  (+0.0000)
+
+212. Config 209: {'failures.lambda': 0.71, 'execution.deadline': 4845, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0084 → 0.0084  (+0.0000)
+   Error level: 19.8824 → 19.8824  (+0.0000)
+
+213. Config 210: {'failures.lambda': 0.77, 'execution.deadline': 3183, 'task_time_factor': 1.23, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0020 → 0.0020  (+0.0000)
+   Error level: 19.9720 → 19.9720  (+0.0000)
+
+214. Config 211: {'failures.lambda': 0.76, 'execution.deadline': 7476, 'task_time_factor': 1.67, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0048 → 0.0048  (+0.0000)
+   Error level: 19.9328 → 19.9328  (+0.0000)
+
+215. Config 212: {'failures.lambda': 0.67, 'execution.deadline': 3536, 'task_time_factor': 1.56, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0096 → 0.0096  (+0.0000)
+   Error level: 19.8656 → 19.8656  (+0.0000)
+
+216. Config 213: {'failures.lambda': 0.67, 'execution.deadline': 4212, 'task_time_factor': 1.26, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0120 → 0.0120  (+0.0000)
+   Error level: 19.8320 → 19.8320  (+0.0000)
+
+217. Config 214: {'failures.lambda': 0.59, 'execution.deadline': 3100, 'task_time_factor': 1.35, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0296 → 0.0296  (+0.0000)
+   Error level: 19.5856 → 19.5856  (+0.0000)
+
+218. Config 215: {'failures.lambda': 0.51, 'execution.deadline': 4637, 'task_time_factor': 1.0, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1700 → 0.1700  (+0.0000)
+   Error level: 17.6200 → 17.6200  (+0.0000)
+
+219. Config 216: {'failures.lambda': 0.85, 'execution.deadline': 5968, 'task_time_factor': 1.95, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+220. Config 217: {'failures.lambda': 0.79, 'execution.deadline': 5492, 'task_time_factor': 0.95, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0024 → 0.0024  (+0.0000)
+   Error level: 19.9664 → 19.9664  (+0.0000)
+
+221. Config 218: {'failures.lambda': 0.67, 'execution.deadline': 5934, 'task_time_factor': 2.07, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0192 → 0.0192  (+0.0000)
+   Error level: 19.7312 → 19.7312  (+0.0000)
+
+222. Config 219: {'failures.lambda': 0.62, 'execution.deadline': 3638, 'task_time_factor': 1.28, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0244 → 0.0244  (+0.0000)
+   Error level: 19.6584 → 19.6584  (+0.0000)
+
+223. Config 220: {'failures.lambda': 0.58, 'execution.deadline': 6230, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0804 → 0.0804  (+0.0000)
+   Error level: 18.8744 → 18.8744  (+0.0000)
+
+224. Config 221: {'failures.lambda': 0.58, 'execution.deadline': 7933, 'task_time_factor': 1.83, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1020 → 0.1020  (+0.0000)
+   Error level: 18.5720 → 18.5720  (+0.0000)
+
+225. Config 222: {'failures.lambda': 0.52, 'execution.deadline': 3509, 'task_time_factor': 1.06, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1156 → 0.1156  (+0.0000)
+   Error level: 18.3816 → 18.3816  (+0.0000)
+
+226. Config 223: {'failures.lambda': 0.52, 'execution.deadline': 3803, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1272 → 0.1272  (+0.0000)
+   Error level: 18.2192 → 18.2192  (+0.0000)
+
+227. Config 224: {'failures.lambda': 0.54, 'execution.deadline': 3867, 'task_time_factor': 2.32, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0900 → 0.0900  (+0.0000)
+   Error level: 18.7400 → 18.7400  (+0.0000)
+
+228. Config 226: {'failures.lambda': 0.89, 'execution.deadline': 3560, 'task_time_factor': 1.48, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+229. Config 227: {'failures.lambda': 0.88, 'execution.deadline': 7328, 'task_time_factor': 2.19, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+230. Config 228: {'failures.lambda': 0.53, 'execution.deadline': 3854, 'task_time_factor': 1.94, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1076 → 0.1076  (+0.0000)
+   Error level: 18.4936 → 18.4936  (+0.0000)
+
+231. Config 229: {'failures.lambda': 0.86, 'execution.deadline': 5784, 'task_time_factor': 1.77, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0008 → 0.0008  (+0.0000)
+   Error level: 19.9888 → 19.9888  (+0.0000)
+
+232. Config 230: {'failures.lambda': 0.54, 'execution.deadline': 6847, 'task_time_factor': 1.12, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1620 → 0.1620  (+0.0000)
+   Error level: 17.7320 → 17.7320  (+0.0000)
+
+233. Config 231: {'failures.lambda': 0.56, 'execution.deadline': 5127, 'task_time_factor': 1.66, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0844 → 0.0844  (+0.0000)
+   Error level: 18.8184 → 18.8184  (+0.0000)
+
+234. Config 232: {'failures.lambda': 0.52, 'execution.deadline': 3574, 'task_time_factor': 1.84, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1196 → 0.1196  (+0.0000)
+   Error level: 18.3256 → 18.3256  (+0.0000)
+
+235. Config 233: {'failures.lambda': 0.54, 'execution.deadline': 5906, 'task_time_factor': 1.06, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1356 → 0.1356  (+0.0000)
+   Error level: 18.1016 → 18.1016  (+0.0000)
+
+236. Config 234: {'failures.lambda': 0.64, 'execution.deadline': 5663, 'task_time_factor': 0.89, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0292 → 0.0292  (+0.0000)
+   Error level: 19.5912 → 19.5912  (+0.0000)
+
+237. Config 235: {'failures.lambda': 0.57, 'execution.deadline': 3672, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0516 → 0.0516  (+0.0000)
+   Error level: 19.2776 → 19.2776  (+0.0000)
+
+238. Config 236: {'failures.lambda': 0.89, 'execution.deadline': 4612, 'task_time_factor': 2.18, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+239. Config 237: {'failures.lambda': 0.53, 'execution.deadline': 6408, 'task_time_factor': 2.09, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1724 → 0.1724  (+0.0000)
+   Error level: 17.5864 → 17.5864  (+0.0000)
+
+240. Config 238: {'failures.lambda': 0.7, 'execution.deadline': 5358, 'task_time_factor': 1.5, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0112 → 0.0112  (+0.0000)
+   Error level: 19.8432 → 19.8432  (+0.0000)
+
+241. Config 239: {'failures.lambda': 0.57, 'execution.deadline': 7648, 'task_time_factor': 2.21, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1132 → 0.1132  (+0.0000)
+   Error level: 18.4152 → 18.4152  (+0.0000)
+
+242. Config 240: {'failures.lambda': 0.88, 'execution.deadline': 3621, 'task_time_factor': 2.04, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0000 → 0.0000  (+0.0000)
+   Error level: 20.0000 → 20.0000  (+0.0000)
+
+243. Config 241: {'failures.lambda': 0.87, 'execution.deadline': 3906, 'task_time_factor': 0.91, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0004 → 0.0004  (+0.0000)
+   Error level: 19.9944 → 19.9944  (+0.0000)
+
+244. Config 242: {'failures.lambda': 0.77, 'execution.deadline': 5872, 'task_time_factor': 2.23, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0028 → 0.0028  (+0.0000)
+   Error level: 19.9608 → 19.9608  (+0.0000)
+
+245. Config 245: {'failures.lambda': 0.73, 'execution.deadline': 5615, 'task_time_factor': 1.41, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0076 → 0.0076  (+0.0000)
+   Error level: 19.8936 → 19.8936  (+0.0000)
+
+246. Config 246: {'failures.lambda': 0.84, 'execution.deadline': 4962, 'task_time_factor': 2.19, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0012 → 0.0012  (+0.0000)
+   Error level: 19.9832 → 19.9832  (+0.0000)
+
+247. Config 247: {'failures.lambda': 0.62, 'execution.deadline': 4885, 'task_time_factor': 1.59, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0328 → 0.0328  (+0.0000)
+   Error level: 19.5408 → 19.5408  (+0.0000)
+
+248. Config 248: {'failures.lambda': 0.55, 'execution.deadline': 6738, 'task_time_factor': 1.65, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.1376 → 0.1376  (+0.0000)
+   Error level: 18.0736 → 18.0736  (+0.0000)
+
+249. Config 249: {'failures.lambda': 0.52, 'execution.deadline': 7498, 'task_time_factor': 1.45, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.2276 → 0.2276  (+0.0000)
+   Error level: 16.8136 → 16.8136  (+0.0000)
+
+250. Config 250: {'failures.lambda': 0.67, 'execution.deadline': 7532, 'task_time_factor': 1.86, 'scheduling.hacks.temporal_redundancy': False}
+   Success rate: 0.0232 → 0.0232  (+0.0000)
+   Error level: 19.6752 → 19.6752  (+0.0000)
