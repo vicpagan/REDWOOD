@@ -1,13 +1,13 @@
 import json
-import subprocess
-import itertools
 import os
-from pathlib import Path
-import pandas as pd
+import subprocess
 from datetime import datetime
-import numpy as np
 from multiprocessing import Pool, cpu_count
-from functools import partial
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
 
 class ExperimentRunner:
     def __init__(self, base_config_path, output_dir="experiments"):
@@ -36,7 +36,7 @@ class ExperimentRunner:
         {
             'failures.lambda': (0.3, 1.0),  # (min, max) for uniform sampling - rounded to 2 decimals
             'execution.deadline': (3000, 20000),  # integers
-            'task_time_slope': (0.5, 2.0)  # slope parameter for linear time function
+            'task_time_factor': (0.5, 2.0)  # slope parameter for linear time function
         }
         """
         configs = []
@@ -78,7 +78,7 @@ class ExperimentRunner:
                     value = value.tolist()
 
                 # Handle special keys
-                if key == 'task_time_slope':
+                if key == 'task_time_factor':
                     # Set the slope for linear time function
                     self._set_task_function(config, slope=value)
                 elif key == 'task_time_intercept':
@@ -126,7 +126,7 @@ class ExperimentRunner:
                         "comments": "a + b * x + c * y",
                         "parameters": {
                             "a": 0.0,    # No base time
-                            "b": 3.0,    # Will be modified by task_time_slope
+                            "b": 3.0,    # Will be modified by task_time_factor
                             "c": 0.0
                         }
                     },
@@ -631,17 +631,17 @@ if __name__ == "__main__":
     # Initialize the experiment runner
     runner = ExperimentRunner(
         base_config_path="../data/sample_input.json",
-        output_dir="../experiments"
+        output_dir="../experiment_results"
     )
 
     # Define parameter ranges for sampling (exclude temporal_redundancy from param_grid)
     param_grid = {
         'failures.lambda': (0.4, 0.9),        # Moderate failure rates
         'execution.deadline': (3000, 8000),   # More reasonable deadlines
-        'task_time_slope': (0.8, 2.5)         # Moderate task time variation
+        'task_time_factor': (0.8, 2.5)        # Moderate task time variation
     }
 
-    # Run 100 different configurations, each repeated 1000 times with different seeds
+    # Run n different configurations, each repeated m times with different seeds
     # This will run TWICE: once with temporal_redundancy=False, once with temporal_redundancy=True
     # Uses all available CPU cores for parallel execution
     results = runner.run_all_experiments(
