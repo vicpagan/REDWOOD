@@ -8,8 +8,7 @@ build/*
 main
 
 # Experiments
-experiments/*
-experiments_temporal/*
+experiment/*
 
 # Object files
 *.o

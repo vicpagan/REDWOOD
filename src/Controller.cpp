@@ -251,9 +251,9 @@ namespace wrench {
 
                     // Implement the scheduling decisions
                     for (auto const &decision : decisions) {
-                        // std::cerr << "Scheduling decision: run task " << decision.task <<
-                        //     " with option " << decision.execution_option <<
-                        //     " on host " << decision.hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
+                        std::cerr << "Scheduling decision: run task " << decision.task <<
+                            " with option " << decision.execution_option <<
+                            " on host " << decision.hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
                         _application_specs->update_running_host(decision.hostname, decision.task,
                                                                 decision.execution_option,
                                                                 Simulation::getCurrentSimulatedDate());
@@ -272,10 +272,10 @@ namespace wrench {
                         auto hostname = success_event->compute_service->getHosts().at(0);
                         auto job_task_name = success_event->job->getName();
                         if (job_task_name.compare(0, current_task.length(), current_task)) {
-                            // std::cout << "Got a job success message for the wrong task." << std::endl;
+                            std::cout << "Got a job success message for the wrong task." << std::endl;
                             continue;
                         }
-                        // std::cout << job_task_name << " completed successfully." << std::endl;
+                        std::cout << job_task_name << " completed successfully." << std::endl;
 
                         std::string selected_option = job_task_name.substr(current_task.length() + 1);
                         running_output_data_size = _task_functions.at(current_task).at(selected_option).at("d_function")(running_output_data_size, running_output_error_level);;
@@ -283,7 +283,7 @@ namespace wrench {
                         current_task_counter++;
                         current_task = _application_specs->get_task(current_task_counter);
 
-                        // std::cout << "New current task: " << current_task << std::endl;
+                        std::cout << "New current task: " << current_task << std::endl;
 
                         if (current_task.empty()) {
                             // were done
@@ -291,7 +291,7 @@ namespace wrench {
                                 num_successes++;
                             }
 
-                            // std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
+                            std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
 
                             best_error = running_output_error_level;
                             if (!_temporal_redundancy) {
@@ -321,31 +321,42 @@ namespace wrench {
                                 _application_specs->get_deadline());
                         }
 
-                        for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
-                            std::string hostname_loop = "ComputeHost_" + std::to_string(i);
-                            // std::cout << "Resetting host " << hostname_loop << std::endl;
-                            if (job_tracker->is_a_job_running(hostname_loop) && hostname_loop != hostname) {
-                                // std::cout << "Job is running on " << hostname_loop << ", terminating it" << std::endl;
-                                try {
-                                    _job_manager->terminateJob(
-                                        job_tracker->get_running_job(hostname)->get_compound_job());
+                        if (_stop_running_jobs) {
+                            for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
+                                std::string hostname_loop = "ComputeHost_" + std::to_string(i);
+                                // std::cout << "Resetting host " << hostname_loop << std::endl;
+                                if (job_tracker->is_a_job_running(hostname_loop) && hostname_loop != hostname) {
+                                    // std::cout << "Job is running on " << hostname_loop << ", terminating it" << std::endl;
+                                    try {
+                                        _job_manager->terminateJob(
+                                            job_tracker->get_running_job(hostname)->get_compound_job());
+                                    }
+                                    catch (ExecutionException&) {
+                                        std::cerr << "Tried to terminate job on down host: " << hostname_loop << " for stop running jobs hack" << std::endl;
+                                    }
+                                    job_tracker->untrack_job(hostname_loop);
                                 }
-                                catch (ExecutionException&) {
-                                    // std::cerr << "Tried to terminate job on down host: " << hostname_loop << std::endl;
-                                }
-                                job_tracker->untrack_job(hostname_loop);
+                                _application_specs->reset_running_host(hostname_loop);
                             }
-                            _application_specs->reset_running_host(hostname_loop);
-                        }
-                        job_tracker->untrack_job(hostname);
-
-                        NodeKiller::start_node_killers(this->getSimulation(),
+                            NodeKiller::start_node_killers(this->getSimulation(),
                                                _compute_services,
                                                _application_specs->get_seed(),
                                                false,
                                                _application_specs->get_exponential_distribution(),
                                                _application_specs->get_restart_overhead(),
                                                this->commport);
+                        } else {
+                            std::map<std::string, std::shared_ptr<BareMetalComputeService>> single_host_reset;
+                            single_host_reset.emplace(hostname, _compute_services.at(hostname));
+                            NodeKiller::start_node_killers(this->getSimulation(),
+                                               single_host_reset,
+                                               _application_specs->get_seed(),
+                                               false,
+                                               _application_specs->get_exponential_distribution(),
+                                               _application_specs->get_restart_overhead(),
+                                               this->commport);
+                        }
+                        job_tracker->untrack_job(hostname);
 
                     }
                     else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
@@ -378,7 +389,7 @@ namespace wrench {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Reset the host's entry to nullptr, so that we now know it's idle
-                            // std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
                             WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
                             // NOTE: Why does it not untrack the job immediately after terminating?
                             job_tracker->untrack_job(hostname);
@@ -388,14 +399,19 @@ namespace wrench {
                         if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
-                            // std::cerr << "Host " << hostname.c_str() << " is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            std::cerr << "Host " << hostname.c_str() << " is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
                             _application_specs->reset_running_host(hostname);
 
                             // Cancel the job
                             WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());
                             if (job_tracker->is_a_job_running(hostname)) {
-                                _job_manager->terminateJob(
-                                    job_tracker->get_running_job(hostname)->get_compound_job());
+                                try {
+                                    _job_manager->terminateJob(
+                                        job_tracker->get_running_job(hostname)->get_compound_job());
+                                }
+                                catch (ExecutionException&) {
+                                    std::cerr << "Tried to terminate job on down host: " << hostname << " for host going down" << std::endl;
+                                }
                             }
                         }
                     }
@@ -410,6 +426,7 @@ namespace wrench {
                                 job_tracker->get_running_job(hostname)->get_compound_job());
                         }
                         catch (ExecutionException&) {
+                            std::cerr << "Tried to terminate job on down host: " << hostname << " at the end of the repetition" << std::endl;
                         }
                     }
                 }
