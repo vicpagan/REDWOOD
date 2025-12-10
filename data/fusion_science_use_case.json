@@ -1,0 +1,250 @@
+{
+  "platform": {
+    "num_compute_nodes": 1,
+    "bandwidth_comment": "The peak aggregate bandwidth on Summit is 2.5TBps",
+    "io_read_bandwidth": "1TBps",
+    "io_write_bandwidth": "1TBps"
+  },
+  "failures": {
+    "restart_overhead": 10,
+    "lambda": 0.7,
+    "seed_comment": "If seed value is negative a random seed will be used",
+    "seed": 31212342
+  },
+  "application": {
+    "initial_data_size_comment": "1 MB... it's supposed to be 'small'",
+    "initial_data_size": 1000000,
+    "initial_error_level": 1.0,
+    "tasks": [
+      {
+        "name": "XGC_Simulation",
+        "comment": "Two execution options below, but could do more",
+        "execution_options": [
+          {
+            "name": "full_accuracy",
+            "parallel_efficiency": 0.25,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "This is 100s for a time-step, regardless of input size",
+              "parameters": {
+                "a": 100,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "The output is ~69TB, based on discussion with Eric",
+              "parameters": {
+                "a": 69000000000000.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "other_comment": "Changing the particle-in-cell resolution, but no really info here",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.0
+              }
+            }
+          },
+          {
+            "name": "lower_resolution_1",
+            "parallel_efficiency": 0.25,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "This is 50s for a time-step, regardless of input size",
+              "parameters": {
+                "a": 50,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "Just picked 1/2 the data size. Perhaps it's 1/4?",
+              "parameters": {
+                "a": 34500000000000.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comment": "Changing the particle-in-cell resolution, but no really info here. Just double the error",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 2.0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "ADIOS_Refactoring",
+        "comments": "The values below are based on an SZ3 benchmark on dirt!",
+        "execution_options": [
+          {
+            "name": "do_nothing",
+            "comment": "Parallel efficiency is near 100% it seems",
+            "parallel_efficiency": 0.99,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 1.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.0
+              }
+            }
+          },
+          {
+            "name": "error_10-2",
+            "comment": "Parallel efficiency is near 100% it seems",
+            "parallel_efficiency": 0.99,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000531475,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.000037787,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.01
+              }
+            }
+          },
+          {
+            "name": "error_10-6",
+            "comment": "Parallel efficiency is near 100% it seems",
+            "parallel_efficiency": 0.99,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000639575,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0008855895,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.000001
+              }
+            }
+          },
+          {
+            "name": "error_10-14",
+            "comment": "Parallel efficiency is near 100% it seems",
+            "parallel_efficiency": 0.99,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.000000001374475,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.415447322,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.00000000000001
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "execution": {
+    "num_repeats": 100,
+    "deadline": 10000,
+    "e_fail": 20.0
+  },
+  "scheduling": {
+    "delta_t_scheme_comments": "'fixed', 'compute'",
+    "delta_t_scheme": {
+      "scheme": "fixed",
+      "parameter_comments": "Either a fixed value or a precision value",
+      "parameter": 1.0
+    },
+    "algorithms": {
+      "one_task": ["dynamic"],
+      "multi_task": ["dynamic"]
+    },
+    "hacks": {
+      "temporal_redundancy": true,
+      "stop_running_jobs": false
+    }
+  }
+}
