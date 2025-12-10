@@ -30,7 +30,6 @@ wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_in
 }
 
 double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_compute_nodes) {
-
     // Make a copy of the object
     auto input = this->json_input;
 
@@ -61,7 +60,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
                 auto parallel_efficiency = opt_obj["parallel_efficiency"].to_number<double>();
                 if (num_compute_nodes == 1) {
                     parallel_speedup = 1.0;
-                } else {
+                }
+                else {
                     parallel_speedup = static_cast<double>(num_compute_nodes) * parallel_efficiency;
                 }
             }
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
      "Maximum deadline\n")
     ("step_deadline", po::value<double>(&step_deadline)->required()->value_name("<step deadline>"),
      "Step deadline\n")
-    ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
+    ("lambda", po::value<double>(&lambda)->required()->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
      "Error associated to a failed execution - will override JSON-provided value\n")
@@ -225,8 +225,8 @@ int main(int argc, char** argv) {
     catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
         std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON spec input (file)> "
-            + "--json_data_parallel <JSON speedup input (str or file path)> "
-            + "[--log=controller.threshold=info | --wrench-full-log]";
+            "--min_deadline <min deadline> --max_deadline <max deadline> "
+            "--max_num_nodes <max number of nodes> --lambda <lambda> ";
         cerr << "Usage: " << usage_string << "\n";
         exit(1);
     }
