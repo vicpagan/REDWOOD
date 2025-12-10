@@ -2,8 +2,8 @@
   "platform": {
     "num_compute_nodes": 1,
     "bandwidth_comment": "The peak aggregate bandwidth on Summit is 2.5TBps",
-    "io_read_bandwidth": "1TBps",
-    "io_write_bandwidth": "1TBps"
+    "io_read_bandwidth": "0.5TBps",
+    "io_write_bandwidth": "0.5TBps"
   },
   "failures": {
     "restart_overhead": 10,
