@@ -1,9 +1,9 @@
 {
   "platform": {
     "num_compute_nodes": 1,
-    "bandwidth_comment": "The peak aggregate bandwidth on Summit is 2.5TBps",
-    "io_read_bandwidth": "0.5TBps",
-    "io_write_bandwidth": "0.5TBps"
+    "bandwidth_comment": "The peak aggregate bandwidth on Summit is 2.5TBps... so... what do we do?",
+    "io_read_bandwidth": "100GBps",
+    "io_write_bandwidth": "100GBps"
   },
   "failures": {
     "restart_overhead": 10,
@@ -22,6 +22,7 @@
         "execution_options": [
           {
             "name": "full_accuracy",
+            "comments": "This seems to be the _bad_ efficiency from Eric, but this makes using parallelism a no-go in most cases....",
             "parallel_efficiency": 0.25,
             "t_function": {
               "type":"affine",
