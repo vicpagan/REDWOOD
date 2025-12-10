@@ -92,7 +92,7 @@
       },
       {
         "name": "ADIOS_Refactoring",
-        "comments": "The values below are based on an SZ3 benchmark on dirt!",
+        "comments": "The values below are based on an SZ3 benchmark on dirt02...",
         "execution_options": [
           {
             "name": "do_nothing",
@@ -219,6 +219,77 @@
                 "a": 0.0,
                 "b": 0.0,
                 "c": 1.00000000000001
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Poincaré_Map",
+        "comment": "Only two options for now....",
+        "execution_options": [
+          {
+            "name": "accurate",
+            "comment": "Parallel efficiency is near 100% it seems",
+            "parallel_efficiency": 0.99,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000000144927536,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.000000000000144927536,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.0
+              }
+            }
+          },
+          {
+            "name": "degraded",
+            "comment": "Parallel efficiency is near 100% it seems",
+            "parallel_efficiency": 0.99,
+            "other_comment": "Just arbitrarily made things 2x faster/smaller, with a 2x error, not sure...",
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000000072463768,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000000007246376,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 2.0
               }
             }
           }
