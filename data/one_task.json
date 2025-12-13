@@ -19,7 +19,7 @@
         "execution_options": [
           {
             "name": "option1",
-            "parallel_efficiency": 0.65,
+            "amhdal_parallelizable_fraction": 0.65,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -50,7 +50,7 @@
           },
           {
             "name": "option2",
-            "parallel_efficiency": 0.7,
+            "amhdal_parallelizable_fraction": 0.7,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",

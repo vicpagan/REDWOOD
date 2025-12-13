@@ -22,8 +22,8 @@
         "execution_options": [
           {
             "name": "full_accuracy",
-            "comments": "This seems to be the _bad_ efficiency from Eric, but this makes using parallelism a no-go in most cases....",
-            "parallel_efficiency": 0.25,
+            "comments": "The results from Eric seem to indicate 25% parallel eff...We have to look at them to come up with some model",
+            "amhdal_parallelizable_fraction": 0.4,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -57,7 +57,7 @@
           },
           {
             "name": "lower_resolution_1",
-            "parallel_efficiency": 0.25,
+            "amhdal_parallelizable_fraction": 0.50,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
@@ -98,7 +98,7 @@
           {
             "name": "do_nothing",
             "comment": "Parallel efficiency is near 100% it seems",
-            "parallel_efficiency": 0.99,
+            "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -130,7 +130,7 @@
           {
             "name": "error_10-2",
             "comment": "Parallel efficiency is near 100% it seems",
-            "parallel_efficiency": 0.99,
+            "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -162,7 +162,7 @@
           {
             "name": "error_10-6",
             "comment": "Parallel efficiency is near 100% it seems",
-            "parallel_efficiency": 0.99,
+            "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -194,7 +194,7 @@
           {
             "name": "error_10-14",
             "comment": "Parallel efficiency is near 100% it seems",
-            "parallel_efficiency": 0.99,
+            "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -232,7 +232,7 @@
           {
             "name": "accurate",
             "comment": "Parallel efficiency is near 100% it seems",
-            "parallel_efficiency": 0.99,
+            "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -264,7 +264,7 @@
           {
             "name": "degraded",
             "comment": "Parallel efficiency is near 100% it seems",
-            "parallel_efficiency": 0.99,
+            "amhdal_parallelizable_fraction": 0.99,
             "other_comment": "Just arbitrarily made things 2x faster/smaller, with a 2x error, not sure...",
             "t_function": {
               "type":"affine",

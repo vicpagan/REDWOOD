@@ -42,10 +42,10 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
         for (auto& option : task_options) {
             auto opt_obj = option.as_object();
             double parallel_speedup;
-            if (opt_obj.contains("speedup_measurements") && opt_obj.contains("parallel_efficiency")) {
+            if (opt_obj.contains("speedup_measurements") && opt_obj.contains("amhdal_parallelizable_fraction")) {
                 throw std::invalid_argument(
                     "Speedup spec for an option of task " + task_name +
-                    " contains both a 'speedup_measurements' and a 'parallel efficiency' key, which is not allowed");
+                    " contains both a 'speedup_measurements' and a 'amhdal_parallelizable_fraction' key, which is not allowed");
             }
             if (opt_obj.contains("speedup_measurements")) {
                 auto speedup_array = opt_obj["speedup_measurements"].as_array();
@@ -56,14 +56,9 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
                 parallel_speedup = speedup_array[std::min(num_compute_nodes - 1, speedup_array.size() - 1)].
                     to_number<double>();
             }
-            else if (opt_obj.contains("parallel_efficiency")) {
-                auto parallel_efficiency = opt_obj["parallel_efficiency"].to_number<double>();
-                if (num_compute_nodes == 1) {
-                    parallel_speedup = 1.0;
-                }
-                else {
-                    parallel_speedup = static_cast<double>(num_compute_nodes) * parallel_efficiency;
-                }
+            else if (opt_obj.contains("amhdal_parallelizable_fraction")) {
+                auto amhdal_parallelizable_fraction = opt_obj["amhdal_parallelizable_fraction"].to_number<double>();
+                parallel_speedup = 1.0 / (1. - amhdal_parallelizable_fraction + amhdal_parallelizable_fraction /  static_cast<double>(num_compute_nodes));
             }
             else {
                 throw std::invalid_argument("Speedup spec invalid/missing for an option of task " + task_name);
@@ -102,8 +97,6 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     // Tweak the lambda value in input to scale up the failure rate
     double lambda = input["failures"].get_object()["lambda"].to_number<double>();
     input["failures"].get_object()["lambda"] = static_cast<double>(num_compute_nodes) * lambda;
-
-    // std::cerr << "TWEAKED " << input << "\n";
 
     auto application_specs = wrench::ApplicationSpecs::create_application_specs(
         input.at("platform").as_object(),
