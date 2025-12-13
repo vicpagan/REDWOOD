@@ -9,7 +9,7 @@
 namespace wrench {
 
     double SchedulingAlgorithmDynamic::get_optimal_expected_error() const {
-        return _preprocessed_decisions.at(_application_specs->get_task(0)).at(static_cast<size_t>(_application_specs->get_deadline())).second;
+        return _preprocessed_decisions.at(_application_specs->get_task(0)).at(static_cast<size_t>(std::ceil(_application_specs->get_deadline() / _delta_t))).second;
     }
 
     void SchedulingAlgorithmDynamic::preprocess_decisions(ProbabilityComputation* probability_computation,
@@ -148,6 +148,7 @@ namespace wrench {
             }
         }
         probability_computation->set_delta_t(selected_delta_t);
+        _delta_t = selected_delta_t;
 
         const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
         const auto R = static_cast<long>(std::ceil(_application_specs->get_restart_overhead() / selected_delta_t));

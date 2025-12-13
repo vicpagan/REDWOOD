@@ -9,6 +9,8 @@
     - Need to make sure hosts that are down still get properly reset and wait
     - Give option to disable this hack
   - Change delta calculation to squeeze on expected error
+    - Issue comes up when trying to calculate lower bound when restart overhead is 0
+    - Solution: For lower bound, start the summation at u = 1
   - Calculate delta based on a single variable
     - By messing with the other variables, we can see how "sensitive" the calcation is to other variables
     - Try this with every independent variable
@@ -24,19 +26,30 @@
       - "Best" first (temp redundancy is based on EV and starts at the highest)
     - Static decision algorithm should also use decision tree and craft it based on whatever heuristic is being used
       - This would include changing the current implementation in Controller as well
+  - Keep track of node status to make sure that we are not trying to schedule something on a host that is down
+    - Need to separate host being down from the job tracker since right now they are conflated
+    - Remove restarting the node killer for job cancelling hack since that causes issues
+  - Test heuristics for stop running jobs hack (no sense in experimenting with this by itself)
+    - Never cancel other hosts
+    - Always cancel other hosts
+    - Cancel based on expected error recalculation at current time
+  - In-situ execution case implementation
+    - Add an option in the JSON to enable/disable in-situ execution
+    - All it does is change the recursion failure to start from the beginning instead of the i-th task again
 
 BUGS:
   - Need to make sure hosts that are down still get properly reset and wait instead of skipping past the restart overhead
 
 EXPERIMENTS:
-    - Test cancel useless runs of tasks upon a single host completing hack
-    - Test delta squeeze vs execution speed
-    - Test one task vs chain?
-    - Test basic heuristics on one host and one task/chain with temp redundancy
-      - Graph would look like different colored sets of dots for each heuristic and best fit lines to compare them
+  - Test cancel useless runs of tasks upon a single host completing hack
+  - Test delta squeeze vs execution speed
+  - Test one task vs chain?
+  - Test basic heuristics on one host and one task/chain with temp redundancy
+    - Graph would look like different colored sets of dots for each heuristic and best fit lines to compare them
 
 NOTES:
-    - With the stop_running_jobs hack, the difference in NodeKiller calls changes the timing of when hosts are killed
-      - This means there's a difference between runs with and without the hack
-      - Does this matter in the case of comparing the results of runs with and without the hack?
-        - Probably not, since with enough runs the differences should average out
+  - With the stop_running_jobs hack, the difference in NodeKiller calls changes the timing of when hosts are killed
+    - This means there's a difference between runs with and without the hack
+    - Does this matter in the case of comparing the results of runs with and without the hack?
+      - Probably not, since with enough runs the differences should average out
+    - NOTE: SOLVABLE BY TRACKING HOST STATUS AS WELL AS JOB TRACKER STATUS

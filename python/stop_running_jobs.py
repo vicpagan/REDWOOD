@@ -637,7 +637,9 @@ if __name__ == "__main__":
     param_grid = {
         'failures.lambda': (0.4, 0.9),        # Moderate failure rates
         'execution.deadline': (3000, 8000),   # More reasonable deadlines
-        'task_time_slope': (0.8, 2.5)         # Moderate task time variation
+        'task_time_slope': (0.8, 2.5),        # Moderate task time variation
+        'num_hosts': (1, 8),                  # Number of compute nodes
+        'num_tasks': (1, 4)                   # Number of tasks
     }
 
     # Run 100 different configurations, each repeated 1000 times with different seeds
