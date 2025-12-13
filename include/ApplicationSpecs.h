@@ -39,6 +39,9 @@ namespace wrench {
             int num_children;
             bool is_leaf;
             double cumulative_error_factor;
+            double cumulative_data_size_factor;
+
+
 
             ExecOptionDecisionNode(std::string task, std::string execution_option, const bool is_leaf) :
                 task(std::move(task)),
