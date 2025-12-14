@@ -3,63 +3,75 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 import sys
-import matplotlib.colors as mcolors
+import bisect
+from matplotlib.patches import Rectangle
+from matplotlib.patches import Patch
 
-# Read JSON from stdin or file
-if len(sys.argv) > 1:
-    with open(sys.argv[1], 'r') as f:
-        json_object = json.load(f)
-else:
-    json_object = json.load(sys.stdin)
+expected_error_thresholds = [1.5, 2.0, 3.0, 4.0, 5.0, 10.0]
+colors = plt.cm.viridis(np.linspace(0, 0.9, len(expected_error_thresholds)))
 
-data = {}
-for key, values in json_object.items():
-    data[float(key)] = values
-    num_procs = len(values)
+def plot_rectangle(ax, x, y, expected_error):
+    index = bisect.bisect_left(expected_error_thresholds, expected_error)
 
-    
-
-# Convert to numpy array
-d_values = np.array(sorted(data.keys()))
-n_values = np.arange(1, num_procs+1)
-Z = np.array([data[d] for d in d_values])
-
-# Create meshgrid for contour plot
-D, N = np.meshgrid(d_values, n_values)
-
-# Create figure with subplots
-fig, (ax1) = plt.subplots(1, 1, figsize=(16, 6))
-
-# Contour plot
-# im = ax1.imshow(Z.T, aspect='auto', origin='lower', cmap='viridis',
-#                 extent=[d_values.min(), d_values.max(),
-#                         n_values.min(), n_values.max()])
-
-# Optional: Add contour lines with step-like appearance
-# contour_lines = ax1.contour(D, N, Z.T, levels=10, colors='white',
-#                             linewidths=0.5, alpha=0.6)
-# ax1.clabel(contour_lines, inline=True, fontsize=12, fmt='%.2f')
-
-# Add colorbar
-# plt.colorbar(im, ax=ax1)
-
-unique_vals = np.unique(Z)
-n_colors = min(len(unique_vals), 20)  # Limit to 20 colors max
-selected_vals = np.linspace(Z.min(), Z.max(), n_colors)
-
-norm = mcolors.BoundaryNorm(selected_vals, ncolors=256)
-
-im = ax1.imshow(Z.T, aspect='auto', origin='lower', cmap='viridis', norm=norm,
-                extent=[d_values.min(), d_values.max(),
-                        n_values.min(), n_values.max()])
-
-# Colorbar with value labels
-cbar = plt.colorbar(im, ax=ax1, ticks=selected_vals, format='%.2f')
+    ax.add_patch(Rectangle((x, y), 1, 1, facecolor=colors[index], linewidth=0.5, edgecolor='white'))
 
 
-ax1.set_xlabel('deadline (sec)', fontsize=12)
-ax1.set_ylabel('number of compute nodes', fontsize=12)
-ax1.set_title('Expected error', fontsize=14)
+if __name__ == '__main__':
 
-plt.tight_layout()
-plt.show()
+    # Read JSON from stdin or file
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as f:
+            json_object = json.load(f)
+    else:
+        json_object = json.load(sys.stdin)
+
+
+    data = {}
+    for key, values in json_object.items():
+        data[float(key)] = values
+    max_num_procs = len(data[list(data.keys())[0]])
+
+
+    # Paint tiles
+    fig, ax = plt.subplots()
+    for deadline_idx, deadline in enumerate(data):
+        for num_procs in range(1, len(data[deadline])+1):
+            expected_error = data[deadline][num_procs-1]
+            plot_rectangle(ax, deadline_idx+1, num_procs-0.5, expected_error)
+
+
+    ax.set_xlabel('deadline (sec)', fontsize=12)
+    ax.set_ylabel('number of compute nodes', fontsize=12)
+    ax.set_title('Near-optimal expected error', fontsize=14)
+
+    ax.set_yticks(np.arange(1, max_num_procs + 1))
+    ax.set_yticks(np.arange(1.5, max_num_procs), minor=True)
+    ax.tick_params(axis='y', which='minor', length=4)  # Adjust length as needed
+    ax.tick_params(axis='y', which='major', length=0)  # Hide major ticks if desired
+
+    ax.set_xticks(np.arange(1.5, len(data) + 1))  # Set major tick positions
+    ax.set_xticklabels([int(x) for x in data.keys()])  # Set labels for those positions
+    ax.set_xticks(np.arange(1.5, len(data) + 1), minor=True)  # Minor ticks between
+    ax.tick_params(axis='x', which='minor', length=4)  # Adjust length as needed
+    ax.tick_params(axis='x', which='major', length=0)  # Hide major ticks if desired
+
+    ax.set_xlim(1, len(data.keys()))
+    ax.set_ylim(0.5, max_num_procs + 0.5)
+
+    # Create legend elements
+    legend_elements = []
+    for i, color in enumerate(colors):
+        if i == 0:
+            label = f"≤ {expected_error_thresholds[0]}"
+        elif i < len(expected_error_thresholds):
+            label = f"≤ {expected_error_thresholds[i]}"
+        else:
+            label = f"> {expected_error_thresholds[-1]}"
+
+        legend_elements.append(Patch(facecolor=color, label=label))
+
+    # Add legend to the plot
+    ax.legend(handles=legend_elements, handlelength=1.0, bbox_to_anchor=(1.20, 0.5), loc="center right")
+
+    plt.tight_layout()
+    plt.show()
