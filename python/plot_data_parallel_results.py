@@ -7,38 +7,23 @@ import bisect
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Patch
 
-expected_error_thresholds = [1.5, 2.0, 3.0, 4.0, 5.0, 10.0]
+expected_error_thresholds = [1.5, 2.0, 3.0, 4.0, 5.0, 10]
 colors = plt.cm.viridis(np.linspace(0, 0.9, len(expected_error_thresholds)))
 
-def plot_rectangle(ax, x, y, expected_error):
-    index = bisect.bisect_left(expected_error_thresholds, expected_error)
 
-    ax.add_patch(Rectangle((x, y), 1, 1, facecolor=colors[index], linewidth=0.5, edgecolor='white'))
+def plot_heatmap(data):
+    def plot_rectangle(ax: plt.figure, x: int, y: int, expected_error: float):
+        index = bisect.bisect_left(expected_error_thresholds, expected_error)
+        ax.add_patch(Rectangle((x, y), 1, 1, facecolor=colors[index], linewidth=0.5, edgecolor='white'))
 
-
-if __name__ == '__main__':
-
-    # Read JSON from stdin or file
-    if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r') as f:
-            json_object = json.load(f)
-    else:
-        json_object = json.load(sys.stdin)
-
-
-    data = {}
-    for key, values in json_object.items():
-        data[float(key)] = values
     max_num_procs = len(data[list(data.keys())[0]])
-
 
     # Paint tiles
     fig, ax = plt.subplots()
     for deadline_idx, deadline in enumerate(data):
-        for num_procs in range(1, len(data[deadline])+1):
-            expected_error = data[deadline][num_procs-1]
-            plot_rectangle(ax, deadline_idx+1, num_procs-0.5, expected_error)
-
+        for num_procs in range(1, len(data[deadline]) + 1):
+            expected_error = data[deadline][num_procs - 1]
+            plot_rectangle(ax, deadline_idx + 1, num_procs - 0.5, expected_error)
 
     ax.set_xlabel('deadline (sec)', fontsize=12)
     ax.set_ylabel('number of PEs', fontsize=12)
@@ -74,4 +59,51 @@ if __name__ == '__main__':
     ax.legend(handles=legend_elements, handlelength=1.0, bbox_to_anchor=(1.20, 0.5), loc="center right")
 
     plt.tight_layout()
-    plt.show()
+    sys.stderr.write("Figure saved in ./heatmap.pdf\n")
+    plt.savefig("./heatmap.pdf")
+
+def plot_curves(data):
+    max_num_procs = len(data[list(data.keys())[0]])
+
+    # Paint tiles
+    fig, ax = plt.subplots()
+    ax.set_xlabel('Number of PEs', fontsize=12)
+    ax.set_ylabel('Near-optimal expected error', fontsize=12)
+    # ax.set_title('Near-optimal expected error', fontsize=14)
+    ax.grid(True)
+
+    max_min_error = 0.0
+    for deadline in data.keys():
+        ax.plot(range(1, len(data[deadline]) + 1), data[deadline], label="deadline (sec):" + str(deadline))
+        max_min_error = max(min(data[deadline]), max_min_error)
+
+    ax.set_xticks(range(1, max_num_procs+1))  # Set major tick positions
+
+    # Compute ok limits
+    ax.set_ylim(1.0, max_min_error + 0.5)
+
+
+    ax.legend()
+    plt.tight_layout()
+    sys.stderr.write("Figure saved in ./curves.pdf\n")
+    plt.savefig("./curves.pdf")
+
+def main():
+    # Read JSON from stdin or file
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as f:
+            json_object = json.load(f)
+    else:
+        json_object = json.load(sys.stdin)
+
+    data = {}
+    for key, values in json_object.items():
+        data[float(key)] = values
+
+    plot_heatmap(data)
+    plot_curves(data)
+
+
+if __name__ == '__main__':
+    main()
+
