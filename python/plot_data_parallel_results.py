@@ -7,14 +7,15 @@ import bisect
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Patch
 
-expected_error_thresholds = [1.5, 2.0, 3.0, 4.0, 5.0, 10]
-colors = plt.cm.viridis(np.linspace(0, 0.9, len(expected_error_thresholds)))
 
 
 def plot_heatmap(data):
-    def plot_rectangle(ax: plt.figure, x: int, y: int, expected_error: float):
+    def plot_rectangle(ax: plt.figure, x: float, y: float, expected_error: float):
         index = bisect.bisect_left(expected_error_thresholds, expected_error)
         ax.add_patch(Rectangle((x, y), 1, 1, facecolor=colors[index], linewidth=0.5, edgecolor='white'))
+
+    expected_error_thresholds = [1.5, 2.0, 3.0, 4.0, 5.0, 10]
+    colors = plt.cm.viridis(np.linspace(0, 0.9, len(expected_error_thresholds)))
 
     max_num_procs = len(data[list(data.keys())[0]])
 
@@ -64,6 +65,8 @@ def plot_heatmap(data):
 
 def plot_curves(data):
     max_num_procs = len(data[list(data.keys())[0]])
+    colors = plt.cm.viridis(np.linspace(0, 0.9, len(data.keys())))
+
 
     # Paint tiles
     fig, ax = plt.subplots()
@@ -73,15 +76,20 @@ def plot_curves(data):
     ax.grid(True)
 
     max_min_error = 0.0
+    color_idx = 0
     for deadline in data.keys():
-        ax.plot(range(1, len(data[deadline]) + 1), data[deadline], label="deadline (sec):" + str(deadline))
-        max_min_error = max(min(data[deadline]), max_min_error)
+        color = colors[color_idx]
+        ax.plot(range(1, len(data[deadline]) + 1), data[deadline], '.-', label="deadline:" + str(int(deadline)) + "s", color=color, linewidth=2)
+        min_error = min(data[deadline])
+        best_num_procs = 1 + data[deadline].index(min_error)
+        ax.plot([best_num_procs], [min_error], 'o', color=color, markersize=6)
+        max_min_error = max(min_error, max_min_error)
+        color_idx += 1
 
     ax.set_xticks(range(1, max_num_procs+1))  # Set major tick positions
 
     # Compute ok limits
-    ax.set_ylim(1.0, max_min_error + 0.5)
-
+    ax.set_ylim(1.0, max_min_error + 0.2)
 
     ax.legend()
     plt.tight_layout()
