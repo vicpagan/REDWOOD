@@ -23,7 +23,7 @@
           {
             "name": "full_accuracy",
             "comments": "The results from Eric seem to indicate 25% parallel eff...We have to look at them to come up with some model",
-            "amhdal_parallelizable_fraction": 0.4,
+            "amhdal_parallelizable_fraction": 0.7,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
@@ -301,7 +301,7 @@
   "execution": {
     "num_repeats": 100,
     "deadline": 10000,
-    "e_fail": 20.0
+    "e_fail": 10.0
   },
   "scheduling": {
     "delta_t_scheme_comments": "'fixed', 'compute'",
