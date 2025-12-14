@@ -41,18 +41,18 @@ if __name__ == '__main__':
 
 
     ax.set_xlabel('deadline (sec)', fontsize=12)
-    ax.set_ylabel('number of compute nodes', fontsize=12)
+    ax.set_ylabel('number of PEs', fontsize=12)
     ax.set_title('Near-optimal expected error', fontsize=14)
 
     ax.set_yticks(np.arange(1, max_num_procs + 1))
     ax.set_yticks(np.arange(1.5, max_num_procs), minor=True)
-    ax.tick_params(axis='y', which='minor', length=4)  # Adjust length as needed
+    ax.tick_params(axis='y', which='minor', length=0)  # Adjust length as needed
     ax.tick_params(axis='y', which='major', length=0)  # Hide major ticks if desired
 
     ax.set_xticks(np.arange(1.5, len(data) + 1))  # Set major tick positions
     ax.set_xticklabels([int(x) for x in data.keys()])  # Set labels for those positions
     ax.set_xticks(np.arange(1.5, len(data) + 1), minor=True)  # Minor ticks between
-    ax.tick_params(axis='x', which='minor', length=4)  # Adjust length as needed
+    ax.tick_params(axis='x', which='minor', length=0)  # Adjust length as needed
     ax.tick_params(axis='x', which='major', length=0)  # Hide major ticks if desired
 
     ax.set_xlim(1, len(data.keys()))
