@@ -27,14 +27,6 @@ namespace wrench {
         _exponential_distribution = std::exponential_distribution<double>(_lambda);
         _seed = boost::json::value_to<int>(failure_spec.at("seed"));
 
-        for (int i = 0; i < _num_compute_nodes; i++) {
-            std::string hostname = "ComputeHost_" + std::to_string(i);
-            _running_hosts.emplace(hostname, std::map<std::string, std::variant<std::string, double>>());
-            _running_hosts.at(hostname).emplace("Current Task", "");
-            _running_hosts.at(hostname).emplace("Current Exec Option", "");
-            _running_hosts.at(hostname).emplace("Current Task Start Time", -1.0);
-        }
-
         for (const auto& task : application_spec.at("tasks").as_array()) {
             auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
             _task_order.push_back(task_name);
@@ -56,39 +48,6 @@ namespace wrench {
         const boost::json::object& scheduling_spec) {
 
         return std::make_shared<ApplicationSpecs>(platform_spec, failure_spec, application_spec, execution_spec, scheduling_spec);
-    }
-
-    void ApplicationSpecs::update_running_host(const std::string& hostname, const std::string& task,
-                                               const std::string &exec_option, double start_time) {
-
-        if (_running_hosts.find(hostname) == _running_hosts.end()) {
-            throw std::invalid_argument("Hostname '" + hostname + "' not found in running hosts");
-        }
-
-        _running_hosts.at(hostname).clear();
-        _running_hosts.at(hostname).emplace("Current Task", task);
-        _running_hosts.at(hostname).emplace("Current Exec Option", exec_option);
-        _running_hosts.at(hostname).emplace("Current Task Start Time", start_time);
-    }
-
-    void ApplicationSpecs::reset_running_host(const std::string& hostname) {
-        if (_running_hosts.find(hostname) == _running_hosts.end()) {
-            throw std::invalid_argument("Hostname '" + hostname + "' not found in running hosts");
-        }
-        _running_hosts.at(hostname).clear();
-        _running_hosts.at(hostname).emplace("Current Task", "");
-        _running_hosts.at(hostname).emplace("Current Exec Option", "");
-        _running_hosts.at(hostname).emplace("Current Task Start Time", -1.0);
-    }
-
-    void ApplicationSpecs::reset_all_running_hosts() {
-        for (int i = 0; i < _num_compute_nodes; i++) {
-            std::string hostname = "ComputeHost_" + std::to_string(i);
-            _running_hosts.at(hostname).clear();
-            _running_hosts.at(hostname).emplace("Current Task", "");
-            _running_hosts.at(hostname).emplace("Current Exec Option", "");
-            _running_hosts.at(hostname).emplace("Current Task Start Time", -1.0);
-        }
     }
 
     std::string ApplicationSpecs::get_task(const int index) {

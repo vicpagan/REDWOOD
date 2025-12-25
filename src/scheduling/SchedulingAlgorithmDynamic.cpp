@@ -4,7 +4,7 @@
 
 #include "scheduling/SchedulingAlgorithmDynamic.h"
 #include "ProbabilityComputation.h"
-#include "JobTracker.h"
+#include "SystemState.h"
 
 namespace wrench {
 
@@ -180,7 +180,7 @@ namespace wrench {
     }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmDynamic::make_decisions(
-        JobTracker* job_tracker,
+        SystemState* system_state_tracker,
         ProbabilityComputation* probability_computation,
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const std::string& task_to_schedule,
@@ -193,8 +193,10 @@ namespace wrench {
 
         // Make a decision for each host that's currently idle
         // All these decisions are independent so that makes it easy
-        for (const auto& [hostname, job] : *job_tracker) {
-            if (job) continue; // Host is not idle
+        for (const auto& entry : *system_state_tracker) {
+            std::string hostname = entry.first;
+
+            if (!system_state_tracker->is_host_idle(hostname)) continue; // Host is not idle
 
             if (_preprocessed_decisions.empty()) {
                 throw std::invalid_argument("Preprocessed decisions are not available");

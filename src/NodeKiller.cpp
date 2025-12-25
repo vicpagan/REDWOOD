@@ -9,6 +9,7 @@ WRENCH_LOG_CATEGORY(node_killer, "Log category for HostSwitcher");
 namespace wrench {
 
     std::map<std::string, std::shared_ptr<NodeKiller>> NodeKiller::_node_killers;
+    std::map<std::string, std::default_random_engine> NodeKiller::_node_killers_generators;
 
     /**
      * @grief Constructor
@@ -20,7 +21,7 @@ namespace wrench {
      * @param hostname: the hostname of the host on which this service runs
      */
     NodeKiller::NodeKiller(
-        const std::default_random_engine rng,
+        std::default_random_engine *rng,
         const std::exponential_distribution<double> exponential_distribution,
         const double restart_overhead,
         const std::string& victim_host,
@@ -41,7 +42,7 @@ namespace wrench {
         TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_RED);
         WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
         while (true) {
-            double sleep_time = _exponential_distribution(_rng);
+            double sleep_time = _exponential_distribution(*_rng);
             // std::cout << "Host " << _victim_host << " will run for " << sleep_time << " seconds" << std::endl;
             Simulation::sleep(sleep_time);
             WRENCH_INFO("Turning host %s \"off\"", _victim_host.c_str());
@@ -74,9 +75,17 @@ namespace wrench {
         std::exponential_distribution<double> distribution,
         const double restart_overhead,
         S4U_CommPort* notify_commport) {
+
+        if (_node_killers_generators.find(victim) == _node_killers_generators.end()) {
+            if (seed == -1) {
+                throw std::invalid_argument("No existing RNG for existing NodeKiller victim '" + victim + "' during reset");
+            }
+            _node_killers_generators[victim] = std::default_random_engine(seed);
+        }
+
         // Start the NodeKiller service
         auto murderer = std::make_shared<NodeKiller>(
-            std::default_random_engine(seed),
+            &_node_killers_generators[victim],
             distribution,
             restart_overhead,
             victim, notify_commport,
@@ -85,7 +94,6 @@ namespace wrench {
         murderer->start(murderer, true, false); // Daemonized, no auto-restart
         return murderer;
     }
-
 
     /**
      * @brief Start a node killer on each host
@@ -102,6 +110,7 @@ namespace wrench {
         if (reset_seed) {
             seed = initial_seed;
         }
+        _node_killers_generators.clear();
         for (auto const& cs : compute_services) {
             auto victim_hostname = cs.second->getHosts().at(0);
             // Kill an existing node killer if any
@@ -109,8 +118,44 @@ namespace wrench {
                 _node_killers[victim_hostname]->killActor(); // brutal
             }
             // Start a node killer (note the seed++ there)
-            _node_killers[victim_hostname] = NodeKiller::start_node_killer(
+            _node_killers[victim_hostname] = start_node_killer(
                 simulation, victim_hostname, seed++, distribution, restart_overhead, notify_commport);
+        }
+    }
+
+    void NodeKiller::reset_node_killer(Simulation *simulation,
+        const std::string &victim_hostname,
+        std::exponential_distribution<double> distribution,
+        const double restart_overhead,
+        S4U_CommPort *notify_commport) {
+
+        if (_node_killers.find(victim_hostname) != _node_killers.end()) {
+            _node_killers[victim_hostname]->killActor();
+
+            _node_killers[victim_hostname] = start_node_killer(
+                simulation,
+                victim_hostname,
+                -1,
+                distribution,
+                restart_overhead,
+                notify_commport);
+        }
+    }
+
+    void NodeKiller::reset_all_node_killers(Simulation* simulation,
+        const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
+        compute_services,
+        std::exponential_distribution<double> distribution,
+        const double restart_overhead,
+        S4U_CommPort* notify_commport) {
+
+        for (auto const& cs : compute_services) {
+            auto victim_hostname = cs.second->getHosts().at(0);
+            reset_node_killer(simulation,
+                victim_hostname,
+                distribution,
+                restart_overhead,
+                notify_commport);
         }
     }
 }

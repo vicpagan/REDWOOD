@@ -9,11 +9,11 @@
 
 #include "ApplicationSpecs.h"
 #include "ProbabilityComputation.h"
-#include "JobTracker.h"
+#include "SystemState.h"
 #include "OptionComparatorFunction.h"
 
 namespace wrench {
-    class JobTracker;
+    class SystemState;
 
     class SchedulingAlgorithm {
     public:
@@ -47,7 +47,7 @@ namespace wrench {
             double remaining_time) = 0;
 
         virtual std::vector<SchedulingDecision> make_decisions(
-            JobTracker* job_tracker,
+            SystemState* job_tracker,
             ProbabilityComputation* probability_computation,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             const std::string& task_to_schedule,
@@ -66,8 +66,6 @@ namespace wrench {
         void reset_preprocessed_decisions() {
             _preprocessed_decisions.clear();
         }
-
-
 
     protected:
         std::shared_ptr<ApplicationSpecs> _application_specs;

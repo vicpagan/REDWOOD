@@ -18,7 +18,7 @@ namespace wrench {
         };
 
         std::vector<SchedulingDecision> make_decisions(
-            JobTracker *job_tracker,
+            SystemState *system_state_tracker,
             ProbabilityComputation *probability_computation,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
                 (double, double)> > > > &exec_options,

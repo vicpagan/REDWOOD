@@ -23,7 +23,7 @@ class SchedulingAlgorithm;
 
 namespace wrench {
     class NodeKiller;
-    class JobTracker;
+    class SystemState;
 
     /**
      *  @brief An Execution Controller implementation
@@ -40,17 +40,17 @@ namespace wrench {
             const std::shared_ptr<SimpleStorageService>& storage_service,
             const std::string& hostname);
 
-    protected:
 
     private:
         int main() override;
 
-        void submit_job(const std::shared_ptr<JobTracker> &job_tracker,
-                                                           const std::string& task_name,
-                                                           const std::string& execution_option,
-                                                           double running_output_data_size,
-                                                           double running_output_error_level,
-                                                           const std::string& hostname);
+        void restart_system() const;
+
+        void submit_job(const std::string& task_name,
+                        const std::string& execution_option,
+                        double running_output_data_size,
+                        double running_output_error_level,
+                        const std::string& hostname);
 
         std::shared_ptr<ApplicationSpecs> _application_specs;
 
@@ -64,6 +64,7 @@ namespace wrench {
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const std::shared_ptr<SimpleStorageService> _storage_service;
 
+        std::shared_ptr<SystemState> _system_state_tracker;
         std::shared_ptr<JobManager> _job_manager;
 
         long _num_repeats;
