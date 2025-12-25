@@ -86,8 +86,7 @@ set(SIMULATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
-        src/RunningJob.cpp
-        src/JobTracker.cpp
+        src/SystemState.cpp
         src/Utils.cpp
         include/PlatformCreator.h
         include/NodeKiller.h
@@ -98,8 +97,7 @@ set(SIMULATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
-        include/RunningJob.h
-        include/JobTracker.h
+        include/SystemState.h
         include/Utils.h
 )
 
@@ -120,6 +118,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
         include/ApplicationSpecs.h
@@ -127,6 +126,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
+        include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
 )

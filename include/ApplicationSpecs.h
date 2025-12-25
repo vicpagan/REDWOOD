@@ -41,14 +41,13 @@ namespace wrench {
             double cumulative_error_factor;
             double cumulative_data_size_factor;
 
-
-
             ExecOptionDecisionNode(std::string task, std::string execution_option, const bool is_leaf) :
                 task(std::move(task)),
                 execution_option(std::move(execution_option)),
                 num_children(0),
                 is_leaf(is_leaf),
-                cumulative_error_factor(1.0) {
+                cumulative_error_factor(1.0),
+                cumulative_data_size_factor(1.0) {
             }
 
             static std::shared_ptr<ExecOptionDecisionNode> create_decision_node(std::string task, std::string execution_option, const bool is_leaf) {
@@ -95,13 +94,6 @@ namespace wrench {
         std::exponential_distribution<double> get_exponential_distribution() const { return _exponential_distribution; }
         int get_seed() const { return _seed; }
 
-        void update_running_host(const std::string& hostname, const std::string& task,
-                                 const std::string& exec_option, double start_time);
-
-        void reset_running_host(const std::string& hostname);
-
-        void reset_all_running_hosts();
-
         std::string get_task(int index);
 
     protected:
@@ -120,7 +112,6 @@ namespace wrench {
         std::vector<std::string> _task_order;
         int _num_tasks;
         std::shared_ptr<ExecOptionDecisionTree> _exec_option_decision_tree;
-        std::map<std::string, std::map<std::string, std::variant<std::string, double>>> _running_hosts;
     };
 }
 

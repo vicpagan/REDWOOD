@@ -22,7 +22,7 @@ namespace wrench {
     public:
         // Constructor
         NodeKiller(
-            std::default_random_engine rng,
+            std::default_random_engine *rng,
             std::exponential_distribution<double> exponential_distribution,
             double restart_overhead,
             const std::string& victim_host,
@@ -38,6 +38,19 @@ namespace wrench {
                                 double restart_overhead,
                                 S4U_CommPort* notify_commport);
 
+        static void reset_node_killer(Simulation *simulation,
+                                    const std::string &victim_host,
+                                    std::exponential_distribution<double> distribution,
+                                    double restart_overhead,
+                                    S4U_CommPort *notify_commport);
+
+        static void reset_all_node_killers(Simulation* simulation,
+                                        const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
+                                        compute_services,
+                                        std::exponential_distribution<double> distribution,
+                                        double restart_overhead,
+                                        S4U_CommPort* notify_commport);
+
     private:
         [[noreturn]] int main() override;
         static std::shared_ptr<NodeKiller> start_node_killer(Simulation* simulation,
@@ -48,12 +61,14 @@ namespace wrench {
                                                              S4U_CommPort* notify_commport);
 
         static std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
+        static std::map<std::string, std::default_random_engine> _node_killers_generators;
 
-        std::default_random_engine _rng;
+        std::default_random_engine *_rng;
         std::exponential_distribution<double> _exponential_distribution;
         double _restart_overhead;
         std::string _victim_host;
         S4U_CommPort* _notify_commport;
+
     };
 } // namespace wrench
 #endif//NODE_KILLER_H

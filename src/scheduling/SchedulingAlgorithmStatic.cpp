@@ -4,7 +4,7 @@
 
 #include "scheduling/SchedulingAlgorithmStatic.h"
 #include "ProbabilityComputation.h"
-#include "JobTracker.h"
+#include "SystemState.h"
 
 namespace wrench {
 
@@ -57,7 +57,7 @@ namespace wrench {
     }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmStatic::make_decisions(
-        JobTracker* job_tracker,
+        SystemState* system_state_tracker,
         ProbabilityComputation* probability_computation,
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const std::string& task_to_schedule,
@@ -82,8 +82,10 @@ namespace wrench {
         }
 
         // Assign decision for each idle host
-        for (const auto& [hostname, job] : *job_tracker) {
-            if (job) continue; // Host is busy
+        for (const auto& entry : *system_state_tracker) {
+            std::string hostname = entry.first;
+            if (!system_state_tracker->is_host_idle(hostname)) continue; // Host is busy
+
             decisions.push_back({hostname, task_to_schedule, task_exec_option_decisions[task_to_schedule]});
         }
         return decisions;
