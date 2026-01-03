@@ -251,6 +251,7 @@ namespace wrench {
                                 initial_data_size, initial_error_level,
                                 _application_specs->get_deadline());
 
+                _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
                 /* Loop until an event message arrives */
                 while (true) {
                     // Invoke the scheduler
@@ -283,7 +284,7 @@ namespace wrench {
 
                         auto job_task_name = success_event->job->getName();
                         if (job_task_name.compare(0, current_task.length(), current_task)) {
-                            std::cout << "Got a job success message for the wrong task." << std::endl;
+                            // std::cout << "Got a job success message for the wrong task." << std::endl;
                             _system_state_tracker->reset_host(success_hostname);
                             _system_state_tracker->untrack_job(success_hostname);
                             continue;
@@ -291,12 +292,11 @@ namespace wrench {
                         std::cout << job_task_name << " completed successfully by host " << success_hostname << " at " << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
 
                         std::string selected_option = job_task_name.substr(current_task.length() + 1);
+                        std::string completed_task = current_task;
                         running_output_data_size = _task_functions.at(current_task).at(selected_option).at("d_function")(running_output_data_size, running_output_error_level);;
                         running_output_error_level = _task_functions.at(current_task).at(selected_option).at("e_function")(running_output_data_size, running_output_error_level);
                         current_task_counter++;
                         current_task = _application_specs->get_task(current_task_counter);
-
-                        std::cout << "New current task: " << current_task << std::endl;
 
                         if (current_task.empty()) {
                             // were done
@@ -311,6 +311,7 @@ namespace wrench {
                                 // std::cout << "Best error: " << best_error << std::endl;
                                 cumulative_error_level += best_error;
                                 algorithm->reset_preprocessed_decisions();
+                                _system_state_tracker->reset_all_hosts();
                                 this->restart_system();
                                 break;
                             }
@@ -328,11 +329,19 @@ namespace wrench {
                                 break;
                             }
                             algorithm->reset_preprocessed_decisions();
+                            _system_state_tracker->reset_all_hosts();
+                            _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
+
                             algorithm->preprocess_decisions(_probability_computation.get(),
                                 _task_functions,
                                 initial_data_size, initial_error_level,
                                 _application_specs->get_deadline());
+                        } else {
+                            // were not done, update all hosts decision nodes to reflect completed task
+                            _system_state_tracker->update_all_hosts_decision_nodes(success_hostname, completed_task, selected_option);
                         }
+
+                        std::cout << "New current task: " << current_task << std::endl;
 
                         if (_stop_running_jobs) {
                             this->restart_system();
@@ -388,7 +397,8 @@ namespace wrench {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Reset the host's entry to nullptr, so that we now know it's idle
-                            std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            // std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            
                             WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
                             _system_state_tracker->set_host_up(hostname);
                             continue;
@@ -397,7 +407,7 @@ namespace wrench {
                         if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
-                            std::cerr << "Host " << hostname.c_str() << " is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            // std::cerr << "Host " << hostname.c_str() << " is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
 
                             // Cancel the job
                             WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());

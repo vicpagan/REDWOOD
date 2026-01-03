@@ -80,7 +80,7 @@ namespace wrench {
         void prune_decision_tree(double best_error) const;
         bool decision_tree_empty() const;
 
-        std::shared_ptr<ExecOptionDecisionNode> get_decision_tree_root() const { return _exec_option_decision_tree->root; }
+        ExecOptionDecisionNode* get_decision_tree_root() const { return _exec_option_decision_tree->root.get(); }
 
         int get_num_compute_nodes() const { return _num_compute_nodes; }
         double get_e_fail() const { return _e_fail; }
@@ -93,6 +93,9 @@ namespace wrench {
         double get_delta_t_parameter() const { return _delta_t_parameter; }
         std::exponential_distribution<double> get_exponential_distribution() const { return _exponential_distribution; }
         int get_seed() const { return _seed; }
+
+        double get_initial_data_size() const { return _initial_data_size; }
+        double get_initial_error_level() const { return _initial_error_level; }
 
         std::string get_task(int index);
 
@@ -108,6 +111,9 @@ namespace wrench {
         double _delta_t_parameter;
         std::exponential_distribution<double> _exponential_distribution;
         int _seed;
+
+        double _initial_data_size;
+        double _initial_error_level;
 
         std::vector<std::string> _task_order;
         int _num_tasks;

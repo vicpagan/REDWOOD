@@ -5,8 +5,8 @@
     "io_write_bandwidth": "200MBps"
   },
   "failures": {
-    "restart_overhead": 2,
-    "lambda": 0.45,
+    "restart_overhead": 10.0,
+    "lambda": 0.4,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 31212342
   },
@@ -129,7 +129,7 @@
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
-                "b": 2.0,
+                "b": 1.1,
                 "c": 0.0
               }
             },
@@ -159,7 +159,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 5,
+    "num_repeats": 1,
     "deadline": 10000,
     "e_fail": 20.0
   },

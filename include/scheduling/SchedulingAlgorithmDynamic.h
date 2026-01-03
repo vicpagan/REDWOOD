@@ -45,18 +45,14 @@ namespace wrench {
             double running_input_data_size,
             double running_input_error_level,
             double selected_delta_t,
-            std::vector<std::vector<std::pair<std::string, double>>> &dp,
+            std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> &dp,
             ProbabilityComputation* probability_computation,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &exec_option_metrics,
-            const std::shared_ptr<ApplicationSpecs::ExecOptionDecisionNode> &current_task_node,
-            long n, long R) const;
+            const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
+            long n,
+            long R,
+            long deadline) const;
 
-        void pick_execution_option(
-            ProbabilityComputation *probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-            double input_data_size,
-            double input_error_level,
-            double remaining_time);
     };
 }
 

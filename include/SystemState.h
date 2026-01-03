@@ -6,19 +6,23 @@
 #include <string>
 #include <utility>
 
+#include "ApplicationSpecs.h"
+
 namespace wrench {
 
     class CompoundJob;
 
     struct HostState {
+        const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node;
         std::string current_task;
         std::string current_exec_option;
         double current_task_start_time;
         bool is_down;
 
-        HostState() : current_task_start_time(0.0), is_down(false) {}
+        HostState() : current_decision_node(nullptr), current_task_start_time(0.0), is_down(false) {}
 
         void reset();
+
         bool is_idle() const;
     };
 
@@ -50,7 +54,11 @@ namespace wrench {
 
         void set_host_down(const std::string& hostname);
         void set_host_up(const std::string& hostname);
+        void update_host_decision_node(const std::string& hostname, const std::string& task_name, const std::string& execution_option);
+        void update_all_hosts_decision_nodes(const std::string& success_hostname, const std::string& task_name, const std::string& execution_option);
+        void initialize_all_hosts_decision_nodes(const ApplicationSpecs::ExecOptionDecisionNode* root_node);
 
+        const ApplicationSpecs::ExecOptionDecisionNode* get_host_current_decision_node(const std::string& hostname) const;
         bool is_host_idle(const std::string& hostname) const;
         bool is_host_down(const std::string& hostname) const;
 

@@ -47,7 +47,7 @@ namespace wrench {
             double remaining_time) = 0;
 
         virtual std::vector<SchedulingDecision> make_decisions(
-            SystemState* job_tracker,
+            SystemState* system_state_tracker,
             ProbabilityComputation* probability_computation,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             const std::string& task_to_schedule,
@@ -79,7 +79,8 @@ namespace wrench {
         double _delta_t;
         std::string _name;
 
-        std::map<std::string, std::vector<std::pair<std::string, double>>> _preprocessed_decisions;
+        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> _preprocessed_decisions;
+        std::vector<std::string> _completed_execution_path;
     };
 }
 
