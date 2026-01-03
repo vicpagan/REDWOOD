@@ -70,6 +70,51 @@ namespace wrench {
         _host_states[hostname].is_down = false;
     }
 
+    void SystemState::update_host_decision_node(const std::string& hostname, const std::string& task_name, const std::string& execution_option) {
+        const ApplicationSpecs::ExecOptionDecisionNode* decision_node = _host_states[hostname].current_decision_node;
+        for (auto child : decision_node->children) {
+            if (child->task == task_name && child->execution_option == execution_option) {
+                decision_node = child.get();
+                break;
+            }
+        }
+        if (_host_states.find(hostname) == _host_states.end()) {
+            throw std::invalid_argument("Hostname '" + hostname + "' not found in hosts");
+        }
+        _host_states[hostname].current_decision_node = decision_node;
+    }
+
+    void SystemState::update_all_hosts_decision_nodes(const std::string& success_hostname, const std::string &task_name, const std::string &execution_option) {
+        const ApplicationSpecs::ExecOptionDecisionNode* decision_node = _host_states[success_hostname].current_decision_node;
+        std::cout << "in update_all_hosts_decision_nodes, success_hostname: " << success_hostname << ", task_name: " << task_name << ", execution_option: " << execution_option << std::endl;
+        std::cout << "decision node task: " << decision_node->task << ", execution_option: " << decision_node->execution_option << std::endl;
+        for (auto child : decision_node->children) {
+            std::cout << "loop" << std::endl;
+            if (child->task == task_name && child->execution_option == execution_option) {
+                decision_node = child.get();
+                break;
+            }
+        }
+        for (auto& [hostname, host_state] : _host_states) {
+            host_state.current_decision_node = decision_node;
+        }
+        std::cout << "end" << std::endl;
+
+    }
+
+    void SystemState::initialize_all_hosts_decision_nodes(const ApplicationSpecs::ExecOptionDecisionNode* root_node) {
+        for (auto& [hostname, host_state] : _host_states) {
+            host_state.current_decision_node = root_node;
+        }
+    }
+
+    const ApplicationSpecs::ExecOptionDecisionNode* SystemState::get_host_current_decision_node(const std::string& hostname) const {
+        if (_host_states.find(hostname) == _host_states.end()) {
+            throw std::invalid_argument("Hostname '" + hostname + "' not found in hosts");
+        }
+        return _host_states.find(hostname)->second.current_decision_node;
+    }
+
     bool SystemState::is_host_idle(const std::string& hostname) const {
         if (_host_states.find(hostname) == _host_states.end()) {
             throw std::invalid_argument("Hostname '" + hostname + "' not found in hosts");

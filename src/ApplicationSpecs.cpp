@@ -37,6 +37,9 @@ namespace wrench {
             _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
         }
 
+        _initial_data_size = boost::json::value_to<double>(application_spec.at("initial_data_size"));
+        _initial_error_level = boost::json::value_to<double>(application_spec.at("initial_error_level"));
+
         _exec_option_decision_tree = std::make_shared<ExecOptionDecisionTree>(ExecOptionDecisionTree(this, ExecOptionDecisionNode::create_decision_node("", "", false)));
     }
 

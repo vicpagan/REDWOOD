@@ -9,17 +9,8 @@
 namespace wrench {
 
     double SchedulingAlgorithmDynamic::get_optimal_expected_error() const {
-        return _preprocessed_decisions.at(_application_specs->get_task(0)).at(static_cast<size_t>(std::ceil(_application_specs->get_deadline() / _delta_t))).second;
-    }
-
-    void SchedulingAlgorithmDynamic::preprocess_decisions(ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        const double initial_data_size,
-        const double initial_error_level,
-        const double deadline) {
-
-        _preprocessed_decisions.clear();
-        this->pick_execution_option(probability_computation, exec_options, initial_data_size, initial_error_level, deadline);
+        // return _preprocessed_decisions.at(_application_specs->get_task(0)).at(static_cast<size_t>(std::ceil(_application_specs->get_deadline() / _delta_t))).second;
+        return 0.0;
     }
 
     double SchedulingAlgorithmDynamic::calculate_expected_error(
@@ -28,14 +19,24 @@ namespace wrench {
         double running_input_data_size,
         double running_input_error_level,
         double selected_delta_t,
-        std::vector<std::vector<std::pair<std::string, double>>> &dp,
+        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> &dp,
         ProbabilityComputation* probability_computation,
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &exec_option_metrics,
-        const std::shared_ptr<ApplicationSpecs::ExecOptionDecisionNode>& current_task_node,
-        const long n, const long R) const {
+        const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
+        const long n, const long R,
+        const long deadline) const {
 
-        if (dp[task_index][n] != std::make_pair(std::string("impossible"), -1.0)) {
-            return dp[task_index][n].second;
+        // Check if vector exists for this node
+        if (dp.find(current_task_node) == dp.end()) {
+            // Create it with the right size
+            dp[current_task_node] = std::vector<std::pair<std::string, double>>(
+                deadline + 1,
+                std::make_pair("impossible", -1.0)
+            );
+        }
+
+        if (dp[current_task_node][n] != std::make_pair(std::string("impossible"), -1.0)) {
+            return dp[current_task_node][n].second;
         }
 
         const std::string task_name = _application_specs->get_task(task_index);
@@ -44,7 +45,7 @@ namespace wrench {
 
         int num_options = current_task_node->num_children;
         for (int i = 0; i < num_options; i++) {
-            auto current_child_node = current_task_node->children[i];
+            auto current_child_node = current_task_node->children[i].get();
             const std::string option_name = current_child_node->execution_option;
 
             auto option_functions = exec_option_metrics.at(task_name).at(option_name);
@@ -73,7 +74,8 @@ namespace wrench {
                         exec_option_metrics,
                         current_child_node,
                         n - exec_time,
-                        R
+                        R,
+                        deadline
                     );
 
                     expected_error = probability_computation->success_probability(exec_time) * next_task_error;
@@ -92,7 +94,8 @@ namespace wrench {
                         exec_option_metrics,
                         current_task_node,
                         std::max(n - u - R - 1, 0L),
-                        R
+                        R,
+                        deadline
                     );
                     expected_error += probability_computation->fail_probability(u) * retry_task_error;
                 }
@@ -105,7 +108,7 @@ namespace wrench {
         }
 
         // std::cout << "Best option: " << best_option << " at time "<< n << " for task number " << task_index << std::endl;
-        dp[task_index][n] = std::make_pair(best_option, min_expected_error);
+        dp[current_task_node][n] = std::make_pair(best_option, min_expected_error);
         return min_expected_error;
     }
 
@@ -122,12 +125,15 @@ namespace wrench {
      * @param remaining_time This is our n, which is the remaining time until the deadline
      * @return The name of the best execution option
      */
-    void SchedulingAlgorithmDynamic::pick_execution_option(
+    void SchedulingAlgorithmDynamic::preprocess_decisions(
         ProbabilityComputation* probability_computation,
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const double input_data_size,
         const double input_error_level,
-        const double remaining_time) {
+        const double deadline) {
+
+        _preprocessed_decisions.clear();
+
         /* Initialize selected_delta_t to +inf */
         double selected_delta_t = std::numeric_limits<double>::max();
         const double lambda = probability_computation->get_lambda();
@@ -150,32 +156,29 @@ namespace wrench {
         probability_computation->set_delta_t(selected_delta_t);
         _delta_t = selected_delta_t;
 
-        const auto n = static_cast<long>(std::ceil(remaining_time / selected_delta_t));
+        const auto d = static_cast<long>(std::ceil(deadline / selected_delta_t));
         const auto R = static_cast<long>(std::ceil(_application_specs->get_restart_overhead() / selected_delta_t));
 
-        std::vector<std::vector<std::pair<std::string, double>>> dp(static_cast<int>(exec_options.size()),
-            std::vector<std::pair<std::string, double>>(n + 1, std::make_pair("impossible", -1.0))
-        );
+        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> dp;
 
         // FIXME: Not a big fan of this brute forcing but whatever
-        for (long i = n; i >= 0; i--) {
+        for (long i = d; i >= 0; i--) {
             calculate_expected_error(static_cast<int>(exec_options.size()) - 1, 0, input_data_size, input_error_level, selected_delta_t, dp,
-                                 probability_computation, exec_options, _application_specs->get_decision_tree_root(), i, R);
+                                 probability_computation, exec_options, _application_specs->get_decision_tree_root(), i, R, d);
         }
 
-        // for (int i = 0; i < dp.size(); i++) {
-        //     for (int j = 0; j < dp[i].size(); j++) {
-        //         std::cout << "dp[" << i << "][" << j << "] = (" << dp[i][j].first << ", " << dp[i][j].second << ")" << std::endl;
+        // for (auto &entry : dp) {
+        //     for (int j = 0; j < dp[entry.first].size(); j++) {
+        //         std::cout << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
         //     }
         // }
 
-        for (int i = 0; i < dp.size(); i++) {
-            std::vector<std::pair<std::string,double>> exec_option_decisions(n+1, std::make_pair("", 0.0));
-            std::string task_name = _application_specs->get_task(i);
-            for (int j = 0; j < dp[i].size(); j++) {
-                exec_option_decisions[j] = dp[i][j];
+        for (auto &entry : dp) {
+            std::vector<std::pair<std::string,double>> exec_option_decisions(d+1, std::make_pair("", 0.0));
+            for (int j = 0; j < dp[entry.first].size(); j++) {
+                exec_option_decisions[j] = dp[entry.first][j];
             }
-            _preprocessed_decisions.emplace(task_name, std::move(exec_option_decisions));
+            _preprocessed_decisions.emplace(entry.first, std::move(exec_option_decisions));
         }
     }
 
@@ -202,10 +205,17 @@ namespace wrench {
                 throw std::invalid_argument("Preprocessed decisions are not available");
             }
 
+            const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node;
+            if (system_state_tracker->get_host_current_decision_node(hostname) == nullptr) {
+                current_decision_node = _application_specs->get_decision_tree_root();
+            } else {
+                current_decision_node = system_state_tracker->get_host_current_decision_node(hostname);
+            }
+
             const int n = static_cast<int>(std::floor(remaining_time / probability_computation->get_delta_t()));
-            const std::string execution_option = _preprocessed_decisions.at(task_to_schedule).at(n).first;
-            // std::cout << "Selected execution_option " << execution_option << " for task " << task_to_schedule <<
-            //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+            const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
+            std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
+                " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
         }
         return decisions;
