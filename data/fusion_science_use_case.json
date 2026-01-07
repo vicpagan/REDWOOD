@@ -12,8 +12,8 @@
     "seed": 31212342
   },
   "application": {
-    "initial_data_size_comment": "1 MB... it's supposed to be 'small'",
-    "initial_data_size": 1000000,
+    "initial_data_size_comment": "10 kB... it's supposed to be 'small' (config file!)",
+    "initial_data_size": 10000,
     "initial_error_level": 1.0,
     "tasks": [
       {
@@ -22,14 +22,14 @@
         "execution_options": [
           {
             "name": "full_accuracy",
-            "comments": "The results from Eric seem to indicate 25% parallel eff...We have to look at them to come up with some model",
-            "amhdal_parallelizable_fraction": 0.7,
+            "comments": "The results from Eric seem to indicate: with 32 nodes, parallel speedup = 7.8x",
+            "amhdal_parallelizable_fraction": 0.8999,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "This is 100s for a time-step, regardless of input size",
+              "other_comments": "This is 18s for a time-step (loosely based on graph from Eric), but we can likely fudge this (i.e., pick some number of time steps to do)",
               "parameters": {
-                "a": 100,
+                "a": 18,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -47,7 +47,7 @@
             "e_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
-              "other_comment": "Changing the particle-in-cell resolution, but no really info here",
+              "other_comment": "Changing the particle-in-cell resolution, but no real info here",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
@@ -56,14 +56,14 @@
             }
           },
           {
-            "name": "lower_resolution_1",
-            "amhdal_parallelizable_fraction": 0.50,
+            "name": "lower_resolution_2x",
+            "amhdal_parallelizable_fraction": 0.8999,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "This is 50s for a time-step, regardless of input size",
+              "other_comments": "This is 9s (18/2) for a time-step, regardless of input size",
               "parameters": {
-                "a": 50,
+                "a": 9,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -71,9 +71,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "Just picked 1/2 the data size. Perhaps it's 1/4?",
+              "other_comments": "Just picked 1/8-th the data size (3-D data, 1/2 the time -> 1/8 the data)",
               "parameters": {
-                "a": 34500000000000.0,
+                "a": 8625000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -81,11 +81,45 @@
             "e_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comment": "Changing the particle-in-cell resolution, but no really info here. Just double the error",
+              "other_comment": "Changing the particle-in-cell resolution, but no really info here. Just x8 the error",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 2.0
+                "c": 8.0
+              }
+            }
+          },
+          {
+            "name": "lower_resolution_4x",
+            "amhdal_parallelizable_fraction": 0.8999,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "This is 4.5s (18/4) for a time-step, regardless of input size",
+              "parameters": {
+                "a": 4.5,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "Just picked 1/64-th the data size (3-D data, 1/4 the time -> 1/64 the data)",
+              "parameters": {
+                "a": 1078125000000.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comment": "Changing the particle-in-cell resolution, but no really info here. Just x64 the error",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 64.0
               }
             }
           }
@@ -130,6 +164,7 @@
           {
             "name": "error_10-2",
             "comment": "Parallel efficiency is near 100% it seems",
+            "comment_dirt02": "These times are on dirt02, so they make little sense :)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
@@ -227,7 +262,7 @@
       },
       {
         "name": "Poincaré_Map",
-        "comment": "Only two options for now....",
+        "comment": "Only two options for now: WARNING below assumes 100s exec, but simulation time steps are above 18s...",
         "execution_options": [
           {
             "name": "accurate",
