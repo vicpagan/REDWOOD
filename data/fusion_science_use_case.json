@@ -127,7 +127,7 @@
       },
       {
         "name": "ADIOS_Refactoring",
-        "comments": "The values below are based on an SZ3 benchmark on dirt02...",
+        "comments": "The values below are based on an SZ3 benchmark on disco.ics.hawaii.edu...",
         "execution_options": [
           {
             "name": "do_nothing",
@@ -164,7 +164,7 @@
           {
             "name": "error_10-2",
             "comment": "Parallel efficiency is near 100% it seems",
-            "comment_dirt02": "These times are on dirt02, so they make little sense :)",
+            "comment_disco": "These times are on disco.ics.hawaii.edu, so they make little sense w.r.t. Summit",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
