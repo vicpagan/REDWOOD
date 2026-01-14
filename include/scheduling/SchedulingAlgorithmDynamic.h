@@ -35,7 +35,8 @@ namespace wrench {
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             double initial_data_size,
             double initial_error_level,
-            double deadline) override;
+            double deadline,
+            bool lower_bound) override;
 
     private:
 
@@ -51,8 +52,24 @@ namespace wrench {
             const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
             long n,
             long R,
-            long deadline) const;
+            long deadline,
+            bool lower_bound) const;
 
+        double compute_best_delta_t(
+            ProbabilityComputation* probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            double initial_data_size,
+            double initial_error_level,
+            double deadline,
+            double precision);
+
+        void fill_preprocessing_table(
+            ProbabilityComputation *probability_computation,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            double input_data_size,
+            double input_error_level,
+            double remaining_time,
+            bool lower_bound);
     };
 }
 

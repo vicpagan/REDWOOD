@@ -249,7 +249,7 @@ namespace wrench {
                 algorithm->preprocess_decisions(_probability_computation.get(),
                                 _task_functions,
                                 initial_data_size, initial_error_level,
-                                _application_specs->get_deadline());
+                                _application_specs->get_deadline(), false);
 
                 _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
                 /* Loop until an event message arrives */
@@ -335,7 +335,8 @@ namespace wrench {
                             algorithm->preprocess_decisions(_probability_computation.get(),
                                 _task_functions,
                                 initial_data_size, initial_error_level,
-                                _application_specs->get_deadline());
+                                _application_specs->get_deadline(),
+                                false);
                         } else {
                             // were not done, update all hosts decision nodes to reflect completed task
                             _system_state_tracker->update_all_hosts_decision_nodes(success_hostname, completed_task, selected_option);
@@ -398,7 +399,7 @@ namespace wrench {
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Reset the host's entry to nullptr, so that we now know it's idle
                             // std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
-                            
+
                             WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
                             _system_state_tracker->set_host_up(hostname);
                             continue;
