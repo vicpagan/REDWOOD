@@ -191,7 +191,7 @@ namespace wrench {
         /* Create a job manager so that we can create/submit jobs */
         _job_manager = this->createJobManager();
 
-        /* Create the job tracker */
+        /* Create the system state tracker */
         std::vector<std::string> hostnames;
         for (auto const &entry : _compute_services) { hostnames.push_back(entry.first); }
         _system_state_tracker = SystemState::create_tracker(hostnames);
@@ -251,7 +251,9 @@ namespace wrench {
                                 initial_data_size, initial_error_level,
                                 _application_specs->get_deadline(), false);
 
+                /* Reset all current decision nodes for all hosts in the state tracker */
                 _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
+
                 /* Loop until an event message arrives */
                 while (true) {
                     // Invoke the scheduler
