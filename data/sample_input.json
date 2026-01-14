@@ -166,7 +166,7 @@
   "scheduling": {
     "delta_t_scheme_comments": "'fixed', 'compute'",
     "delta_t_scheme": {
-      "scheme": "fixed",
+      "scheme": "compute",
       "parameter_comments": "Either a fixed value or a precision value",
       "parameter": 1.0
     },
