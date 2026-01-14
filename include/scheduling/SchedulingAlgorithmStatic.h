@@ -23,7 +23,8 @@ namespace wrench {
                                   const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
                                   double input_data_size,
                                   double input_error_level,
-                                  double remaining_time) override {}
+                                  double remaining_time,
+                                  bool lower_bound) override {}
 
         std::vector<SchedulingDecision> make_decisions(
             SystemState *system_state_tracker,
