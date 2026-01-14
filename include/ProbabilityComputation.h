@@ -21,8 +21,6 @@ public:
 
     [[nodiscard]] double compute_probability(double task_time, double time_to_deadline, bool lower_bound) const;
 
-    double compute_best_deltat(double task_time, double time_to_deadline, double precision);
-
     void set_delta_t(const double delta_t) {
         _delta_t = delta_t;
     }

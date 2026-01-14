@@ -144,7 +144,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
                                     task_functions,
                                     initial_data_size,
                                     initial_error_level,
-                                    application_specs->get_deadline());
+                                    application_specs->get_deadline(),
+                                    false);
 
     auto optimal_error = algorithm->get_optimal_expected_error();
     return optimal_error;
