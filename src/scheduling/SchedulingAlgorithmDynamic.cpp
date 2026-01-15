@@ -111,7 +111,8 @@ namespace wrench {
                 }
 
                 // Task failure
-                for (long u = 0; u < exec_time; u++) {
+                int lower_bound_int = static_cast<int>(lower_bound);
+                for (long u = 0 + lower_bound_int; u < exec_time; u++) {
 
                     // FIXME: This is gross fuck branching statements
                     long remaining_time_after_failure;
@@ -136,12 +137,12 @@ namespace wrench {
                         probability_computation,
                         exec_option_metrics,
                         current_task_node,
-                        remaining_time_after_failure,
+                        std::max(n - u - R - 1 + lower_bound_int, 0L),
                         R,
                         deadline,
                         lower_bound
                     );
-                    expected_error += probability_computation->fail_probability(u) * retry_task_error;
+                    expected_error += probability_computation->fail_probability(u-lower_bound_int) * retry_task_error;
                 }
             }
 
@@ -178,6 +179,7 @@ namespace wrench {
 
         const auto n = static_cast<long>(std::ceil(remaining_time / _delta_t));
         const auto R = static_cast<long>(std::ceil(_application_specs->get_restart_overhead() / _delta_t));
+
 
         std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> dp;
 
@@ -229,6 +231,7 @@ namespace wrench {
             _preprocessed_decisions.clear();
             this->fill_preprocessing_table(probability_computation, exec_options, initial_data_size, initial_error_level, deadline, true);
             double result_lower_bound = this->get_optimal_expected_error();
+
 
             // Upper bound
             _preprocessed_decisions.clear();
