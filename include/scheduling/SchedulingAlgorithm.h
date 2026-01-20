@@ -19,8 +19,16 @@ namespace wrench {
     public:
         virtual ~SchedulingAlgorithm() = default;
 
-        SchedulingAlgorithm(const std::shared_ptr<ApplicationSpecs> &application_specs, std::string name) :
+        SchedulingAlgorithm(const std::shared_ptr<ApplicationSpecs> &application_specs,
+            std::string name,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            ProbabilityComputation* probability_computation,
+            OptionComparatorFunction* comparator_function) :
+
             _application_specs(application_specs),
+            _exec_options(exec_options),
+            _probability_computation(probability_computation),
+            _comparator_function(comparator_function),
             _e_fail(application_specs->get_e_fail()),
             _delta_t_scheme(application_specs->get_delta_t_scheme()),
             _delta_t_parameter(application_specs->get_delta_t_parameter()),
@@ -40,29 +48,30 @@ namespace wrench {
 
         virtual double get_optimal_expected_error() const = 0;
 
-        virtual void preprocess_decisions(ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-            double input_data_size,
+        virtual void preprocess_decisions(double input_data_size,
             double input_error_level,
             double remaining_time,
             bool lower_bound) = 0;
 
         virtual std::vector<SchedulingDecision> make_decisions(
             SystemState* system_state_tracker,
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             const std::string& task_to_schedule,
-            double input_data_size,
-            double input_error_level,
             double remaining_time,
-            OptionComparatorFunction* comparator_function,
             bool minimize) = 0;
 
 
         static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(
-            const std::string& type, const std::shared_ptr<ApplicationSpecs>& application_specs);
+            const std::string& type,
+            const std::shared_ptr<ApplicationSpecs>& application_specs,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            ProbabilityComputation* probability_computation,
+            OptionComparatorFunction* comparator_function);
 
         std::string get_name() { return _name; }
+
+        void set_delta_t(double delta_t) {
+            _delta_t = delta_t;
+        }
 
         void reset_preprocessed_decisions() {
             _preprocessed_decisions.clear();
@@ -70,6 +79,11 @@ namespace wrench {
 
     protected:
         std::shared_ptr<ApplicationSpecs> _application_specs;
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &_exec_options;
+
+        ProbabilityComputation* _probability_computation;
+        OptionComparatorFunction* _comparator_function;
+
         double _e_fail;
         std::string _delta_t_scheme;
         double _delta_t_parameter;

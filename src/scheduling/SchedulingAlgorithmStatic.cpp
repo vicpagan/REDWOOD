@@ -8,14 +8,10 @@
 
 namespace wrench {
 
-    std::string SchedulingAlgorithmStatic::pick_execution_option(
-        ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::function<double(double, double)>>>& exec_options,
-        const double input_data_size,
-        const double input_error_level,
-        const double remaining_time,
-        OptionComparatorFunction* comparator_function,
-        const bool minimize) const {
+    void SchedulingAlgorithmStatic::preprocess_decisions(const double initial_data_size,
+        const double initial_error_level,
+        const double deadline,
+        const bool minimize) {
 
         /* Initialize min_error_level and selected_delta_t to +inf */
         double selected_delta_t;
@@ -23,14 +19,14 @@ namespace wrench {
 
         std::string best_option;
 
-        for (const auto& [option_name, option_functions] : exec_options) {
+        for (const auto& [option_name, option_functions] : _exec_options) {
             /* Grab all the necessary info about the execution option */
             const auto exec_option_name = option_name;
-            const auto exec_option_time = option_functions.at("t_function")(input_data_size, input_error_level);
-            const auto exec_option_data = option_functions.at("d_function")(input_data_size, input_error_level);
+            const auto exec_option_time = option_functions.at("t_function")(initial_data_size, initial_error_level);
+            const auto exec_option_data = option_functions.at("d_function")(initial_data_size, initial_error_level);
             // std::cerr << "LOOKING AT OPTION_NAME = " << exec_option_name << std::endl;
 
-            const double exec_option_time_total = (input_data_size /  _application_specs->get_io_read_bandwidth()) + exec_option_time + (exec_option_data /  _application_specs->get_io_write_bandwidth());
+            const double exec_option_time_total = (initial_data_size /  _application_specs->get_io_read_bandwidth()) + exec_option_time + (exec_option_data /  _application_specs->get_io_write_bandwidth());
             /* Select a delta based on the scheme */
             if (_delta_t_scheme == "fixed") {
                 // _delta_t_parameter is our fixed delta_t value
@@ -40,10 +36,10 @@ namespace wrench {
             } else {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
-            probability_computation->set_delta_t(selected_delta_t);
+            _probability_computation->set_delta_t(selected_delta_t);
 
-            const double comp_value = comparator_function->comp_value(probability_computation, option_functions, input_data_size, input_error_level,
-                                                                     remaining_time);
+            const double comp_value = _comparator_function->comp_value(_probability_computation, option_functions, input_data_size, input_error_level,
+                                                                     deadline);
 
             /* Select the option with the optimal metric were focusing on */
             if ((minimize && comp_value < best_option_value) || (!minimize && comp_value > best_option_value)) {
@@ -51,20 +47,20 @@ namespace wrench {
                 best_option = option_name;
             }
         }
+    }
 
-        // std::cerr << "STATIC DECISION: " << best_option << std::endl;
-        return best_option;
+    void fill_preprocessing_table(
+            double input_data_size,
+            double input_error_level,
+            double remaining_time,
+            bool minimize) {
+        
     }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmStatic::make_decisions(
         SystemState* system_state_tracker,
-        ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const std::string& task_to_schedule,
-        const double input_data_size,
-        const double input_error_level,
         const double remaining_time,
-        OptionComparatorFunction* comparator_function,
         const bool minimize ) {
         std::vector<SchedulingAlgorithm::SchedulingDecision> decisions;
 

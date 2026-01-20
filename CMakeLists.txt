@@ -139,9 +139,35 @@ target_link_libraries(data_parallel_evaluator
         ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
 )
 
+set(DELTA_T_EVALUATOR_SOURCE_FILES
+        src/DeltatEvaluator.cpp
+        src/ApplicationSpecs.cpp
+        src/Utils.cpp
+        src/scheduling/SchedulingAlgorithm.cpp
+        src/scheduling/SchedulingAlgorithmDynamic.cpp
+        src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/SystemState.cpp
+        src/FunctionGenerator.cpp
+        src/ProbabilityComputation.cpp
+        include/ApplicationSpecs.h
+        include/Utils.h
+        include/scheduling/SchedulingAlgorithm.h
+        include/scheduling/SchedulingAlgorithmDynamic.h
+        include/scheduling/SchedulingAlgorithmStatic.h
+        include/SystemState.h
+        include/FunctionGenerator.h
+        include/ProbabilityComputation.h
+)
 
+add_executable(delta_t_evaluator ${DELTA_T_EVALUATOR_SOURCE_FILES})
 
+target_link_libraries(delta_t_evaluator
+        ${WRENCH_LIBRARY}   # For UnitParser :)
+        ${Boost_LIBRARIES}
+        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
+)
 
 install(TARGETS redwood_sim DESTINATION bin)
 install(TARGETS data_parallel_evaluator DESTINATION bin)
+install(TARGETS delta_t_evaluator DESTINATION bin)
 
