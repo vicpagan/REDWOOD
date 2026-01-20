@@ -14,9 +14,7 @@ namespace wrench {
         return optimal_EV;
     }
 
-    void SchedulingAlgorithmDynamic::preprocess_decisions(ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        const double initial_data_size,
+    void SchedulingAlgorithmDynamic::preprocess_decisions(const double initial_data_size,
         const double initial_error_level,
         const double deadline,
         const bool lower_bound) {
@@ -27,17 +25,19 @@ namespace wrench {
             if (_delta_t_scheme == "fixed") {
                 selected_delta_t = _delta_t_parameter;
             } else if (_delta_t_scheme == "compute") {
-                selected_delta_t = this->compute_best_delta_t(probability_computation, exec_options, initial_data_size, initial_error_level, deadline, 1e-3);
+                selected_delta_t = this->compute_best_delta_t(initial_data_size, initial_error_level, deadline, 1e-2);
             } else {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
 
+            std::cout << "Selected delta_t: " << selected_delta_t << std::endl;
+
             _delta_t = selected_delta_t;
-            probability_computation->set_delta_t(selected_delta_t);
+            _probability_computation->set_delta_t(selected_delta_t);
         }
 
         _preprocessed_decisions.clear();
-        this->fill_preprocessing_table(probability_computation, exec_options, initial_data_size, initial_error_level, deadline, lower_bound);
+        this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, lower_bound);
     }
 
     double SchedulingAlgorithmDynamic::calculate_expected_error(
@@ -47,16 +47,13 @@ namespace wrench {
         double running_input_error_level,
         double selected_delta_t,
         std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> &dp,
-        ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &exec_option_metrics,
         const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
         const long n, const long R,
         const long deadline,
         const bool lower_bound) const {
 
-        // Check if vector exists for this node
+        // NOTE: simpler than initializing it all at once which requires tree traversal
         if (dp.find(current_task_node) == dp.end()) {
-            // Create it with the right size
             dp[current_task_node] = std::vector<std::pair<std::string, double>>(
                 deadline + 1,
                 std::make_pair("impossible", -1.0)
@@ -76,9 +73,9 @@ namespace wrench {
             auto current_child_node = current_task_node->children[i].get();
             const std::string option_name = current_child_node->execution_option;
 
-            auto option_functions = exec_option_metrics.at(task_name).at(option_name);
+            auto option_functions = _exec_options.at(task_name).at(option_name);
 
-            long exec_time = static_cast<long>(option_functions.at("t_function")(running_input_data_size, running_input_error_level) / selected_delta_t);
+            long exec_time = static_cast<long>(std::ceil(option_functions.at("t_function")(running_input_data_size, running_input_error_level) / selected_delta_t));
             double expected_error;
 
             if (n < exec_time) {
@@ -89,7 +86,7 @@ namespace wrench {
 
                 // Task success
                 if (remaining_tasks == 0) {
-                    expected_error = probability_computation->success_probability(exec_time) * updated_error_level;
+                    expected_error = _probability_computation->success_probability(exec_time) * updated_error_level;
                 } else {
                     double next_task_error = calculate_expected_error(
                         remaining_tasks - 1,
@@ -98,8 +95,6 @@ namespace wrench {
                         updated_error_level,
                         selected_delta_t,
                         dp,
-                        probability_computation,
-                        exec_option_metrics,
                         current_child_node,
                         n - exec_time,
                         R,
@@ -107,7 +102,7 @@ namespace wrench {
                         lower_bound
                     );
 
-                    expected_error = probability_computation->success_probability(exec_time) * next_task_error;
+                    expected_error = _probability_computation->success_probability(exec_time) * next_task_error;
                 }
 
                 // Task failure
@@ -115,7 +110,7 @@ namespace wrench {
 
                     // FIXME: This is gross fuck branching statements
                     long remaining_time_after_failure;
-                    if (lower_bound == 1) {
+                    if (lower_bound) {
                         if (u == 0) {
                             // must consume at least 1 time step to avoid infinite loop
                             remaining_time_after_failure = std::max(n - R - 1, 0L);
@@ -133,15 +128,13 @@ namespace wrench {
                         running_input_error_level,
                         selected_delta_t,
                         dp,
-                        probability_computation,
-                        exec_option_metrics,
                         current_task_node,
                         remaining_time_after_failure,
                         R,
                         deadline,
                         lower_bound
                     );
-                    expected_error += probability_computation->fail_probability(u) * retry_task_error;
+                    expected_error += _probability_computation->fail_probability(u) * retry_task_error;
                 }
             }
 
@@ -168,10 +161,7 @@ namespace wrench {
      * @param remaining_time This is our n, which is the remaining time until the deadline
      * @return The name of the best execution option
      */
-    void SchedulingAlgorithmDynamic::fill_preprocessing_table(
-        ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        const double input_data_size,
+    void SchedulingAlgorithmDynamic::fill_preprocessing_table(const double input_data_size,
         const double input_error_level,
         const double remaining_time,
         const bool lower_bound) {
@@ -182,9 +172,10 @@ namespace wrench {
         std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> dp;
 
         // FIXME: Not a big fan of this brute forcing but whatever
-        for (long i = n; i >= 0; i--) {
-            calculate_expected_error(static_cast<int>(exec_options.size()) - 1, 0, input_data_size, input_error_level, _delta_t, dp,
-                                 probability_computation, exec_options, _application_specs->get_decision_tree_root(), i, R, n, lower_bound);
+        for (long i = 0; i <= n; i++) {
+            // std::cout << "ITERATION i = " << i << std::endl;
+            calculate_expected_error(static_cast<int>(_exec_options.size()) - 1, 0, input_data_size, input_error_level, _delta_t, dp,
+                                 _application_specs->get_decision_tree_root(), i, R, n, lower_bound);
         }
 
         // for (auto &entry : dp) {
@@ -195,6 +186,7 @@ namespace wrench {
         //     }
         // }
 
+        // Store the results in preprocessing table
         for (auto &entry : dp) {
             std::vector<std::pair<std::string,double>> exec_option_decisions(n+1, std::make_pair("", 0.0));
             for (int j = 0; j < dp[entry.first].size(); j++) {
@@ -204,9 +196,7 @@ namespace wrench {
         }
     }
 
-    double SchedulingAlgorithmDynamic::compute_best_delta_t(ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        const double initial_data_size,
+    double SchedulingAlgorithmDynamic::compute_best_delta_t(const double initial_data_size,
         const double initial_error_level,
         const double deadline,
         double precision) {
@@ -222,17 +212,17 @@ namespace wrench {
             std::cerr << "HI=" << hi << "  LO=" <<  lo << std::endl;
             double mid = (lo + hi) / 2;
 
-            probability_computation->set_delta_t(mid);
+            _probability_computation->set_delta_t(mid);
             _delta_t = mid;
 
             // Lower bound
             _preprocessed_decisions.clear();
-            this->fill_preprocessing_table(probability_computation, exec_options, initial_data_size, initial_error_level, deadline, true);
+            this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, true);
             double result_lower_bound = this->get_optimal_expected_error();
 
             // Upper bound
             _preprocessed_decisions.clear();
-            this->fill_preprocessing_table(probability_computation, exec_options, initial_data_size, initial_error_level, deadline, false);
+            this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, false);
             double result_upper_bound = this->get_optimal_expected_error();
 
             double result_avg = (result_upper_bound + result_lower_bound) / 2;
@@ -254,25 +244,20 @@ namespace wrench {
 
         // Restore original delta_t
         _delta_t = current_delta_t;
-        probability_computation->set_delta_t(current_delta_t);
+        _probability_computation->set_delta_t(current_delta_t);
 
         return best_deltat;
     }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmDynamic::make_decisions(
         SystemState* system_state_tracker,
-        ProbabilityComputation* probability_computation,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const std::string& task_to_schedule,
-        const double input_data_size,
-        const double input_error_level,
         const double remaining_time,
-        OptionComparatorFunction* comparator_function,
         const bool minimize) {
-        std::vector<SchedulingDecision> decisions;
 
         // Make a decision for each host that's currently idle
         // All these decisions are independent so that makes it easy
+        std::vector<SchedulingDecision> decisions;
         for (const auto& entry : *system_state_tracker) {
             std::string hostname = entry.first;
 
@@ -289,7 +274,7 @@ namespace wrench {
                 current_decision_node = system_state_tracker->get_host_current_decision_node(hostname);
             }
 
-            const int n = static_cast<int>(std::floor(remaining_time / probability_computation->get_delta_t()));
+            const int n = static_cast<int>(std::floor(remaining_time / _delta_t));
             const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
             std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
                 " on host " << hostname << " with remaining time " << remaining_time << std::endl;

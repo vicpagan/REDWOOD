@@ -140,9 +140,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
 
     application_specs->prune_decision_tree(0.0);
     application_specs->build_decision_tree(task_functions);
-    algorithm->preprocess_decisions(probability_computation.get(),
-                                    task_functions,
-                                    initial_data_size,
+    algorithm->preprocess_decisions(initial_data_size,
                                     initial_error_level,
                                     application_specs->get_deadline(),
                                     false);

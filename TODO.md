@@ -7,8 +7,7 @@
           - fixed this (i think)
 
   - [VP]
-  - Compress preprocessing table 
-    - 
+  - Compress preprocessing table
   - Calculate delta based on a single variable
     - By messing with the other variables, we can see how "sensitive" the calcation is to other variables
     - Try this with every independent variable
@@ -24,10 +23,6 @@
       - "Best" first (temp redundancy is based on EV and starts at the highest)
     - Static decision algorithm should also use decision tree and craft it based on whatever heuristic is being used
       - This would include changing the current implementation in Controller as well
-  - Test heuristics for stop running jobs hack (no sense in experimenting with this by itself)
-    - Never cancel other hosts
-    - Always cancel other hosts
-    - Cancel based on expected error recalculation at current time
   - In-situ execution case implementation
     - Add an option in the JSON to enable/disable in-situ execution
     - All it does is change the recursion failure to start from the beginning instead of the i-th task again
@@ -38,3 +33,7 @@ EXPERIMENTS:
   - Test one task vs chain?
   - Test basic heuristics on one host and one task/chain with temp redundancy
     - Graph would look like different colored sets of dots for each heuristic and best fit lines to compare them
+  - Test heuristics for stop running jobs hack (no sense in experimenting with this by itself)
+    - Never cancel other hosts
+    - Always cancel other hosts
+    - Cancel based on expected error recalculation at current time 

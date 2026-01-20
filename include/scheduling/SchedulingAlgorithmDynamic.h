@@ -13,27 +13,25 @@
 namespace wrench {
     class SchedulingAlgorithmDynamic : public SchedulingAlgorithm {
     public:
-        explicit SchedulingAlgorithmDynamic(const std::shared_ptr<ApplicationSpecs> &application_specs) : SchedulingAlgorithm(
-            application_specs, "dynamic") {
+        explicit SchedulingAlgorithmDynamic(const std::shared_ptr<ApplicationSpecs> &application_specs,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            ProbabilityComputation *probability_computation,
+            OptionComparatorFunction* comparator_function) : SchedulingAlgorithm(application_specs,
+                "dynamic",
+                exec_options,
+                probability_computation,
+                comparator_function) {
         };
 
         std::vector<SchedulingDecision> make_decisions(
             SystemState *system_state_tracker,
-            ProbabilityComputation *probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
-                (double, double)> > > > &exec_options,
             const std::string &task_to_schedule,
-            double input_data_size,
-            double input_error_level,
             double remaining_time,
-            OptionComparatorFunction *comparator_function,
             bool minimize) override;
 
         double get_optimal_expected_error() const override;
 
-        void preprocess_decisions(ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-            double initial_data_size,
+        void preprocess_decisions(double initial_data_size,
             double initial_error_level,
             double deadline,
             bool lower_bound) override;
@@ -47,8 +45,6 @@ namespace wrench {
             double running_input_error_level,
             double selected_delta_t,
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> &dp,
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &exec_option_metrics,
             const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
             long n,
             long R,
@@ -56,16 +52,12 @@ namespace wrench {
             bool lower_bound) const;
 
         double compute_best_delta_t(
-            ProbabilityComputation* probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             double initial_data_size,
             double initial_error_level,
             double deadline,
             double precision);
 
         void fill_preprocessing_table(
-            ProbabilityComputation *probability_computation,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             double input_data_size,
             double input_error_level,
             double remaining_time,
