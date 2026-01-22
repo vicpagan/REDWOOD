@@ -116,7 +116,7 @@ namespace wrench {
                         _system_state_tracker->get_running_job(hostname));
                 }
                 catch (ExecutionException&) {
-                    std::cerr << "Tried to terminate job on down host: " << hostname << " for stop running jobs hack" << std::endl;
+                    // std::cerr << "Tried to terminate job on down host: " << hostname << " for stop running jobs hack" << std::endl;
                 }
                 _system_state_tracker->reset_host(hostname);
                 _system_state_tracker->untrack_job(hostname);
@@ -208,7 +208,7 @@ namespace wrench {
 
         /* Loop over all the scheduling algorithms */
         for (const auto& algorithm : _scheduling_algorithms) {
-            std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
+            // std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
             WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
 
             /* Keep track of number of successes */
@@ -246,9 +246,7 @@ namespace wrench {
                 /* Build/reset decision tree to use for temporal redundancy */
                 _application_specs->prune_decision_tree(0.0);
                 _application_specs->build_decision_tree(_task_functions);
-                algorithm->preprocess_decisions(_probability_computation.get(),
-                                _task_functions,
-                                initial_data_size, initial_error_level,
+                algorithm->preprocess_decisions(initial_data_size, initial_error_level,
                                 _application_specs->get_deadline(), false);
 
                 /* Reset all current decision nodes for all hosts in the state tracker */
@@ -259,18 +257,15 @@ namespace wrench {
                     // Invoke the scheduler
                     auto decisions =
                         algorithm->make_decisions(_system_state_tracker.get(),
-                            _probability_computation.get(),
-                           _task_functions,
                            current_task,
-                           running_output_data_size, running_output_error_level,
                            time_to_deadline - Simulation::getCurrentSimulatedDate(),
-                           _option_comparator.get(), true);
+                           true);
 
                     // Implement the scheduling decisions
                     for (const auto &[hostname, task, execution_option] : decisions) {
-                        std::cerr << "Scheduling decision: run task " << task <<
-                            " with option " << execution_option <<
-                            " on host " << hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
+                        // std::cerr << "Scheduling decision: run task " << task <<
+                        //     " with option " << execution_option <<
+                        //     " on host " << hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
                         this->submit_job(task,
                                          execution_option,
                                          running_output_data_size,
@@ -291,7 +286,7 @@ namespace wrench {
                             _system_state_tracker->untrack_job(success_hostname);
                             continue;
                         }
-                        std::cout << job_task_name << " completed successfully by host " << success_hostname << " at " << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
+                        // std::cout << job_task_name << " completed successfully by host " << success_hostname << " at " << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
 
                         std::string selected_option = job_task_name.substr(current_task.length() + 1);
                         std::string completed_task = current_task;
@@ -307,7 +302,7 @@ namespace wrench {
                             }
                             best_error = running_output_error_level;
 
-                            std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
+                            // std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
 
                             if (!_temporal_redundancy) {
                                 // std::cout << "Best error: " << best_error << std::endl;
@@ -334,9 +329,7 @@ namespace wrench {
                             _system_state_tracker->reset_all_hosts();
                             _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
 
-                            algorithm->preprocess_decisions(_probability_computation.get(),
-                                _task_functions,
-                                initial_data_size, initial_error_level,
+                            algorithm->preprocess_decisions(initial_data_size, initial_error_level,
                                 _application_specs->get_deadline(),
                                 false);
                         } else {
@@ -344,7 +337,7 @@ namespace wrench {
                             _system_state_tracker->update_all_hosts_decision_nodes(success_hostname, completed_task, selected_option);
                         }
 
-                        std::cout << "New current task: " << current_task << std::endl;
+                        // std::cout << "New current task: " << current_task << std::endl;
 
                         if (_stop_running_jobs) {
                             this->restart_system();
@@ -420,7 +413,7 @@ namespace wrench {
                                         _system_state_tracker->get_running_job(hostname));
                                 }
                                 catch (ExecutionException&) {
-                                    std::cerr << "Tried to terminate job on down host: " << hostname << " for host going down" << std::endl;
+                                    // std::cerr << "Tried to terminate job on down host: " << hostname << " for host going down" << std::endl;
                                 }
                             }
 
@@ -441,7 +434,7 @@ namespace wrench {
                                 _system_state_tracker->get_running_job(hostname));
                         }
                         catch (ExecutionException&) {
-                            std::cerr << "Tried to terminate job on down host: " << hostname << " at the end of the repetition" << std::endl;
+                            // std::cerr << "Tried to terminate job on down host: " << hostname << " at the end of the repetition" << std::endl;
                         }
                     }
                 }

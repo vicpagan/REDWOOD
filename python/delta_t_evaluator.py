@@ -5,6 +5,9 @@ import subprocess
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import re
+import tempfile
+import os
 
 def run_evaluator(json_file, min_delta_t, max_delta_t, step_size, executable="./delta_t_evaluator"):
     """Run the C++ evaluator and parse results"""
@@ -25,7 +28,52 @@ def run_evaluator(json_file, min_delta_t, max_delta_t, step_size, executable="./
 
     return json.loads(result.stdout)
 
-def plot_results(data, output_file="delta_t_analysis.png"):
+def run_simulation(json_file, delta_t, num_repeats=1000, sim_executable="../build/redwood_sim"):
+    """Run simulation for a specific delta_t value"""
+    # Load the original JSON
+    with open(json_file, 'r') as f:
+        config = json.load(f)
+
+    # Modify the config for this delta_t
+    config['scheduling']['delta_t_scheme'] = {
+        "scheme": "fixed",
+        "parameter": delta_t
+    }
+    config['execution']['num_repeats'] = num_repeats
+
+    # Write to a temporary file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
+        json.dump(config, tmp, indent=2)
+        tmp_file = tmp.name
+
+    try:
+        # Run the simulation
+        cmd = [sim_executable, "--json", tmp_file]
+        print(f"  Running simulation for delta_t={delta_t}...", end=' ', flush=True)
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            print(f"FAILED")
+            print(f"Simulation error: {result.stderr}", file=sys.stderr)
+            return None
+
+        # Parse the output to extract avg error level
+        output = result.stdout
+        match = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
+
+        if match:
+            avg_error = float(match.group(1))
+            print(f"Avg error: {avg_error:.3f}")
+            return avg_error
+        else:
+            print(f"Could not parse avg error from output")
+            return None
+
+    finally:
+        # Clean up temp file
+        os.unlink(tmp_file)
+
+def plot_results(data, sim_results=None, output_file="delta_t_analysis.png"):
     """Create visualization of delta_t analysis"""
     delta_t = np.array(data["delta_t"])
     upper_bound = np.array(data["upper_bound"])
@@ -50,6 +98,22 @@ def plot_results(data, output_file="delta_t_analysis.png"):
     ax1.fill_between(delta_t, lower_bound, upper_bound, alpha=0.2, color='gray',
                      label='Uncertainty range')
 
+    # Plot simulation results if available
+    lines_for_legend = line1 + line2
+    if sim_results:
+        sim_delta_t = []
+        sim_avg_error = []
+        for dt, err in sim_results.items():
+            if err is not None:
+                sim_delta_t.append(dt)
+                sim_avg_error.append(err)
+
+        if sim_delta_t:
+            line4 = ax1.plot(sim_delta_t, sim_avg_error, 'D', color='purple',
+                             markersize=8, label='Actual simulation (1000 runs)',
+                             markeredgecolor='black', markeredgewidth=0.5)
+            lines_for_legend = lines_for_legend + line4
+
     ax1.tick_params(axis='y', labelcolor='black')
     ax1.grid(True, alpha=0.3)
 
@@ -62,7 +126,7 @@ def plot_results(data, output_file="delta_t_analysis.png"):
     ax2.tick_params(axis='y', labelcolor=color3)
 
     # Combine legends
-    lines = line1 + line2 + line3
+    lines = lines_for_legend + line3
     labels = [l.get_label() for l in lines]
     ax1.legend(lines, labels, loc='best', fontsize=10)
 
@@ -75,12 +139,12 @@ def plot_results(data, output_file="delta_t_analysis.png"):
     optimal_delta_t = delta_t[optimal_idx]
     optimal_error = upper_bound[optimal_idx]
 
-    ax1.annotate(f'Optimal delta_t = {optimal_delta_t:.2f}\nError = {optimal_error:.3f}',
-                 xy=(optimal_delta_t, optimal_error),
-                 xytext=(optimal_delta_t + (max(delta_t) - min(delta_t)) * 0.1,
-                         optimal_error * 1.1),
-                 arrowprops=dict(arrowstyle='->', color='red', lw=2),
-                 fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+    # ax1.annotate(f'Optimal delta_t = {optimal_delta_t:.2f}\nError = {optimal_error:.3f}',
+    #              xy=(optimal_delta_t, optimal_error),
+    #              xytext=(optimal_delta_t + (max(delta_t) - min(delta_t)) * 0.1,
+    #                      optimal_error * 1.1),
+    #              arrowprops=dict(arrowstyle='->', color='red', lw=2),
+    #              fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -99,25 +163,62 @@ def plot_results(data, output_file="delta_t_analysis.png"):
 
 def main():
     if len(sys.argv) < 5:
-        print("Usage: python delta_t_evaluator.py <json_file> <min_delta_t> <max_delta_t> <step_size> [executable]")
+        print("Usage: python delta_t_evaluator.py <json_file> <min_delta_t> <max_delta_t> <step_size> [executable] [--run-sims] [--sim-executable <path>]")
         print("Example: python delta_t_evaluator.py config.json 0.5 10.0 0.5")
+        print("         python delta_t_evaluator.py config.json 1.0 10.0 1.0 ./delta_t_evaluator --run-sims")
         sys.exit(1)
 
     json_file = sys.argv[1]
     min_delta_t = float(sys.argv[2])
     max_delta_t = float(sys.argv[3])
     step_size = float(sys.argv[4])
-    executable = sys.argv[5] if len(sys.argv) > 5 else "./delta_t_evaluator"
+
+    # Parse remaining arguments
+    executable = "./delta_t_evaluator"
+    run_sims = False
+    sim_executable = "../build/redwood_sim"
+
+    i = 5
+    while i < len(sys.argv):
+        if sys.argv[i] == "--run-sims":
+            run_sims = True
+            i += 1
+        elif sys.argv[i] == "--sim-executable":
+            sim_executable = sys.argv[i + 1]
+            i += 2
+        else:
+            executable = sys.argv[i]
+            i += 1
 
     # Run evaluator
     data = run_evaluator(json_file, min_delta_t, max_delta_t, step_size, executable)
 
+    # Run simulations if requested
+    sim_results = None
+    if run_sims:
+        print("\n=== Running Simulations ===")
+        sim_results = {}
+        delta_t_values = data["delta_t"]
+
+        for dt in delta_t_values:
+            avg_error = run_simulation(json_file, dt, num_repeats=50, sim_executable=sim_executable)
+            sim_results[dt] = avg_error
+
+        print("\nSimulation results:")
+        for dt, err in sim_results.items():
+            if err is not None:
+                print(f"  delta_t={dt}: avg_error={err:.3f}")
+
     # Create visualization
-    plot_results(data)
+    plot_results(data, sim_results)
 
     # Optionally save raw data
+    output_data = data.copy()
+    if sim_results:
+        output_data["simulation_avg_error"] = [sim_results.get(dt) for dt in data["delta_t"]]
+
     with open("delta_t_results.json", "w") as f:
-        json.dump(data, f, indent=2)
+        json.dump(output_data, f, indent=2)
     print("Raw data saved to delta_t_results.json")
 
 if __name__ == "__main__":

@@ -5,13 +5,13 @@
     "io_write_bandwidth": "200MBps"
   },
   "failures": {
-    "restart_overhead": 10.0,
-    "lambda": 0.4,
+    "restart_overhead": 100.0,
+    "lambda": 0.01,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 31212342
   },
   "application": {
-    "initial_data_size": 10.0,
+    "initial_data_size": 1000.0,
     "initial_error_level": 1.0,
     "tasks": [
       {
@@ -159,8 +159,8 @@
     ]
   },
   "execution": {
-    "num_repeats": 25,
-    "deadline": 10000,
+    "num_repeats": 1,
+    "deadline": 10000000,
     "e_fail": 20.0
   },
   "scheduling": {
@@ -168,7 +168,7 @@
     "delta_t_scheme": {
       "scheme": "fixed",
       "parameter_comments": "Either a fixed value or a precision value",
-      "parameter": 1.0
+      "parameter": 10.0
     },
     "algorithms": {
       "one_task": ["dynamic"],
