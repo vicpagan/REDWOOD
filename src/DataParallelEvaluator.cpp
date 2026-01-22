@@ -19,7 +19,7 @@
 #include "ApplicationSpecs.h"
 #include "FunctionGenerator.h"
 #include "Utils.h"
-#include "scheduling/SchedulingAlgorithmDynamic.h"
+#include "scheduling/SchedulingAlgorithm.h"
 #include "DataParallelEvaluator.h"
 
 namespace po = boost::program_options;
@@ -129,11 +129,12 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
         }
     }
 
-    // Create an unused scheduling algorithm
-    auto algorithm = new wrench::SchedulingAlgorithmDynamic(application_specs);
-
     // Create a probability computation object
     auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
+
+    // Create an unused scheduling algorithm
+    auto algorithm = SchedulingAlgorithm::create_scheduling_algorithm(
+                            "dynamic", application_specs, task_functions, probability_computation.get(), nullptr);
 
     double initial_data_size = input.at("application").as_object().at("initial_data_size").to_number<double>();
     double initial_error_level = input.at("application").as_object().at("initial_error_level").to_number<double>();

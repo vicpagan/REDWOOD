@@ -30,7 +30,7 @@ namespace wrench {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
 
-            std::cout << "Selected delta_t: " << selected_delta_t << std::endl;
+            // std::cout << "Selected delta_t: " << selected_delta_t << std::endl;
 
             _delta_t = selected_delta_t;
             _probability_computation->set_delta_t(selected_delta_t);
@@ -112,8 +112,12 @@ namespace wrench {
                     long remaining_time_after_failure;
                     if (lower_bound) {
                         if (u == 0) {
-                            // must consume at least 1 time step to avoid infinite loop
-                            remaining_time_after_failure = std::max(n - R - 1, 0L);
+                            // Lower bound: waste 0 of current step, but must consume at least 1 step
+                            if (R == 0) {
+                                remaining_time_after_failure = std::max(n - 1, 0L);
+                            } else {
+                                remaining_time_after_failure = std::max(n - R, 0L);
+                            }
                         } else {
                             remaining_time_after_failure = std::max(n - u - R, 0L);
                         }
@@ -205,7 +209,7 @@ namespace wrench {
         double current_delta_t = _delta_t;
 
         double lo = 1.0; // What to put here?
-        double hi = 10.0; // What to put here?
+        double hi = 10000.0; // What to put here?
         double best_deltat = lo;
 
         while (std::abs(hi - lo) / hi > precision) {
@@ -276,8 +280,8 @@ namespace wrench {
 
             const int n = static_cast<int>(std::floor(remaining_time / _delta_t));
             const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
-            std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
-                " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+            // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
+            //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
         }
         return decisions;
