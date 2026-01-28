@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <boost/json.hpp>
+#include <cmath>
 #include "Utils.h"
 
 /**

@@ -5,11 +5,20 @@
 #include "scheduling/SchedulingAlgorithmDynamic.h"
 #include "ProbabilityComputation.h"
 #include "SystemState.h"
+#include "Utils.h"
+
+#ifndef OPTIMISTIC_EXECUTION
+#define OPTIMISTIC_EXECUTION 0
+#endif
 
 namespace wrench {
 
     double SchedulingAlgorithmDynamic::get_optimal_expected_error() const {
-        double optimal_EV = _preprocessed_decisions.at(_application_specs->get_decision_tree_root()).at(static_cast<size_t>(std::ceil(_application_specs->get_deadline() / _delta_t))).second;
+#if OPTIMISTIC_EXECUTION
+        double optimal_EV = _preprocessed_decisions.at(_application_specs->get_decision_tree_root()).at(static_cast<size_t>(std::floor(_application_specs->get_deadline() / _delta_t))).second;
+#else
+        double optimal_EV = _preprocessed_decisions.at(_application_specs->get_decision_tree_root()).at(static_cast<size_t>(ceiling_division(_application_specs->get_deadline(), _delta_t))).second;
+#endif
         // std::cerr << "Optimal error: " << optimal_EV << std::endl;
         return optimal_EV;
     }
@@ -66,7 +75,7 @@ namespace wrench {
 
         const std::string task_name = _application_specs->get_task(task_index);
         std::string best_option;
-        double min_expected_error = std::numeric_limits<double>::infinity();
+        double min_expected_error = std::numeric_limits<double>::infinity(); // FIXME: Should be e_fail and the simulator should have a way of handling impossible scheduling (give up and dont waste time)
 
         int num_options = current_task_node->num_children;
         for (int i = 0; i < num_options; i++) {
@@ -74,8 +83,11 @@ namespace wrench {
             const std::string option_name = current_child_node->execution_option;
 
             auto option_functions = _exec_options.at(task_name).at(option_name);
-
-            long exec_time = static_cast<long>(std::ceil(option_functions.at("t_function")(running_input_data_size, running_input_error_level) / selected_delta_t));
+#if OPTIMISTIC_EXECUTION
+            const long exec_time = static_cast<long>(std::floor(option_functions.at("t_function")(running_input_data_size, running_input_error_level) / selected_delta_t));
+#else
+            const long exec_time = ceiling_division(option_functions.at("t_function")(running_input_data_size, running_input_error_level), selected_delta_t);
+#endif
             double expected_error;
 
             if (n < exec_time) {
@@ -170,8 +182,15 @@ namespace wrench {
         const double remaining_time,
         const bool lower_bound) {
 
-        const auto n = static_cast<long>(std::ceil(remaining_time / _delta_t));
-        const auto R = static_cast<long>(std::ceil(_application_specs->get_restart_overhead() / _delta_t));
+#if OPTIMISTIC_EXECUTION
+        const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
+        const auto R = static_cast<long>(std::floor(_application_specs->get_restart_overhead() / _delta_t));
+        // std::cerr << "OPTIMISTIC_EXECUTION: TRUE" << std::endl;
+#else
+        const auto n = ceiling_division(remaining_time, _delta_t);
+        const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
+        // std::cerr << "OPTIMISTIC_EXECUTION: FALSE" << std::endl;
+#endif
 
         std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> dp;
 
@@ -183,10 +202,8 @@ namespace wrench {
         }
 
         // for (auto &entry : dp) {
-        //     if (entry.first == _application_specs->get_decision_tree_root()) {
-        //         for (int j = 0; j < dp[entry.first].size(); j++) {
-        //             std::cout << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
-        //         }
+        //     for (int j = 0; j < dp[entry.first].size(); j++) {
+        //         std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
         //     }
         // }
 
@@ -277,8 +294,11 @@ namespace wrench {
             } else {
                 current_decision_node = system_state_tracker->get_host_current_decision_node(hostname);
             }
-
-            const int n = static_cast<int>(std::floor(remaining_time / _delta_t));
+#if OPTIMISTIC_EXECUTION
+            const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
+#else
+            const auto n = ceiling_division(remaining_time, _delta_t);
+#endif
             const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
             // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
             //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;

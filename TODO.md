@@ -7,6 +7,8 @@
           - fixed this (i think)
 
   - [VP]
+  - How to run the delta_t evaluation program:
+    - python python/delta_t_evaluator.py <data/XXX.json> <min delta_t> <max delta_t> <step size> --run-sims
   - Compress preprocessing table
   - Calculate delta based on a single variable
     - By messing with the other variables, we can see how "sensitive" the calcation is to other variables
@@ -26,6 +28,8 @@
   - In-situ execution case implementation
     - Add an option in the JSON to enable/disable in-situ execution
     - All it does is change the recursion failure to start from the beginning instead of the i-th task again
+  - Change all the ceilings to floors when discretizing just to see what happens
+    - The scheduling should be much more optimistic than the actual, otherwise something is wrong with the simulation/EV calculation
 
 EXPERIMENTS:
   - Test cancel useless runs of tasks upon a single host completing hack

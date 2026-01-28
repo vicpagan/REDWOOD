@@ -5,13 +5,13 @@
     "io_write_bandwidth": "200MBps"
   },
   "failures": {
-    "restart_overhead": 0.0,
-    "lambda": 0.1,
+    "restart_overhead": 60.0,
+    "lambda": 0.05,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 31212342
   },
   "application": {
-    "initial_data_size": 50.0,
+    "initial_data_size": 0.0,
     "initial_error_level": 1.0,
     "tasks": [
       {
@@ -24,8 +24,8 @@
               "type":"affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 0.0,
-                "b": 1.5,
+                "a": 60.0,
+                "b": 0.0,
                 "c": 0.0
               }
             },
@@ -34,7 +34,7 @@
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
-                "b": 2.0,
+                "b": 0.0,
                 "c": 0.0
               }
             },
@@ -44,7 +44,7 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 15.0,
+                "c": 4.0,
                 "d": 0.0,
                 "e": 0.0
               }
@@ -57,8 +57,8 @@
               "type":"affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 0.0,
-                "b": 1.6,
+                "a": 120.0,
+                "b": 0.0,
                 "c": 0.0
               }
             },
@@ -67,7 +67,7 @@
               "comments": "a + b * x + c * y + d * x^2 + e * y^2",
               "parameters": {
                 "a": 0.0,
-                "b": 2.0,
+                "b": 0.0,
                 "c": 0.0,
                 "d": 0.0,
                 "e": 0.0
@@ -79,7 +79,78 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 10.0
+                "c": 1.0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "task2",
+        "execution_options": [
+          {
+            "name": "option1",
+            "amhdal_parallelizable_fraction": 0.999,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 60.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 4.0,
+                "d": 0.0,
+                "e": 0.0
+              }
+            }
+          },
+          {
+            "name": "option2",
+            "amhdal_parallelizable_fraction": 0.999,
+            "t_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 120.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type":"quadratic",
+              "comments": "a + b * x + c * y + d * x^2 + e * y^2",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 0.0,
+                "d": 0.0,
+                "e": 0.0
+              }
+            },
+            "e_function": {
+              "type":"affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.0
               }
             }
           }
@@ -88,9 +159,9 @@
     ]
   },
   "execution": {
-    "num_repeats": 10,
-    "deadline": 10000,
-    "e_fail": 50.0
+    "num_repeats": 25,
+    "deadline": 15000,
+    "e_fail": 20.0
   },
   "scheduling": {
     "delta_t_scheme_comments": "'fixed', 'compute'",
