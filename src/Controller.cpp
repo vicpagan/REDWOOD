@@ -15,6 +15,10 @@
 #define MBYTE (1000.0 * 1000.0)
 #define GBYTE (1000.0 * 1000.0 * 1000.0)
 
+#ifndef OPTIMISTIC_DISCRETIZATION
+#define OPTIMISTIC_DISCRETIZATION 0
+#endif
+
 #include <iostream>
 #include <wrench/util/UnitParser.h>
 
@@ -141,7 +145,7 @@ namespace wrench {
                                 const std::string& hostname) {
         const auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
 
-        // std::cout << "Submitting job for task " << task_name << " with execution option " << execution_option <<
+        // std::cerr << "Submitting job for task " << task_name << " with execution option " << execution_option <<
         //     " on host " << hostname << std::endl;
 
         const auto read_input_action = job->addCustomAction("read", 0, 1,
@@ -193,6 +197,8 @@ namespace wrench {
     int Controller::main() {
         TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_GREEN);
         WRENCH_INFO("Controller starting");
+
+        // std::cerr << "OPTIMISTIC DISCRETIZATION: " << OPTIMISTIC_DISCRETIZATION << std::endl;
 
         /* Create a job manager so that we can create/submit jobs */
         _job_manager = this->createJobManager();
@@ -247,7 +253,7 @@ namespace wrench {
                 _application_specs->prune_decision_tree(0.0);
                 _application_specs->build_decision_tree(_task_functions);
                 algorithm->preprocess_decisions(initial_data_size, initial_error_level,
-                                _application_specs->get_deadline(), false);
+                                _application_specs->get_deadline(), OPTIMISTIC_DISCRETIZATION);
 
                 /* Reset all current decision nodes for all hosts in the state tracker */
                 _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
@@ -331,7 +337,7 @@ namespace wrench {
 
                             algorithm->preprocess_decisions(initial_data_size, initial_error_level,
                                 _application_specs->get_deadline(),
-                                false);
+                                OPTIMISTIC_DISCRETIZATION);
                         } else {
                             // were not done, update all hosts decision nodes to reflect completed task
                             _system_state_tracker->update_all_hosts_decision_nodes(success_hostname, completed_task, selected_option);
