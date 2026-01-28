@@ -173,7 +173,7 @@ target_link_libraries(data_parallel_evaluator
 )
 
 set(DELTA_T_EVALUATOR_SOURCE_FILES
-        src/DeltatEvaluator.cpp
+        src/DeltaTEvaluator.cpp
         src/ApplicationSpecs.cpp
         src/Utils.cpp
         src/scheduling/SchedulingAlgorithm.cpp
