@@ -22,13 +22,11 @@ namespace wrench {
         SchedulingAlgorithm(const std::shared_ptr<ApplicationSpecs> &application_specs,
             std::string name,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-            ProbabilityComputation* probability_computation,
-            OptionComparatorFunction* comparator_function) :
+            ProbabilityComputation* probability_computation) :
 
             _application_specs(application_specs),
             _exec_options(exec_options),
             _probability_computation(probability_computation),
-            _comparator_function(comparator_function),
             _e_fail(application_specs->get_e_fail()),
             _delta_t_scheme(application_specs->get_delta_t_scheme()),
             _delta_t_parameter(application_specs->get_delta_t_parameter()),
@@ -64,8 +62,7 @@ namespace wrench {
             const std::string& type,
             const std::shared_ptr<ApplicationSpecs>& application_specs,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-            ProbabilityComputation* probability_computation,
-            OptionComparatorFunction* comparator_function);
+            ProbabilityComputation* probability_computation);
 
         std::string get_name() { return _name; }
 
@@ -82,7 +79,6 @@ namespace wrench {
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &_exec_options;
 
         ProbabilityComputation* _probability_computation;
-        OptionComparatorFunction* _comparator_function;
 
         double _e_fail;
         std::string _delta_t_scheme;

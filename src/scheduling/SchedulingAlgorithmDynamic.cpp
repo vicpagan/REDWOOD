@@ -84,9 +84,9 @@ namespace wrench {
 
             auto option_functions = _exec_options.at(task_name).at(option_name);
 #if OPTIMISTIC_EXECUTION
-            const long exec_time = static_cast<long>(std::floor(option_functions.at("t_function")(running_input_data_size, running_input_error_level) / selected_delta_t));
+            const long exec_time = static_cast<long>(std::floor(((running_input_data_size / _io_read_bandwidth) + option_functions.at("t_function")(running_input_data_size, running_input_error_level) + (option_functions.at("d_function")(running_input_data_size, running_input_error_level) / _io_write_bandwidth)) / selected_delta_t));
 #else
-            const long exec_time = ceiling_division(option_functions.at("t_function")(running_input_data_size, running_input_error_level), selected_delta_t);
+            const long exec_time = ceiling_division(((running_input_data_size / _io_read_bandwidth) + option_functions.at("t_function")(running_input_data_size, running_input_error_level) + (option_functions.at("d_function")(running_input_data_size, running_input_error_level) / _io_write_bandwidth)), selected_delta_t);
 #endif
             double expected_error;
 
@@ -202,8 +202,10 @@ namespace wrench {
         }
 
         // for (auto &entry : dp) {
-        //     for (int j = 0; j < dp[entry.first].size(); j++) {
-        //         std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
+        //     if (entry.first->task == "ADIOS_Refactoring" && entry.first->execution_option == "do_nothing") {
+        //         for (int j = 0; j < dp[entry.first].size(); j++) {
+        //             std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
+        //         }
         //     }
         // }
 
@@ -294,14 +296,12 @@ namespace wrench {
             } else {
                 current_decision_node = system_state_tracker->get_host_current_decision_node(hostname);
             }
-#if OPTIMISTIC_EXECUTION
             const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
-#else
-            const auto n = ceiling_division(remaining_time, _delta_t);
-#endif
+
             const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
-            // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
-            //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+            std::cout << "n = " << n << std::endl;
+            std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
+                " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
         }
         return decisions;

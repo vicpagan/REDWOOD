@@ -38,16 +38,16 @@ namespace wrench {
 
             int num_children;
             bool is_leaf;
-            double cumulative_error_factor;
             double cumulative_data_size_factor;
+            double cumulative_error_factor;
 
             ExecOptionDecisionNode(std::string task, std::string execution_option, const bool is_leaf) :
                 task(std::move(task)),
                 execution_option(std::move(execution_option)),
                 num_children(0),
                 is_leaf(is_leaf),
-                cumulative_error_factor(1.0),
-                cumulative_data_size_factor(1.0) {
+                cumulative_data_size_factor(1.0),
+                cumulative_error_factor(1.0) {
             }
 
             static std::shared_ptr<ExecOptionDecisionNode> create_decision_node(std::string task, std::string execution_option, const bool is_leaf) {
@@ -69,6 +69,7 @@ namespace wrench {
             void build_tree_helper(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
                 int task_index,
                 const std::shared_ptr<ExecOptionDecisionNode>& parent,
+                double running_data_size_factor,
                 double running_error_factor);
 
             void prune_tree(double best_error);

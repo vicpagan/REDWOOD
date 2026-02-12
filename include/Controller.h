@@ -56,8 +56,6 @@ namespace wrench {
 
         std::unique_ptr<ProbabilityComputation> _probability_computation;
 
-        std::shared_ptr<OptionComparatorFunction> _option_comparator;
-
         const boost::json::object _application_spec;
         const boost::json::object _execution_spec;
         const boost::json::object _scheduling_spec;

@@ -87,9 +87,6 @@ namespace wrench {
         /* Create the probability computation utility */
         _probability_computation = std::make_unique<ProbabilityComputation>(_application_specs);
 
-        /* Create an execution option comparator function object */
-        _option_comparator = std::make_shared<ExpectedErrorComparator>(_application_specs);
-
         /* Determine the list of scheduling algorithms */
         /* Determine/validate the scheduling algorithms to use */
         std::string scheduling_type;
@@ -101,7 +98,7 @@ namespace wrench {
         }
         for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
-                            boost::json::value_to<string>(alg_name), _application_specs, _task_functions, _probability_computation.get(), _option_comparator.get());
+                            boost::json::value_to<string>(alg_name), _application_specs, _task_functions, _probability_computation.get());
 
             _scheduling_algorithms.push_back(alg);
         }
@@ -308,7 +305,7 @@ namespace wrench {
                             }
                             best_error = running_output_error_level;
 
-                            // std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
+                            std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
 
                             if (!_temporal_redundancy) {
                                 // std::cout << "Best error: " << best_error << std::endl;

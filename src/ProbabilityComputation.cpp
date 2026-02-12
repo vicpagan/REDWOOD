@@ -31,6 +31,9 @@ double ProbabilityComputation::compute_probability(const double task_time, const
 
     // Allocate memoization array
     // TODO: Bound that perhaps? (i.e., only memoize "small" values...)
+    std::cerr << "PROB COMP: n = " << n << std::endl;
+    std::cerr << "time_to_deadline = " << time_to_deadline << std::endl;
+    std::cerr << "_delta_t = " << _delta_t << std::endl;
     auto dp(std::vector<double>(n + 1, 0.0)); // For bottom up iterative
 
     // Call iterative function
