@@ -12,6 +12,8 @@
 
 #include "PlatformCreator.h"
 
+#include <wrench/util/UnitParser.h>
+
 /**
  * @brief Method to create the simulated platform
  */
@@ -19,15 +21,19 @@ void PlatformCreator::create_platform() const {
     // Get the top-level zone
     auto zone = simgrid::s4u::Engine::get_instance()->get_netzone_root();
 
+    auto num_compute_nodes = boost::json::value_to<int>(_platform_spec.at("num_compute_nodes"));
+
     // Create the UserHost host with its disk
     auto controller_host = zone->add_host("ControllerHost", "10Gf");
     controller_host->set_core_count(1);
-    auto controller_host_disk = controller_host->add_disk("hard_drive",
-                                                          boost::json::value_to<std::string>(
-                                                              _platform_spec.at("io_read_bandwidth")),
-                                                          boost::json::value_to<std::string>(
-                                                              _platform_spec.at("io_write_bandwidth"))
-    );
+
+    auto io_read_bandwidth = wrench::UnitParser::parse_bandwidth(
+        boost::json::value_to<std::string>(_platform_spec.at("io_read_bandwidth_per_node"))) * num_compute_nodes;
+    auto io_write_bandwidth = wrench::UnitParser::parse_bandwidth(
+        boost::json::value_to<std::string>(_platform_spec.at("io_write_bandwidth_per_node"))) * num_compute_nodes;
+
+    auto controller_host_disk = controller_host->add_disk("hard_drive", io_read_bandwidth, io_write_bandwidth);
+
     controller_host_disk->set_property("size", "50000GiB");
     controller_host_disk->set_property("mount", "/");
 
@@ -35,7 +41,7 @@ void PlatformCreator::create_platform() const {
     auto network_link = zone->add_link("network_link", "10000Gbps")->set_latency("0us");
 
     // Create compute nodes
-    for (int i = 0; i < boost::json::value_to<int>(_platform_spec.at("num_compute_nodes")); i++) {
+    for (int i = 0; i < num_compute_nodes; i++) {
         auto compute_host = zone->add_host("ComputeHost_" + std::to_string(i), "1f");
         compute_host->set_core_count(10);
         compute_host->add_disk("hard_drive",

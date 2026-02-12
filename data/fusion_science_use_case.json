@@ -1,18 +1,19 @@
 {
   "platform": {
     "num_compute_nodes": 1,
-    "bandwidth_comment": "The peak aggregate bandwidth on Summit is 2.5TBps... so... what do we do?",
-    "io_read_bandwidth": "100GBps",
-    "io_write_bandwidth": "100GBps"
+    "bandwidth_comment": "The peak aggregate bandwidth on Summit is 2.5TBps... so... what do we do? (4000-nodes: 4.2TB - 7.8TB)",
+    "io_read_bandwidth_per_node": "2GBps",
+    "io_write_bandwidth_per_node": "1GBps"
   },
   "failures": {
+    "restart_overhead_comment": "Fred is thinking of a 'reasonable value'",
     "restart_overhead": 10,
     "lambda": 0.025,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 31212342
   },
   "application": {
-    "initial_data_size_comment": "10 kB... it's supposed to be 'small' (config file!)",
+    "initial_data_size_comment": "10 kB... it's supposed to be 'small' (config file - Fred will ask)",
     "initial_data_size": 10000,
     "initial_error_level": 1.0,
     "tasks": [
