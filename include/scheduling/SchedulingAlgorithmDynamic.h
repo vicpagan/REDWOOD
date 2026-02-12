@@ -15,12 +15,10 @@ namespace wrench {
     public:
         explicit SchedulingAlgorithmDynamic(const std::shared_ptr<ApplicationSpecs> &application_specs,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-            ProbabilityComputation *probability_computation,
-            OptionComparatorFunction* comparator_function) : SchedulingAlgorithm(application_specs,
+            ProbabilityComputation *probability_computation) : SchedulingAlgorithm(application_specs,
                 "dynamic",
                 exec_options,
-                probability_computation,
-                comparator_function) {
+                probability_computation) {
         };
 
         std::vector<SchedulingDecision> make_decisions(

@@ -41,3 +41,12 @@ EXPERIMENTS:
     - Never cancel other hosts
     - Always cancel other hosts
     - Cancel based on expected error recalculation at current time 
+
+NOTES:
+  - The "pessimistic" preprocessing assumes its impossible for something to be scheduled by a certain time in some best-cases
+    - This leads to the scheduler not knowing what to do as it does not have an entry in the preprocessing table
+    - Our options are to either:
+      - a) Use "optimistic" preprocessing to ensure that all possible bases are covered
+      - b) Run the preprocessing from the deadline for ALL tasks in the chain, even if it should be impossible for some
+      - c) Use the compressed table as a guideline to "fill in" the unknown values
+        - i.e. just use whichever choice is "nearest"

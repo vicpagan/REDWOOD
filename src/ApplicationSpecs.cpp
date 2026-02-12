@@ -81,12 +81,13 @@ namespace wrench {
             return;
         }
 
-        build_tree_helper(exec_options, 0, application_specs->_exec_option_decision_tree->root, 1.0);
+        build_tree_helper(exec_options, 0, application_specs->_exec_option_decision_tree->root, 1.0, 1.0);
     }
 
     void ApplicationSpecs::ExecOptionDecisionTree::build_tree_helper(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
         const int task_index,
         const std::shared_ptr<ExecOptionDecisionNode>& parent,
+        const double running_data_size_factor,
         const double running_error_factor) {
 
         if (task_index >= application_specs->_num_tasks) {
@@ -101,10 +102,13 @@ namespace wrench {
             const double current_error_factor = functions.at("e_function")(0, running_error_factor);
             child->cumulative_error_factor = current_error_factor;
 
+            const double current_data_size_factor = functions.at("d_function")(0, running_data_size_factor);
+            child->cumulative_data_size_factor = current_data_size_factor;
+
             parent->children.push_back(child);
             parent->num_children++;
 
-            build_tree_helper(exec_options, task_index + 1, child, child->cumulative_error_factor);
+            build_tree_helper(exec_options, task_index + 1, child, current_data_size_factor, current_error_factor);
         }
 
     }

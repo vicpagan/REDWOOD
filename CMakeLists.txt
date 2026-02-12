@@ -86,6 +86,7 @@ set(SIMULATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/scheduling/SchedulingAlgorithmRandom.cpp
         src/SystemState.cpp
         src/Utils.cpp
         include/PlatformCreator.h
@@ -151,6 +152,8 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/scheduling/SchedulingAlgorithmRandom.cpp
+        src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
@@ -159,6 +162,8 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
+        include/scheduling/SchedulingAlgorithmRandom.h
+        include/scheduling/OptionComparatorFunction.h
         include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
@@ -179,6 +184,8 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/scheduling/SchedulingAlgorithmRandom.cpp
+        src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
@@ -187,6 +194,8 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
+        include/scheduling/SchedulingAlgorithmRandom.h
+        include/scheduling/OptionComparatorFunction.h
         include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h

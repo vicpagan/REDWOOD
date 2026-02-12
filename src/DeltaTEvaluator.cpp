@@ -50,7 +50,7 @@ namespace wrench {
 
         // Create algorithm and probability computation
         auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
-        auto algorithm = SchedulingAlgorithm::create_scheduling_algorithm("dynamic", application_specs, task_functions, probability_computation.get(), nullptr);
+        auto algorithm = SchedulingAlgorithm::create_scheduling_algorithm("dynamic", application_specs, task_functions, probability_computation.get());
 
         double initial_data_size = json_input.at("application").as_object().at("initial_data_size").to_number<double>();
         double initial_error_level = json_input.at("application").as_object().at("initial_error_level").to_number<double>();

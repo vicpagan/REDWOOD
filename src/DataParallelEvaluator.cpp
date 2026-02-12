@@ -134,7 +134,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
 
     // Create an unused scheduling algorithm
     auto algorithm = SchedulingAlgorithm::create_scheduling_algorithm(
-                            "dynamic", application_specs, task_functions, probability_computation.get(), nullptr);
+                            "dynamic", application_specs, task_functions, probability_computation.get());
 
     double initial_data_size = input.at("application").as_object().at("initial_data_size").to_number<double>();
     double initial_error_level = input.at("application").as_object().at("initial_error_level").to_number<double>();

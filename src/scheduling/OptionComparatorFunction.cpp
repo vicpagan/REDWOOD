@@ -1,4 +1,5 @@
 #include "scheduling/OptionComparatorFunction.h"
+#include <iostream>
 
 namespace wrench {
 
@@ -70,9 +71,12 @@ namespace wrench {
         const double exec_option_time_total = (input_data_size / _io_read_bandwidth) + exec_option_time +
                                               (exec_option_data / _io_write_bandwidth);
 
+        std::cerr << "OPCOMPFUNC: remaining_time = " << remaining_time << std::endl;
+
         const double probability_success = probability_computation->compute_probability(exec_option_time_total, remaining_time, false);
 
         return probability_success / exec_option_error;
+
     }
 }
 
