@@ -13,8 +13,8 @@
     "seed": 31212342
   },
   "application": {
-    "initial_data_size_comment": "10 kB... it's supposed to be 'small' (config file - Fred will ask)",
-    "initial_data_size": 10000,
+    "initial_data_size_comment": "41 MB: parameter file (~KB), mesh field file (~41MB), magnetic equilibrium file (~100KB)",
+    "initial_data_size": 41000000,
     "initial_error_level": 1.0,
     "tasks": [
       {
@@ -48,7 +48,6 @@
             "e_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
-              "other_comment": "Changing the particle-in-cell resolution, but no real info here",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
@@ -57,7 +56,7 @@
             }
           },
           {
-            "name": "lower_resolution_2x",
+            "name": "2x_fewer_particles",
             "amhdal_parallelizable_fraction": 0.8999,
             "t_function": {
               "type": "affine",
@@ -72,9 +71,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "Just picked 1/8-th the data size (3-D data, 1/2 the time -> 1/8 the data)",
+              "other_comments": "1/2 of the data)",
               "parameters": {
-                "a": 8625000000000.0,
+                "a": 34500000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -82,16 +81,16 @@
             "e_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comment": "Changing the particle-in-cell resolution, but no really info here. Just x8 the error",
+              "other_comment": "2x the error",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 8.0
+                "c": 2.0
               }
             }
           },
           {
-            "name": "lower_resolution_4x",
+            "name": "4x_fewer_particles",
             "amhdal_parallelizable_fraction": 0.8999,
             "t_function": {
               "type": "affine",
@@ -106,9 +105,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "Just picked 1/64-th the data size (3-D data, 1/4 the time -> 1/64 the data)",
+              "other_comments": "1/4 of the data",
               "parameters": {
-                "a": 1078125000000.0,
+                "a": 17250000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -116,11 +115,11 @@
             "e_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comment": "Changing the particle-in-cell resolution, but no really info here. Just x64 the error",
+              "other_comment": "4x the error",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 64.0
+                "c": 4.0
               }
             }
           }
@@ -164,8 +163,8 @@
           },
           {
             "name": "error_10-2",
-            "comment": "Parallel efficiency is near 100% it seems",
-            "comment_disco": "These times are on disco.ics.hawaii.edu, so they make little sense w.r.t. Summit",
+            "comment": "Parallel efficiency is near 100% (based on published results)",
+            "comment_disco": "These times are on disco.ics.hawaii.edu",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
@@ -197,7 +196,7 @@
           },
           {
             "name": "error_10-6",
-            "comment": "Parallel efficiency is near 100% it seems",
+            "comment": "Parallel efficiency is near 100% (based on published results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
@@ -229,14 +228,14 @@
           },
           {
             "name": "error_10-14",
-            "comment": "Parallel efficiency is near 100% it seems",
+            "comment": "Parallel efficiency is near 100% (based on published results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type":"affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
-                "b": 0.000000001374475,
+                "b": 0.00000001374475,
                 "c": 0.0
               }
             },
