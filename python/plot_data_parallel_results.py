@@ -89,7 +89,7 @@ def plot_curves(data):
     ax.set_xticks(range(1, max_num_procs+1))  # Set major tick positions
 
     # Compute ok limits
-    ax.set_ylim(1.0, max_min_error + 0.2)
+#    ax.set_ylim(1.0, max_min_error + 0.2)
 
     ax.legend()
     plt.tight_layout()
@@ -108,7 +108,7 @@ def main():
     for key, values in json_object.items():
         data[float(key)] = values
 
-    plot_heatmap(data)
+    # plot_heatmap(data)
     plot_curves(data)
 
 
