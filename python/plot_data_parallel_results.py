@@ -15,7 +15,7 @@ def plot_curves(data):
     # Paint tiles
     fig, ax = plt.subplots()
     ax.set_xlabel('Number of PEs', fontsize=12)
-    ax.set_ylabel('Near-optimal expected error', fontsize=12)
+    ax.set_ylabel('Lower bound on optimal expected error', fontsize=12)
     # ax.set_title('Near-optimal expected error', fontsize=14)
     ax.grid(True)
 
@@ -53,7 +53,6 @@ def main():
     data = {}
     for key, values in json_object.items():
         data[float(key)] = values
-    print(data)
 
     plot_curves(data)
 

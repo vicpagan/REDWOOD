@@ -167,7 +167,7 @@ std::vector<std::pair<unsigned long, double>> wrench::DataParallelEvaluator::eva
     std::vector<std::pair<unsigned long, double>> errors;
     errors.reserve(this->max_num_compute_nodes);
     for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes += this->step_num_compute_nodes) {
-        if (num_compute_nodes == 1 + this->step_num_compute_nodes) { // Stupid hack make one special
+        if ((this->step_num_compute_nodes > 1) and (num_compute_nodes == 1 + this->step_num_compute_nodes)) { // Stupid hack make one special
             num_compute_nodes -= 1;
         }
         double expected_error = compute_expected_error(num_compute_nodes);
