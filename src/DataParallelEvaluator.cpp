@@ -27,8 +27,9 @@
 namespace po = boost::program_options;
 
 wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_input,
-                                                     unsigned long max_num_compute_nodes) :
-    json_input(std::move(json_input)), max_num_compute_nodes(max_num_compute_nodes) {
+                                                     unsigned long max_num_compute_nodes,
+                                                     unsigned long step_num_compute_nodes) :
+    json_input(std::move(json_input)), max_num_compute_nodes(max_num_compute_nodes), step_num_compute_nodes(step_num_compute_nodes) {
 }
 
 double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_compute_nodes) {
@@ -165,8 +166,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
 std::vector<std::pair<unsigned long, double>> wrench::DataParallelEvaluator::evaluate() {
     std::vector<std::pair<unsigned long, double>> errors;
     errors.reserve(this->max_num_compute_nodes);
-    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes += 4) {
-        if (num_compute_nodes == 5) { // Stupid hack to do 1, 2, ...
+    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes += this->step_num_compute_nodes) {
+        if (num_compute_nodes == 1 + this->step_num_compute_nodes) { // Stupid hack make one special
             num_compute_nodes -= 1;
         }
         double expected_error = compute_expected_error(num_compute_nodes);
@@ -188,6 +189,7 @@ int main(int argc, char** argv) {
     std::string json_input_arg;
     std::string json_data_parallel_input_arg;
     unsigned long max_num_nodes;
+    unsigned long step_num_nodes;
     double min_deadline, max_deadline, step_deadline;
     double lambda;
     double e_fail;
@@ -200,6 +202,8 @@ int main(int argc, char** argv) {
      "JSON input string or file path\n")
     ("max_num_nodes", po::value<unsigned long>(&max_num_nodes)->required()->value_name("<max number of nodes>"),
      "Maximum number of compute nodes\n")
+    ("step_num_nodes", po::value<unsigned long>(&step_num_nodes)->required()->value_name("<step number of nodes>"),
+     "Step number of compute nodes\n")
     ("min_deadline", po::value<double>(&min_deadline)->required()->value_name("<min deadline>"),
      "Minimum deadline\n")
     ("max_deadline", po::value<double>(&max_deadline)->required()->value_name("<max deadline>"),
@@ -232,7 +236,7 @@ int main(int argc, char** argv) {
         cerr << "Error: " << e.what() << "\n\n";
         std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON spec input (file)> "
             "--min_deadline <min deadline> --max_deadline <max deadline> --step_deadline <deadline step> "
-            "--max_num_nodes <max number of nodes> --lambda <lambda> ";
+            "--max_num_nodes <max number of nodes> --step_num_nodes <step num nodes> --lambda <lambda> ";
         cerr << "Usage: " << usage_string << "\n";
         exit(1);
     }
@@ -262,7 +266,7 @@ int main(int argc, char** argv) {
     for (double deadline = min_deadline; deadline <= max_deadline; deadline = deadline + step_deadline) {
         std::cerr << "." << std::flush;
         json_input.at("execution").get_object().at("deadline") = deadline;
-        auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, max_num_nodes);
+        auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, max_num_nodes, step_num_nodes);
         results[deadline] = evaluator->evaluate();
     }
     std::cerr << std::endl;
