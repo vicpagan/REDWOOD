@@ -148,7 +148,8 @@ namespace wrench {
         const auto read_input_action = job->addCustomAction("read", 0, 1,
                                                       [this, running_output_data_size](
                                                       const std::shared_ptr<wrench::ActionExecutor>& action_executor) {
-                                                          _storage_disk->write(
+                                                          auto disk = wrench::S4U_Simulation::hostHasMountPoint(action_executor->hostname, "/");
+                                                          disk->write(
                                                               static_cast<sg_size_t>(running_output_data_size));
                                                       },
                                                       [](const std::shared_ptr<wrench::ActionExecutor>&
@@ -166,7 +167,8 @@ namespace wrench {
                                                             running_output_error_level](
                                                         const std::shared_ptr<wrench::ActionExecutor>&
                                                         action_executor) {
-                                                            _storage_disk->read(static_cast<sg_size_t>(
+                                                            auto disk = wrench::S4U_Simulation::hostHasMountPoint(action_executor->hostname, "/");
+                                                            disk->write(static_cast<sg_size_t>(
                                                                 _task_functions[task_name][execution_option][
                                                                     "d_function"]
                                                                 (running_output_data_size,
