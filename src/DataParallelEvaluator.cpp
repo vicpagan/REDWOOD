@@ -162,11 +162,15 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
 /**
  * @brief Function to evaluate data parallel options
  */
-std::vector<double> wrench::DataParallelEvaluator::evaluate() {
-    std::vector<double> errors;
+std::vector<std::pair<unsigned long, double>> wrench::DataParallelEvaluator::evaluate() {
+    std::vector<std::pair<unsigned long, double>> errors;
     errors.reserve(this->max_num_compute_nodes);
-    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes++) {
-        errors.push_back(compute_expected_error(num_compute_nodes));
+    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes += 4) {
+        if (num_compute_nodes == 5) { // Stupid hack to do 1, 2, ...
+            num_compute_nodes -= 1;
+        }
+        double expected_error = compute_expected_error(num_compute_nodes);
+        errors.push_back(std::make_pair(num_compute_nodes, expected_error));
     }
     return errors;
 }
@@ -254,7 +258,7 @@ int main(int argc, char** argv) {
 
 
     // Compute results
-    std::map<double, std::vector<double>> results;
+    std::map<double, std::vector<std::pair<unsigned long, double>>> results;
     for (double deadline = min_deadline; deadline <= max_deadline; deadline = deadline + step_deadline) {
         std::cerr << "." << std::flush;
         json_input.at("execution").get_object().at("deadline") = deadline;
@@ -265,13 +269,30 @@ int main(int argc, char** argv) {
 
     // Output them in JSON
     boost::json::object json_obj;
+
     for (const auto& [key, vec] : results) {
-        boost::json::array json_array;
-        for (double val : vec) {
-            json_array.push_back(val);
+        boost::json::array arr;
+
+        for (const auto& [id, value] : vec) {
+            boost::json::object pair_obj;
+            pair_obj["num_nodes"] = id;
+            pair_obj["expected_error"] = value;
+            arr.push_back(pair_obj);
         }
-        json_obj[std::to_string(key)] = json_array;
+        // Convert double key to string for JSON object key
+        json_obj[std::to_string(key)] = arr;
     }
+
+    //
+    //
+    //
+    // for (const auto& [key, vec] : results) {
+    //     boost::json::array json_array;
+    //     for (double val : vec) {
+    //         json_array.push_back(val);
+    //     }
+    //     json_obj[std::to_string(key)] = json_array;
+    // }
 
     // Convert to string
     std::string json_string = boost::json::serialize(json_obj);

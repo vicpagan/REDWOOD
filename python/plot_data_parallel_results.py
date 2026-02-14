@@ -7,62 +7,6 @@ import bisect
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Patch
 
-
-
-def plot_heatmap(data):
-    def plot_rectangle(ax: plt.figure, x: float, y: float, expected_error: float):
-        index = bisect.bisect_left(expected_error_thresholds, expected_error)
-        ax.add_patch(Rectangle((x, y), 1, 1, facecolor=colors[index], linewidth=0.5, edgecolor='white'))
-
-    expected_error_thresholds = [1.5, 2.0, 3.0, 4.0, 5.0, 10]
-    colors = plt.cm.viridis(np.linspace(0, 0.9, len(expected_error_thresholds)))
-
-    max_num_procs = len(data[list(data.keys())[0]])
-
-    # Paint tiles
-    fig, ax = plt.subplots()
-    for deadline_idx, deadline in enumerate(data):
-        for num_procs in range(1, len(data[deadline]) + 1):
-            expected_error = data[deadline][num_procs - 1]
-            plot_rectangle(ax, deadline_idx + 1, num_procs - 0.5, expected_error)
-
-    ax.set_xlabel('deadline (sec)', fontsize=12)
-    ax.set_ylabel('number of PEs', fontsize=12)
-    ax.set_title('Near-optimal expected error', fontsize=14)
-
-    ax.set_yticks(np.arange(1, max_num_procs + 1))
-    ax.set_yticks(np.arange(1.5, max_num_procs), minor=True)
-    ax.tick_params(axis='y', which='minor', length=0)  # Adjust length as needed
-    ax.tick_params(axis='y', which='major', length=0)  # Hide major ticks if desired
-
-    ax.set_xticks(np.arange(1.5, len(data) + 1))  # Set major tick positions
-    ax.set_xticklabels([int(x) for x in data.keys()])  # Set labels for those positions
-    ax.set_xticks(np.arange(1.5, len(data) + 1), minor=True)  # Minor ticks between
-    ax.tick_params(axis='x', which='minor', length=0)  # Adjust length as needed
-    ax.tick_params(axis='x', which='major', length=0)  # Hide major ticks if desired
-
-    ax.set_xlim(1, len(data.keys()))
-    ax.set_ylim(0.5, max_num_procs + 0.5)
-
-    # Create legend elements
-    legend_elements = []
-    for i, color in enumerate(colors):
-        if i == 0:
-            label = f"≤ {expected_error_thresholds[0]}"
-        elif i < len(expected_error_thresholds):
-            label = f"≤ {expected_error_thresholds[i]}"
-        else:
-            label = f"> {expected_error_thresholds[-1]}"
-
-        legend_elements.append(Patch(facecolor=color, label=label))
-
-    # Add legend to the plot
-    ax.legend(handles=legend_elements, handlelength=1.0, bbox_to_anchor=(1.20, 0.5), loc="center right")
-
-    plt.tight_layout()
-    sys.stderr.write("Figure saved in ./heatmap.pdf\n")
-    plt.savefig("./heatmap.pdf")
-
 def plot_curves(data):
     max_num_procs = len(data[list(data.keys())[0]])
     colors = plt.cm.viridis(np.linspace(0, 0.9, len(data.keys())))
@@ -79,14 +23,16 @@ def plot_curves(data):
     color_idx = 0
     for deadline in data.keys():
         color = colors[color_idx]
-        ax.plot(range(1, len(data[deadline]) + 1), data[deadline], '.-', label="deadline:" + str(int(deadline)) + "s", color=color, linewidth=2)
-        min_error = min(data[deadline])
-        best_num_procs = 1 + data[deadline].index(min_error)
+        num_nodes_values = [x["num_nodes"] for x in data[deadline]]
+        error_values = [x["expected_error"] for x in data[deadline]]
+        ax.plot(num_nodes_values, error_values, '.-', label="deadline:" + str(int(deadline)) + "s", color=color, linewidth=2)
+        min_error = min(error_values)
+        best_num_procs = num_nodes_values[error_values.index(min_error)]
         ax.plot([best_num_procs], [min_error], 'o', color=color, markersize=6)
         max_min_error = max(min_error, max_min_error)
         color_idx += 1
 
-    ax.set_xticks(range(1, max_num_procs+1))  # Set major tick positions
+    ax.set_xticks(num_nodes_values)  # Set major tick positions
 
     # Compute ok limits
 #    ax.set_ylim(1.0, max_min_error + 0.2)
@@ -107,8 +53,8 @@ def main():
     data = {}
     for key, values in json_object.items():
         data[float(key)] = values
+    print(data)
 
-    # plot_heatmap(data)
     plot_curves(data)
 
 

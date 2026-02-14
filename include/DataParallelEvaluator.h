@@ -30,7 +30,7 @@ namespace wrench {
         // Constructor
         DataParallelEvaluator(boost::json::object json_input, unsigned long max_num_compute_nodes);
 
-        std::vector<double> evaluate();
+        std::vector<std::pair<unsigned long, double>> evaluate();
 
     protected:
 
