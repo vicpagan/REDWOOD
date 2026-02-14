@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
     catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
         std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON spec input (file)> "
-            "--min_deadline <min deadline> --max_deadline <max deadline> "
+            "--min_deadline <min deadline> --max_deadline <max deadline> --step_deadline <deadline step> "
             "--max_num_nodes <max number of nodes> --lambda <lambda> ";
         cerr << "Usage: " << usage_string << "\n";
         exit(1);
