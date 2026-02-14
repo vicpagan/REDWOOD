@@ -22,6 +22,8 @@
 #include "scheduling/SchedulingAlgorithm.h"
 #include "DataParallelEvaluator.h"
 
+#include <wrench/util/UnitParser.h>
+
 namespace po = boost::program_options;
 
 wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_input,
@@ -97,6 +99,13 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     // Tweak the lambda value in input to scale up the failure rate
     double lambda = input["failures"].get_object()["lambda"].to_number<double>();
     input["failures"].get_object()["lambda"] = static_cast<double>(num_compute_nodes) * lambda;
+
+    // Tweak the IO bandwidth value
+    double original_io_read_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(boost::json::value_to<std::string>(input["platform"].get_object()["io_read_bandwidth_per_node"]));
+    double original_io_write_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(boost::json::value_to<std::string>(input["platform"].get_object()["io_write_bandwidth_per_node"]));
+
+    input["platform"].get_object()["io_read_bandwidth_per_node"] = std::to_string(static_cast<double>(num_compute_nodes) * original_io_read_bandwidth_per_node);
+    input["platform"].get_object()["io_write_bandwidth_per_node"] = std::to_string(static_cast<double>(num_compute_nodes) * original_io_write_bandwidth_per_node);
 
     auto application_specs = wrench::ApplicationSpecs::create_application_specs(
         input.at("platform").as_object(),
