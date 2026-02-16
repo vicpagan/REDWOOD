@@ -74,9 +74,9 @@ namespace wrench {
             auto& best_option_functions = _exec_options.at(task_name).at(best_option);
             double exec_time = best_option_functions.at("t_function")(running_data_size, running_error_level);
             std::cerr << "exec_time = " << exec_time << std::endl;
-            double exec_time_total = (running_data_size / _io_read_bandwidth) +
+            double exec_time_total = (running_data_size / _io_read_bandwidth_per_node) +
                                     exec_time +
-                                    (best_option_functions.at("d_function")(running_data_size, running_error_level) / _io_write_bandwidth);
+                                    (best_option_functions.at("d_function")(running_data_size, running_error_level) / _io_write_bandwidth_per_node);
 
             double task_success_prob = _probability_computation->compute_probability(
                 exec_time_total, remaining_time, false);

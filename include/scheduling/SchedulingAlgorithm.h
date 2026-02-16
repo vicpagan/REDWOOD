@@ -32,8 +32,8 @@ namespace wrench {
             _delta_t_parameter(application_specs->get_delta_t_parameter()),
             _compute_always(application_specs->get_delta_t_scheme() == "compute_always"),
             _restart_overhead(application_specs->get_restart_overhead()),
-            _io_read_bandwidth(application_specs->get_io_read_bandwidth()),
-            _io_write_bandwidth(application_specs->get_io_write_bandwidth()),
+            _io_read_bandwidth_per_node(application_specs->get_io_read_bandwidth_per_node()),
+            _io_write_bandwidth_per_node(application_specs->get_io_write_bandwidth_per_node()),
             _delta_t(-1),
             _name(std::move(name)) {
         };
@@ -85,8 +85,8 @@ namespace wrench {
         double _delta_t_parameter;
         bool _compute_always;
         double _restart_overhead;
-        double _io_read_bandwidth;
-        double _io_write_bandwidth;
+        double _io_read_bandwidth_per_node;
+        double _io_write_bandwidth_per_node;
         double _delta_t;
         std::string _name;
 
