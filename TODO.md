@@ -30,6 +30,11 @@
     - All it does is change the recursion failure to start from the beginning instead of the i-th task again
   - Change all the ceilings to floors when discretizing just to see what happens
     - The scheduling should be much more optimistic than the actual, otherwise something is wrong with the simulation/EV calculation
+  - JSON file changed from "io_XXX_bandwidth" to "io_XXX_bandwidth_per_node", needs fixing for code
+  - Implement different static scheduling types
+    - Online Static: Dynamic preprocessing, select option, run it until task completes, move onto next
+    - Blind Static: Assume current task is the only task, select option, run until completion, repeat with next
+    - All-Paths Static: Run preprocessing for each possible combination, select one, run with that combination of options
 
 EXPERIMENTS:
   - Test cancel useless runs of tasks upon a single host completing hack
