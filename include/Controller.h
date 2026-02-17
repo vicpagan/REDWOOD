@@ -37,7 +37,6 @@ namespace wrench {
             const boost::json::object& scheduling_spec,
             const std::shared_ptr<ApplicationSpecs>& _application_specs,
             const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
-            const std::shared_ptr<SimpleStorageService>& storage_service,
             const std::string& hostname);
 
 
@@ -60,7 +59,6 @@ namespace wrench {
         const boost::json::object _execution_spec;
         const boost::json::object _scheduling_spec;
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
-        const std::shared_ptr<SimpleStorageService> _storage_service;
 
         std::shared_ptr<SystemState> _system_state_tracker;
         std::shared_ptr<JobManager> _job_manager;
@@ -74,8 +72,6 @@ namespace wrench {
         std::vector<std::pair<std::vector<std::string>, double>> _execution_combinations;
         std::exponential_distribution<double> _exponential_distribution;
         std::vector<std::shared_ptr<wrench::SchedulingAlgorithm>> _scheduling_algorithms;
-
-        simgrid::s4u::Disk *_storage_disk;
 
     };
 } // namespace wrench
