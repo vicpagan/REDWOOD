@@ -85,8 +85,8 @@ namespace wrench {
 
         int get_num_compute_nodes() const { return _num_compute_nodes; }
         double get_e_fail() const { return _e_fail; }
-        double get_io_read_bandwidth() const { return _io_read_bandwidth; }
-        double get_io_write_bandwidth() const { return _io_write_bandwidth; }
+        double get_io_read_bandwidth_per_node() const { return _io_read_bandwidth_per_node; }
+        double get_io_write_bandwidth_per_node() const { return _io_write_bandwidth_per_node; }
         double get_restart_overhead() const { return _restart_overhead; }
         double get_deadline() const { return _deadline; }
         double get_lambda() const { return _lambda; }
@@ -102,8 +102,8 @@ namespace wrench {
 
     protected:
         int _num_compute_nodes;
-        double _io_read_bandwidth;
-        double _io_write_bandwidth;
+        double _io_read_bandwidth_per_node;
+        double _io_write_bandwidth_per_node;
         double _deadline;
         double _restart_overhead;
         double _e_fail;
