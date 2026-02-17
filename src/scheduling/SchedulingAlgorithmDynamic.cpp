@@ -84,9 +84,9 @@ namespace wrench {
 
             auto option_functions = _exec_options.at(task_name).at(option_name);
 #if OPTIMISTIC_EXECUTION
-            const long exec_time = static_cast<long>(std::floor(((running_input_data_size / _io_read_bandwidth) + option_functions.at("t_function")(running_input_data_size, running_input_error_level) + (option_functions.at("d_function")(running_input_data_size, running_input_error_level) / _io_write_bandwidth)) / selected_delta_t));
+            const long exec_time = static_cast<long>(std::floor(((running_input_data_size / _io_read_bandwidth_per_node) + option_functions.at("t_function")(running_input_data_size, running_input_error_level) + (option_functions.at("d_function")(running_input_data_size, running_input_error_level) / _io_write_bandwidth_per_node)) / selected_delta_t));
 #else
-            const long exec_time = ceiling_division(((running_input_data_size / _io_read_bandwidth) + option_functions.at("t_function")(running_input_data_size, running_input_error_level) + (option_functions.at("d_function")(running_input_data_size, running_input_error_level) / _io_write_bandwidth)), selected_delta_t);
+            const long exec_time = ceiling_division(((running_input_data_size / _io_read_bandwidth_per_node) + option_functions.at("t_function")(running_input_data_size, running_input_error_level) + (option_functions.at("d_function")(running_input_data_size, running_input_error_level) / _io_write_bandwidth_per_node)), selected_delta_t);
 #endif
             double expected_error;
 

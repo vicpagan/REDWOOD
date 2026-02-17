@@ -8,7 +8,7 @@
   "failures": {
     "restart_overhead_comment": "Fred is thinking of a 'reasonable value'",
     "restart_overhead": 10,
-    "lambda": 0.025,
+    "lambda": 0.0000025,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 31212342
   },
@@ -400,7 +400,7 @@
   },
   "execution": {
     "num_repeats": 15,
-    "deadline": 10000,
+    "deadline": 100000,
     "e_fail": 200.0
   },
   "scheduling": {

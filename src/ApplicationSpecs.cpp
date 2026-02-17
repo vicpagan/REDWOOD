@@ -15,9 +15,9 @@ namespace wrench {
 
         _num_compute_nodes = boost::json::value_to<int>(platform_spec.at("num_compute_nodes"));
 
-        _io_read_bandwidth = wrench::UnitParser::parse_bandwidth(
+        _io_read_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(
         boost::json::value_to<std::string>(platform_spec.at("io_read_bandwidth_per_node"))) * _num_compute_nodes;
-        _io_write_bandwidth = wrench::UnitParser::parse_bandwidth(
+        _io_write_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(
             boost::json::value_to<std::string>(platform_spec.at("io_write_bandwidth_per_node"))) * _num_compute_nodes;
 
         _deadline = boost::json::value_to<double>(execution_spec.at("deadline"));
