@@ -41,7 +41,6 @@ namespace wrench {
      * @param execution_spec: application specifications
      * @param scheduling_spec: scheduling specifications
      * @param compute_services: a set of compute services available to run actions
-     * @param storage_service: the storage service
      * @param hostname: the name of the host on which to start the Execution Controller
      */
     Controller::Controller(const boost::json::object& application_spec,
@@ -49,14 +48,12 @@ namespace wrench {
                            const boost::json::object& scheduling_spec,
                            const std::shared_ptr<ApplicationSpecs>& application_specs,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
-                           const std::shared_ptr<SimpleStorageService>& storage_service,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
                                                           _application_specs(application_specs),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _scheduling_spec(scheduling_spec),
-                                                          _compute_services(compute_services),
-                                                          _storage_service(storage_service) {
+                                                          _compute_services(compute_services) {
 
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
         _temporal_redundancy = boost::json::value_to<bool>(_scheduling_spec.at("hacks").as_object().at("temporal_redundancy"));
@@ -103,7 +100,6 @@ namespace wrench {
             _scheduling_algorithms.push_back(alg);
         }
 
-        _storage_disk = _storage_service->getHost()->get_disks().at(0);
     }
 
     void Controller::restart_system() const {

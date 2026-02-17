@@ -26,7 +26,7 @@
             "comments": "The results from Eric seem to indicate: with 32 nodes, parallel speedup = 7.8x",
             "amhdal_parallelizable_fraction": 0.8999,
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "other_comments": "This is 18s for a time-step (loosely based on graph from Eric), but we can likely fudge this (i.e., pick some number of time steps to do)",
               "parameters": {
@@ -36,7 +36,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "other_comments": "The output is ~69TB, based on discussion with Eric",
               "parameters": {
@@ -46,7 +46,7 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -122,6 +122,40 @@
                 "c": 4.0
               }
             }
+          },
+          {
+            "name": "8x_fewer_particles",
+            "amhdal_parallelizable_fraction": 0.8999,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "This is 2.25s (18/8) for a time-step, regardless of input size",
+              "parameters": {
+                "a": 4.5,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comments": "1/8 of the data",
+              "parameters": {
+                "a": 8625000000000.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "other_comment": "4x the error",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 8.0
+              }
+            }
           }
         ]
       },
@@ -134,7 +168,7 @@
             "comment": "Parallel efficiency is near 100% it seems",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -143,7 +177,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -152,7 +186,7 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y ",
               "parameters": {
                 "a": 0.0,
@@ -167,7 +201,7 @@
             "comment_disco": "These times are on disco.ics.hawaii.edu",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -176,7 +210,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -185,7 +219,7 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y ",
               "parameters": {
                 "a": 0.0,
@@ -199,7 +233,7 @@
             "comment": "Parallel efficiency is near 100% (based on published results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -208,7 +242,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -217,7 +251,7 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y ",
               "parameters": {
                 "a": 0.0,
@@ -231,7 +265,7 @@
             "comment": "Parallel efficiency is near 100% (based on published results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -240,7 +274,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -249,7 +283,7 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y ",
               "parameters": {
                 "a": 0.0,
@@ -266,10 +300,10 @@
         "execution_options": [
           {
             "name": "accurate",
-            "comment": "Parallel efficiency is near 100% it seems",
+            "comment": "Parallel efficiency is near 100%",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -278,7 +312,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -287,7 +321,7 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y ",
               "parameters": {
                 "a": 0.0,
@@ -297,12 +331,11 @@
             }
           },
           {
-            "name": "degraded",
-            "comment": "Parallel efficiency is near 100% it seems",
+            "name": "degraded_2x",
+            "comment": "Parallel efficiency is near 100%",
             "amhdal_parallelizable_fraction": 0.99,
-            "other_comment": "Just arbitrarily made things 2x faster/smaller, with a 2x error, not sure...",
             "t_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -311,7 +344,7 @@
               }
             },
             "d_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
                 "a": 0.0,
@@ -320,12 +353,44 @@
               }
             },
             "e_function": {
-              "type":"affine",
+              "type": "affine",
               "comments": "a + b * x + c * y ",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
                 "c": 2.0
+              }
+            }
+          },
+          {
+            "name": "degraded_4x",
+            "comment": "Parallel efficiency is near 100%",
+            "amhdal_parallelizable_fraction": 0.99,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000000036231884,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.00000000000003623188,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y ",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 4.0
               }
             }
           }
