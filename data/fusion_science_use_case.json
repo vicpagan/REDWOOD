@@ -19,18 +19,17 @@
     "tasks": [
       {
         "name": "XGC_Simulation",
-        "comment": "Two execution options below, but could do more",
         "execution_options": [
           {
             "name": "full_accuracy",
-            "comments": "The results from Eric seem to indicate: with 32 nodes, parallel speedup = 7.8x",
+            "comments": "Experimental results indicate a parallel speedup of 7.8x",
             "amhdal_parallelizable_fraction": 0.8999,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "This is 18s for a time-step (loosely based on graph from Eric), but we can likely fudge this (i.e., pick some number of time steps to do)",
+              "other_comments": "Work that corresponds to a 100GB output, based on discussion with user",
               "parameters": {
-                "a": 18,
+                "a": 52.17,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -38,9 +37,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "The output is ~69TB, based on discussion with Eric",
+              "other_comments": "The output is 100GB",
               "parameters": {
-                "a": 69000000000000.0,
+                "a": 100000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -61,9 +60,9 @@
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "This is 9s (18/2) for a time-step, regardless of input size",
+              "other_comments": "1/2 the work",
               "parameters": {
-                "a": 9,
+                "a": 26.08,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -71,9 +70,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "1/2 of the data)",
+              "other_comments": "1/2 the data)",
               "parameters": {
-                "a": 34500000000000.0,
+                "a": 50000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -95,9 +94,9 @@
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "This is 4.5s (18/4) for a time-step, regardless of input size",
+              "other_comments": "1/4 the time",
               "parameters": {
-                "a": 4.5,
+                "a": 13.04,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -105,9 +104,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "1/4 of the data",
+              "other_comments": "1/4 the data",
               "parameters": {
-                "a": 17250000000000.0,
+                "a": 25000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -129,9 +128,9 @@
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "This is 2.25s (18/8) for a time-step, regardless of input size",
+              "other_comments": "1/8 the time",
               "parameters": {
-                "a": 4.5,
+                "a": 6.52,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -139,9 +138,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "1/8 of the data",
+              "other_comments": "1/8 the data",
               "parameters": {
-                "a": 8625000000000.0,
+                "a": 12500000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -149,7 +148,7 @@
             "e_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comment": "4x the error",
+              "other_comment": "8x the error",
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
@@ -161,11 +160,11 @@
       },
       {
         "name": "ADIOS_Refactoring",
-        "comments": "The values below are based on an SZ3 benchmark on disco.ics.hawaii.edu...",
+        "comments": "The values below are based on SZ3 benchmarking",
         "execution_options": [
           {
             "name": "do_nothing",
-            "comment": "Parallel efficiency is near 100% it seems",
+            "comment": "Parallel efficiency is near 100% (based on publicly available results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type": "affine",
@@ -197,8 +196,7 @@
           },
           {
             "name": "error_10-2",
-            "comment": "Parallel efficiency is near 100% (based on published results)",
-            "comment_disco": "These times are on disco.ics.hawaii.edu",
+            "comment": "Parallel efficiency is near 100% (based on publicly available results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type": "affine",
@@ -230,7 +228,7 @@
           },
           {
             "name": "error_10-6",
-            "comment": "Parallel efficiency is near 100% (based on published results)",
+            "comment": "Parallel efficiency is near 100% (based on publicly available results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type": "affine",
@@ -262,7 +260,7 @@
           },
           {
             "name": "error_10-14",
-            "comment": "Parallel efficiency is near 100% (based on published results)",
+            "comment": "Parallel efficiency is near 100% (based on publicly available results)",
             "amhdal_parallelizable_fraction": 0.99,
             "t_function": {
               "type": "affine",
@@ -296,7 +294,6 @@
       },
       {
         "name": "Poincaré_Map",
-        "comment": "Only two options for now: WARNING below assumes 100s exec, but simulation time steps are above 18s...",
         "execution_options": [
           {
             "name": "accurate",
