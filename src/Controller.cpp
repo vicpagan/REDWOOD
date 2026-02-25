@@ -53,7 +53,7 @@ namespace wrench {
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _scheduling_spec(scheduling_spec),
-                                                          _compute_services(compute_services) {
+                                                          _compute_services(compute_services){
 
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
         _temporal_redundancy = boost::json::value_to<bool>(_scheduling_spec.at("hacks").as_object().at("temporal_redundancy"));

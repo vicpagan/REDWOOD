@@ -13,16 +13,6 @@
 
 namespace wrench {
 
-    double SchedulingAlgorithmDynamic::get_optimal_expected_error() const {
-#if OPTIMISTIC_EXECUTION
-        double optimal_EV = _preprocessed_decisions.at(_application_specs->get_decision_tree_root()).at(static_cast<size_t>(std::floor(_application_specs->get_deadline() / _delta_t))).second;
-#else
-        double optimal_EV = _preprocessed_decisions.at(_application_specs->get_decision_tree_root()).at(static_cast<size_t>(ceiling_division(_application_specs->get_deadline(), _delta_t))).second;
-#endif
-        // std::cerr << "Optimal error: " << optimal_EV << std::endl;
-        return optimal_EV;
-    }
-
     void SchedulingAlgorithmDynamic::preprocess_decisions(const double initial_data_size,
         const double initial_error_level,
         const double deadline,
@@ -202,21 +192,37 @@ namespace wrench {
         }
 
         // for (auto &entry : dp) {
-        //     if (entry.first->task == "ADIOS_Refactoring" && entry.first->execution_option == "do_nothing") {
-        //         for (int j = 0; j < dp[entry.first].size(); j++) {
-        //             std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
-        //         }
+        //     for (int j = 0; j < dp[entry.first].size(); j++) {
+        //         std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
         //     }
         // }
 
-        // Store the results in preprocessing table
+        _optimal_EV = dp[_application_specs->get_decision_tree_root()][n].second;
+
         for (auto &entry : dp) {
-            std::vector<std::pair<std::string,double>> exec_option_decisions(n+1, std::make_pair("", 0.0));
+            std::vector<std::pair<long, std::string>> compressed;
+            std::string last_option = "";
+
             for (int j = 0; j < dp[entry.first].size(); j++) {
-                exec_option_decisions[j] = dp[entry.first][j];
+                const auto& [option, error] = dp[entry.first][j];
+
+                if (option == "impossible" || option.empty()) continue;
+
+                if (option != last_option) {  // Only check if option changes
+                    compressed.push_back({j, option});
+                    last_option = option;
+                }
             }
-            _preprocessed_decisions.emplace(entry.first, std::move(exec_option_decisions));
+            _preprocessed_decisions.emplace(entry.first, std::move(compressed));
         }
+
+        // for (auto &entry : _preprocessed_decisions) {
+        //     std::cerr << "Preprocessed decisions for node (task: " << entry.first->task
+        //               << ", execution_option: " << entry.first->execution_option << "):" << std::endl;
+        //     for (const auto& [time, option] : entry.second) {
+        //         std::cerr << "  Time >= " << time << ": Option = " << option << std::endl;
+        //     }
+        // }
     }
 
     double SchedulingAlgorithmDynamic::compute_best_delta_t(const double initial_data_size,
@@ -298,8 +304,15 @@ namespace wrench {
             }
             const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
 
-            const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
-            // std::cout << "n = " << n << std::endl;
+            const auto& curr_node_decisions = _preprocessed_decisions.at(current_decision_node);
+
+            auto it = std::upper_bound(curr_node_decisions.begin(), curr_node_decisions.end(), n,
+                [](long time, const std::pair<long, std::string>& entry) {
+                    return time < entry.first;
+                });
+            --it;
+            const std::string& execution_option = it->second;
+
             // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
             //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});

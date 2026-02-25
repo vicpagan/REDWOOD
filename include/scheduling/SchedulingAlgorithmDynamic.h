@@ -27,7 +27,7 @@ namespace wrench {
             double remaining_time,
             bool minimize) override;
 
-        double get_optimal_expected_error() const override;
+        double get_optimal_expected_error() const override { return _optimal_EV; };
 
         void preprocess_decisions(double initial_data_size,
             double initial_error_level,
@@ -60,6 +60,8 @@ namespace wrench {
             double input_error_level,
             double remaining_time,
             bool lower_bound);
+
+        double _optimal_EV;
     };
 }
 
