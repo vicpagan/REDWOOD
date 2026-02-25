@@ -251,6 +251,7 @@ namespace wrench {
                                 _application_specs->get_deadline(), OPTIMISTIC_DISCRETIZATION);
 
                 /* Reset all current decision nodes for all hosts in the state tracker */
+                _system_state_tracker->reset_all_hosts();
                 _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
 
                 /* Loop until an event message arrives */

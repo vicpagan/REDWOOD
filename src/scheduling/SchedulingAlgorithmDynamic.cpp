@@ -299,9 +299,9 @@ namespace wrench {
             const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
 
             const std::string execution_option = _preprocessed_decisions.at(current_decision_node).at(n).first;
-            std::cout << "n = " << n << std::endl;
-            std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
-                " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+            // std::cout << "n = " << n << std::endl;
+            // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
+            //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
         }
         return decisions;
