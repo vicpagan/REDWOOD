@@ -91,21 +91,34 @@ def run_simulation(json_file, delta_t, num_repeats, sim_executable):
 
 def plot_results(all_results, output_file="delta_t_analysis.png"):
     """Create visualization of delta_t analysis"""
-    # all_results is a dict with keys: 'default', 'opt_exec', 'opt_sched', 'opt_both'
-    # Each contains: data (with delta_t, upper_bound, lower_bound, comp_time), sim_results
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
 
-    # Colors and markers for different configurations
     configs = {
-        'default': {'color_u': 'tab:red', 'color_l': 'tab:blue', 'marker_u': 'o', 'marker_l': 's',
-                    'label_prefix': 'Default', 'sim_color': 'purple', 'sim_marker': 'D'},
-        'opt_exec': {'color_u': 'indianred', 'color_l': 'lightblue', 'marker_u': 'v', 'marker_l': '^',
-                     'label_prefix': 'Opt Exec', 'sim_color': 'orchid', 'sim_marker': 'p'},
-        'opt_sched': {'color_u': 'darkred', 'color_l': 'darkblue', 'marker_u': '<', 'marker_l': '>',
-                      'label_prefix': 'Opt Sched', 'sim_color': 'mediumorchid', 'sim_marker': 'h'},
-        'opt_both': {'color_u': 'orangered', 'color_l': 'steelblue', 'marker_u': 'p', 'marker_l': 'H',
-                     'label_prefix': 'Opt Both', 'sim_color': 'darkviolet', 'sim_marker': '*'}
+        'default': {
+            'color_u': 'tab:red',
+            'color_l': 'tab:blue',
+            'label_prefix': 'Default',
+            'sim_color': 'purple'
+        },
+        'opt_exec': {
+            'color_u': 'indianred',
+            'color_l': 'lightblue',
+            'label_prefix': 'Opt Exec',
+            'sim_color': 'orchid'
+        },
+        'opt_sched': {
+            'color_u': 'darkred',
+            'color_l': 'darkblue',
+            'label_prefix': 'Opt Sched',
+            'sim_color': 'mediumorchid'
+        },
+        'opt_both': {
+            'color_u': 'orangered',
+            'color_l': 'steelblue',
+            'label_prefix': 'Opt Both',
+            'sim_color': 'darkviolet'
+        }
     }
 
     ax1.set_xlabel('Delta_t (time discretization)', fontsize=12)
@@ -113,7 +126,6 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
 
     all_lines = []
 
-    # Plot each configuration
     for config_key, result in all_results.items():
         if result is None:
             continue
@@ -126,38 +138,60 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
         upper_bound = np.array(data["upper_bound"])
         lower_bound = np.array(data["lower_bound"])
 
-        # Plot bounds
-        line_u = ax1.plot(delta_t, upper_bound, cfg['marker_u'] + '-',
-                          color=cfg['color_u'], linewidth=1.5, markersize=5,
-                          label=f"{cfg['label_prefix']} Upper", alpha=0.8)
-        line_l = ax1.plot(delta_t, lower_bound, cfg['marker_l'] + '-',
-                          color=cfg['color_l'], linewidth=1.5, markersize=5,
-                          label=f"{cfg['label_prefix']} Lower", alpha=0.8)
+        # Upper bound line
+        line_u = ax1.plot(
+            delta_t, upper_bound,
+            color=cfg['color_u'],
+            linewidth=2,
+            label=f"{cfg['label_prefix']} Upper",
+            alpha=0.8
+        )
+
+        # Lower bound line
+        line_l = ax1.plot(
+            delta_t, lower_bound,
+            color=cfg['color_l'],
+            linewidth=2,
+            label=f"{cfg['label_prefix']} Lower",
+            alpha=0.8
+        )
+
         all_lines.extend(line_u + line_l)
 
         # Fill between bounds
-        ax1.fill_between(delta_t, lower_bound, upper_bound, alpha=0.05, color=cfg['color_u'])
+        ax1.fill_between(
+            delta_t,
+            lower_bound,
+            upper_bound,
+            alpha=0.05,
+            color=cfg['color_u']
+        )
 
-        # Plot simulation results if available
+        # Simulation results (as lines instead of markers)
         if sim_results:
             sim_delta_t = []
             sim_avg_error = []
+
             for dt, err in sim_results.items():
                 if err is not None:
                     sim_delta_t.append(dt)
                     sim_avg_error.append(err)
 
             if sim_delta_t:
-                line_sim = ax1.plot(sim_delta_t, sim_avg_error, cfg['sim_marker'],
-                                    color=cfg['sim_color'], markersize=7,
-                                    label=f"{cfg['label_prefix']} Sim",
-                                    markeredgecolor='black', markeredgewidth=0.5, alpha=0.9)
+                line_sim = ax1.plot(
+                    sim_delta_t,
+                    sim_avg_error,
+                    color=cfg['sim_color'],
+                    linewidth=2,
+                    linestyle='--',
+                    label=f"{cfg['label_prefix']} Sim",
+                    alpha=0.9
+                )
                 all_lines.extend(line_sim)
 
-    ax1.tick_params(axis='y', labelcolor='black')
     ax1.grid(True, alpha=0.3)
 
-    # Plot computation time on right y-axis (only from default)
+    # Computation time (no markers)
     if 'default' in all_results and all_results['default'] is not None:
         ax2 = ax1.twinx()
         comp_time = np.array(all_results['default']['data']["computation_time_ms"])
@@ -165,18 +199,29 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
 
         color3 = 'tab:green'
         ax2.set_ylabel('Computation Time (ms)', color=color3, fontsize=12)
-        line_time = ax2.plot(delta_t, comp_time, '^-', color=color3, linewidth=2,
-                             markersize=6, label='Preprocessing time', alpha=0.7)
+
+        line_time = ax2.plot(
+            delta_t,
+            comp_time,
+            color=color3,
+            linewidth=2,
+            linestyle='-.',
+            label='Preprocessing time',
+            alpha=0.7
+        )
+
         ax2.tick_params(axis='y', labelcolor=color3)
         all_lines.extend(line_time)
 
-    # Combined legend
     labels = [l.get_label() for l in all_lines]
     ax1.legend(all_lines, labels, loc='best', fontsize=8, ncol=2)
 
-    # Add title
-    plt.title('Delta_t Impact on Expected Error (Multiple Configurations)',
-              fontsize=14, fontweight='bold', pad=20)
+    plt.title(
+        'Delta_t Impact on Expected Error (Multiple Configurations)',
+        fontsize=14,
+        fontweight='bold',
+        pad=20
+    )
 
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')

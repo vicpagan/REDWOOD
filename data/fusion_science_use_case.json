@@ -8,7 +8,8 @@
   "failures": {
     "restart_overhead_comment": "Fred is thinking of a 'reasonable value'",
     "restart_overhead": 10,
-    "lambda": 0.0000025,
+    "lambda_comment": "Assumes mean of ~10 (software) failures per day",
+    "lambda": 0.00012,
     "seed_comment": "If seed value is negative a random seed will be used",
     "seed": 31212342
   },
@@ -27,9 +28,9 @@
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "Work that corresponds to a 100GB output, based on discussion with user",
+              "other_comments": "Work that corresponds to a 4TB output, based on discussion with user",
               "parameters": {
-                "a": 52.17,
+                "a": 2086.8,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -37,9 +38,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "The output is 100GB",
+              "other_comments": "The output is 2TB",
               "parameters": {
-                "a": 100000000000.0,
+                "a": 4000000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -62,7 +63,7 @@
               "comments": "a + b * x + c * y",
               "other_comments": "1/2 the work",
               "parameters": {
-                "a": 26.08,
+                "a": 1043.2,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -70,9 +71,9 @@
             "d_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
-              "other_comments": "1/2 the data)",
+              "other_comments": "1/2 the data",
               "parameters": {
-                "a": 50000000000.0,
+                "a": 2000000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -96,7 +97,7 @@
               "comments": "a + b * x + c * y",
               "other_comments": "1/4 the time",
               "parameters": {
-                "a": 13.04,
+                "a": 521.6,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -106,7 +107,7 @@
               "comments": "a + b * x + c * y",
               "other_comments": "1/4 the data",
               "parameters": {
-                "a": 25000000000.0,
+                "a": 1000000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -130,7 +131,7 @@
               "comments": "a + b * x + c * y",
               "other_comments": "1/8 the time",
               "parameters": {
-                "a": 6.52,
+                "a": 260.8,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -140,7 +141,7 @@
               "comments": "a + b * x + c * y",
               "other_comments": "1/8 the data",
               "parameters": {
-                "a": 12500000000.0,
+                "a": 500000000000.0,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -396,9 +397,10 @@
     ]
   },
   "execution": {
-    "num_repeats": 15,
-    "deadline": 100000,
-    "e_fail": 200.0
+    "num_repeats": 50,
+    "deadline_comment": "120 minutes",
+    "deadline": 5000,
+    "e_fail": 50.0
   },
   "scheduling": {
     "delta_t_scheme_comments": "'fixed', 'compute'",
@@ -408,8 +410,8 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["random"],
-      "multi_task": ["random"]
+      "one_task": ["dynamic"],
+      "multi_task": ["dynamic"]
     },
     "hacks": {
       "temporal_redundancy": true,
