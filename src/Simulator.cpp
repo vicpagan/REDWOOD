@@ -117,10 +117,6 @@ int main(int argc, char** argv) {
     /* Instantiating the platform */
     simulation->instantiatePlatform(PlatformCreator(json_input["platform"].as_object()));
 
-    /* Instantiate a storage service on the ControllerHost */
-    //auto storage_service = simulation->add(wrench::SimpleStorageService::createSimpleStorageService(
-    //    "ControllerHost", {"/"}, {}, {}));
-
     /* Instantiate a bare-metal compute service on each host of the platform */
     auto num_compute_nodes = boost::json::value_to<int>(json_input.at("platform").at("num_compute_nodes"));
     std::map<std::string, std::shared_ptr<wrench::BareMetalComputeService>> compute_services;

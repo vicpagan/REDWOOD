@@ -90,7 +90,8 @@ namespace wrench {
         double _delta_t;
         std::string _name;
 
-        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> _preprocessed_decisions;
+        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<long, std::string>>> _preprocessed_decisions;
+
         std::vector<std::string> _completed_execution_path;
     };
 }
