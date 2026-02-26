@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
     }
     catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
-	std::cerr << desc;
+	    std::cerr << desc;
         exit(1);
     }
 
