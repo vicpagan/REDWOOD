@@ -210,11 +210,11 @@ int main(int argc, char** argv) {
      "Maximum deadline\n")
     ("step_deadline", po::value<double>(&step_deadline)->required()->value_name("<step deadline>"),
      "Step deadline\n")
-    ("lambda", po::value<double>(&lambda)->required()->value_name("<lambda>"),
+    ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
-    ("e_fail", po::value<double>(&e_fail)->required()->value_name("<e_fail>"),
+    ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
      "Error associated to a failed execution - will override JSON-provided value\n")
-    ("delta_t", po::value<double>(&delta_t)->required()->value_name("<delta_t>"),
+    ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
      "delta_t value - will override JSON-provided value\n");
     // Parse command-line arguments
     po::variables_map vm;
