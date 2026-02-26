@@ -212,9 +212,9 @@ int main(int argc, char** argv) {
      "Step deadline\n")
     ("lambda", po::value<double>(&lambda)->required()->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
-    ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
+    ("e_fail", po::value<double>(&e_fail)->required()->value_name("<e_fail>"),
      "Error associated to a failed execution - will override JSON-provided value\n")
-    ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
+    ("delta_t", po::value<double>(&delta_t)->required()->value_name("<delta_t>"),
      "delta_t value - will override JSON-provided value\n");
     // Parse command-line arguments
     po::variables_map vm;
@@ -234,10 +234,7 @@ int main(int argc, char** argv) {
     }
     catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
-        std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON spec input (file)> "
-            "--min_deadline <min deadline> --max_deadline <max deadline> --step_deadline <deadline step> "
-            "--max_num_nodes <max number of nodes> --step_num_nodes <step num nodes> --lambda <lambda> ";
-        cerr << "Usage: " << usage_string << "\n";
+	std::cerr << desc;
         exit(1);
     }
 
