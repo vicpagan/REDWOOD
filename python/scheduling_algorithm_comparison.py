@@ -19,13 +19,13 @@ class AlgorithmResult:
     num_successes: int
     success_rate: float
     avg_error: float
+    avg_error_successes: float
     comparator: Optional[str] = None
 
 def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
     """Run simulation for a specific algorithm configuration"""
     json_file, algorithm, comparator, num_repeats, sim_executable = args
 
-    # Load the original JSON
     with open(json_file, 'r') as f:
         config = json.load(f)
 
@@ -77,8 +77,9 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
         successes_match = re.search(r'Num successes:\s*(\d+)', output)
         success_rate_match = re.search(r'Success rate:\s*(\d+\.?\d*)', output)
         avg_error_match = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
+        avg_error_successes_match = re.search(r'Avg error level of successes:\s*(\d+\.?\d*)', output)
 
-        if not all([repeats_match, successes_match, success_rate_match, avg_error_match]):
+        if not all([repeats_match, successes_match, success_rate_match, avg_error_match, avg_error_successes_match]):
             print(f"Could not parse output for {algo_name}")
             return None
 
@@ -88,10 +89,11 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
             num_successes=int(successes_match.group(1)),
             success_rate=float(success_rate_match.group(1)),
             avg_error=float(avg_error_match.group(1)),
+            avg_error_successes=float(avg_error_successes_match.group(1)),
             comparator=comparator
         )
 
-        print(f"Done {algo_name}: Success rate={result_obj.success_rate:.3f}, Avg error={result_obj.avg_error:.3f}", flush=True)
+        print(f"Done {algo_name}: Success rate={result_obj.success_rate:.3f}, Avg error={result_obj.avg_error:.3f}, Avg error (successes)={result_obj.avg_error_successes:.3f}", flush=True)
         return result_obj
 
     finally:
@@ -101,11 +103,12 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
 def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorithm_comparison.png"):
     """Create comparison plots"""
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
 
     labels = []
     success_rates = []
     avg_errors = []
+    avg_errors_successes = []
     colors = []
 
     color_map = {
@@ -123,6 +126,7 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
         labels.append(label)
         success_rates.append(result.success_rate * 100)
         avg_errors.append(result.avg_error)
+        avg_errors_successes.append(result.avg_error_successes)
         colors.append(color_map.get(result.name, 'gray'))
 
     x = np.arange(len(labels))
@@ -141,10 +145,10 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
         ax1.text(bar.get_x() + bar.get_width()/2., height,
                  f'{height:.1f}%', ha='center', va='bottom', fontsize=9)
 
-    # Plot 2: Average Error
+    # Plot 2: Average Error (all runs)
     bars2 = ax2.bar(x, avg_errors, color=colors, alpha=0.7, edgecolor='black')
     ax2.set_ylabel('Average Error Level', fontsize=12)
-    ax2.set_title('Average Error Comparison', fontsize=14, fontweight='bold')
+    ax2.set_title('Average Error (All Runs)', fontsize=14, fontweight='bold')
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
     ax2.grid(True, alpha=0.3, axis='y')
@@ -152,6 +156,19 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
     for bar in bars2:
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width()/2., height,
+                 f'{height:.2f}', ha='center', va='bottom', fontsize=9)
+
+    # Plot 3: Average Error (successes only)
+    bars3 = ax3.bar(x, avg_errors_successes, color=colors, alpha=0.7, edgecolor='black')
+    ax3.set_ylabel('Average Error Level', fontsize=12)
+    ax3.set_title('Average Error (Successes Only)', fontsize=14, fontweight='bold')
+    ax3.set_xticks(x)
+    ax3.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
+    ax3.grid(True, alpha=0.3, axis='y')
+
+    for bar in bars3:
+        height = bar.get_height()
+        ax3.text(bar.get_x() + bar.get_width()/2., height,
                  f'{height:.2f}', ha='center', va='bottom', fontsize=9)
 
     from matplotlib.patches import Patch
@@ -167,20 +184,21 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
 
 def print_results_table(results: List[AlgorithmResult]):
     """Print results in a formatted table"""
-    print("\n" + "="*80)
+    print("\n" + "="*95)
     print("ALGORITHM COMPARISON RESULTS")
-    print("="*80)
-    print(f"{'Algorithm':<25} {'Comparator':<20} {'Success Rate':<15} {'Avg Error':<15}")
-    print("-"*80)
+    print("="*95)
+    print(f"{'Algorithm':<25} {'Comparator':<20} {'Success Rate':<15} {'Avg Error':<15} {'Avg Error (Succ)':<15}")
+    print("-"*95)
 
     for result in results:
         comp_str = result.comparator if result.comparator else "N/A"
-        print(f"{result.name:<25} {comp_str:<20} {result.success_rate*100:>6.2f}%{'':<8} {result.avg_error:>10.4f}")
+        print(f"{result.name:<25} {comp_str:<20} {result.success_rate*100:>6.2f}%{'':<8} {result.avg_error:>10.4f}     {result.avg_error_successes:>10.4f}")
 
-    print("="*80)
+    print("="*95)
 
     best_success = max(results, key=lambda r: r.success_rate)
     best_error = min(results, key=lambda r: r.avg_error)
+    best_error_successes = min(results, key=lambda r: r.avg_error_successes)
 
     print(f"\nBest Success Rate: {best_success.name}", end='')
     if best_success.comparator:
@@ -191,6 +209,11 @@ def print_results_table(results: List[AlgorithmResult]):
     if best_error.comparator:
         print(f" ({best_error.comparator})", end='')
     print(f" - {best_error.avg_error:.4f}")
+
+    print(f"Best Avg Error (Successes): {best_error_successes.name}", end='')
+    if best_error_successes.comparator:
+        print(f" ({best_error_successes.comparator})", end='')
+    print(f" - {best_error_successes.avg_error_successes:.4f}")
 
 
 def main():
@@ -243,7 +266,6 @@ def main():
     print(f"Starting algorithm comparison with {num_repeats} repeats per algorithm")
     print(f"Running {len(configurations)} configurations in parallel\n")
 
-    # Run all configurations in parallel
     raw_results = {}
     with ProcessPoolExecutor() as executor:
         futures = {executor.submit(run_simulation, args): args for args in all_args}
@@ -251,7 +273,6 @@ def main():
             args = futures[future]
             raw_results[args] = future.result()
 
-    # Reorder results to match original configuration order
     results = [raw_results[args] for args in all_args if raw_results.get(args) is not None]
 
     if not results:
@@ -269,7 +290,8 @@ def main():
                 "comparator": r.comparator,
                 "num_successes": r.num_successes,
                 "success_rate": r.success_rate,
-                "avg_error": r.avg_error
+                "avg_error": r.avg_error,
+                "avg_error_successes": r.avg_error_successes
             }
             for r in results
         ]
