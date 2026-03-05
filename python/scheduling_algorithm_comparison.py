@@ -25,7 +25,7 @@ class AlgorithmResult:
     num_successes: int
     success_rate: float
     avg_error: float
-    avg_error_successes: float
+    avg_error_successes: float  # may be float('nan') if no successes
 
 def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
     """Run simulation for a specific algorithm + deadline configuration"""
@@ -79,18 +79,21 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
 
         output = result.stdout
 
-        repeats_match           = re.search(r'Total repeats:\s*(\d+)', output)
-        successes_match         = re.search(r'Num successes:\s*(\d+)', output)
-        success_rate_match      = re.search(r'Success rate:\s*(\d+\.?\d*)', output)
-        avg_error_match         = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
-        avg_error_succ_match    = re.search(r'Avg error level of successes:\s*(\d+\.?\d*)', output)
+        repeats_match        = re.search(r'Total repeats:\s*(\d+)', output)
+        successes_match      = re.search(r'Num successes:\s*(\d+)', output)
+        success_rate_match   = re.search(r'Success rate:\s*(\d+\.?\d*)', output)
+        avg_error_match      = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
+        avg_error_succ_match = re.search(r'Avg error level of successes:\s*(\d+\.?\d*|N/A)', output)
 
         if not all([repeats_match, successes_match, success_rate_match,
                     avg_error_match, avg_error_succ_match]):
             print(f"Could not parse output for {algo_name} deadline={deadline}")
-            print(f"Raw stdout:\n{output}", flush=True)         # <-- add this
-            print(f"Raw stderr:\n{result.stderr}", flush=True)  # <-- and this
+            print(f"Raw stdout:\n{output}", flush=True)
+            print(f"Raw stderr:\n{result.stderr}", flush=True)
             return None
+
+        avg_error_succ_str = avg_error_succ_match.group(1)
+        avg_error_successes = float(avg_error_succ_str) if avg_error_succ_str != "N/A" else float('nan')
 
         result_obj = AlgorithmResult(
             name=algorithm,
@@ -100,13 +103,14 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
             num_successes=int(successes_match.group(1)),
             success_rate=float(success_rate_match.group(1)),
             avg_error=float(avg_error_match.group(1)),
-            avg_error_successes=float(avg_error_succ_match.group(1)),
+            avg_error_successes=avg_error_successes,
         )
 
+        succ_str = f"{avg_error_successes:.3f}" if not np.isnan(avg_error_successes) else "N/A"
         print(f"Done {algo_name} deadline={deadline}: "
               f"success={result_obj.success_rate:.3f} "
               f"err={result_obj.avg_error:.3f} "
-              f"err_succ={result_obj.avg_error_successes:.3f}", flush=True)
+              f"err_succ={succ_str}", flush=True)
         return result_obj
 
     finally:
@@ -157,22 +161,22 @@ def plot_comparison(results: List[AlgorithmResult],
 
         data = grouped[key]
         xs = sorted(data.keys())
-        success_rates     = [data[d].success_rate * 100 for d in xs]
-        avg_errors        = [data[d].avg_error for d in xs]
-        avg_errors_succ   = [data[d].avg_error_successes for d in xs]
+        success_rates   = [data[d].success_rate * 100 for d in xs]
+        avg_errors      = [data[d].avg_error for d in xs]
+        avg_errors_succ = [data[d].avg_error_successes for d in xs]  # nan handled automatically
 
-        label  = algo_label(algorithm, comparator)
-        color  = color_map.get(algorithm, 'gray')
-        ls     = linestyle_map.get(comparator, 'solid')
+        label = algo_label(algorithm, comparator)
+        color = color_map.get(algorithm, 'gray')
+        ls    = linestyle_map.get(comparator, 'solid')
 
         ax1.plot(xs, success_rates,   label=label, color=color, linestyle=ls, marker='o', markersize=4)
         ax2.plot(xs, avg_errors,      label=label, color=color, linestyle=ls, marker='o', markersize=4)
         ax3.plot(xs, avg_errors_succ, label=label, color=color, linestyle=ls, marker='o', markersize=4)
 
     for ax, title, ylabel in [
-        (ax1, 'Success Rate vs Deadline',              'Success Rate (%)'),
-        (ax2, 'Avg Error vs Deadline (All Runs)',       'Average Error Level'),
-        (ax3, 'Avg Error vs Deadline (Successes Only)', 'Average Error Level'),
+        (ax1, 'Success Rate vs Deadline',               'Success Rate (%)'),
+        (ax2, 'Avg Error vs Deadline (All Runs)',        'Average Error Level'),
+        (ax3, 'Avg Error vs Deadline (Successes Only)',  'Average Error Level'),
     ]:
         ax.set_title(title, fontsize=13, fontweight='bold')
         ax.set_xlabel('Deadline', fontsize=11)
@@ -207,29 +211,34 @@ def print_results_table(results: List[AlgorithmResult], deadlines: List[int]):
 
         for r in deadline_results:
             comp_str = r.comparator if r.comparator else "N/A"
+            succ_err_str = f"{r.avg_error_successes:>10.4f}" if not np.isnan(r.avg_error_successes) else f"{'N/A':>10}"
             print(f"{r.name:<25} {comp_str:<20} {r.success_rate*100:>6.2f}%{'':<8} "
-                  f"{r.avg_error:>10.4f}     {r.avg_error_successes:>10.4f}")
+                  f"{r.avg_error:>10.4f}     {succ_err_str}")
 
     # Overall bests across all deadlines
     print(f"\n{'='*100}")
     print("OVERALL BESTS (across all deadlines)")
     print(f"{'='*100}")
-    best_success      = max(results, key=lambda r: r.success_rate)
-    best_error        = min(results, key=lambda r: r.avg_error)
-    best_error_succ   = min(results, key=lambda r: r.avg_error_successes)
 
-    for label, r, val in [
-        ("Best Success Rate",         best_success,    f"{r.success_rate*100:.2f}%"),
-        ("Best Avg Error",            best_error,      f"{r.avg_error:.4f}"),
-        ("Best Avg Error (Successes)", best_error_succ, f"{r.avg_error_successes:.4f}"),
-    ]:
-        key = algo_key(r.name, r.comparator)
-        print(f"{label}: {key} @ deadline={r.deadline} -> {val}")
+    best_success    = max(results, key=lambda r: r.success_rate)
+    best_error      = min(results, key=lambda r: r.avg_error)
+    valid_succ      = [r for r in results if not np.isnan(r.avg_error_successes)]
+    best_error_succ = min(valid_succ, key=lambda r: r.avg_error_successes) if valid_succ else None
+
+    print(f"Best Success Rate: {algo_key(best_success.name, best_success.comparator)} "
+          f"@ deadline={best_success.deadline} -> {best_success.success_rate*100:.2f}%")
+    print(f"Best Avg Error: {algo_key(best_error.name, best_error.comparator)} "
+          f"@ deadline={best_error.deadline} -> {best_error.avg_error:.4f}")
+    if best_error_succ:
+        print(f"Best Avg Error (Successes): {algo_key(best_error_succ.name, best_error_succ.comparator)} "
+              f"@ deadline={best_error_succ.deadline} -> {best_error_succ.avg_error_successes:.4f}")
 
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: python algorithm_comparison.py <json_file> [num_repeats] [sim_executable]")
+        print("\nExample: python algorithm_comparison.py config.json 1000")
+        print(f"\nDeadline sweep: {DEADLINE_START} to {DEADLINE_END} step {DEADLINE_STEP}")
         sys.exit(1)
 
     json_file      = sys.argv[1]
@@ -259,7 +268,6 @@ def main():
 
     deadlines = list(range(DEADLINE_START, DEADLINE_END + 1, DEADLINE_STEP))
 
-    # Build all (config, deadline) argument tuples
     all_args = [
         (json_file, algorithm, comparator, num_repeats, sim_executable, deadline)
         for algorithm, comparator in configurations
@@ -301,7 +309,7 @@ def main():
                 "num_successes":       r.num_successes,
                 "success_rate":        r.success_rate,
                 "avg_error":           r.avg_error,
-                "avg_error_successes": r.avg_error_successes,
+                "avg_error_successes": None if np.isnan(r.avg_error_successes) else r.avg_error_successes,
             }
             for r in results
         ]
