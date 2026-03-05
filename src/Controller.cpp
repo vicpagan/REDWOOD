@@ -215,6 +215,7 @@ namespace wrench {
             /* Keep track of number of successes */
             int num_successes = 0;
             double cumulative_error_level = 0.0;
+            double cumulative_error_level_successes = 0.0;
 
             /* Do all the repeats */
             for (int repeat = 0; repeat < _num_repeats; repeat++) {
@@ -310,6 +311,7 @@ namespace wrench {
                             if (!_temporal_redundancy) {
                                 // std::cout << "Best error: " << best_error << std::endl;
                                 cumulative_error_level += best_error;
+                                cumulative_error_level_successes += best_error;
                                 algorithm->reset_preprocessed_decisions();
                                 _system_state_tracker->reset_all_hosts();
                                 this->restart_system();
@@ -326,6 +328,7 @@ namespace wrench {
                             if (_application_specs->decision_tree_empty()) {
                                 // std::cout << "We cannot do better" << std::endl;
                                 cumulative_error_level += best_error;
+                                cumulative_error_level_successes += best_error;
                                 break;
                             }
                             algorithm->reset_preprocessed_decisions();
@@ -385,6 +388,10 @@ namespace wrench {
                             }
                             WRENCH_INFO("Deadline reached");
                             // std::cout << "Best error: " << best_error << std::endl;
+                            if (best_error != _application_specs->get_e_fail()) {
+                                std::cout << "Failed with error: " << best_error << std::endl;
+                                cumulative_error_level_successes += best_error;
+                            }
                             cumulative_error_level += best_error;
 
                             algorithm->reset_preprocessed_decisions();
@@ -447,6 +454,7 @@ namespace wrench {
             std::cout << "Num successes: " << num_successes << "\n";
             std::cout << "Success rate: " << static_cast<double>(num_successes)/static_cast<double>(_num_repeats) << "\n";
             std::cout << "Avg error level: " << cumulative_error_level/static_cast<double>(_num_repeats) << "\n";
+            std::cout << "Avg error level of successes: " << cumulative_error_level_successes/static_cast<double>(num_successes) << "\n";
         }
         return 0;
     }
