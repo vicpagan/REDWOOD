@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, Dict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-DEADLINE_START = 5000
-DEADLINE_END   = 25000
+DEADLINE_START = 3000
+DEADLINE_END   = 15000
 DEADLINE_STEP  = 1000
 
 @dataclass
