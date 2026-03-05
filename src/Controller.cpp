@@ -454,7 +454,12 @@ namespace wrench {
             std::cout << "Num successes: " << num_successes << "\n";
             std::cout << "Success rate: " << static_cast<double>(num_successes)/static_cast<double>(_num_repeats) << "\n";
             std::cout << "Avg error level: " << cumulative_error_level/static_cast<double>(_num_repeats) << "\n";
-            std::cout << "Avg error level of successes: " << cumulative_error_level_successes/static_cast<double>(num_successes) << "\n";
+            if (num_successes > 0) {
+                std::cout << "Avg error level of successes: " << cumulative_error_level_successes/static_cast<double>(num_successes) << "\n";
+            }
+            else {
+                std::cout << "Avg error level of successes: N/A\n";
+            }
         }
         return 0;
     }
