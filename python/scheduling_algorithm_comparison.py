@@ -129,19 +129,29 @@ def plot_comparison(results: List[AlgorithmResult],
                     configurations: List[Tuple],
                     output_file: str = "algorithm_comparison.png"):
 
-    color_map = {
-        'dynamic':            'tab:blue',
-        'static_foresighted': 'tab:orange',
-        'static_nearsighted': 'tab:purple',
-        'random':             'tab:green',
+    # Color = comparator (what decision strategy)
+    comparator_color_map = {
+        None:                  'tab:blue',    # dynamic / random
+        'expected_error':      'tab:orange',
+        'probability_success': 'tab:green',
+        'error_level':         'tab:red',
+        'success_error_ratio': 'tab:purple',
     }
 
-    linestyle_map = {
-        None:                  'solid',
-        'expected_error':      'solid',
-        'probability_success': 'dashed',
-        'error_level':         'dotted',
-        'success_error_ratio': 'dashdot',
+    # Linestyle = algorithm family (foresighted vs nearsighted)
+    algorithm_linestyle_map = {
+        'dynamic':            'solid',
+        'static_foresighted': 'solid',
+        'static_nearsighted': 'dashed',
+        'random':             'dotted',
+    }
+
+    # Marker = algorithm family for extra clarity
+    algorithm_marker_map = {
+        'dynamic':            's',   # square
+        'static_foresighted': 'o',   # circle
+        'static_nearsighted': '^',   # triangle
+        'random':             'D',   # diamond
     }
 
     # Group results by (algorithm, comparator) -> {deadline -> result}
@@ -163,15 +173,16 @@ def plot_comparison(results: List[AlgorithmResult],
         xs = sorted(data.keys())
         success_rates   = [data[d].success_rate * 100 for d in xs]
         avg_errors      = [data[d].avg_error for d in xs]
-        avg_errors_succ = [data[d].avg_error_successes for d in xs]  # nan handled automatically
+        avg_errors_succ = [data[d].avg_error_successes for d in xs]
 
-        label = algo_label(algorithm, comparator)
-        color = color_map.get(algorithm, 'gray')
-        ls    = linestyle_map.get(comparator, 'solid')
+        label  = algo_label(algorithm, comparator)
+        color  = comparator_color_map.get(comparator, 'gray')
+        ls     = algorithm_linestyle_map.get(algorithm, 'solid')
+        marker = algorithm_marker_map.get(algorithm, 'o')
 
-        ax1.plot(xs, success_rates,   label=label, color=color, linestyle=ls, marker='o', markersize=4)
-        ax2.plot(xs, avg_errors,      label=label, color=color, linestyle=ls, marker='o', markersize=4)
-        ax3.plot(xs, avg_errors_succ, label=label, color=color, linestyle=ls, marker='o', markersize=4)
+        ax1.plot(xs, success_rates,   label=label, color=color, linestyle=ls, marker=marker, markersize=4)
+        ax2.plot(xs, avg_errors,      label=label, color=color, linestyle=ls, marker=marker, markersize=4)
+        ax3.plot(xs, avg_errors_succ, label=label, color=color, linestyle=ls, marker=marker, markersize=4)
 
     for ax, title, ylabel in [
         (ax1, 'Success Rate vs Deadline',               'Success Rate (%)'),
@@ -187,10 +198,29 @@ def plot_comparison(results: List[AlgorithmResult],
 
     ax1.set_ylim(0, 100)
 
-    handles, labels = ax1.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower center',
-               ncol=min(len(configurations), 5), fontsize=8,
-               bbox_to_anchor=(0.5, -0.15))
+    # Two-part legend: colors for comparators, linestyles for algorithm families
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    comparator_legend = [
+        Patch(color=comparator_color_map[None],                  label='dynamic / random'),
+        Patch(color=comparator_color_map['expected_error'],      label='expected_error'),
+        Patch(color=comparator_color_map['probability_success'], label='probability_success'),
+        Patch(color=comparator_color_map['error_level'],         label='error_level'),
+        Patch(color=comparator_color_map['success_error_ratio'], label='success_error_ratio'),
+    ]
+
+    style_legend = [
+        Line2D([0], [0], color='black', linestyle='solid',  marker='s', markersize=6, label='dynamic'),
+        Line2D([0], [0], color='black', linestyle='solid',  marker='o', markersize=6, label='static_foresighted'),
+        Line2D([0], [0], color='black', linestyle='dashed', marker='^', markersize=6, label='static_nearsighted'),
+        Line2D([0], [0], color='black', linestyle='dotted', marker='D', markersize=6, label='random'),
+    ]
+
+    fig.legend(handles=comparator_legend, title='Comparator (color)',
+               loc='lower left', bbox_to_anchor=(0.01, -0.18), fontsize=9, ncol=5)
+    fig.legend(handles=style_legend, title='Algorithm (line/marker)',
+               loc='lower right', bbox_to_anchor=(0.99, -0.18), fontsize=9, ncol=4)
 
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -215,7 +245,6 @@ def print_results_table(results: List[AlgorithmResult], deadlines: List[int]):
             print(f"{r.name:<25} {comp_str:<20} {r.success_rate*100:>6.2f}%{'':<8} "
                   f"{r.avg_error:>10.4f}     {succ_err_str}")
 
-    # Overall bests across all deadlines
     print(f"\n{'='*100}")
     print("OVERALL BESTS (across all deadlines)")
     print(f"{'='*100}")
