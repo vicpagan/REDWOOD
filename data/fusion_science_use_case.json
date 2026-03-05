@@ -399,7 +399,7 @@
   "execution": {
     "num_repeats": 50,
     "deadline_comment": "120 minutes",
-    "deadline": 15000,
+    "deadline": 5000,
     "e_fail": 100.0
   },
   "scheduling": {
@@ -410,8 +410,8 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["static_foresighted_expected_error"],
-      "multi_task": ["static_foresighted_expected_error"]
+      "one_task": ["static_foresighted_error_level"],
+      "multi_task": ["static_foresighted_error_level"]
     },
     "hacks": {
       "temporal_redundancy": true,
