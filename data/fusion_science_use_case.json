@@ -399,7 +399,7 @@
   "execution": {
     "num_repeats": 50,
     "deadline_comment": "120 minutes",
-    "deadline": 5000,
+    "deadline": 6000,
     "e_fail": 100.0
   },
   "scheduling": {
