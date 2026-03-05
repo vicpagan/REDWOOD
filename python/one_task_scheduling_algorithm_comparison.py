@@ -9,7 +9,8 @@ import re
 import tempfile
 import os
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import List, Optional, Tuple
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 @dataclass
 class AlgorithmResult:
@@ -20,24 +21,21 @@ class AlgorithmResult:
     avg_error: float
     comparator: Optional[str] = None
 
-def run_simulation(json_file: str, algorithm: str, comparator: Optional[str],
-                   num_repeats: int, sim_executable: str = "../build/redwood_sim_opt_both") -> Optional[AlgorithmResult]:
+def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
     """Run simulation for a specific algorithm configuration"""
+    json_file, algorithm, comparator, num_repeats, sim_executable = args
 
     # Load the original JSON
     with open(json_file, 'r') as f:
         config = json.load(f)
 
-    # Modify the config for this algorithm
     config['execution']['num_repeats'] = num_repeats
 
-    # Set the algorithm
     if algorithm == "dynamic":
         config['scheduling']['algorithms'] = {
             "one_task": ["dynamic"],
             "multi_task": ["dynamic"]
         }
-        # Make sure delta_t is fixed for fair comparison
         config['scheduling']['delta_t_scheme'] = {
             "scheme": "fixed",
             "parameter": 1.0
@@ -57,36 +55,31 @@ def run_simulation(json_file: str, algorithm: str, comparator: Optional[str],
     else:
         raise ValueError(f"Unknown algorithm: {algorithm}")
 
-    # Write to a temporary file
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
         json.dump(config, tmp, indent=2)
         tmp_file = tmp.name
 
     try:
-        # Run the simulation
         cmd = [sim_executable, "--json", tmp_file]
-
         algo_name = f"{algorithm}_{comparator}" if comparator else algorithm
-        print(f"Running {algo_name} ({num_repeats} repeats)...", end=' ', flush=True)
+        print(f"Running {algo_name} ({num_repeats} repeats)...", flush=True)
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
-            print(f"FAILED")
+            print(f"FAILED: {algo_name}")
             print(f"Error: {result.stderr}", file=sys.stderr)
             return None
 
-        # Parse the output
         output = result.stdout
 
-        # Extract statistics
         repeats_match = re.search(r'Total repeats:\s*(\d+)', output)
         successes_match = re.search(r'Num successes:\s*(\d+)', output)
         success_rate_match = re.search(r'Success rate:\s*(\d+\.?\d*)', output)
         avg_error_match = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
 
         if not all([repeats_match, successes_match, success_rate_match, avg_error_match]):
-            print(f"Could not parse output")
+            print(f"Could not parse output for {algo_name}")
             return None
 
         result_obj = AlgorithmResult(
@@ -98,20 +91,18 @@ def run_simulation(json_file: str, algorithm: str, comparator: Optional[str],
             comparator=comparator
         )
 
-        print(f"Success rate: {result_obj.success_rate:.3f}, Avg error: {result_obj.avg_error:.3f}")
-
+        print(f"Done {algo_name}: Success rate={result_obj.success_rate:.3f}, Avg error={result_obj.avg_error:.3f}", flush=True)
         return result_obj
 
     finally:
-        # Clean up temp file
         os.unlink(tmp_file)
+
 
 def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorithm_comparison.png"):
     """Create comparison plots"""
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
-    # Prepare data
     labels = []
     success_rates = []
     avg_errors = []
@@ -130,7 +121,7 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
         else:
             label = result.name
         labels.append(label)
-        success_rates.append(result.success_rate * 100)  # Convert to percentage
+        success_rates.append(result.success_rate * 100)
         avg_errors.append(result.avg_error)
         colors.append(color_map.get(result.name, 'gray'))
 
@@ -145,12 +136,10 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
     ax1.grid(True, alpha=0.3, axis='y')
     ax1.set_ylim(0, 100)
 
-    # Add value labels on bars
     for bar in bars1:
         height = bar.get_height()
         ax1.text(bar.get_x() + bar.get_width()/2., height,
-                 f'{height:.1f}%',
-                 ha='center', va='bottom', fontsize=9)
+                 f'{height:.1f}%', ha='center', va='bottom', fontsize=9)
 
     # Plot 2: Average Error
     bars2 = ax2.bar(x, avg_errors, color=colors, alpha=0.7, edgecolor='black')
@@ -160,14 +149,11 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
     ax2.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
     ax2.grid(True, alpha=0.3, axis='y')
 
-    # Add value labels on bars
     for bar in bars2:
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width()/2., height,
-                 f'{height:.2f}',
-                 ha='center', va='bottom', fontsize=9)
+                 f'{height:.2f}', ha='center', va='bottom', fontsize=9)
 
-    # Add legend
     from matplotlib.patches import Patch
     legend_elements = [Patch(facecolor=color, alpha=0.7, edgecolor='black', label=name)
                        for name, color in color_map.items()
@@ -177,6 +163,7 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"\nComparison plot saved to {output_file}")
+
 
 def print_results_table(results: List[AlgorithmResult]):
     """Print results in a formatted table"""
@@ -192,7 +179,6 @@ def print_results_table(results: List[AlgorithmResult]):
 
     print("="*80)
 
-    # Find best performers
     best_success = max(results, key=lambda r: r.success_rate)
     best_error = min(results, key=lambda r: r.avg_error)
 
@@ -205,6 +191,7 @@ def print_results_table(results: List[AlgorithmResult]):
     if best_error.comparator:
         print(f" ({best_error.comparator})", end='')
     print(f" - {best_error.avg_error:.4f}")
+
 
 def main():
     if len(sys.argv) < 2:
@@ -229,7 +216,6 @@ def main():
     num_repeats = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
     sim_executable = sys.argv[3] if len(sys.argv) > 3 else "../build/redwood_sim_opt_both"
 
-    # Check if files exist
     if not os.path.exists(json_file):
         print(f"Error: JSON file not found: {json_file}")
         sys.exit(1)
@@ -238,11 +224,6 @@ def main():
         print(f"Error: Simulator executable not found: {sim_executable}")
         sys.exit(1)
 
-    print(f"Starting algorithm comparison with {num_repeats} repeats per algorithm\n")
-
-    results = []
-
-    # Test configurations
     configurations = [
         ("dynamic", None),
         ("static_foresighted", "expected_error"),
@@ -256,22 +237,30 @@ def main():
         ("random", None),
     ]
 
-    for algorithm, comparator in configurations:
-        result = run_simulation(json_file, algorithm, comparator, num_repeats, sim_executable)
-        if result:
-            results.append(result)
+    all_args = [(json_file, algorithm, comparator, num_repeats, sim_executable)
+                for algorithm, comparator in configurations]
+
+    print(f"Starting algorithm comparison with {num_repeats} repeats per algorithm")
+    print(f"Running {len(configurations)} configurations in parallel\n")
+
+    # Run all configurations in parallel
+    raw_results = {}
+    with ProcessPoolExecutor() as executor:
+        futures = {executor.submit(run_simulation, args): args for args in all_args}
+        for future in as_completed(futures):
+            args = futures[future]
+            raw_results[args] = future.result()
+
+    # Reorder results to match original configuration order
+    results = [raw_results[args] for args in all_args if raw_results.get(args) is not None]
 
     if not results:
         print("No results collected!")
         sys.exit(1)
 
-    # Print results table
     print_results_table(results)
-
-    # Create plots
     plot_comparison(results)
 
-    # Save detailed results to JSON
     output_data = {
         "num_repeats": num_repeats,
         "results": [
@@ -289,6 +278,7 @@ def main():
     with open("algorithm_comparison_results.json", "w") as f:
         json.dump(output_data, f, indent=2)
     print("\nDetailed results saved to algorithm_comparison_results.json")
+
 
 if __name__ == "__main__":
     main()
