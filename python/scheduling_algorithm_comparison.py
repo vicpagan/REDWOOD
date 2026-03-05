@@ -88,6 +88,8 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
         if not all([repeats_match, successes_match, success_rate_match,
                     avg_error_match, avg_error_succ_match]):
             print(f"Could not parse output for {algo_name} deadline={deadline}")
+            print(f"Raw stdout:\n{output}", flush=True)         # <-- add this
+            print(f"Raw stderr:\n{result.stderr}", flush=True)  # <-- and this
             return None
 
         result_obj = AlgorithmResult(
