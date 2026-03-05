@@ -24,15 +24,20 @@ namespace wrench {
         std::vector<SchedulingDecision> make_decisions(
             SystemState *system_state_tracker,
             const std::string &task_to_schedule,
-            double remaining_time,
-            bool minimize) override;
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) override;
 
-        double get_optimal_expected_error() const override { return _optimal_EV; };
+        double get_expected_error() const override { return _optimal_EV; };
 
         void preprocess_decisions(double initial_data_size,
             double initial_error_level,
             double deadline,
             bool lower_bound) override;
+
+        void reset_preprocessed_decisions() override {
+            _preprocessed_decisions.clear();
+        }
 
     private:
 
@@ -62,6 +67,7 @@ namespace wrench {
             bool lower_bound);
 
         double _optimal_EV;
+        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<long, std::string>>> _preprocessed_decisions;
     };
 }
 

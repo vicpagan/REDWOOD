@@ -44,7 +44,7 @@ namespace wrench {
             std::string execution_option;
         };
 
-        virtual double get_optimal_expected_error() const = 0;
+        virtual double get_expected_error() const = 0;
 
         virtual void preprocess_decisions(double input_data_size,
             double input_error_level,
@@ -54,8 +54,9 @@ namespace wrench {
         virtual std::vector<SchedulingDecision> make_decisions(
             SystemState* system_state_tracker,
             const std::string& task_to_schedule,
-            double remaining_time,
-            bool minimize) = 0;
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) = 0;
 
 
         static std::shared_ptr<SchedulingAlgorithm> create_scheduling_algorithm(
@@ -70,9 +71,7 @@ namespace wrench {
             _delta_t = delta_t;
         }
 
-        void reset_preprocessed_decisions() {
-            _preprocessed_decisions.clear();
-        }
+        virtual void reset_preprocessed_decisions() = 0;
 
     protected:
         std::shared_ptr<ApplicationSpecs> _application_specs;
@@ -89,8 +88,6 @@ namespace wrench {
         double _io_write_bandwidth_per_node;
         double _delta_t;
         std::string _name;
-
-        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<long, std::string>>> _preprocessed_decisions;
 
         std::vector<std::string> _completed_execution_path;
     };

@@ -86,6 +86,8 @@ set(SIMULATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
+        src/scheduling/SchedulingAlgorithmStaticNearsighted.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
         src/SystemState.cpp
         src/Utils.cpp
@@ -98,6 +100,9 @@ set(SIMULATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
+        include/scheduling/SchedulingAlgorithmStaticForesighted.h
+        include/scheduling/SchedulingAlgorithmStaticNearsighted.h
+        include/scheduling/SchedulingAlgorithmRandom.h
         include/SystemState.h
         include/Utils.h
 )
@@ -152,6 +157,8 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
+        src/scheduling/SchedulingAlgorithmStaticNearsighted.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
         src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
@@ -162,6 +169,8 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
+        include/scheduling/SchedulingAlgorithmStaticForesighted.h
+        include/scheduling/SchedulingAlgorithmStaticNearsighted.h
         include/scheduling/SchedulingAlgorithmRandom.h
         include/scheduling/OptionComparatorFunction.h
         include/SystemState.h
@@ -184,6 +193,8 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithm.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
+        src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
+        src/scheduling/SchedulingAlgorithmStaticNearsighted.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
         src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp

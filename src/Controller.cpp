@@ -260,8 +260,9 @@ namespace wrench {
                     auto decisions =
                         algorithm->make_decisions(_system_state_tracker.get(),
                            current_task,
-                           time_to_deadline - Simulation::getCurrentSimulatedDate(),
-                           true);
+                           running_output_data_size,
+                           running_output_error_level,
+                           time_to_deadline - Simulation::getCurrentSimulatedDate());
 
                     // Implement the scheduling decisions
                     for (const auto &[hostname, task, execution_option] : decisions) {

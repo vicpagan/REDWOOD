@@ -156,7 +156,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
                                     application_specs->get_deadline(),
                                     false);
 
-    auto optimal_error = algorithm->get_optimal_expected_error();
+    auto optimal_error = algorithm->get_expected_error();
     return optimal_error;
 }
 

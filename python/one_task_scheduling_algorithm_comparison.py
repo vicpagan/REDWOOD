@@ -42,12 +42,12 @@ def run_simulation(json_file: str, algorithm: str, comparator: Optional[str],
             "scheme": "fixed",
             "parameter": 1.0
         }
-    elif algorithm == "static":
+    elif algorithm in ("static_foresighted", "static_nearsighted"):
         if comparator is None:
-            raise ValueError("Static algorithm requires a comparator")
+            raise ValueError(f"{algorithm} requires a comparator")
         config['scheduling']['algorithms'] = {
-            "one_task": [f"static_{comparator}"],
-            "multi_task": [f"static_{comparator}"]
+            "one_task": [f"{algorithm}_{comparator}"],
+            "multi_task": [f"{algorithm}_{comparator}"]
         }
     elif algorithm == "random":
         config['scheduling']['algorithms'] = {
@@ -109,7 +109,7 @@ def run_simulation(json_file: str, algorithm: str, comparator: Optional[str],
 def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorithm_comparison.png"):
     """Create comparison plots"""
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
     # Prepare data
     labels = []
@@ -118,8 +118,9 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
     colors = []
 
     color_map = {
-        # 'dynamic': 'tab:blue',
-        'static': 'tab:orange',
+        'dynamic': 'tab:blue',
+        'static_foresighted': 'tab:orange',
+        'static_nearsighted': 'tab:purple',
         'random': 'tab:green'
     }
 
@@ -166,6 +167,13 @@ def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorith
                  f'{height:.2f}',
                  ha='center', va='bottom', fontsize=9)
 
+    # Add legend
+    from matplotlib.patches import Patch
+    legend_elements = [Patch(facecolor=color, alpha=0.7, edgecolor='black', label=name)
+                       for name, color in color_map.items()
+                       if any(r.name == name for r in results)]
+    fig.legend(handles=legend_elements, loc='upper right', fontsize=10)
+
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"\nComparison plot saved to {output_file}")
@@ -175,12 +183,12 @@ def print_results_table(results: List[AlgorithmResult]):
     print("\n" + "="*80)
     print("ALGORITHM COMPARISON RESULTS")
     print("="*80)
-    print(f"{'Algorithm':<20} {'Comparator':<20} {'Success Rate':<15} {'Avg Error':<15}")
+    print(f"{'Algorithm':<25} {'Comparator':<20} {'Success Rate':<15} {'Avg Error':<15}")
     print("-"*80)
 
     for result in results:
         comp_str = result.comparator if result.comparator else "N/A"
-        print(f"{result.name:<20} {comp_str:<20} {result.success_rate*100:>6.2f}%{'':<8} {result.avg_error:>10.4f}")
+        print(f"{result.name:<25} {comp_str:<20} {result.success_rate*100:>6.2f}%{'':<8} {result.avg_error:>10.4f}")
 
     print("="*80)
 
@@ -204,7 +212,12 @@ def main():
         print("\nExample: python algorithm_comparison.py config.json 1000")
         print("\nThis will compare:")
         print("  - Dynamic scheduling")
-        print("  - Static scheduling with different comparators:")
+        print("  - Static foresighted scheduling with different comparators:")
+        print("      * expected_error")
+        print("      * probability_success")
+        print("      * error_level")
+        print("      * success_error_ratio")
+        print("  - Static nearsighted scheduling with different comparators:")
         print("      * expected_error")
         print("      * probability_success")
         print("      * error_level")
@@ -231,11 +244,15 @@ def main():
 
     # Test configurations
     configurations = [
-        # ("dynamic", None),
-        ("static", "expected_error"),
-        ("static", "probability_success"),
-        ("static", "error_level"),
-        ("static", "success_error_ratio"),
+        ("dynamic", None),
+        ("static_foresighted", "expected_error"),
+        ("static_foresighted", "probability_success"),
+        ("static_foresighted", "error_level"),
+        ("static_foresighted", "success_error_ratio"),
+        ("static_nearsighted", "expected_error"),
+        ("static_nearsighted", "probability_success"),
+        ("static_nearsighted", "error_level"),
+        ("static_nearsighted", "success_error_ratio"),
         ("random", None),
     ]
 
