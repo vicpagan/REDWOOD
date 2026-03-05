@@ -1,7 +1,6 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
-#include <future>
 
 #include "scheduling/SchedulingAlgorithmStaticForesighted.h"
 #include "ApplicationSpecs.h"
@@ -36,55 +35,59 @@ namespace wrench {
         std::vector<std::string> current_path;
         collect_combinations(_application_specs->get_decision_tree_root(), current_path);
 
-        std::vector<std::future<double>> futures;
-        futures.reserve(_all_combinations.size());
-
-        for (const auto &combo : _all_combinations) {
-            futures.push_back(std::async(std::launch::async, [&, combo]() {
-                const int num_tasks = static_cast<int>(combo.size()) - 1;
-                std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-
-                if (dynamic_cast<ExpectedErrorComparator*>(_comparator_function)) {
-                    return calculate_expected_error(
-                        num_tasks, 0, initial_data_size, initial_error_level,
-                        _delta_t, dp, _application_specs->get_decision_tree_root(),
-                        combo, n, R, n, lower_bound);
-                } else if (dynamic_cast<ProbabilitySuccessComparator*>(_comparator_function)) {
-                    return calculate_prob_success(
-                        num_tasks, 0, initial_data_size, initial_error_level,
-                        _delta_t, dp, _application_specs->get_decision_tree_root(),
-                        combo, n, R, n, lower_bound);
-                } else if (dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
-                    return calculate_error_level(
-                        _application_specs->get_decision_tree_root(), combo, 0);
-                } else if (dynamic_cast<SuccessErrorRatioComparator*>(_comparator_function)) {
-                    std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp2;
-                    double ps = calculate_prob_success(
-                        num_tasks, 0, initial_data_size, initial_error_level,
-                        _delta_t, dp2, _application_specs->get_decision_tree_root(),
-                        combo, n, R, n, lower_bound);
-                    double el = calculate_error_level(
-                        _application_specs->get_decision_tree_root(), combo, 0);
-                    return ps / el;
-                } else {
-                    throw std::runtime_error("Unknown comparator type");
-                }
-            }));
-        }
-
-        // Collect results and find best
         std::vector<std::string> best_combo;
         double best_value = minimize ? std::numeric_limits<double>::infinity()
                                      : -std::numeric_limits<double>::infinity();
 
-        for (size_t i = 0; i < _all_combinations.size(); i++) {
-            double value = futures[i].get();
+        for (const auto &combo : _all_combinations) {
+            const int num_tasks = static_cast<int>(combo.size()) - 1;
+            std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
+
+            double value;
+            if (dynamic_cast<ExpectedErrorComparator*>(_comparator_function)) {
+                value = calculate_expected_error(
+                    num_tasks, 0, initial_data_size, initial_error_level,
+                    _delta_t, dp, _application_specs->get_decision_tree_root(),
+                    combo, n, R, n, lower_bound);
+            } else if (dynamic_cast<ProbabilitySuccessComparator*>(_comparator_function)) {
+                value = calculate_prob_success(
+                    num_tasks, 0, initial_data_size, initial_error_level,
+                    _delta_t, dp, _application_specs->get_decision_tree_root(),
+                    combo, n, R, n, lower_bound);
+            } else if (dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
+                value = calculate_error_level(
+                    _application_specs->get_decision_tree_root(), combo, 0);
+            } else if (dynamic_cast<SuccessErrorRatioComparator*>(_comparator_function)) {
+                std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp2;
+                double ps = calculate_prob_success(
+                    num_tasks, 0, initial_data_size, initial_error_level,
+                    _delta_t, dp2, _application_specs->get_decision_tree_root(),
+                    combo, n, R, n, lower_bound);
+                double el = calculate_error_level(
+                    _application_specs->get_decision_tree_root(), combo, 0);
+                value = ps / el;
+            } else {
+                throw std::runtime_error("Unknown comparator type");
+            }
+
+            // std::cout << "Combo: ";
+            // for (const auto &option : combo) {
+            //     std::cout << option << " ";
+            // }
+            // std::cout << "Value: " << value << std::endl;
+
             bool better = minimize ? (value < best_value) : (value > best_value);
             if (better) {
                 best_value = value;
-                best_combo = _all_combinations[i];
+                best_combo = combo;
             }
         }
+
+        // std::cout << "Best combo: ";
+        // for (const auto &option : best_combo) {
+        //     std::cout << option << " ";
+        // }
+        // std::cout << "Best value: " << best_value << std::endl;
 
         for (int i = 0; i < static_cast<int>(best_combo.size()); i++) {
             _static_decisions[_application_specs->get_task(i)] = best_combo[i];

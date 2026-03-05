@@ -9,27 +9,33 @@ import re
 import tempfile
 import os
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 from concurrent.futures import ProcessPoolExecutor, as_completed
+
+DEADLINE_START = 5000
+DEADLINE_END   = 25000
+DEADLINE_STEP  = 1000
 
 @dataclass
 class AlgorithmResult:
     name: str
+    comparator: Optional[str]
+    deadline: int
     num_repeats: int
     num_successes: int
     success_rate: float
     avg_error: float
     avg_error_successes: float
-    comparator: Optional[str] = None
 
 def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
-    """Run simulation for a specific algorithm configuration"""
-    json_file, algorithm, comparator, num_repeats, sim_executable = args
+    """Run simulation for a specific algorithm + deadline configuration"""
+    json_file, algorithm, comparator, num_repeats, sim_executable, deadline = args
 
     with open(json_file, 'r') as f:
         config = json.load(f)
 
     config['execution']['num_repeats'] = num_repeats
+    config['execution']['deadline'] = deadline
 
     if algorithm == "dynamic":
         config['scheduling']['algorithms'] = {
@@ -62,181 +68,170 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
     try:
         cmd = [sim_executable, "--json", tmp_file]
         algo_name = f"{algorithm}_{comparator}" if comparator else algorithm
-        print(f"Running {algo_name} ({num_repeats} repeats)...", flush=True)
+        print(f"Running {algo_name} deadline={deadline}...", flush=True)
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
-            print(f"FAILED: {algo_name}")
+            print(f"FAILED: {algo_name} deadline={deadline}")
             print(f"Error: {result.stderr}", file=sys.stderr)
             return None
 
         output = result.stdout
 
-        repeats_match = re.search(r'Total repeats:\s*(\d+)', output)
-        successes_match = re.search(r'Num successes:\s*(\d+)', output)
-        success_rate_match = re.search(r'Success rate:\s*(\d+\.?\d*)', output)
-        avg_error_match = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
-        avg_error_successes_match = re.search(r'Avg error level of successes:\s*(\d+\.?\d*)', output)
+        repeats_match           = re.search(r'Total repeats:\s*(\d+)', output)
+        successes_match         = re.search(r'Num successes:\s*(\d+)', output)
+        success_rate_match      = re.search(r'Success rate:\s*(\d+\.?\d*)', output)
+        avg_error_match         = re.search(r'Avg error level:\s*(\d+\.?\d*)', output)
+        avg_error_succ_match    = re.search(r'Avg error level of successes:\s*(\d+\.?\d*)', output)
 
-        if not all([repeats_match, successes_match, success_rate_match, avg_error_match, avg_error_successes_match]):
-            print(f"Could not parse output for {algo_name}")
+        if not all([repeats_match, successes_match, success_rate_match,
+                    avg_error_match, avg_error_succ_match]):
+            print(f"Could not parse output for {algo_name} deadline={deadline}")
             return None
 
         result_obj = AlgorithmResult(
             name=algorithm,
+            comparator=comparator,
+            deadline=deadline,
             num_repeats=int(repeats_match.group(1)),
             num_successes=int(successes_match.group(1)),
             success_rate=float(success_rate_match.group(1)),
             avg_error=float(avg_error_match.group(1)),
-            avg_error_successes=float(avg_error_successes_match.group(1)),
-            comparator=comparator
+            avg_error_successes=float(avg_error_succ_match.group(1)),
         )
 
-        print(f"Done {algo_name}: Success rate={result_obj.success_rate:.3f}, Avg error={result_obj.avg_error:.3f}, Avg error (successes)={result_obj.avg_error_successes:.3f}", flush=True)
+        print(f"Done {algo_name} deadline={deadline}: "
+              f"success={result_obj.success_rate:.3f} "
+              f"err={result_obj.avg_error:.3f} "
+              f"err_succ={result_obj.avg_error_successes:.3f}", flush=True)
         return result_obj
 
     finally:
         os.unlink(tmp_file)
 
 
-def plot_comparison(results: List[AlgorithmResult], output_file: str = "algorithm_comparison.png"):
-    """Create comparison plots"""
+def algo_label(name: str, comparator: Optional[str]) -> str:
+    return f"{name}\n({comparator})" if comparator else name
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
+def algo_key(name: str, comparator: Optional[str]) -> str:
+    return f"{name}_{comparator}" if comparator else name
 
-    labels = []
-    success_rates = []
-    avg_errors = []
-    avg_errors_successes = []
-    colors = []
+
+def plot_comparison(results: List[AlgorithmResult],
+                    deadlines: List[int],
+                    configurations: List[Tuple],
+                    output_file: str = "algorithm_comparison.png"):
 
     color_map = {
-        'dynamic': 'tab:blue',
+        'dynamic':            'tab:blue',
         'static_foresighted': 'tab:orange',
         'static_nearsighted': 'tab:purple',
-        'random': 'tab:green'
+        'random':             'tab:green',
     }
 
-    for result in results:
-        if result.comparator:
-            label = f"{result.name}\n({result.comparator})"
-        else:
-            label = result.name
-        labels.append(label)
-        success_rates.append(result.success_rate * 100)
-        avg_errors.append(result.avg_error)
-        avg_errors_successes.append(result.avg_error_successes)
-        colors.append(color_map.get(result.name, 'gray'))
+    linestyle_map = {
+        None:                  'solid',
+        'expected_error':      'solid',
+        'probability_success': 'dashed',
+        'error_level':         'dotted',
+        'success_error_ratio': 'dashdot',
+    }
 
-    x = np.arange(len(labels))
+    # Group results by (algorithm, comparator) -> {deadline -> result}
+    grouped: Dict[str, Dict[int, AlgorithmResult]] = {}
+    for r in results:
+        key = algo_key(r.name, r.comparator)
+        if key not in grouped:
+            grouped[key] = {}
+        grouped[key][r.deadline] = r
 
-    # Plot 1: Success Rate
-    bars1 = ax1.bar(x, success_rates, color=colors, alpha=0.7, edgecolor='black')
-    ax1.set_ylabel('Success Rate (%)', fontsize=12)
-    ax1.set_title('Success Rate Comparison', fontsize=14, fontweight='bold')
-    ax1.set_xticks(x)
-    ax1.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
-    ax1.grid(True, alpha=0.3, axis='y')
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 7))
+
+    for algorithm, comparator in configurations:
+        key = algo_key(algorithm, comparator)
+        if key not in grouped:
+            continue
+
+        data = grouped[key]
+        xs = sorted(data.keys())
+        success_rates     = [data[d].success_rate * 100 for d in xs]
+        avg_errors        = [data[d].avg_error for d in xs]
+        avg_errors_succ   = [data[d].avg_error_successes for d in xs]
+
+        label  = algo_label(algorithm, comparator)
+        color  = color_map.get(algorithm, 'gray')
+        ls     = linestyle_map.get(comparator, 'solid')
+
+        ax1.plot(xs, success_rates,   label=label, color=color, linestyle=ls, marker='o', markersize=4)
+        ax2.plot(xs, avg_errors,      label=label, color=color, linestyle=ls, marker='o', markersize=4)
+        ax3.plot(xs, avg_errors_succ, label=label, color=color, linestyle=ls, marker='o', markersize=4)
+
+    for ax, title, ylabel in [
+        (ax1, 'Success Rate vs Deadline',              'Success Rate (%)'),
+        (ax2, 'Avg Error vs Deadline (All Runs)',       'Average Error Level'),
+        (ax3, 'Avg Error vs Deadline (Successes Only)', 'Average Error Level'),
+    ]:
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel('Deadline', fontsize=11)
+        ax.set_ylabel(ylabel, fontsize=11)
+        ax.grid(True, alpha=0.3)
+        ax.set_xticks(deadlines)
+        ax.tick_params(axis='x', rotation=45)
+
     ax1.set_ylim(0, 100)
 
-    for bar in bars1:
-        height = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width()/2., height,
-                 f'{height:.1f}%', ha='center', va='bottom', fontsize=9)
-
-    # Plot 2: Average Error (all runs)
-    bars2 = ax2.bar(x, avg_errors, color=colors, alpha=0.7, edgecolor='black')
-    ax2.set_ylabel('Average Error Level', fontsize=12)
-    ax2.set_title('Average Error (All Runs)', fontsize=14, fontweight='bold')
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
-    ax2.grid(True, alpha=0.3, axis='y')
-
-    for bar in bars2:
-        height = bar.get_height()
-        ax2.text(bar.get_x() + bar.get_width()/2., height,
-                 f'{height:.2f}', ha='center', va='bottom', fontsize=9)
-
-    # Plot 3: Average Error (successes only)
-    bars3 = ax3.bar(x, avg_errors_successes, color=colors, alpha=0.7, edgecolor='black')
-    ax3.set_ylabel('Average Error Level', fontsize=12)
-    ax3.set_title('Average Error (Successes Only)', fontsize=14, fontweight='bold')
-    ax3.set_xticks(x)
-    ax3.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
-    ax3.grid(True, alpha=0.3, axis='y')
-
-    for bar in bars3:
-        height = bar.get_height()
-        ax3.text(bar.get_x() + bar.get_width()/2., height,
-                 f'{height:.2f}', ha='center', va='bottom', fontsize=9)
-
-    from matplotlib.patches import Patch
-    legend_elements = [Patch(facecolor=color, alpha=0.7, edgecolor='black', label=name)
-                       for name, color in color_map.items()
-                       if any(r.name == name for r in results)]
-    fig.legend(handles=legend_elements, loc='upper right', fontsize=10)
+    handles, labels = ax1.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='lower center',
+               ncol=min(len(configurations), 5), fontsize=8,
+               bbox_to_anchor=(0.5, -0.15))
 
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"\nComparison plot saved to {output_file}")
 
 
-def print_results_table(results: List[AlgorithmResult]):
-    """Print results in a formatted table"""
-    print("\n" + "="*95)
-    print("ALGORITHM COMPARISON RESULTS")
-    print("="*95)
-    print(f"{'Algorithm':<25} {'Comparator':<20} {'Success Rate':<15} {'Avg Error':<15} {'Avg Error (Succ)':<15}")
-    print("-"*95)
+def print_results_table(results: List[AlgorithmResult], deadlines: List[int]):
+    for deadline in deadlines:
+        deadline_results = [r for r in results if r.deadline == deadline]
+        if not deadline_results:
+            continue
 
-    for result in results:
-        comp_str = result.comparator if result.comparator else "N/A"
-        print(f"{result.name:<25} {comp_str:<20} {result.success_rate*100:>6.2f}%{'':<8} {result.avg_error:>10.4f}     {result.avg_error_successes:>10.4f}")
+        print(f"\n{'='*100}")
+        print(f"DEADLINE = {deadline}")
+        print(f"{'='*100}")
+        print(f"{'Algorithm':<25} {'Comparator':<20} {'Success Rate':<15} {'Avg Error':<15} {'Avg Error (Succ)':<15}")
+        print(f"{'-'*100}")
 
-    print("="*95)
+        for r in deadline_results:
+            comp_str = r.comparator if r.comparator else "N/A"
+            print(f"{r.name:<25} {comp_str:<20} {r.success_rate*100:>6.2f}%{'':<8} "
+                  f"{r.avg_error:>10.4f}     {r.avg_error_successes:>10.4f}")
 
-    best_success = max(results, key=lambda r: r.success_rate)
-    best_error = min(results, key=lambda r: r.avg_error)
-    best_error_successes = min(results, key=lambda r: r.avg_error_successes)
+    # Overall bests across all deadlines
+    print(f"\n{'='*100}")
+    print("OVERALL BESTS (across all deadlines)")
+    print(f"{'='*100}")
+    best_success      = max(results, key=lambda r: r.success_rate)
+    best_error        = min(results, key=lambda r: r.avg_error)
+    best_error_succ   = min(results, key=lambda r: r.avg_error_successes)
 
-    print(f"\nBest Success Rate: {best_success.name}", end='')
-    if best_success.comparator:
-        print(f" ({best_success.comparator})", end='')
-    print(f" - {best_success.success_rate*100:.2f}%")
-
-    print(f"Best Avg Error: {best_error.name}", end='')
-    if best_error.comparator:
-        print(f" ({best_error.comparator})", end='')
-    print(f" - {best_error.avg_error:.4f}")
-
-    print(f"Best Avg Error (Successes): {best_error_successes.name}", end='')
-    if best_error_successes.comparator:
-        print(f" ({best_error_successes.comparator})", end='')
-    print(f" - {best_error_successes.avg_error_successes:.4f}")
+    for label, r, val in [
+        ("Best Success Rate",         best_success,    f"{r.success_rate*100:.2f}%"),
+        ("Best Avg Error",            best_error,      f"{r.avg_error:.4f}"),
+        ("Best Avg Error (Successes)", best_error_succ, f"{r.avg_error_successes:.4f}"),
+    ]:
+        key = algo_key(r.name, r.comparator)
+        print(f"{label}: {key} @ deadline={r.deadline} -> {val}")
 
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: python algorithm_comparison.py <json_file> [num_repeats] [sim_executable]")
-        print("\nExample: python algorithm_comparison.py config.json 1000")
-        print("\nThis will compare:")
-        print("  - Dynamic scheduling")
-        print("  - Static foresighted scheduling with different comparators:")
-        print("      * expected_error")
-        print("      * probability_success")
-        print("      * error_level")
-        print("      * success_error_ratio")
-        print("  - Static nearsighted scheduling with different comparators:")
-        print("      * expected_error")
-        print("      * probability_success")
-        print("      * error_level")
-        print("      * success_error_ratio")
-        print("  - Random scheduling")
         sys.exit(1)
 
-    json_file = sys.argv[1]
-    num_repeats = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
+    json_file      = sys.argv[1]
+    num_repeats    = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
     sim_executable = sys.argv[3] if len(sys.argv) > 3 else "../build/redwood_sim_opt_both"
 
     if not os.path.exists(json_file):
@@ -248,7 +243,7 @@ def main():
         sys.exit(1)
 
     configurations = [
-        ("dynamic", None),
+        ("dynamic",            None),
         ("static_foresighted", "expected_error"),
         ("static_foresighted", "probability_success"),
         ("static_foresighted", "error_level"),
@@ -257,21 +252,32 @@ def main():
         ("static_nearsighted", "probability_success"),
         ("static_nearsighted", "error_level"),
         ("static_nearsighted", "success_error_ratio"),
-        ("random", None),
+        ("random",             None),
     ]
 
-    all_args = [(json_file, algorithm, comparator, num_repeats, sim_executable)
-                for algorithm, comparator in configurations]
+    deadlines = list(range(DEADLINE_START, DEADLINE_END + 1, DEADLINE_STEP))
 
-    print(f"Starting algorithm comparison with {num_repeats} repeats per algorithm")
-    print(f"Running {len(configurations)} configurations in parallel\n")
+    # Build all (config, deadline) argument tuples
+    all_args = [
+        (json_file, algorithm, comparator, num_repeats, sim_executable, deadline)
+        for algorithm, comparator in configurations
+        for deadline in deadlines
+    ]
 
-    raw_results = {}
+    total = len(all_args)
+    print(f"Starting comparison: {len(configurations)} algorithms x {len(deadlines)} deadlines = {total} jobs")
+    print(f"Running all {total} jobs in parallel\n")
+
+    raw_results: Dict[Tuple, Optional[AlgorithmResult]] = {}
     with ProcessPoolExecutor() as executor:
         futures = {executor.submit(run_simulation, args): args for args in all_args}
         for future in as_completed(futures):
             args = futures[future]
-            raw_results[args] = future.result()
+            try:
+                raw_results[args] = future.result()
+            except Exception as e:
+                print(f"Job failed for {args[1]}_{args[2]} deadline={args[5]}: {e}", file=sys.stderr)
+                raw_results[args] = None
 
     results = [raw_results[args] for args in all_args if raw_results.get(args) is not None]
 
@@ -279,19 +285,21 @@ def main():
         print("No results collected!")
         sys.exit(1)
 
-    print_results_table(results)
-    plot_comparison(results)
+    print_results_table(results, deadlines)
+    plot_comparison(results, deadlines, configurations)
 
     output_data = {
         "num_repeats": num_repeats,
+        "deadlines": deadlines,
         "results": [
             {
-                "algorithm": r.name,
-                "comparator": r.comparator,
-                "num_successes": r.num_successes,
-                "success_rate": r.success_rate,
-                "avg_error": r.avg_error,
-                "avg_error_successes": r.avg_error_successes
+                "algorithm":           r.name,
+                "comparator":          r.comparator,
+                "deadline":            r.deadline,
+                "num_successes":       r.num_successes,
+                "success_rate":        r.success_rate,
+                "avg_error":           r.avg_error,
+                "avg_error_successes": r.avg_error_successes,
             }
             for r in results
         ]
