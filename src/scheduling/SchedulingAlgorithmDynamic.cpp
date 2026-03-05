@@ -247,12 +247,12 @@ namespace wrench {
             // Lower bound
             _preprocessed_decisions.clear();
             this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, true);
-            double result_lower_bound = this->get_optimal_expected_error();
+            double result_lower_bound = this->get_expected_error();
 
             // Upper bound
             _preprocessed_decisions.clear();
             this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, false);
-            double result_upper_bound = this->get_optimal_expected_error();
+            double result_upper_bound = this->get_expected_error();
 
             double result_avg = (result_upper_bound + result_lower_bound) / 2;
             std::cerr << "EV(MID) UPPER BOUND = " << result_upper_bound <<
@@ -281,8 +281,13 @@ namespace wrench {
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmDynamic::make_decisions(
         SystemState* system_state_tracker,
         const std::string& task_to_schedule,
-        const double remaining_time,
-        const bool minimize) {
+        const double input_data_size,
+        const double input_error_level,
+        const double remaining_time) {
+
+        if (_preprocessed_decisions.empty()) {
+            preprocess_decisions(input_data_size, input_error_level, remaining_time, true);
+        }
 
         // Make a decision for each host that's currently idle
         // All these decisions are independent so that makes it easy
@@ -291,10 +296,6 @@ namespace wrench {
             std::string hostname = entry.first;
 
             if (!system_state_tracker->is_host_idle(hostname)) continue; // Host is not idle
-
-            if (_preprocessed_decisions.empty()) {
-                throw std::invalid_argument("Preprocessed decisions are not available");
-            }
 
             const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node;
             if (system_state_tracker->get_host_current_decision_node(hostname) == nullptr) {
@@ -313,8 +314,8 @@ namespace wrench {
             --it;
             const std::string& execution_option = it->second;
 
-            // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
-            //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+            std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
+                " on host " << hostname << " with remaining time " << remaining_time << std::endl;
             decisions.push_back({hostname, task_to_schedule, execution_option});
         }
         return decisions;

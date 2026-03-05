@@ -159,7 +159,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 25,
+    "num_repeats": 5,
     "deadline": 10000,
     "e_fail": 20.0
   },
@@ -171,8 +171,8 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["dynamic"],
-      "multi_task": ["dynamic"]
+      "one_task": ["static_nearsighted_expected_error"],
+      "multi_task": ["static_nearsighted_expected_error"]
     },
     "hacks": {
       "temporal_redundancy": true,

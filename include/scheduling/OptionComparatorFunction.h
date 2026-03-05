@@ -22,6 +22,8 @@ namespace wrench {
             double input_error_level,
             double remaining_time
         ) const = 0;
+
+        virtual bool is_minimizing() const = 0;
         
         static std::shared_ptr<OptionComparatorFunction> create_scheduling_algorithm(
             const std::string& type, std::shared_ptr<ApplicationSpecs> application_specs);
@@ -48,6 +50,8 @@ namespace wrench {
             double input_error_level,
             double remaining_time) const override;
 
+        bool is_minimizing() const override { return true; }
+
     private:
         double _io_read_bandwidth_per_node;
         double _io_write_bandwidth_per_node;
@@ -68,6 +72,9 @@ namespace wrench {
             double input_error_level,
             double remaining_time) const override;
 
+        bool is_minimizing() const override { return false; }
+
+
     private:
         double _io_read_bandwidth_per_node;
         double _io_write_bandwidth_per_node;
@@ -78,7 +85,7 @@ namespace wrench {
         explicit ErrorLevelComparator(const std::shared_ptr<ApplicationSpecs> &application_specs) : OptionComparatorFunction(application_specs, "error_level"),
                                                                                    _io_read_bandwidth_per_node(application_specs->get_io_read_bandwidth_per_node()),
                                                                                    _io_write_bandwidth_per_node(application_specs->get_io_write_bandwidth_per_node()),
-                                                                                   _prob_success_threshold(0.95) {
+                                                                                   _prob_success_threshold(0.0) {
         }
 
         double comp_value(
@@ -87,6 +94,8 @@ namespace wrench {
             double input_data_size,
             double input_error_level,
             double remaining_time) const override;
+
+        bool is_minimizing() const override { return true; }
 
     private:
         double _io_read_bandwidth_per_node;
@@ -107,6 +116,9 @@ namespace wrench {
             double input_data_size,
             double input_error_level,
             double remaining_time) const override;
+
+        bool is_minimizing() const override { return false; }
+
 
     private:
         double _io_read_bandwidth_per_node;

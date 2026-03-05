@@ -5,7 +5,8 @@
 #include "scheduling/SchedulingAlgorithm.h"
 #include "ProbabilityComputation.h"
 #include "scheduling/SchedulingAlgorithmDynamic.h"
-#include "scheduling/SchedulingAlgorithmStatic.h"
+#include "scheduling/SchedulingAlgorithmStaticForesighted.h"
+#include "scheduling/SchedulingAlgorithmStaticNearsighted.h"
 #include "scheduling/SchedulingAlgorithmRandom.h"
 
 
@@ -21,9 +22,24 @@ namespace wrench {
         ProbabilityComputation *probability_computation) {
         if (type == "dynamic") {
             return std::make_shared<SchedulingAlgorithmDynamic>(application_specs, exec_options, probability_computation);
-        } else if (type.rfind("static_", 0) == 0) {  // starts with "static_"
-            std::string comparator_name = type.substr(7);  // remove "static_"
+        }
+        else if (type.rfind("static_", 0) == 0) {  // starts with "static_"
+            std::string remainder = type.substr(7);  // remove "static_"
 
+            // Check for variants
+            std::string variant;
+            if (remainder.rfind("foresighted_", 0) == 0) {
+                variant = "foresighted";
+            }
+            else if (remainder.rfind("nearsighted_", 0) == 0) {
+                variant = "nearsighted";
+            }
+            else {
+                throw std::invalid_argument("Invalid static algorithm format. Expected: static_<foresighted|nearsighted>_<comparator>");
+            }
+
+            // Create comparator
+            std::string comparator_name = remainder.substr(12);
             OptionComparatorFunction* chosen_comparator = nullptr;
 
             if (comparator_name == "expected_error") {
@@ -39,21 +55,27 @@ namespace wrench {
                 chosen_comparator = new SuccessErrorRatioComparator(application_specs);
             }
             else {
-                throw std::invalid_argument(
-                    "Unknown static comparator '" + comparator_name + "'");
+                throw std::invalid_argument("Unknown static comparator '" + comparator_name + "'");
             }
 
-            return std::make_shared<SchedulingAlgorithmStatic>(
-                application_specs,
-                exec_options,
-                probability_computation,
-                chosen_comparator
-            );
-        } else if (type == "random")  {
+            // Create appropriate static variant
+            if (variant == "foresighted") {
+                return std::make_shared<SchedulingAlgorithmStaticForesighted>(
+                    application_specs, exec_options, probability_computation, chosen_comparator);
+            }
+            else if (variant == "nearsighted") {
+                return std::make_shared<SchedulingAlgorithmStaticNearsighted>(
+                    application_specs, exec_options, probability_computation, chosen_comparator);
+            }
+            else {
+                throw std::invalid_argument("Unknown static variant '" + variant + "'");
+            }
+        }
+        else if (type == "random") {
             return std::make_shared<SchedulingAlgorithmRandom>(application_specs, exec_options, probability_computation);
-        } else {
+        }
+        else {
             throw std::invalid_argument("Unknown scheduling algorithm '" + type + "'");
         }
     }
-
 }

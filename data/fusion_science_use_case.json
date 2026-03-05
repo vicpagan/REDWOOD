@@ -400,7 +400,7 @@
     "num_repeats": 50,
     "deadline_comment": "120 minutes",
     "deadline": 5000,
-    "e_fail": 50.0
+    "e_fail": 100.0
   },
   "scheduling": {
     "delta_t_scheme_comments": "'fixed', 'compute'",
@@ -410,8 +410,8 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["dynamic"],
-      "multi_task": ["dynamic"]
+      "one_task": ["static_foresighted_expected_error"],
+      "multi_task": ["static_foresighted_expected_error"]
     },
     "hacks": {
       "temporal_redundancy": true,

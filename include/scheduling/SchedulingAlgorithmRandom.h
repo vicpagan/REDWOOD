@@ -12,7 +12,7 @@ namespace wrench {
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             ProbabilityComputation* probability_computation);
 
-        double get_optimal_expected_error() const override;
+        double get_expected_error() const override;
 
         void preprocess_decisions(double input_data_size,
                                  double input_error_level,
@@ -22,8 +22,13 @@ namespace wrench {
         std::vector<SchedulingDecision> make_decisions(
             SystemState* system_state_tracker,
             const std::string& task_to_schedule,
-            double remaining_time,
-            bool minimize) override;
+            double input_data_size,
+            double input_error_level,
+            double remaining_time) override;
+
+        void reset_preprocessed_decisions() override {
+            // No preprocessing, so nothing to reset
+        }
 
     private:
         std::default_random_engine _rng;

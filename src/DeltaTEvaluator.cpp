@@ -79,7 +79,7 @@ namespace wrench {
                 deadline,
                 true  // lower_bound
             );
-            result.lower_bound_error = algorithm->get_optimal_expected_error();
+            result.lower_bound_error = algorithm->get_expected_error();
 
             // Upper bound
             algorithm->reset_preprocessed_decisions();
@@ -89,7 +89,7 @@ namespace wrench {
                 deadline,
                 false  // upper_bound
             );
-            result.upper_bound_error = algorithm->get_optimal_expected_error();
+            result.upper_bound_error = algorithm->get_expected_error();
 
             auto end_time = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);

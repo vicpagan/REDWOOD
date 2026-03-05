@@ -12,7 +12,7 @@ namespace wrench {
           _rng(std::chrono::steady_clock::now().time_since_epoch().count()) {
     }
 
-    double SchedulingAlgorithmRandom::get_optimal_expected_error() const {
+    double SchedulingAlgorithmRandom::get_expected_error() const {
         return _e_fail;
     }
 
@@ -26,8 +26,9 @@ namespace wrench {
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmRandom::make_decisions(
         SystemState* system_state_tracker,
         const std::string& task_to_schedule,
-        const double remaining_time,
-        const bool minimize) {
+        const double input_data_size,
+        const double input_error_level,
+        const double remaining_time) {
 
         std::vector<SchedulingDecision> decisions;
 
