@@ -1,0 +1,1190 @@
+{
+  "num_repeats": 50,
+  "deadlines": [
+    3000,
+    4000,
+    5000,
+    6000,
+    7000,
+    8000,
+    9000,
+    10000,
+    11000,
+    12000,
+    13000,
+    14000,
+    15000
+  ],
+  "results": [
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 3000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 11.68,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 4000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 5000,
+      "num_successes": 39,
+      "success_rate": 0.78,
+      "avg_error": 25.6,
+      "avg_error_successes": 4.61538
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 6000,
+      "num_successes": 45,
+      "success_rate": 0.9,
+      "avg_error": 13.84,
+      "avg_error_successes": 4.26667
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 7000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 6.0,
+      "avg_error_successes": 4.08163
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 8000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.08,
+      "avg_error_successes": 4.08
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 9000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 10000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 11000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 12000,
+      "num_successes": 43,
+      "success_rate": 0.86,
+      "avg_error": 16.24,
+      "avg_error_successes": 2.60465
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 13000,
+      "num_successes": 44,
+      "success_rate": 0.88,
+      "avg_error": 14.12,
+      "avg_error_successes": 2.40909
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 14000,
+      "num_successes": 45,
+      "success_rate": 0.9,
+      "avg_error": 12.04,
+      "avg_error_successes": 2.26667
+    },
+    {
+      "algorithm": "dynamic",
+      "comparator": null,
+      "deadline": 15000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 6.04,
+      "avg_error_successes": 2.125
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 3000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 11.68,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 4000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 5000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 6000,
+      "num_successes": 43,
+      "success_rate": 0.86,
+      "avg_error": 17.44,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 7000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 7.84,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 8000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 5.92,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 9000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 10000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 11000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 12000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 13000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 14000,
+      "num_successes": 42,
+      "success_rate": 0.84,
+      "avg_error": 17.68,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "expected_error",
+      "deadline": 15000,
+      "num_successes": 45,
+      "success_rate": 0.9,
+      "avg_error": 11.8,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 3000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 11.68,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 4000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 5000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 6000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 8.0,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 7000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 5.76,
+      "avg_error_successes": 5.76
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 8000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.56,
+      "avg_error_successes": 4.56
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 9000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.24,
+      "avg_error_successes": 4.24
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 10000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.16,
+      "avg_error_successes": 4.16
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 11000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.16,
+      "avg_error_successes": 4.16
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 12000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.08,
+      "avg_error_successes": 4.08
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 13000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 14000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "probability_success",
+      "deadline": 15000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 3000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 4000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 5000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 6000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 7000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 8000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 9000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 10000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 11000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 12000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 13000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 14000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "error_level",
+      "deadline": 15000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 3000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 11.68,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 4000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 5000,
+      "num_successes": 34,
+      "success_rate": 0.68,
+      "avg_error": 34.72,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 6000,
+      "num_successes": 43,
+      "success_rate": 0.86,
+      "avg_error": 17.44,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 7000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 7.84,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 8000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 9000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 10000,
+      "num_successes": 25,
+      "success_rate": 0.5,
+      "avg_error": 51.0,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 11000,
+      "num_successes": 32,
+      "success_rate": 0.64,
+      "avg_error": 37.28,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 12000,
+      "num_successes": 37,
+      "success_rate": 0.74,
+      "avg_error": 27.48,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 13000,
+      "num_successes": 40,
+      "success_rate": 0.8,
+      "avg_error": 21.6,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 14000,
+      "num_successes": 42,
+      "success_rate": 0.84,
+      "avg_error": 17.68,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_foresighted",
+      "comparator": "success_error_ratio",
+      "deadline": 15000,
+      "num_successes": 45,
+      "success_rate": 0.9,
+      "avg_error": 11.8,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 3000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 4000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 5000,
+      "num_successes": 34,
+      "success_rate": 0.68,
+      "avg_error": 34.72,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 6000,
+      "num_successes": 43,
+      "success_rate": 0.86,
+      "avg_error": 17.44,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 7000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 7.84,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 8000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 9000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 10000,
+      "num_successes": 25,
+      "success_rate": 0.5,
+      "avg_error": 51.0,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 11000,
+      "num_successes": 32,
+      "success_rate": 0.64,
+      "avg_error": 37.28,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 12000,
+      "num_successes": 37,
+      "success_rate": 0.74,
+      "avg_error": 27.48,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 13000,
+      "num_successes": 40,
+      "success_rate": 0.8,
+      "avg_error": 21.6,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 14000,
+      "num_successes": 42,
+      "success_rate": 0.84,
+      "avg_error": 17.68,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "expected_error",
+      "deadline": 15000,
+      "num_successes": 45,
+      "success_rate": 0.9,
+      "avg_error": 11.8,
+      "avg_error_successes": 2.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 3000,
+      "num_successes": 48,
+      "success_rate": 0.96,
+      "avg_error": 11.68,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 4000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 5000,
+      "num_successes": 49,
+      "success_rate": 0.98,
+      "avg_error": 9.84,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 6000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 8.0,
+      "avg_error_successes": 8.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 7000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 5.76,
+      "avg_error_successes": 5.76
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 8000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.56,
+      "avg_error_successes": 4.56
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 9000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.24,
+      "avg_error_successes": 4.24
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 10000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.16,
+      "avg_error_successes": 4.16
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 11000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.16,
+      "avg_error_successes": 4.16
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 12000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.08,
+      "avg_error_successes": 4.08
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 13000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 14000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "probability_success",
+      "deadline": 15000,
+      "num_successes": 50,
+      "success_rate": 1.0,
+      "avg_error": 4.0,
+      "avg_error_successes": 4.0
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 3000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 4000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 5000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 6000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 7000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 8000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 9000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 10000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 11000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 12000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 13000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 14000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "error_level",
+      "deadline": 15000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 3000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 4000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 5000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 6000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 7000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 8000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 9000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 10000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 11000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 12000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 13000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 14000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "static_nearsighted",
+      "comparator": "success_error_ratio",
+      "deadline": 15000,
+      "num_successes": 0,
+      "success_rate": 0.0,
+      "avg_error": 100.0,
+      "avg_error_successes": null
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 3000,
+      "num_successes": 3,
+      "success_rate": 0.06,
+      "avg_error": 95.12,
+      "avg_error_successes": 18.6667
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 4000,
+      "num_successes": 9,
+      "success_rate": 0.18,
+      "avg_error": 85.2048,
+      "avg_error_successes": 17.8044
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 5000,
+      "num_successes": 10,
+      "success_rate": 0.2,
+      "avg_error": 83.936,
+      "avg_error_successes": 19.68
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 6000,
+      "num_successes": 7,
+      "success_rate": 0.14,
+      "avg_error": 88.008,
+      "avg_error_successes": 14.3429
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 7000,
+      "num_successes": 9,
+      "success_rate": 0.18,
+      "avg_error": 85.6016,
+      "avg_error_successes": 20.0089
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 8000,
+      "num_successes": 14,
+      "success_rate": 0.28,
+      "avg_error": 76.1632,
+      "avg_error_successes": 14.8686
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 9000,
+      "num_successes": 21,
+      "success_rate": 0.42,
+      "avg_error": 65.2128,
+      "avg_error_successes": 17.1733
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 10000,
+      "num_successes": 23,
+      "success_rate": 0.46,
+      "avg_error": 62.032,
+      "avg_error_successes": 17.4609
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 11000,
+      "num_successes": 22,
+      "success_rate": 0.44,
+      "avg_error": 62.8232,
+      "avg_error_successes": 15.5073
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 12000,
+      "num_successes": 19,
+      "success_rate": 0.38,
+      "avg_error": 67.7728,
+      "avg_error_successes": 15.1916
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 13000,
+      "num_successes": 27,
+      "success_rate": 0.54,
+      "avg_error": 54.7328,
+      "avg_error_successes": 16.1719
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 14000,
+      "num_successes": 24,
+      "success_rate": 0.48,
+      "avg_error": 58.1696,
+      "avg_error_successes": 12.8533
+    },
+    {
+      "algorithm": "random",
+      "comparator": null,
+      "deadline": 15000,
+      "num_successes": 30,
+      "success_rate": 0.6,
+      "avg_error": 48.6144,
+      "avg_error_successes": 14.3573
+    }
+  ]
+}
