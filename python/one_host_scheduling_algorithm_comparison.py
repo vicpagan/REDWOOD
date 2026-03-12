@@ -296,6 +296,7 @@ def main():
     ]
 
     deadlines = list(range(DEADLINE_START, DEADLINE_END + 1, DEADLINE_STEP))
+    deadlines.reverse() # Run higher deadlines first to load balance
 
     all_args = [
         (json_file, algorithm, comparator, num_repeats, sim_executable, deadline)
