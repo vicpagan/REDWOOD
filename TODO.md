@@ -10,6 +10,7 @@
   - How to run the delta_t evaluation program:
     - python python/delta_t_evaluator.py <data/XXX.json> <min delta_t> <max delta_t> <step size> --run-sims
   - Compress preprocessing table
+    - Done using ranges and assumption
   - Calculate delta based on a single variable
     - By messing with the other variables, we can see how "sensitive" the calcation is to other variables
     - Try this with every independent variable
@@ -18,23 +19,21 @@
     - This would allow us to do delta calculation based on given constant values instead of doing heavy recalculations
     - Maybe if the graphs/results for a variable are nice enough, we can prove it theoretically
   - Make temporal redundancy viable with other heuristics
-    - Right now, temporal redundancy always removes option combinations based on EV
+    - Right now, temporal redundancy always removes option combinations based on best possible error
     - Should work with static heuristics like:
       - Cheapest first (temp redundancy is based on prob of success and starts at the highest)
       - Expensive first (temp redundancy is based on error and starts at the lowest)
       - "Best" first (temp redundancy is based on EV and starts at the highest)
-    - Static decision algorithm should also use decision tree and craft it based on whatever heuristic is being used
-      - This would include changing the current implementation in Controller as well
   - In-situ execution case implementation
     - Add an option in the JSON to enable/disable in-situ execution
     - All it does is change the recursion failure to start from the beginning instead of the i-th task again
   - Change all the ceilings to floors when discretizing just to see what happens
     - The scheduling should be much more optimistic than the actual, otherwise something is wrong with the simulation/EV calculation
   - JSON file changed from "io_XXX_bandwidth" to "io_XXX_bandwidth_per_node", needs fixing for code
-  - Implement different static scheduling types
-    - Online Static: Dynamic preprocessing, select option, run it until task completes, move onto next
-    - Blind Static: Assume current task is the only task, select option, run until completion, repeat with next
-    - All-Paths Static: Run preprocessing for each possible combination, select one, run with that combination of options
+  - Test one-host heuristics with higher delta_t and compare
+  - Run heuristics with temporal redundancy on/off
+    - Should run with the higher delta_t so it doesn't take forever
+  - 
 
 EXPERIMENTS:
   - Test cancel useless runs of tasks upon a single host completing hack
@@ -53,5 +52,5 @@ NOTES:
     - Our options are to either:
       - a) Use "optimistic" preprocessing to ensure that all possible bases are covered
       - b) Run the preprocessing from the deadline for ALL tasks in the chain, even if it should be impossible for some
-      - c) Use the compressed table as a guideline to "fill in" the unknown values
+      - c) Use the compressed table as a guideline to "fill in" the unknown values (WHAT WERE DOING RIGHT NOW)
         - i.e. just use whichever choice is "nearest"
