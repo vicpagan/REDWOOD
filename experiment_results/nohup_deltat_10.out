@@ -1,0 +1,914 @@
+Starting comparison: 10 algorithms x 25 deadlines = 250 jobs
+Running all 250 jobs in parallel
+
+Running dynamic deadline=25000...
+Running dynamic deadline=22000...
+Running dynamic deadline=21000...
+Running dynamic deadline=23000...
+Running dynamic deadline=19000...
+Running dynamic deadline=20000...
+Running dynamic deadline=18000...
+Running dynamic deadline=24000...
+Running dynamic deadline=14000...
+Running dynamic deadline=17000...
+Running dynamic deadline=16000...
+Running dynamic deadline=15000...
+Running dynamic deadline=13000...
+Running dynamic deadline=11000...
+Running dynamic deadline=10000...
+Running dynamic deadline=9000...
+Running dynamic deadline=12000...
+Running dynamic deadline=8000...
+Running dynamic deadline=6000...
+Running dynamic deadline=5000...
+Running dynamic deadline=4000...
+Running dynamic deadline=7000...
+Running dynamic deadline=2000...
+Running dynamic deadline=1000...
+Running dynamic deadline=3000...
+Running static_foresighted_expected_error deadline=24000...
+Running static_foresighted_expected_error deadline=23000...
+Running static_foresighted_expected_error deadline=21000...
+Running static_foresighted_expected_error deadline=22000...
+Running static_foresighted_expected_error deadline=20000...
+Running static_foresighted_expected_error deadline=19000...
+Running static_foresighted_expected_error deadline=25000...
+Running static_foresighted_expected_error deadline=18000...
+Running static_foresighted_expected_error deadline=17000...
+Running static_foresighted_expected_error deadline=16000...
+Running static_foresighted_expected_error deadline=15000...
+Running static_foresighted_expected_error deadline=14000...
+Running static_foresighted_expected_error deadline=13000...
+Running static_foresighted_expected_error deadline=12000...
+Running static_foresighted_expected_error deadline=11000...
+Running static_foresighted_expected_error deadline=7000...
+Running static_foresighted_expected_error deadline=10000...
+Running static_foresighted_expected_error deadline=9000...
+Running static_foresighted_expected_error deadline=8000...
+Running static_foresighted_expected_error deadline=2000...
+Running static_foresighted_expected_error deadline=6000...
+Running static_foresighted_expected_error deadline=5000...
+Running static_foresighted_expected_error deadline=1000...
+Running static_foresighted_expected_error deadline=3000...
+Running static_foresighted_expected_error deadline=4000...
+Running static_foresighted_probability_success deadline=23000...
+Running static_foresighted_probability_success deadline=25000...
+Running static_foresighted_probability_success deadline=21000...
+Running static_foresighted_probability_success deadline=22000...
+Running static_foresighted_probability_success deadline=20000...
+Running static_foresighted_probability_success deadline=24000...
+Running static_foresighted_probability_success deadline=19000...
+Running static_foresighted_probability_success deadline=18000...
+Running static_foresighted_probability_success deadline=17000...
+Running static_foresighted_probability_success deadline=14000...
+Running static_foresighted_probability_success deadline=11000...
+Running static_foresighted_probability_success deadline=15000...
+Running static_foresighted_probability_success deadline=16000...
+Running static_foresighted_probability_success deadline=10000...
+Running static_foresighted_probability_success deadline=12000...
+Running static_foresighted_probability_success deadline=13000...
+Running static_foresighted_probability_success deadline=9000...
+Running static_foresighted_probability_success deadline=8000...
+Running static_foresighted_probability_success deadline=6000...
+Running static_foresighted_probability_success deadline=5000...
+Running static_foresighted_probability_success deadline=4000...
+Running static_foresighted_probability_success deadline=2000...
+Running static_foresighted_error_level deadline=25000...
+Running static_foresighted_probability_success deadline=3000...
+Running static_foresighted_probability_success deadline=7000...
+Running static_foresighted_probability_success deadline=1000...
+Running static_foresighted_error_level deadline=24000...
+Running static_foresighted_error_level deadline=22000...
+Running static_foresighted_error_level deadline=21000...
+Running static_foresighted_error_level deadline=23000...
+Running static_foresighted_error_level deadline=19000...
+Running static_foresighted_error_level deadline=20000...
+Running static_foresighted_error_level deadline=18000...
+Running static_foresighted_error_level deadline=17000...
+Running static_foresighted_error_level deadline=16000...
+Running static_foresighted_error_level deadline=14000...
+Running static_foresighted_error_level deadline=15000...
+Running static_foresighted_error_level deadline=13000...
+Running static_foresighted_error_level deadline=11000...
+Running static_foresighted_error_level deadline=10000...
+Running static_foresighted_error_level deadline=9000...
+Running static_foresighted_error_level deadline=8000...
+Running static_foresighted_error_level deadline=7000...
+Running static_foresighted_error_level deadline=6000...
+Running static_foresighted_error_level deadline=12000...
+Running static_foresighted_error_level deadline=5000...
+Done static_foresighted_error_level deadline=6000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_error_level deadline=5000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_error_level deadline=4000...
+Running static_foresighted_error_level deadline=3000...
+Done static_foresighted_error_level deadline=7000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_error_level deadline=2000...
+Done static_foresighted_error_level deadline=8000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_error_level deadline=1000...
+Done static_foresighted_error_level deadline=9000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=25000...
+Done static_foresighted_error_level deadline=10000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=24000...
+Done static_foresighted_error_level deadline=11000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=23000...
+Done static_foresighted_error_level deadline=14000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_error_level deadline=12000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_error_level deadline=13000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=21000...
+Running static_foresighted_success_error_ratio deadline=22000...
+Running static_foresighted_success_error_ratio deadline=20000...
+Done static_foresighted_error_level deadline=15000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=19000...
+Done static_foresighted_error_level deadline=18000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=18000...
+Done static_foresighted_error_level deadline=16000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=17000...
+Done static_foresighted_error_level deadline=19000: success=0.170 err=83.170 err_succ=1.000
+Done static_foresighted_error_level deadline=17000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=16000...
+Running static_foresighted_success_error_ratio deadline=15000...
+Done static_foresighted_error_level deadline=20000: success=0.230 err=77.230 err_succ=1.000
+Running static_foresighted_success_error_ratio deadline=14000...
+Done static_foresighted_error_level deadline=3000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_error_level deadline=22000: success=0.320 err=68.320 err_succ=1.000
+Done static_foresighted_error_level deadline=4000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=13000...
+Running static_foresighted_success_error_ratio deadline=12000...
+Running static_foresighted_success_error_ratio deadline=11000...
+Done static_foresighted_error_level deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_error_level deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_error_level deadline=24000: success=0.420 err=58.420 err_succ=1.000
+Running static_foresighted_success_error_ratio deadline=10000...
+Running static_foresighted_success_error_ratio deadline=8000...
+Running static_foresighted_success_error_ratio deadline=9000...
+Done static_foresighted_error_level deadline=23000: success=0.360 err=64.360 err_succ=1.000
+Running static_foresighted_success_error_ratio deadline=7000...
+Done static_foresighted_error_level deadline=21000: success=0.280 err=72.280 err_succ=1.000
+Running static_foresighted_success_error_ratio deadline=6000...
+Done static_foresighted_error_level deadline=25000: success=0.470 err=53.470 err_succ=1.000
+Running static_foresighted_success_error_ratio deadline=5000...
+Done dynamic deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=4000...
+Done static_foresighted_expected_error deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=3000...
+Done static_foresighted_probability_success deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=2000...
+Done dynamic deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_foresighted_success_error_ratio deadline=1000...
+Done static_foresighted_success_error_ratio deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_expected_error deadline=25000...
+Done dynamic deadline=3000: success=0.930 err=14.440 err_succ=8.000
+Running static_nearsighted_expected_error deadline=24000...
+Done static_foresighted_probability_success deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_expected_error deadline=23000...
+Done static_foresighted_expected_error deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_expected_error deadline=22000...
+Done static_foresighted_success_error_ratio deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_expected_error deadline=21000...
+Done dynamic deadline=4000: success=0.990 err=8.920 err_succ=8.000
+Running static_nearsighted_expected_error deadline=20000...
+Done dynamic deadline=5000: success=0.800 err=23.800 err_succ=4.750
+Running static_nearsighted_expected_error deadline=19000...
+Done static_foresighted_probability_success deadline=3000: success=0.930 err=14.440 err_succ=8.000
+Running static_nearsighted_expected_error deadline=18000...
+Done static_foresighted_expected_error deadline=3000: success=0.930 err=14.440 err_succ=8.000
+Running static_nearsighted_expected_error deadline=17000...
+Done static_foresighted_success_error_ratio deadline=3000: success=0.930 err=14.440 err_succ=8.000
+Running static_nearsighted_expected_error deadline=16000...
+Done static_nearsighted_expected_error deadline=24000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=15000...
+Done static_nearsighted_expected_error deadline=21000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=14000...
+Done static_nearsighted_expected_error deadline=22000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=13000...
+Done static_nearsighted_expected_error deadline=20000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=12000...
+Done static_nearsighted_expected_error deadline=25000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=11000...
+Done static_nearsighted_expected_error deadline=23000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=10000...
+Done static_nearsighted_expected_error deadline=10000: success=0.470 err=53.940 err_succ=2.000
+Running static_nearsighted_expected_error deadline=9000...
+Done dynamic deadline=6000: success=0.910 err=12.960 err_succ=4.352
+Running static_nearsighted_expected_error deadline=8000...
+Done static_nearsighted_expected_error deadline=12000: success=0.730 err=28.460 err_succ=2.000
+Running static_nearsighted_expected_error deadline=7000...
+Done static_nearsighted_expected_error deadline=11000: success=0.610 err=40.220 err_succ=2.000
+Running static_nearsighted_expected_error deadline=6000...
+Done static_nearsighted_expected_error deadline=16000: success=0.950 err=6.900 err_succ=2.000
+Running static_nearsighted_expected_error deadline=5000...
+Done static_nearsighted_expected_error deadline=17000: success=0.980 err=3.960 err_succ=2.000
+Running static_nearsighted_expected_error deadline=4000...
+Done static_nearsighted_expected_error deadline=18000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_expected_error deadline=3000...
+Done static_nearsighted_expected_error deadline=13000: success=0.800 err=21.600 err_succ=2.000
+Running static_nearsighted_expected_error deadline=2000...
+Done static_nearsighted_expected_error deadline=3000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_expected_error deadline=1000...
+Done static_nearsighted_expected_error deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_probability_success deadline=25000...
+Done static_nearsighted_expected_error deadline=15000: success=0.920 err=9.840 err_succ=2.000
+Running static_nearsighted_probability_success deadline=24000...
+Done static_nearsighted_expected_error deadline=4000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_probability_success deadline=23000...
+Done static_nearsighted_expected_error deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_probability_success deadline=22000...
+Done static_nearsighted_expected_error deadline=5000: success=0.670 err=35.680 err_succ=4.000
+Running static_nearsighted_probability_success deadline=21000...
+Done static_nearsighted_expected_error deadline=14000: success=0.870 err=14.740 err_succ=2.000
+Running static_nearsighted_probability_success deadline=20000...
+Done static_nearsighted_expected_error deadline=6000: success=0.860 err=17.440 err_succ=4.000
+Running static_nearsighted_probability_success deadline=19000...
+Done static_nearsighted_expected_error deadline=7000: success=0.950 err=8.800 err_succ=4.000
+Running static_nearsighted_probability_success deadline=18000...
+Done static_nearsighted_expected_error deadline=9000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_probability_success deadline=17000...
+Done static_nearsighted_expected_error deadline=8000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_probability_success deadline=16000...
+Done static_nearsighted_expected_error deadline=19000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_probability_success deadline=15000...
+Done static_foresighted_success_error_ratio deadline=4000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_probability_success deadline=14000...
+Done dynamic deadline=7000: success=0.960 err=7.880 err_succ=4.042
+Running static_nearsighted_probability_success deadline=13000...
+Done static_nearsighted_probability_success deadline=15000: success=1.000 err=4.000 err_succ=4.000
+Running static_nearsighted_probability_success deadline=12000...
+Done static_nearsighted_probability_success deadline=19000: success=1.000 err=2.300 err_succ=2.300
+Running static_nearsighted_probability_success deadline=11000...
+Done static_nearsighted_probability_success deadline=16000: success=1.000 err=3.700 err_succ=3.700
+Running static_nearsighted_probability_success deadline=10000...
+Done static_nearsighted_probability_success deadline=17000: success=1.000 err=3.140 err_succ=3.140
+Running static_nearsighted_probability_success deadline=9000...
+Done static_foresighted_expected_error deadline=4000: success=0.990 err=8.920 err_succ=8.000
+Running static_nearsighted_probability_success deadline=8000...
+Done static_nearsighted_probability_success deadline=20000: success=1.000 err=2.160 err_succ=2.160
+Running static_nearsighted_probability_success deadline=7000...
+Done static_foresighted_probability_success deadline=4000: success=0.990 err=8.920 err_succ=8.000
+Running static_nearsighted_probability_success deadline=6000...
+Done static_nearsighted_probability_success deadline=18000: success=1.000 err=2.640 err_succ=2.640
+Running static_nearsighted_probability_success deadline=5000...
+Done static_nearsighted_probability_success deadline=6000: success=1.000 err=8.000 err_succ=8.000
+Running static_nearsighted_probability_success deadline=4000...
+Done static_nearsighted_probability_success deadline=21000: success=1.000 err=2.080 err_succ=2.080
+Running static_nearsighted_probability_success deadline=3000...
+Done static_nearsighted_probability_success deadline=22000: success=1.000 err=2.020 err_succ=2.020
+Running static_nearsighted_probability_success deadline=2000...
+Done static_nearsighted_probability_success deadline=5000: success=0.990 err=8.920 err_succ=8.000
+Running static_nearsighted_probability_success deadline=1000...
+Done static_nearsighted_probability_success deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_error_level deadline=25000...
+Done static_nearsighted_probability_success deadline=3000: success=0.930 err=14.440 err_succ=8.000
+Running static_nearsighted_error_level deadline=24000...
+Done static_nearsighted_probability_success deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_error_level deadline=23000...
+Done static_nearsighted_probability_success deadline=7000: success=1.000 err=5.880 err_succ=5.880
+Running static_nearsighted_error_level deadline=22000...
+Done static_nearsighted_probability_success deadline=4000: success=0.990 err=8.920 err_succ=8.000
+Running static_nearsighted_error_level deadline=21000...
+Done static_nearsighted_probability_success deadline=8000: success=1.000 err=4.600 err_succ=4.600
+Running static_nearsighted_error_level deadline=20000...
+Done static_nearsighted_probability_success deadline=9000: success=1.000 err=4.240 err_succ=4.240
+Running static_nearsighted_error_level deadline=19000...
+Done static_nearsighted_probability_success deadline=10000: success=1.000 err=4.080 err_succ=4.080
+Running static_nearsighted_error_level deadline=18000...
+Done static_nearsighted_probability_success deadline=11000: success=1.000 err=4.080 err_succ=4.080
+Running static_nearsighted_error_level deadline=17000...
+Done static_nearsighted_probability_success deadline=14000: success=1.000 err=4.000 err_succ=4.000
+Running static_nearsighted_error_level deadline=16000...
+Done static_nearsighted_probability_success deadline=23000: success=1.000 err=2.020 err_succ=2.020
+Running static_nearsighted_error_level deadline=15000...
+Done static_nearsighted_probability_success deadline=12000: success=1.000 err=4.040 err_succ=4.040
+Running static_nearsighted_error_level deadline=14000...
+Done static_nearsighted_probability_success deadline=24000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_error_level deadline=13000...
+Done static_nearsighted_probability_success deadline=13000: success=1.000 err=4.000 err_succ=4.000
+Running static_nearsighted_error_level deadline=12000...
+Done static_nearsighted_error_level deadline=25000: success=0.470 err=53.470 err_succ=1.000
+Running static_nearsighted_error_level deadline=11000...
+Done static_nearsighted_error_level deadline=21000: success=0.280 err=72.280 err_succ=1.000
+Running static_nearsighted_error_level deadline=10000...
+Done static_nearsighted_error_level deadline=24000: success=0.420 err=58.420 err_succ=1.000
+Running static_nearsighted_error_level deadline=9000...
+Done static_nearsighted_error_level deadline=23000: success=0.360 err=64.360 err_succ=1.000
+Done static_nearsighted_error_level deadline=22000: success=0.320 err=68.320 err_succ=1.000
+Running static_nearsighted_error_level deadline=8000...
+Running static_nearsighted_error_level deadline=7000...
+Done static_nearsighted_error_level deadline=20000: success=0.230 err=77.230 err_succ=1.000
+Running static_nearsighted_error_level deadline=6000...
+Done static_nearsighted_error_level deadline=19000: success=0.170 err=83.170 err_succ=1.000
+Running static_nearsighted_error_level deadline=5000...
+Done static_nearsighted_error_level deadline=6000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_error_level deadline=4000...
+Done static_nearsighted_error_level deadline=7000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_error_level deadline=3000...
+Done static_nearsighted_error_level deadline=4000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_error_level deadline=2000...
+Done static_nearsighted_error_level deadline=5000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_error_level deadline=1000...
+Done static_nearsighted_error_level deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=25000...
+Done static_nearsighted_error_level deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=24000...
+Done static_nearsighted_error_level deadline=3000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=23000...
+Done static_nearsighted_error_level deadline=8000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=22000...
+Done static_nearsighted_error_level deadline=9000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=21000...
+Done static_nearsighted_error_level deadline=10000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=20000...
+Done static_nearsighted_error_level deadline=13000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=19000...
+Done static_nearsighted_error_level deadline=12000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=18000...
+Done static_nearsighted_error_level deadline=11000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=17000...
+Done static_nearsighted_error_level deadline=14000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=16000...
+Done static_nearsighted_error_level deadline=16000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=15000...
+Done static_nearsighted_error_level deadline=18000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=14000...
+Done static_nearsighted_error_level deadline=17000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=13000...
+Done static_nearsighted_error_level deadline=15000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=12000...
+Done static_nearsighted_probability_success deadline=25000: success=1.000 err=2.000 err_succ=2.000
+Running static_nearsighted_success_error_ratio deadline=11000...
+Done dynamic deadline=8000: success=0.990 err=5.000 err_succ=4.040
+Running static_nearsighted_success_error_ratio deadline=10000...
+Done static_nearsighted_success_error_ratio deadline=12000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=9000...
+Done static_nearsighted_success_error_ratio deadline=13000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=8000...
+Done static_nearsighted_success_error_ratio deadline=11000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=7000...
+Done static_nearsighted_success_error_ratio deadline=14000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=6000...
+Done static_nearsighted_success_error_ratio deadline=15000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=5000...
+Done static_nearsighted_success_error_ratio deadline=10000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=4000...
+Done static_nearsighted_success_error_ratio deadline=25000: success=0.470 err=53.470 err_succ=1.000
+Running static_nearsighted_success_error_ratio deadline=3000...
+Done static_nearsighted_success_error_ratio deadline=24000: success=0.420 err=58.420 err_succ=1.000
+Running static_nearsighted_success_error_ratio deadline=2000...
+Done static_nearsighted_success_error_ratio deadline=16000: success=0.000 err=100.000 err_succ=N/A
+Running static_nearsighted_success_error_ratio deadline=1000...
+Done static_nearsighted_success_error_ratio deadline=6000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=25000...
+Done static_nearsighted_success_error_ratio deadline=5000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=24000...
+Done static_nearsighted_success_error_ratio deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=23000...
+Done static_nearsighted_success_error_ratio deadline=4000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=22000...
+Done static_nearsighted_success_error_ratio deadline=7000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=21000...
+Done static_nearsighted_success_error_ratio deadline=23000: success=0.360 err=64.360 err_succ=1.000
+Done static_nearsighted_success_error_ratio deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=20000...
+Running random deadline=19000...
+Done static_nearsighted_success_error_ratio deadline=22000: success=0.320 err=68.320 err_succ=1.000
+Running random deadline=18000...
+Done static_nearsighted_success_error_ratio deadline=3000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=17000...
+Done static_nearsighted_success_error_ratio deadline=21000: success=0.280 err=72.280 err_succ=1.000
+Running random deadline=16000...
+Done random deadline=25000: success=0.720 err=37.004 err_succ=12.506
+Running random deadline=15000...
+Done random deadline=24000: success=0.670 err=41.891 err_succ=13.271
+Running random deadline=14000...
+Done random deadline=23000: success=0.740 err=35.506 err_succ=12.846
+Running random deadline=13000...
+Done random deadline=19000: success=0.650 err=43.601 err_succ=13.232
+Done random deadline=21000: success=0.690 err=40.072 err_succ=13.147
+Running random deadline=12000...
+Running random deadline=11000...
+Done random deadline=20000: success=0.640 err=43.998 err_succ=12.498
+Running random deadline=10000...
+Done static_nearsighted_success_error_ratio deadline=20000: success=0.230 err=77.230 err_succ=1.000
+Running random deadline=9000...
+Done random deadline=22000: success=0.700 err=38.144 err_succ=11.634
+Running random deadline=8000...
+Done static_nearsighted_success_error_ratio deadline=9000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=7000...
+Done random deadline=18000: success=0.690 err=39.632 err_succ=12.510
+Running random deadline=6000...
+Done random deadline=17000: success=0.620 err=46.956 err_succ=14.444
+Running random deadline=5000...
+Done static_nearsighted_success_error_ratio deadline=8000: success=0.000 err=100.000 err_succ=N/A
+Running random deadline=4000...
+Done random deadline=16000: success=0.610 err=48.970 err_succ=16.345
+Running random deadline=3000...
+Done static_nearsighted_success_error_ratio deadline=19000: success=0.170 err=83.170 err_succ=1.000
+Running random deadline=2000...
+Done random deadline=14000: success=0.420 err=62.892 err_succ=11.647
+Running random deadline=1000...
+Done random deadline=15000: success=0.510 err=56.430 err_succ=14.569
+Done random deadline=4000: success=0.120 err=90.571 err_succ=21.427
+Done random deadline=7000: success=0.200 err=83.169 err_succ=15.844
+Done random deadline=5000: success=0.240 err=80.134 err_succ=17.227
+Done random deadline=6000: success=0.220 err=82.336 err_succ=19.709
+Done random deadline=9000: success=0.280 err=75.246 err_succ=11.594
+Done static_nearsighted_success_error_ratio deadline=17000: success=0.000 err=100.000 err_succ=N/A
+Done random deadline=11000: success=0.510 err=55.632 err_succ=13.004
+Done random deadline=3000: success=0.080 err=93.360 err_succ=17.000
+Done random deadline=10000: success=0.450 err=62.209 err_succ=16.020
+Done random deadline=12000: success=0.490 err=58.350 err_succ=14.999
+Done random deadline=8000: success=0.330 err=72.369 err_succ=16.270
+Done random deadline=13000: success=0.490 err=58.296 err_succ=14.891
+Done random deadline=2000: success=0.000 err=100.000 err_succ=N/A
+Done random deadline=1000: success=0.000 err=100.000 err_succ=N/A
+Done static_nearsighted_success_error_ratio deadline=18000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_success_error_ratio deadline=5000: success=0.670 err=35.680 err_succ=4.000
+Done static_foresighted_probability_success deadline=5000: success=0.990 err=8.920 err_succ=8.000
+Done static_foresighted_expected_error deadline=5000: success=0.990 err=8.920 err_succ=8.000
+Done dynamic deadline=9000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_expected_error deadline=6000: success=0.860 err=17.440 err_succ=4.000
+Done dynamic deadline=10000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_success_error_ratio deadline=6000: success=0.860 err=17.440 err_succ=4.000
+Done static_foresighted_probability_success deadline=6000: success=1.000 err=8.000 err_succ=8.000
+Done dynamic deadline=11000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_success_error_ratio deadline=7000: success=0.950 err=8.800 err_succ=4.000
+Done dynamic deadline=12000: success=0.870 err=15.320 err_succ=2.667
+Done static_foresighted_expected_error deadline=7000: success=0.950 err=8.800 err_succ=4.000
+Done dynamic deadline=13000: success=0.900 err=12.220 err_succ=2.467
+Done static_foresighted_expected_error deadline=8000: success=0.980 err=5.920 err_succ=4.000
+Done static_foresighted_success_error_ratio deadline=8000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_success_error_ratio deadline=9000: success=0.000 err=100.000 err_succ=N/A
+Done static_foresighted_probability_success deadline=7000: success=1.000 err=5.880 err_succ=5.880
+Done dynamic deadline=14000: success=0.930 err=9.120 err_succ=2.280
+Done dynamic deadline=16000: success=0.970 err=5.040 err_succ=2.103
+Done dynamic deadline=15000: success=0.960 err=6.060 err_succ=2.146
+Done dynamic deadline=17000: success=0.980 err=4.000 err_succ=2.041
+Done static_foresighted_expected_error deadline=9000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_expected_error deadline=10000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_probability_success deadline=8000: success=1.000 err=4.600 err_succ=4.600
+Done dynamic deadline=18000: success=1.000 err=2.040 err_succ=2.040
+Done static_foresighted_success_error_ratio deadline=10000: success=0.470 err=53.940 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=12000: success=0.730 err=28.460 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=11000: success=0.610 err=40.220 err_succ=2.000
+Done static_foresighted_expected_error deadline=11000: success=1.000 err=4.000 err_succ=4.000
+Done dynamic deadline=19000: success=1.000 err=2.000 err_succ=2.000
+Done dynamic deadline=20000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=9000: success=1.000 err=4.240 err_succ=4.240
+Done static_foresighted_success_error_ratio deadline=13000: success=0.800 err=21.600 err_succ=2.000
+Done dynamic deadline=21000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_expected_error deadline=12000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_probability_success deadline=10000: success=1.000 err=4.080 err_succ=4.080
+Done dynamic deadline=23000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=14000: success=0.870 err=14.740 err_succ=2.000
+Done dynamic deadline=24000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_expected_error deadline=14000: success=0.870 err=14.740 err_succ=2.000
+Done dynamic deadline=22000: success=1.000 err=2.000 err_succ=2.000
+Done dynamic deadline=25000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_expected_error deadline=13000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_probability_success deadline=11000: success=1.000 err=4.080 err_succ=4.080
+Done static_foresighted_success_error_ratio deadline=15000: success=0.920 err=9.840 err_succ=2.000
+Done static_foresighted_probability_success deadline=12000: success=1.000 err=4.040 err_succ=4.040
+Done static_foresighted_expected_error deadline=15000: success=0.920 err=9.840 err_succ=2.000
+Done static_foresighted_expected_error deadline=16000: success=0.950 err=6.900 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=16000: success=0.950 err=6.900 err_succ=2.000
+Done static_foresighted_probability_success deadline=13000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_expected_error deadline=17000: success=0.980 err=3.960 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=17000: success=0.980 err=3.960 err_succ=2.000
+Done static_foresighted_probability_success deadline=14000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_expected_error deadline=18000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=18000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=15000: success=1.000 err=4.000 err_succ=4.000
+Done static_foresighted_expected_error deadline=19000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_expected_error deadline=20000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=16000: success=1.000 err=3.700 err_succ=3.700
+Done static_foresighted_success_error_ratio deadline=19000: success=0.170 err=83.170 err_succ=1.000
+Done static_foresighted_expected_error deadline=21000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_success_error_ratio deadline=20000: success=0.230 err=77.230 err_succ=1.000
+Done static_foresighted_probability_success deadline=17000: success=1.000 err=3.140 err_succ=3.140
+Done static_foresighted_expected_error deadline=22000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_expected_error deadline=23000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_expected_error deadline=24000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=18000: success=1.000 err=2.640 err_succ=2.640
+Done static_foresighted_success_error_ratio deadline=21000: success=0.280 err=72.280 err_succ=1.000
+Done static_foresighted_probability_success deadline=22000: success=1.000 err=2.020 err_succ=2.020
+Done static_foresighted_expected_error deadline=25000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=19000: success=1.000 err=2.500 err_succ=2.500
+Done static_foresighted_success_error_ratio deadline=22000: success=0.320 err=68.320 err_succ=1.000
+Done static_foresighted_probability_success deadline=23000: success=1.000 err=2.020 err_succ=2.020
+Done static_foresighted_probability_success deadline=24000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=20000: success=1.000 err=2.260 err_succ=2.260
+Done static_foresighted_success_error_ratio deadline=23000: success=0.360 err=64.360 err_succ=1.000
+Done static_foresighted_probability_success deadline=25000: success=1.000 err=2.000 err_succ=2.000
+Done static_foresighted_probability_success deadline=21000: success=1.000 err=2.140 err_succ=2.140
+Done static_foresighted_success_error_ratio deadline=24000: success=0.420 err=58.420 err_succ=1.000
+Done static_foresighted_success_error_ratio deadline=25000: success=0.470 err=53.470 err_succ=1.000
+
+====================================================================================================
+DEADLINE = 25000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.0000         2.0000
+static_foresighted        error_level           47.00%            53.4700         1.0000
+static_foresighted        success_error_ratio   47.00%            53.4700         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.0000         2.0000
+static_nearsighted        error_level           47.00%            53.4700         1.0000
+static_nearsighted        success_error_ratio   47.00%            53.4700         1.0000
+random                    N/A                   72.00%            37.0040        12.5056
+
+====================================================================================================
+DEADLINE = 24000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.0000         2.0000
+static_foresighted        error_level           42.00%            58.4200         1.0000
+static_foresighted        success_error_ratio   42.00%            58.4200         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.0000         2.0000
+static_nearsighted        error_level           42.00%            58.4200         1.0000
+static_nearsighted        success_error_ratio   42.00%            58.4200         1.0000
+random                    N/A                   67.00%            41.8912        13.2705
+
+====================================================================================================
+DEADLINE = 23000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.0200         2.0200
+static_foresighted        error_level           36.00%            64.3600         1.0000
+static_foresighted        success_error_ratio   36.00%            64.3600         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.0200         2.0200
+static_nearsighted        error_level           36.00%            64.3600         1.0000
+static_nearsighted        success_error_ratio   36.00%            64.3600         1.0000
+random                    N/A                   74.00%            35.5060        12.8459
+
+====================================================================================================
+DEADLINE = 22000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.0200         2.0200
+static_foresighted        error_level           32.00%            68.3200         1.0000
+static_foresighted        success_error_ratio   32.00%            68.3200         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.0200         2.0200
+static_nearsighted        error_level           32.00%            68.3200         1.0000
+static_nearsighted        success_error_ratio   32.00%            68.3200         1.0000
+random                    N/A                   70.00%            38.1436        11.6337
+
+====================================================================================================
+DEADLINE = 21000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.1400         2.1400
+static_foresighted        error_level           28.00%            72.2800         1.0000
+static_foresighted        success_error_ratio   28.00%            72.2800         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.0800         2.0800
+static_nearsighted        error_level           28.00%            72.2800         1.0000
+static_nearsighted        success_error_ratio   28.00%            72.2800         1.0000
+random                    N/A                   69.00%            40.0716        13.1472
+
+====================================================================================================
+DEADLINE = 20000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.2600         2.2600
+static_foresighted        error_level           23.00%            77.2300         1.0000
+static_foresighted        success_error_ratio   23.00%            77.2300         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.1600         2.1600
+static_nearsighted        error_level           23.00%            77.2300         1.0000
+static_nearsighted        success_error_ratio   23.00%            77.2300         1.0000
+random                    N/A                   64.00%            43.9984        12.4975
+
+====================================================================================================
+DEADLINE = 19000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0000         2.0000
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.5000         2.5000
+static_foresighted        error_level           17.00%            83.1700         1.0000
+static_foresighted        success_error_ratio   17.00%            83.1700         1.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.3000         2.3000
+static_nearsighted        error_level           17.00%            83.1700         1.0000
+static_nearsighted        success_error_ratio   17.00%            83.1700         1.0000
+random                    N/A                   65.00%            43.6008        13.2320
+
+====================================================================================================
+DEADLINE = 18000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             2.0400         2.0400
+static_foresighted        expected_error       100.00%             2.0000         2.0000
+static_foresighted        probability_success  100.00%             2.6400         2.6400
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio  100.00%             2.0000         2.0000
+static_nearsighted        expected_error       100.00%             2.0000         2.0000
+static_nearsighted        probability_success  100.00%             2.6400         2.6400
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   69.00%            39.6320        12.5101
+
+====================================================================================================
+DEADLINE = 17000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   98.00%             4.0000         2.0408
+static_foresighted        expected_error        98.00%             3.9600         2.0000
+static_foresighted        probability_success  100.00%             3.1400         3.1400
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   98.00%             3.9600         2.0000
+static_nearsighted        expected_error        98.00%             3.9600         2.0000
+static_nearsighted        probability_success  100.00%             3.1400         3.1400
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   62.00%            46.9556        14.4445
+
+====================================================================================================
+DEADLINE = 16000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   97.00%             5.0400         2.1031
+static_foresighted        expected_error        95.00%             6.9000         2.0000
+static_foresighted        probability_success  100.00%             3.7000         3.7000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   95.00%             6.9000         2.0000
+static_nearsighted        expected_error        95.00%             6.9000         2.0000
+static_nearsighted        probability_success  100.00%             3.7000         3.7000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   61.00%            48.9702        16.3446
+
+====================================================================================================
+DEADLINE = 15000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   96.00%             6.0600         2.1458
+static_foresighted        expected_error        92.00%             9.8400         2.0000
+static_foresighted        probability_success  100.00%             4.0000         4.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   92.00%             9.8400         2.0000
+static_nearsighted        expected_error        92.00%             9.8400         2.0000
+static_nearsighted        probability_success  100.00%             4.0000         4.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   51.00%            56.4300        14.5686
+
+====================================================================================================
+DEADLINE = 14000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   93.00%             9.1200         2.2796
+static_foresighted        expected_error        87.00%            14.7400         2.0000
+static_foresighted        probability_success  100.00%             4.0000         4.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   87.00%            14.7400         2.0000
+static_nearsighted        expected_error        87.00%            14.7400         2.0000
+static_nearsighted        probability_success  100.00%             4.0000         4.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   42.00%            62.8916        11.6467
+
+====================================================================================================
+DEADLINE = 13000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   90.00%            12.2200         2.4667
+static_foresighted        expected_error       100.00%             4.0000         4.0000
+static_foresighted        probability_success  100.00%             4.0000         4.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   80.00%            21.6000         2.0000
+static_nearsighted        expected_error        80.00%            21.6000         2.0000
+static_nearsighted        probability_success  100.00%             4.0000         4.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   49.00%            58.2964        14.8906
+
+====================================================================================================
+DEADLINE = 12000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   87.00%            15.3200         2.6667
+static_foresighted        expected_error       100.00%             4.0000         4.0000
+static_foresighted        probability_success  100.00%             4.0400         4.0400
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   73.00%            28.4600         2.0000
+static_nearsighted        expected_error        73.00%            28.4600         2.0000
+static_nearsighted        probability_success  100.00%             4.0400         4.0400
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   49.00%            58.3496        14.9992
+
+====================================================================================================
+DEADLINE = 11000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             4.0000         4.0000
+static_foresighted        expected_error       100.00%             4.0000         4.0000
+static_foresighted        probability_success  100.00%             4.0800         4.0800
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   61.00%            40.2200         2.0000
+static_nearsighted        expected_error        61.00%            40.2200         2.0000
+static_nearsighted        probability_success  100.00%             4.0800         4.0800
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   51.00%            55.6320        13.0039
+
+====================================================================================================
+DEADLINE = 10000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             4.0000         4.0000
+static_foresighted        expected_error       100.00%             4.0000         4.0000
+static_foresighted        probability_success  100.00%             4.0800         4.0800
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   47.00%            53.9400         2.0000
+static_nearsighted        expected_error        47.00%            53.9400         2.0000
+static_nearsighted        probability_success  100.00%             4.0800         4.0800
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   45.00%            62.2088        16.0196
+
+====================================================================================================
+DEADLINE = 9000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                  100.00%             4.0000         4.0000
+static_foresighted        expected_error       100.00%             4.0000         4.0000
+static_foresighted        probability_success  100.00%             4.2400         4.2400
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio    0.00%           100.0000            N/A
+static_nearsighted        expected_error         0.00%           100.0000            N/A
+static_nearsighted        probability_success  100.00%             4.2400         4.2400
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   28.00%            75.2464        11.5943
+
+====================================================================================================
+DEADLINE = 8000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   99.00%             5.0000         4.0404
+static_foresighted        expected_error        98.00%             5.9200         4.0000
+static_foresighted        probability_success  100.00%             4.6000         4.6000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio    0.00%           100.0000            N/A
+static_nearsighted        expected_error         0.00%           100.0000            N/A
+static_nearsighted        probability_success  100.00%             4.6000         4.6000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   33.00%            72.3692        16.2703
+
+====================================================================================================
+DEADLINE = 7000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   96.00%             7.8800         4.0417
+static_foresighted        expected_error        95.00%             8.8000         4.0000
+static_foresighted        probability_success  100.00%             5.8800         5.8800
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   95.00%             8.8000         4.0000
+static_nearsighted        expected_error        95.00%             8.8000         4.0000
+static_nearsighted        probability_success  100.00%             5.8800         5.8800
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   20.00%            83.1688        15.8440
+
+====================================================================================================
+DEADLINE = 6000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   91.00%            12.9600         4.3517
+static_foresighted        expected_error        86.00%            17.4400         4.0000
+static_foresighted        probability_success  100.00%             8.0000         8.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   86.00%            17.4400         4.0000
+static_nearsighted        expected_error        86.00%            17.4400         4.0000
+static_nearsighted        probability_success  100.00%             8.0000         8.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   22.00%            82.3360        19.7091
+
+====================================================================================================
+DEADLINE = 5000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   80.00%            23.8000         4.7500
+static_foresighted        expected_error        99.00%             8.9200         8.0000
+static_foresighted        probability_success   99.00%             8.9200         8.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   67.00%            35.6800         4.0000
+static_nearsighted        expected_error        67.00%            35.6800         4.0000
+static_nearsighted        probability_success   99.00%             8.9200         8.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   24.00%            80.1344        17.2267
+
+====================================================================================================
+DEADLINE = 4000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   99.00%             8.9200         8.0000
+static_foresighted        expected_error        99.00%             8.9200         8.0000
+static_foresighted        probability_success   99.00%             8.9200         8.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio    0.00%           100.0000            N/A
+static_nearsighted        expected_error         0.00%           100.0000            N/A
+static_nearsighted        probability_success   99.00%             8.9200         8.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                   12.00%            90.5712        21.4267
+
+====================================================================================================
+DEADLINE = 3000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                   93.00%            14.4400         8.0000
+static_foresighted        expected_error        93.00%            14.4400         8.0000
+static_foresighted        probability_success   93.00%            14.4400         8.0000
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio   93.00%            14.4400         8.0000
+static_nearsighted        expected_error         0.00%           100.0000            N/A
+static_nearsighted        probability_success   93.00%            14.4400         8.0000
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                    8.00%            93.3600        17.0000
+
+====================================================================================================
+DEADLINE = 2000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                    0.00%           100.0000            N/A
+static_foresighted        expected_error         0.00%           100.0000            N/A
+static_foresighted        probability_success    0.00%           100.0000            N/A
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio    0.00%           100.0000            N/A
+static_nearsighted        expected_error         0.00%           100.0000            N/A
+static_nearsighted        probability_success    0.00%           100.0000            N/A
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                    0.00%           100.0000            N/A
+
+====================================================================================================
+DEADLINE = 1000
+====================================================================================================
+Algorithm                 Comparator           Success Rate    Avg Error       Avg Error (Succ)
+----------------------------------------------------------------------------------------------------
+dynamic                   N/A                    0.00%           100.0000            N/A
+static_foresighted        expected_error         0.00%           100.0000            N/A
+static_foresighted        probability_success    0.00%           100.0000            N/A
+static_foresighted        error_level            0.00%           100.0000            N/A
+static_foresighted        success_error_ratio    0.00%           100.0000            N/A
+static_nearsighted        expected_error         0.00%           100.0000            N/A
+static_nearsighted        probability_success    0.00%           100.0000            N/A
+static_nearsighted        error_level            0.00%           100.0000            N/A
+static_nearsighted        success_error_ratio    0.00%           100.0000            N/A
+random                    N/A                    0.00%           100.0000            N/A
+
+====================================================================================================
+OVERALL BESTS (across all deadlines)
+====================================================================================================
+Best Success Rate: dynamic @ deadline=25000 -> 100.00%
+Best Avg Error: dynamic @ deadline=25000 -> 2.0000
+Best Avg Error (Successes): static_foresighted_error_level @ deadline=25000 -> 1.0000
+
+Comparison plot saved to algorithm_comparison.png
+
+Detailed results saved to algorithm_comparison_results.json

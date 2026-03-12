@@ -44,7 +44,7 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
         }
         config['scheduling']['delta_t_scheme'] = {
             "scheme": "fixed",
-            "parameter": 10.0
+            "parameter": 5.0
         }
     elif algorithm in ("static_foresighted", "static_nearsighted"):
         if comparator is None:
