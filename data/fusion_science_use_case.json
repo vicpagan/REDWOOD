@@ -407,7 +407,7 @@
     "delta_t_scheme": {
       "scheme": "fixed",
       "parameter_comments": "Either a fixed value or a precision value",
-      "parameter": 10.0
+      "parameter": 5.0
     },
     "algorithms": {
       "one_task": ["static_foresighted_error_level"],
