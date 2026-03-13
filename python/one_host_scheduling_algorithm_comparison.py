@@ -8,7 +8,7 @@ import numpy as np
 import re
 import tempfile
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Tuple, Dict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -26,6 +26,7 @@ class AlgorithmResult:
     success_rate: float
     avg_error: float
     avg_error_successes: float  # may be float('nan') if no successes
+    repetition_errors: List[float] = field(default_factory=list)  # per-repetition error, nan if not parsed
 
 def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
     """Run simulation for a specific algorithm + deadline configuration"""
@@ -95,6 +96,21 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
         avg_error_succ_str = avg_error_succ_match.group(1)
         avg_error_successes = float(avg_error_succ_str) if avg_error_succ_str != "N/A" else float('nan')
 
+        # Parse per-repetition errors. Expected format (one pair per repetition):
+        #   Repetition <N>
+        #   Error: <value>
+        repetition_errors: List[float] = []
+        rep_blocks = re.findall(r'Repetition\s+\d+\s+Error:\s*(\d+\.?\d*)', output)
+        if rep_blocks:
+            repetition_errors = [float(v) for v in rep_blocks]
+        else:
+            # Fallback: try two-line pattern in case there's whitespace/newline between them
+            rep_pairs = re.findall(
+                r'Repetition\s+\d+[\s\S]*?Error:\s*(\d+\.?\d*)',
+                output
+            )
+            repetition_errors = [float(v) for v in rep_pairs]
+
         result_obj = AlgorithmResult(
             name=algorithm,
             comparator=comparator,
@@ -104,13 +120,15 @@ def run_simulation(args: Tuple) -> Optional[AlgorithmResult]:
             success_rate=float(success_rate_match.group(1)),
             avg_error=float(avg_error_match.group(1)),
             avg_error_successes=avg_error_successes,
+            repetition_errors=repetition_errors,
         )
 
         succ_str = f"{avg_error_successes:.3f}" if not np.isnan(avg_error_successes) else "N/A"
         print(f"Done {algo_name} deadline={deadline}: "
               f"success={result_obj.success_rate:.3f} "
               f"err={result_obj.avg_error:.3f} "
-              f"err_succ={succ_str}", flush=True)
+              f"err_succ={succ_str} "
+              f"({len(repetition_errors)} rep errors parsed)", flush=True)
         return result_obj
 
     finally:
@@ -340,6 +358,7 @@ def main():
                 "success_rate":        r.success_rate,
                 "avg_error":           r.avg_error,
                 "avg_error_successes": None if np.isnan(r.avg_error_successes) else r.avg_error_successes,
+                "repetition_errors":   r.repetition_errors,
             }
             for r in results
         ]
