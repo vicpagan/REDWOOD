@@ -306,17 +306,7 @@ namespace wrench {
                             }
                             best_error = running_output_error_level;
 
-                            std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
-
-                            if (!_temporal_redundancy) {
-                                // std::cout << "Best error: " << best_error << std::endl;
-                                cumulative_error_level += best_error;
-                                cumulative_error_level_successes += best_error;
-                                algorithm->reset_preprocessed_decisions();
-                                _system_state_tracker->reset_all_hosts();
-                                this->restart_system();
-                                break;
-                            }
+                            // std::cout << "Succeeded with error: " << running_output_error_level << std::endl;
 
                             // reset running trackers
                             running_output_data_size = initial_data_size;
@@ -325,10 +315,13 @@ namespace wrench {
                             current_task = _application_specs->get_task(current_task_counter);
 
                             _application_specs->prune_decision_tree(best_error);
-                            if (_application_specs->decision_tree_empty()) {
-                                // std::cout << "We cannot do better" << std::endl;
+                            if (_application_specs->decision_tree_empty() || !_temporal_redundancy) {
+                                std::cout << "Error: " << best_error << std::endl;
                                 cumulative_error_level += best_error;
                                 cumulative_error_level_successes += best_error;
+                                algorithm->reset_preprocessed_decisions();
+                                _system_state_tracker->reset_all_hosts();
+                                this->restart_system();
                                 break;
                             }
                             algorithm->reset_preprocessed_decisions();
@@ -340,6 +333,7 @@ namespace wrench {
                                 OPTIMISTIC_DISCRETIZATION);
                         } else {
                             // were not done, update all hosts decision nodes to reflect completed task
+                            // TODO: Change this for stop_running_jobs hack
                             _system_state_tracker->update_all_hosts_decision_nodes(success_hostname, completed_task, selected_option);
                         }
 
@@ -387,9 +381,9 @@ namespace wrench {
                                 // Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" << std::endl;
                             }
                             WRENCH_INFO("Deadline reached");
-                            // std::cout << "Best error: " << best_error << std::endl;
+                            std::cout << "Error: " << best_error << std::endl;
                             if (best_error != _application_specs->get_e_fail()) {
-                                std::cout << "Failed with error: " << best_error << std::endl;
+                                // std::cout << "Failed with error: " << best_error << std::endl;
                                 cumulative_error_level_successes += best_error;
                             }
                             cumulative_error_level += best_error;
