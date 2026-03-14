@@ -27,9 +27,8 @@
 namespace po = boost::program_options;
 
 wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_input,
-                                                     unsigned long max_num_compute_nodes,
-                                                     unsigned long step_num_compute_nodes) :
-    json_input(std::move(json_input)), max_num_compute_nodes(max_num_compute_nodes), step_num_compute_nodes(step_num_compute_nodes) {
+                                                     std::vector<unsigned long>& list_of_num_nodes) :
+    json_input(std::move(json_input)), list_of_num_nodes(list_of_num_nodes) {
 }
 
 double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_compute_nodes) {
@@ -165,11 +164,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
  */
 std::vector<std::pair<unsigned long, double>> wrench::DataParallelEvaluator::evaluate() {
     std::vector<std::pair<unsigned long, double>> errors;
-    errors.reserve(this->max_num_compute_nodes);
-    for (unsigned long num_compute_nodes = 1; num_compute_nodes <= this->max_num_compute_nodes; num_compute_nodes += this->step_num_compute_nodes) {
-        if ((this->step_num_compute_nodes > 1) and (num_compute_nodes == 1 + this->step_num_compute_nodes)) { // Stupid hack make one special
-            num_compute_nodes -= 1;
-        }
+    errors.reserve(this->list_of_num_nodes.size());
+    for (auto &num_compute_nodes : this->list_of_num_nodes) {
         double expected_error = compute_expected_error(num_compute_nodes);
         errors.push_back(std::make_pair(num_compute_nodes, expected_error));
     }
@@ -190,26 +186,35 @@ int main(int argc, char** argv) {
     std::string json_data_parallel_input_arg;
     unsigned long max_num_nodes;
     unsigned long step_num_nodes;
+    std::string num_nodes_list;
+    std::vector<unsigned long> list_of_num_nodes;
     double min_deadline, max_deadline, step_deadline;
+    std::string deadline_list;
+    std::vector<double> list_of_deadlines;
     double lambda;
     double e_fail;
     double delta_t;
+
     po::options_description desc("Allowed arguments");
     desc.add_options()
     ("help",
      "Show this help message\n")
     ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
      "JSON input string or file path\n")
-    ("max_num_nodes", po::value<unsigned long>(&max_num_nodes)->required()->value_name("<max number of nodes>"),
+    ("max_num_nodes", po::value<unsigned long>(&max_num_nodes)->value_name("<max number of nodes>"),
      "Maximum number of compute nodes\n")
-    ("step_num_nodes", po::value<unsigned long>(&step_num_nodes)->required()->value_name("<step number of nodes>"),
+    ("step_num_nodes", po::value<unsigned long>(&step_num_nodes)->value_name("<step number of nodes>"),
      "Step number of compute nodes\n")
-    ("min_deadline", po::value<double>(&min_deadline)->required()->value_name("<min deadline>"),
+    ("num_nodes_list", po::value<std::string>(&num_nodes_list)->value_name("<comma-separated list of number of nodes>"),
+     "List of specific number of nodes\n")
+    ("min_deadline", po::value<double>(&min_deadline)->value_name("<min deadline>"),
      "Minimum deadline\n")
-    ("max_deadline", po::value<double>(&max_deadline)->required()->value_name("<max deadline>"),
+    ("max_deadline", po::value<double>(&max_deadline)->value_name("<max deadline>"),
      "Maximum deadline\n")
-    ("step_deadline", po::value<double>(&step_deadline)->required()->value_name("<step deadline>"),
+    ("step_deadline", po::value<double>(&step_deadline)->value_name("<step deadline>"),
      "Step deadline\n")
+    ("deadline_list", po::value<std::string>(&deadline_list)->value_name("<comma-separated list of deadlines>"),
+     "List of specific deadlines\n")
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
      "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
@@ -231,11 +236,61 @@ int main(int argc, char** argv) {
         }
         // Throw whatever exception in case argument values are erroneous
         po::notify(vm);
-    }
-    catch (std::exception& e) {
+    } catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
 	    std::cerr << desc;
         exit(1);
+    }
+
+    // Process the list of num nodes
+    if (vm.count("num_nodes_list")) {
+        if (vm.count("max_num_nodes") or vm.count("step_num_nodes")) {
+            cerr << "Error: Cannot specify --max_num_nodes or --step_num_nodes if --num_nodes_list is used\n\n";
+            std::cerr << desc;
+            exit(1);
+        }
+        std::stringstream ss(num_nodes_list);
+        std::vector<std::string> tokens;
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            list_of_num_nodes.push_back(std::stoul(token));
+        }
+    } else {
+        if (not vm.count("max_num_nodes") or not vm.count("step_num_nodes")) {
+            cerr << "Error: Must specify --max_num_nodes and --step_num_nodes if --num_nodes_list is not used\n\n";
+            std::cerr << desc;
+            exit(1);
+        }
+        for (unsigned long num_compute_nodes = 1; num_compute_nodes <= max_num_nodes; num_compute_nodes += step_num_nodes) {
+            if ((step_num_nodes > 1) and (num_compute_nodes == 1 + step_num_nodes)) { // Stupid hack make one special
+                num_compute_nodes -= 1;
+            }
+            list_of_num_nodes.push_back(num_compute_nodes);
+        }
+    }
+
+    // Process the list of deadlines
+    if (vm.count("deadline_list")) {
+        if (vm.count("min_deadline") or vm.count("max_deadline") or vm.count("step_deadline")) {
+            cerr << "Error: Cannot specify --min_deadline or --max_deadline  or --step_deadline if --deadline_list is used\n\n";
+            std::cerr << desc;
+            exit(1);
+        }
+        std::stringstream ss(deadline_list);
+        std::vector<std::string> tokens;
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            list_of_deadlines.push_back(std::stoul(token));
+        }
+    } else {
+        if (not vm.count("min_deadline") or not vm.count("max_deadline") or not vm.count("step_deadline")) {
+            cerr << "Error: Must specify --min_deadline and --max_deadline  and --step_deadline if --deadline_list is not used\n\n";
+            std::cerr << desc;
+            exit(1);
+        }
+        for (double deadline = min_deadline; deadline <= max_deadline; deadline += step_deadline) {
+            list_of_deadlines.push_back(deadline);
+        }
     }
 
     boost::json::object json_input;
@@ -260,10 +315,10 @@ int main(int argc, char** argv) {
 
     // Compute results
     std::map<double, std::vector<std::pair<unsigned long, double>>> results;
-    for (double deadline = min_deadline; deadline <= max_deadline; deadline = deadline + step_deadline) {
+    for (auto const &deadline : list_of_deadlines) {
         std::cerr << "." << std::flush;
         json_input.at("execution").get_object().at("deadline") = deadline;
-        auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, max_num_nodes, step_num_nodes);
+        auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, list_of_num_nodes);
         results[deadline] = evaluator->evaluate();
     }
     std::cerr << std::endl;
