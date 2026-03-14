@@ -17,7 +17,7 @@ def plot_curves(data):
     # Paint tiles
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.set_xlabel('Number of compute nodes ($n$)', fontsize=12)
-    ax.set_ylabel('Lower bound on optimal expected error', fontsize=12)
+    ax.set_ylabel('Approximate optimal expected error', fontsize=12)
 
     max_min_error = 0.0
     color_idx = 0
@@ -32,7 +32,7 @@ def plot_curves(data):
             deadline_string = str(int(deadline/60)) + " min"
         else:
             deadline_string = str(int(deadline/3600)) + " hour"
-        ax.plot(num_nodes_values, error_values, '.-', label="deadline:" + deadline_string, color=color, linewidth=2)
+        ax.plot(num_nodes_values, error_values, '.-', label="deadline:" + deadline_string, color=color, linewidth=3, markersize=10)
         min_error = min(error_values)
         best_num_procs = num_nodes_values[error_values.index(min_error)]
         #ax.plot([best_num_procs], [min_error], 'o', color=color, markersize=6)
