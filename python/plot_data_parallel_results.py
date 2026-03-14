@@ -16,7 +16,7 @@ def plot_curves(data):
 
     # Paint tiles
     fig, ax = plt.subplots()
-    ax.set_xlabel('Number of PEs', fontsize=12)
+    ax.set_xlabel('Number of compute nodes ($n$)', fontsize=12)
     ax.set_ylabel('Lower bound on optimal expected error', fontsize=12)
     # ax.set_yscale('log', base=2)
     # ax.set_title('Near-optimal expected error', fontsize=14)
