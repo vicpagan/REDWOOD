@@ -15,12 +15,9 @@ def plot_curves(data):
 
 
     # Paint tiles
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 4))
     ax.set_xlabel('Number of compute nodes ($n$)', fontsize=12)
     ax.set_ylabel('Lower bound on optimal expected error', fontsize=12)
-    # ax.set_yscale('log', base=2)
-    # ax.set_title('Near-optimal expected error', fontsize=14)
-    # ax.grid(True)
 
     max_min_error = 0.0
     color_idx = 0
@@ -54,9 +51,9 @@ def plot_curves(data):
     ax.grid()
 
     # Compute ok limits
-#    ax.set_ylim(1.0, max_min_error + 0.2)
-
-    ax.legend(bbox_to_anchor=(0.4, 0.9))
+    ax.set_ylim(1, 103)
+    ax.set_yticks([1,20,40,60,80,100])
+    ax.legend(bbox_to_anchor=(0.35, 0.92))
     plt.tight_layout()
     sys.stderr.write("Figure saved in ./curves.pdf\n")
     plt.savefig("./curves.pdf")
