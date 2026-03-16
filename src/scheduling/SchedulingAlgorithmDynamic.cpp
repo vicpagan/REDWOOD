@@ -160,8 +160,6 @@ namespace wrench {
      * DYNAMIC SCHEDULING ALGORITHM
      *
      * @brief Selects the best execution option based on the lowest E(x, y, n)
-     * @param probability_computation The probability computation utility
-     * @param exec_options Map of execution options for the current task
      * @param input_data_size This is our x
      * @param input_error_level This is our y
      * @param remaining_time This is our n, which is the remaining time until the deadline
