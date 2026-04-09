@@ -55,6 +55,12 @@ namespace wrench {
         return std::make_shared<ApplicationSpecs>(platform_spec, failure_spec, application_spec, execution_spec, scheduling_spec);
     }
 
+    void ApplicationSpecs::replace_tasks(const int start_idx, const int num_combined_tasks, const std::string &combined_task_name) {
+        _task_order.erase(_task_order.begin() + start_idx, _task_order.begin() + start_idx + num_combined_tasks);
+        _task_order.insert(_task_order.begin() + start_idx, combined_task_name);
+        _num_tasks = static_cast<int>(_task_order.size());
+    }
+
     std::string ApplicationSpecs::get_task(const int index) {
         if (index < 0 || index >= _num_tasks) {
             return "";

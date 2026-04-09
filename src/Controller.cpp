@@ -60,12 +60,15 @@ namespace wrench {
         _stop_running_jobs = boost::json::value_to<bool>(_scheduling_spec.at("hacks").as_object().at("stop_running_jobs"));
 
         /* Create the data structure that describes all task functions */
+        std::map<std::string, bool> in_situ_tasks;
         for (const auto& task : _application_spec.at("tasks").as_array()) {
             std::vector<std::pair<std::string, std::function<double(double, double)>>> options_for_task;
 
             auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
-            auto& exec_options = task.as_object().at("execution_options").as_array();
+            auto in_situ_with_next_task = boost::json::value_to<bool>(task.as_object().at("in_situ_with_next_task"));
+            in_situ_tasks.emplace(task_name, in_situ_with_next_task);
 
+            auto& exec_options = task.as_object().at("execution_options").as_array();
             for (const auto& option : exec_options) {
                 auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
 
@@ -80,6 +83,112 @@ namespace wrench {
                 }
             }
         }
+
+        // std::cout << "Before In-Situ Merge" << std::endl;
+        // std::cout << "Num tasks: " << _task_functions.size() << std::endl;
+        //
+        // for (const auto& [task_name, options] : _task_functions) {
+        //     std::cout << "\nTask: " << task_name << std::endl;
+        //     std::cout << "  Num options: " << options.size() << std::endl;
+        //
+        //     for (const auto& [option_name, functions] : options) {
+        //         std::cout << "  Option: " << option_name << std::endl;
+        //
+        //         const double test_x = 1.0;
+        //         const double test_e = 1.0;
+        //         for (const auto& [func_name, func] : functions) {
+        //             std::cout << "    " << func_name
+        //                       << "(x=" << test_x << ", e=" << test_e << ") = "
+        //                       << func(test_x, test_e) << std::endl;
+        //         }
+        //     }
+        // }
+
+        int i = 0;
+        int num_tasks = application_specs->get_num_tasks();
+        while (i < num_tasks) {
+            std::string task_name = application_specs->get_task(i);
+            if (!in_situ_tasks.at(task_name)) {
+                i++;
+                continue;
+            }
+
+            // Collect the full chain
+            std::vector<std::string> chain;
+            chain.push_back(application_specs->get_task(i));
+            while (in_situ_tasks.at(chain.back()) && i + chain.size() < num_tasks) {
+                chain.push_back(application_specs->get_task(i + static_cast<int>(chain.size())));
+            }
+
+            // Fold the chain into a single combined task
+            std::string combined_tasks_name = chain[0];
+            auto combined = _task_functions.at(chain[0]); // copy first task's options
+
+            for (size_t j = 1; j < chain.size(); j++) {
+                combined_tasks_name += "+" + chain[j];
+                std::map<std::string, std::map<std::string, std::function<double(double, double)>>> next_combined;
+
+                for (const auto& [opt1_name, opt1_funcs] : combined) {
+                    auto t1 = opt1_funcs.at("t_function");
+                    auto d1 = opt1_funcs.at("d_function");
+                    auto e1 = opt1_funcs.at("e_function");
+
+                    for (const auto& [opt2_name, opt2_funcs] : _task_functions.at(chain[j])) {
+                        auto t2 = opt2_funcs.at("t_function");
+                        auto d2 = opt2_funcs.at("d_function");
+                        auto e2 = opt2_funcs.at("e_function");
+
+                        std::string combined_opt_name = opt1_name;
+                        combined_opt_name += "+";
+                        combined_opt_name += opt2_name;
+
+                        next_combined[combined_opt_name]["t_function"] =
+                            [t1, d1, e1, t2](const double x, const double e) {
+                                return t1(x, e) + t2(d1(x, e), e1(x, e));
+                            };
+                        next_combined[combined_opt_name]["d_function"] =
+                            [d1, e1, d2](const double x, const double e) {
+                                return d2(d1(x, e), e1(x, e));
+                            };
+                        next_combined[combined_opt_name]["e_function"] =
+                            [d1, e1, e2](const double x, const double e) {
+                                return e2(d1(x, e), e1(x, e));
+                            };
+                    }
+                }
+                combined = std::move(next_combined);
+            }
+
+            // Register combined task and update application_specs
+            _task_functions[combined_tasks_name] = std::move(combined);
+            for (const auto& task : chain) {
+                _task_functions.erase(task);
+            }
+
+            application_specs->replace_tasks(i, static_cast<int>(chain.size()), combined_tasks_name);
+            num_tasks = application_specs->get_num_tasks();
+            i++;
+        }
+
+        // std::cout << "After In-Situ Merge" << std::endl;
+        // std::cout << "Num tasks: " << _task_functions.size() << std::endl;
+        //
+        // for (const auto& [task_name, options] : _task_functions) {
+        //     std::cout << "\nTask: " << task_name << std::endl;
+        //     std::cout << "  Num options: " << options.size() << std::endl;
+        //
+        //     for (const auto& [option_name, functions] : options) {
+        //         std::cout << "  Option: " << option_name << std::endl;
+        //
+        //         const double test_x = 1.0;
+        //         const double test_e = 1.0;
+        //         for (const auto& [func_name, func] : functions) {
+        //             std::cout << "    " << func_name
+        //                       << "(x=" << test_x << ", e=" << test_e << ") = "
+        //                       << func(test_x, test_e) << std::endl;
+        //         }
+        //     }
+        // }
 
         /* Create the probability computation utility */
         _probability_computation = std::make_unique<ProbabilityComputation>(_application_specs);

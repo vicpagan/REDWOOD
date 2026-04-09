@@ -83,6 +83,8 @@ namespace wrench {
 
         ExecOptionDecisionNode* get_decision_tree_root() const { return _exec_option_decision_tree->root.get(); }
 
+        void replace_tasks(int start_idx, int num_combined_tasks, const std::string &combined_tasks_name);
+
         int get_num_compute_nodes() const { return _num_compute_nodes; }
         double get_e_fail() const { return _e_fail; }
         double get_io_read_bandwidth_per_node() const { return _io_read_bandwidth_per_node; }
@@ -94,6 +96,7 @@ namespace wrench {
         double get_delta_t_parameter() const { return _delta_t_parameter; }
         std::exponential_distribution<double> get_exponential_distribution() const { return _exponential_distribution; }
         int get_seed() const { return _seed; }
+        int get_num_tasks() const { return _num_tasks; }
 
         double get_initial_data_size() const { return _initial_data_size; }
         double get_initial_error_level() const { return _initial_error_level; }
