@@ -113,60 +113,70 @@ namespace wrench {
                 continue;
             }
 
-            // Collect the full chain
-            std::vector<std::string> chain;
-            chain.push_back(application_specs->get_task(i));
-            while (in_situ_tasks.at(chain.back()) && i + chain.size() < num_tasks) {
-                chain.push_back(application_specs->get_task(i + static_cast<int>(chain.size())));
+            // Collect the tasks to merge
+            int num_tasks_to_merge = 1;
+
+            std::vector<std::string> tasks_to_merge;
+            tasks_to_merge.push_back(application_specs->get_task(i));
+
+            while (in_situ_tasks.at(tasks_to_merge.back()) && i + tasks_to_merge.size() < num_tasks) {
+                tasks_to_merge.push_back(application_specs->get_task(i + static_cast<int>(tasks_to_merge.size())));
+                num_tasks_to_merge++;
             }
 
-            // Fold the chain into a single combined task
-            std::string combined_tasks_name = chain[0];
-            auto combined = _task_functions.at(chain[0]); // copy first task's options
+            // Need to cover edge case of last task having the in_situ_with_next_task flag set to true (for some stupid reason just in case I guess)
+            if (num_tasks_to_merge == 1) {
+                i++;
+                continue;
+            }
 
-            for (size_t j = 1; j < chain.size(); j++) {
-                combined_tasks_name += "+" + chain[j];
-                std::map<std::string, std::map<std::string, std::function<double(double, double)>>> next_combined;
+            // Merge the list of tasks into a single task
+            std::string merged_tasks_name = tasks_to_merge[0];
+            auto merged_tasks = _task_functions.at(tasks_to_merge[0]); // copy first task's options
 
-                for (const auto& [opt1_name, opt1_funcs] : combined) {
-                    auto t1 = opt1_funcs.at("t_function");
-                    auto d1 = opt1_funcs.at("d_function");
-                    auto e1 = opt1_funcs.at("e_function");
+            for (size_t j = 1; j < tasks_to_merge.size(); j++) {
+                merged_tasks_name += "+" + tasks_to_merge[j];
+                std::map<std::string, std::map<std::string, std::function<double(double, double)>>> next_task_to_combine;
 
-                    for (const auto& [opt2_name, opt2_funcs] : _task_functions.at(chain[j])) {
-                        auto t2 = opt2_funcs.at("t_function");
-                        auto d2 = opt2_funcs.at("d_function");
-                        auto e2 = opt2_funcs.at("e_function");
+                for (const auto& [opt1_name, opt1_functions] : merged_tasks) {
+                    auto t1 = opt1_functions.at("t_function");
+                    auto d1 = opt1_functions.at("d_function");
+                    auto e1 = opt1_functions.at("e_function");
 
-                        std::string combined_opt_name = opt1_name;
-                        combined_opt_name += "+";
-                        combined_opt_name += opt2_name;
+                    for (const auto& [opt2_name, opt2_functions] : _task_functions.at(tasks_to_merge[j])) {
+                        auto t2 = opt2_functions.at("t_function");
+                        auto d2 = opt2_functions.at("d_function");
+                        auto e2 = opt2_functions.at("e_function");
 
-                        next_combined[combined_opt_name]["t_function"] =
+                        std::string merged_opt_name = opt1_name;
+                        merged_opt_name += "+";
+                        merged_opt_name += opt2_name;
+
+                        next_task_to_combine[merged_opt_name]["t_function"] =
                             [t1, d1, e1, t2](const double x, const double e) {
                                 return t1(x, e) + t2(d1(x, e), e1(x, e));
                             };
-                        next_combined[combined_opt_name]["d_function"] =
+                        next_task_to_combine[merged_opt_name]["d_function"] =
                             [d1, e1, d2](const double x, const double e) {
                                 return d2(d1(x, e), e1(x, e));
                             };
-                        next_combined[combined_opt_name]["e_function"] =
+                        next_task_to_combine[merged_opt_name]["e_function"] =
                             [d1, e1, e2](const double x, const double e) {
                                 return e2(d1(x, e), e1(x, e));
                             };
                     }
                 }
-                combined = std::move(next_combined);
+                merged_tasks = std::move(next_task_to_combine);
             }
 
-            // Register combined task and update application_specs
-            _task_functions[combined_tasks_name] = std::move(combined);
-            for (const auto& task : chain) {
+            // Update _task_functions with merged tasks and update application_specs
+            _task_functions[merged_tasks_name] = std::move(merged_tasks);
+            for (const auto& task : tasks_to_merge) {
                 _task_functions.erase(task);
             }
-
-            application_specs->replace_tasks(i, static_cast<int>(chain.size()), combined_tasks_name);
+            application_specs->replace_tasks(i, num_tasks_to_merge, merged_tasks_name);
             num_tasks = application_specs->get_num_tasks();
+
             i++;
         }
 
