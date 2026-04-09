@@ -157,7 +157,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": true
       },
       {
         "name": "ADIOS_Refactoring",
@@ -291,7 +292,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": false
       },
       {
         "name": "Poincaré_Map",
@@ -392,7 +394,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": false
       }
     ]
   },

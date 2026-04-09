@@ -83,7 +83,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": false
       },
       {
         "name": "task2",
@@ -154,7 +155,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": false
       }
     ]
   },
