@@ -137,6 +137,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
             }
         }
     }
+    application_specs->merge_in_situ_tasks(task_functions);
 
     // Create a probability computation object
     auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
