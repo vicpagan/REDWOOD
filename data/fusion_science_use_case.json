@@ -158,7 +158,7 @@
             }
           }
         ],
-        "in_situ_with_next_task": true
+        "in_situ_with_next_task": false
       },
       {
         "name": "ADIOS_Refactoring",
