@@ -32,6 +32,9 @@ namespace wrench {
         for (const auto& task : application_spec.at("tasks").as_array()) {
             auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
             _task_order.push_back(task_name);
+
+            auto in_situ_with_next_task = boost::json::value_to<bool>(task.as_object().at("in_situ_with_next_task"));
+            _in_situ_tasks.emplace(task_name, in_situ_with_next_task);
         }
         _num_tasks = static_cast<int>(_task_order.size());
 
@@ -55,11 +58,84 @@ namespace wrench {
         return std::make_shared<ApplicationSpecs>(platform_spec, failure_spec, application_spec, execution_spec, scheduling_spec);
     }
 
-    void ApplicationSpecs::replace_tasks(const int start_idx, const int num_combined_tasks, const std::string &combined_task_name) {
-        _task_order.erase(_task_order.begin() + start_idx, _task_order.begin() + start_idx + num_combined_tasks);
-        _task_order.insert(_task_order.begin() + start_idx, combined_task_name);
-        _num_tasks = static_cast<int>(_task_order.size());
+    void ApplicationSpecs::merge_in_situ_tasks(std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& task_functions) {
+        int i = 0;
+        while (i < _num_tasks) {
+            std::string task_name = get_task(i);
+            if (!_in_situ_tasks.at(task_name)) {
+                i++;
+                continue;
+            }
+
+            // Collect the tasks to merge
+            int num_tasks_to_merge = 1;
+
+            std::vector<std::string> tasks_to_merge;
+            tasks_to_merge.push_back(get_task(i));
+
+            while (_in_situ_tasks.at(tasks_to_merge.back()) && i + tasks_to_merge.size() < _num_tasks) {
+                tasks_to_merge.push_back(get_task(i + static_cast<int>(tasks_to_merge.size())));
+                num_tasks_to_merge++;
+            }
+
+            // Need to cover edge case of last task having the in_situ_with_next_task flag set to true (for some stupid reason just in case I guess)
+            if (num_tasks_to_merge == 1) {
+                i++;
+                continue;
+            }
+
+            // Merge the list of tasks into a single task
+            std::string merged_tasks_name = tasks_to_merge[0];
+            auto merged_tasks = task_functions.at(tasks_to_merge[0]); // copy first task's options
+
+            for (size_t j = 1; j < tasks_to_merge.size(); j++) {
+                merged_tasks_name += "+" + tasks_to_merge[j];
+                std::map<std::string, std::map<std::string, std::function<double(double, double)>>> next_task_to_combine;
+
+                for (const auto& [opt1_name, opt1_functions] : merged_tasks) {
+                    auto t1 = opt1_functions.at("t_function");
+                    auto d1 = opt1_functions.at("d_function");
+                    auto e1 = opt1_functions.at("e_function");
+
+                    for (const auto& [opt2_name, opt2_functions] : task_functions.at(tasks_to_merge[j])) {
+                        auto t2 = opt2_functions.at("t_function");
+                        auto d2 = opt2_functions.at("d_function");
+                        auto e2 = opt2_functions.at("e_function");
+
+                        std::string merged_opt_name = opt1_name;
+                        merged_opt_name += "+";
+                        merged_opt_name += opt2_name;
+
+                        next_task_to_combine[merged_opt_name]["t_function"] =
+                            [t1, d1, e1, t2](const double x, const double e) {
+                                return t1(x, e) + t2(d1(x, e), e1(x, e));
+                            };
+                        next_task_to_combine[merged_opt_name]["d_function"] =
+                            [d1, e1, d2](const double x, const double e) {
+                                return d2(d1(x, e), e1(x, e));
+                            };
+                        next_task_to_combine[merged_opt_name]["e_function"] =
+                            [d1, e1, e2](const double x, const double e) {
+                                return e2(d1(x, e), e1(x, e));
+                            };
+                    }
+                }
+                merged_tasks = std::move(next_task_to_combine);
+            }
+
+            // Update _task_functions with merged tasks and update application_specs
+            task_functions[merged_tasks_name] = std::move(merged_tasks);
+            for (const auto& task : tasks_to_merge) {
+                task_functions.erase(task);
+            }
+            _task_order.erase(_task_order.begin() + i, _task_order.begin() + i + num_tasks_to_merge);
+            _task_order.insert(_task_order.begin() + i, merged_tasks_name);
+            _num_tasks = static_cast<int>(_task_order.size());
+
+            i++;
+        }
     }
+
 
     std::string ApplicationSpecs::get_task(const int index) {
         if (index < 0 || index >= _num_tasks) {

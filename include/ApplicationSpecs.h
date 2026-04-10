@@ -83,7 +83,7 @@ namespace wrench {
 
         ExecOptionDecisionNode* get_decision_tree_root() const { return _exec_option_decision_tree->root.get(); }
 
-        void replace_tasks(int start_idx, int num_combined_tasks, const std::string &combined_tasks_name);
+        void merge_in_situ_tasks(std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& task_functions);
 
         int get_num_compute_nodes() const { return _num_compute_nodes; }
         double get_e_fail() const { return _e_fail; }
@@ -119,6 +119,7 @@ namespace wrench {
         double _initial_data_size;
         double _initial_error_level;
 
+        std::map<std::string, bool> _in_situ_tasks;
         std::vector<std::string> _task_order;
         int _num_tasks;
         std::shared_ptr<ExecOptionDecisionTree> _exec_option_decision_tree;
