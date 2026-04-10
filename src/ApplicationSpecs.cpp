@@ -5,6 +5,8 @@
 #include <iostream>
 #include <boost/json/value_to.hpp>
 
+#include "FunctionGenerator.h"
+
 namespace wrench {
 
     ApplicationSpecs::ApplicationSpecs(const boost::json::object& platform_spec,
@@ -35,8 +37,26 @@ namespace wrench {
 
             auto in_situ_with_next_task = boost::json::value_to<bool>(task.as_object().at("in_situ_with_next_task"));
             _in_situ_tasks.emplace(task_name, in_situ_with_next_task);
+
+            std::vector<std::pair<std::string, std::function<double(double, double)>>> options_for_task;
+            auto& exec_options = task.as_object().at("execution_options").as_array();
+            for (const auto& option : exec_options) {
+                auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
+
+                for (auto function_name : {"t_function", "d_function", "e_function"}) {
+                    auto& function = option.as_object().at(function_name).as_object();
+                    auto func = FunctionGenerator::get_function(function);
+
+                    if (static_cast<std::string>(function_name) == "e_function") {
+                        options_for_task.emplace_back(option_name, func);
+                    }
+                    _task_functions[task_name][option_name][function_name] = func;
+                }
+            }
         }
         _num_tasks = static_cast<int>(_task_order.size());
+
+        merge_in_situ_tasks(_task_functions);
 
         if (_seed < 0) {
             _seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
@@ -144,8 +164,8 @@ namespace wrench {
         return _task_order.at(index);
     }
 
-    void ApplicationSpecs::build_decision_tree(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options) const {
-        _exec_option_decision_tree->build_tree(exec_options);
+    void ApplicationSpecs::build_decision_tree() const {
+        _exec_option_decision_tree->build_tree();
     }
 
     void ApplicationSpecs::prune_decision_tree(const double best_error) const {
@@ -159,20 +179,19 @@ namespace wrench {
         return false;
     }
 
-    void ApplicationSpecs::ExecOptionDecisionTree::build_tree(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options) {
+    void ApplicationSpecs::ExecOptionDecisionTree::build_tree() {
         if (application_specs->_num_tasks == 0) {
             std::cerr << "No tasks!" << std::endl;
             return;
         }
 
-        build_tree_helper(exec_options, 0, application_specs->_exec_option_decision_tree->root, 1.0, 1.0);
+        build_tree_helper(0, application_specs->_exec_option_decision_tree->root, 1.0, 1.0);
     }
 
-    void ApplicationSpecs::ExecOptionDecisionTree::build_tree_helper(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        const int task_index,
-        const std::shared_ptr<ExecOptionDecisionNode>& parent,
-        const double running_data_size_factor,
-        const double running_error_factor) {
+    void ApplicationSpecs::ExecOptionDecisionTree::build_tree_helper(const int task_index,
+                                                                     const std::shared_ptr<ExecOptionDecisionNode>& parent,
+                                                                     const double running_data_size_factor,
+                                                                     const double running_error_factor) {
 
         if (task_index >= application_specs->_num_tasks) {
             parent->is_leaf = true;
@@ -180,7 +199,7 @@ namespace wrench {
         }
 
         const std::string& task_name = application_specs->_task_order[task_index];
-        for (const auto& [option_name, functions] : exec_options.at(task_name)) {
+        for (const auto& [option_name, functions] : application_specs->_task_functions.at(task_name)) {
             auto child = ExecOptionDecisionNode::create_decision_node(task_name, option_name, false);
 
             const double current_error_factor = functions.at("e_function")(0, running_error_factor);
@@ -192,9 +211,8 @@ namespace wrench {
             parent->children.push_back(child);
             parent->num_children++;
 
-            build_tree_helper(exec_options, task_index + 1, child, current_data_size_factor, current_error_factor);
+            build_tree_helper(task_index + 1, child, current_data_size_factor, current_error_factor);
         }
-
     }
 
     void ApplicationSpecs::ExecOptionDecisionTree::prune_tree(const double best_error) {

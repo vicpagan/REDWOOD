@@ -115,29 +115,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
         input.at("scheduling").as_object());
 
     // Create the task functions
-    std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
-        task_functions;
-    for (const auto& task : input.at("application").at("tasks").as_array()) {
-        std::vector<std::pair<std::string, std::function<double(double, double)>>> options_for_task;
-
-        auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
-        auto& exec_options = task.as_object().at("execution_options").as_array();
-
-        for (const auto& option : exec_options) {
-            auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
-
-            for (auto function_name : {"t_function", "d_function", "e_function"}) {
-                auto& function = option.as_object().at(function_name).as_object();
-                auto func = FunctionGenerator::get_function(function);
-
-                if (static_cast<std::string>(function_name) == "e_function") {
-                    options_for_task.emplace_back(option_name, func);
-                }
-                task_functions[task_name][option_name][function_name] = func;
-            }
-        }
-    }
-    application_specs->merge_in_situ_tasks(task_functions);
+    const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>&
+        task_functions = application_specs->get_task_functions();
 
     // Create a probability computation object
     auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
@@ -150,7 +129,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     double initial_error_level = input.at("application").as_object().at("initial_error_level").to_number<double>();
 
     application_specs->prune_decision_tree(0.0);
-    application_specs->build_decision_tree(task_functions);
+    application_specs->build_decision_tree();
     algorithm->preprocess_decisions(initial_data_size,
                                     initial_error_level,
                                     application_specs->get_deadline(),

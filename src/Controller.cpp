@@ -53,76 +53,14 @@ namespace wrench {
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _scheduling_spec(scheduling_spec),
-                                                          _compute_services(compute_services){
+                                                          _compute_services(compute_services),
+                                                          _task_functions(_application_specs->get_task_functions()) {
 
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
-        _temporal_redundancy = boost::json::value_to<bool>(_scheduling_spec.at("hacks").as_object().at("temporal_redundancy"));
-        _stop_running_jobs = boost::json::value_to<bool>(_scheduling_spec.at("hacks").as_object().at("stop_running_jobs"));
-
-        /* Create the data structure that describes all task functions */
-        for (const auto& task : _application_spec.at("tasks").as_array()) {
-            std::vector<std::pair<std::string, std::function<double(double, double)>>> options_for_task;
-
-            auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
-            auto& exec_options = task.as_object().at("execution_options").as_array();
-            for (const auto& option : exec_options) {
-                auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
-
-                for (auto function_name : {"t_function", "d_function", "e_function"}) {
-                    auto& function = option.as_object().at(function_name).as_object();
-                    auto func = FunctionGenerator::get_function(function);
-
-                    if (static_cast<std::string>(function_name) == "e_function") {
-                        options_for_task.emplace_back(option_name, func);
-                    }
-                    _task_functions[task_name][option_name][function_name] = func;
-                }
-            }
-        }
-
-        // std::cout << "Before In-Situ Merge" << std::endl;
-        // std::cout << "Num tasks: " << _task_functions.size() << std::endl;
-        //
-        // for (const auto& [task_name, options] : _task_functions) {
-        //     std::cout << "\nTask: " << task_name << std::endl;
-        //     std::cout << "  Num options: " << options.size() << std::endl;
-        //
-        //     for (const auto& [option_name, functions] : options) {
-        //         std::cout << "  Option: " << option_name << std::endl;
-        //
-        //         const double test_x = 1.0;
-        //         const double test_e = 1.0;
-        //         for (const auto& [func_name, func] : functions) {
-        //             std::cout << "    " << func_name
-        //                       << "(x=" << test_x << ", e=" << test_e << ") = "
-        //                       << func(test_x, test_e) << std::endl;
-        //         }
-        //     }
-        // }
-
-        _application_specs->merge_in_situ_tasks(_task_functions);
-
-        // std::cout << "After In-Situ Merge" << std::endl;
-        // std::cout << "Num tasks: " << _task_functions.size() << std::endl;
-        //
-        // for (const auto& [task_name, options] : _task_functions) {
-        //     std::cout << "\nTask: " << task_name << std::endl;
-        //     std::cout << "  Num options: " << options.size() << std::endl;
-        //
-        //     for (const auto& [option_name, functions] : options) {
-        //         std::cout << "  Option: " << option_name << std::endl;
-        //
-        //         const double test_x = 1.0;
-        //         const double test_e = 1.0;
-        //         for (const auto& [func_name, func] : functions) {
-        //             std::cout << "    " << func_name
-        //                       << "(x=" << test_x << ", e=" << test_e << ") = "
-        //                       << func(test_x, test_e) << std::endl;
-        //         }
-        //     }
-        // }
-
-        // std::exit(0);
+        _temporal_redundancy = boost::json::value_to<bool>(
+            _scheduling_spec.at("hacks").as_object().at("temporal_redundancy"));
+        _stop_running_jobs = boost::json::value_to<bool>(
+            _scheduling_spec.at("hacks").as_object().at("stop_running_jobs"));
 
         /* Create the probability computation utility */
         _probability_computation = std::make_unique<ProbabilityComputation>(_application_specs);
@@ -132,17 +70,16 @@ namespace wrench {
         std::string scheduling_type;
         if (_application_spec.at("tasks").as_array().size() == 1) {
             scheduling_type = "one_task";
-        }
-        else {
+        } else {
             scheduling_type = "multi_task";
         }
-        for (auto const& alg_name : _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
+        for (auto const &alg_name: _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
-                            boost::json::value_to<string>(alg_name), _application_specs, _task_functions, _probability_computation.get());
+                boost::json::value_to<string>(alg_name), _application_specs, _task_functions,
+                _probability_computation.get());
 
             _scheduling_algorithms.push_back(alg);
         }
-
     }
 
     void Controller::restart_system() const {
@@ -196,7 +133,7 @@ namespace wrench {
                                                       });
 
         const auto compute_action = job->addComputeAction("compute",
-                                                    _task_functions[task_name][execution_option]["t_function"]
+                                                    _task_functions.at(task_name).at(execution_option).at("t_function")
                                                     (running_output_data_size, running_output_error_level),
                                                     0.0,
                                                     1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
@@ -208,8 +145,7 @@ namespace wrench {
                                                         action_executor) {
                                                             auto disk = wrench::S4U_Simulation::hostHasMountPoint(action_executor->hostname, "/");
                                                             disk->write(static_cast<sg_size_t>(
-                                                                _task_functions[task_name][execution_option][
-                                                                    "d_function"]
+                                                                _task_functions.at(task_name).at(execution_option).at("d_function")
                                                                 (running_output_data_size,
                                                                  running_output_error_level)));
                                                         },
@@ -290,7 +226,7 @@ namespace wrench {
 
                 /* Build/reset decision tree to use for temporal redundancy */
                 _application_specs->prune_decision_tree(0.0);
-                _application_specs->build_decision_tree(_task_functions);
+                _application_specs->build_decision_tree();
                 algorithm->preprocess_decisions(initial_data_size, initial_error_level,
                                 _application_specs->get_deadline(), OPTIMISTIC_DISCRETIZATION);
 
