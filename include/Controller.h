@@ -67,7 +67,7 @@ namespace wrench {
         bool _temporal_redundancy;
         bool _stop_running_jobs;
 
-        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &
         _task_functions;
         std::vector<std::pair<std::vector<std::string>, double>> _execution_combinations;
         std::exponential_distribution<double> _exponential_distribution;

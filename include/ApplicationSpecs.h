@@ -64,26 +64,27 @@ namespace wrench {
                 root(std::move(root)) {
             }
 
-            void build_tree(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options);
+            void build_tree();
 
-            void build_tree_helper(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-                int task_index,
-                const std::shared_ptr<ExecOptionDecisionNode>& parent,
-                double running_data_size_factor,
-                double running_error_factor);
+            void build_tree_helper(int task_index,
+                                   const std::shared_ptr<ExecOptionDecisionNode>& parent,
+                                   double running_data_size_factor,
+                                   double running_error_factor);
 
             void prune_tree(double best_error);
 
             bool prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, double best_error);
         };
 
-        void build_decision_tree(const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options) const;
+        void build_decision_tree() const;
         void prune_decision_tree(double best_error) const;
         bool decision_tree_empty() const;
 
         ExecOptionDecisionNode* get_decision_tree_root() const { return _exec_option_decision_tree->root.get(); }
 
         void merge_in_situ_tasks(std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& task_functions);
+
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> & get_task_functions() const { return _task_functions; }
 
         int get_num_compute_nodes() const { return _num_compute_nodes; }
         double get_e_fail() const { return _e_fail; }
@@ -119,6 +120,8 @@ namespace wrench {
         double _initial_data_size;
         double _initial_error_level;
 
+        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
+        _task_functions;
         std::map<std::string, bool> _in_situ_tasks;
         std::vector<std::string> _task_order;
         int _num_tasks;

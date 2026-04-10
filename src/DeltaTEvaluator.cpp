@@ -30,23 +30,7 @@ namespace wrench {
             json_input.at("execution").as_object(),
             json_input.at("scheduling").as_object());
 
-        // Create task functions
-        std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
-            task_functions;
-        for (const auto& task : json_input.at("application").at("tasks").as_array()) {
-            auto task_name = boost::json::value_to<std::string>(task.as_object().at("name"));
-            auto& exec_options = task.as_object().at("execution_options").as_array();
-
-            for (const auto& option : exec_options) {
-                auto option_name = boost::json::value_to<std::string>(option.as_object().at("name"));
-
-                for (auto function_name : {"t_function", "d_function", "e_function"}) {
-                    auto& function = option.as_object().at(function_name).as_object();
-                    auto func = FunctionGenerator::get_function(function);
-                    task_functions[task_name][option_name][function_name] = func;
-                }
-            }
-        }
+        auto task_functions = application_specs->get_task_functions();
 
         // Create algorithm and probability computation
         auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
@@ -57,7 +41,7 @@ namespace wrench {
         double deadline = json_input.at("execution").as_object().at("deadline").to_number<double>();
 
         application_specs->prune_decision_tree(0.0);
-        application_specs->build_decision_tree(task_functions);
+        application_specs->build_decision_tree();
 
         // Evaluate each delta_t value
         for (double delta_t = min_delta_t; delta_t <= max_delta_t; delta_t += step_size) {
