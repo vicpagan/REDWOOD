@@ -1,6 +1,6 @@
 {
   "platform": {
-    "num_compute_nodes": 1,
+    "num_compute_nodes": 2,
     "bandwidth_comment": "Reported on Summit: 4000-nodes 4.2TB - 7.8TB)",
     "io_read_bandwidth_per_node": "2GBps",
     "io_write_bandwidth_per_node": "1GBps"
@@ -402,7 +402,7 @@
   "execution": {
     "num_repeats": 50,
     "deadline_comment": "120 minutes",
-    "deadline": 5000,
+    "deadline": 10000,
     "e_fail": 100.0
   },
   "scheduling": {
@@ -413,12 +413,12 @@
       "parameter": 5.0
     },
     "algorithms": {
-      "one_task": ["static_foresighted_error_level"],
-      "multi_task": ["static_foresighted_error_level"]
+      "one_task": ["static_nearsighted_error_level"],
+      "multi_task": ["greedy_foresighted_decrementing_probability_success"]
     },
     "hacks": {
-      "temporal_redundancy": true,
-      "stop_running_jobs": true
+      "temporal_redundancy": false,
+      "stop_running_jobs": false
     }
   }
 }

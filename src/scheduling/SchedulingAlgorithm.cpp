@@ -7,6 +7,10 @@
 #include "scheduling/SchedulingAlgorithmDynamic.h"
 #include "scheduling/SchedulingAlgorithmStaticForesighted.h"
 #include "scheduling/SchedulingAlgorithmStaticNearsighted.h"
+#include "scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.h"
+#include "scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.h"
+#include "scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.h"
+#include "scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.h"
 #include "scheduling/SchedulingAlgorithmRandom.h"
 
 
@@ -26,7 +30,6 @@ namespace wrench {
         else if (type.rfind("static_", 0) == 0) {  // starts with "static_"
             std::string remainder = type.substr(7);  // remove "static_"
 
-            // Check for variants
             std::string variant;
             if (remainder.rfind("foresighted_", 0) == 0) {
                 variant = "foresighted";
@@ -69,6 +72,84 @@ namespace wrench {
             }
             else {
                 throw std::invalid_argument("Unknown static variant '" + variant + "'");
+            }
+        }
+        else if (type.rfind("greedy_", 0) == 0) {  // starts with "greedy_"
+            std::string remainder_after_type = type.substr(7);  // remove "greedy_"
+
+            std::string variant;
+            if (remainder_after_type.rfind("foresighted_", 0) == 0) {
+                variant = "foresighted";
+            }
+            else if (remainder_after_type.rfind("nearsighted_", 0) == 0) {
+                variant = "nearsighted";
+            }
+            else {
+                throw std::invalid_argument("Invalid static algorithm format. Expected: static_<foresighted|nearsighted>_<comparator>");
+            }
+
+            std::string remainder_after_variant = remainder_after_type.substr(12);  // remove "foresighted_" or "nearsighted_"
+
+            std::string incrementing;
+            if (remainder_after_variant.rfind("incrementing_", 0) == 0) {
+                incrementing = "incrementing";
+            }
+            else if (remainder_after_variant.rfind("decrementing_", 0) == 0) {
+                incrementing = "decrementing";
+            }
+            else {
+                throw std::invalid_argument("Invalid greedy algorithm format. Expected: greedy_<foresighted|nearsighted>_<incrementing|decrementing>_<comparator>");
+            }
+
+            // Create comparator
+            std::string comparator_name = remainder_after_variant.substr(13); // remove "incrementing_" or "decrementing_"
+            OptionComparatorFunction* chosen_comparator = nullptr;
+
+            if (comparator_name == "expected_error") {
+                chosen_comparator = new ExpectedErrorComparator(application_specs);
+            }
+            else if (comparator_name == "probability_success") {
+                chosen_comparator = new ProbabilitySuccessComparator(application_specs);
+            }
+            else if (comparator_name == "error_level") {
+                chosen_comparator = new ErrorLevelComparator(application_specs);
+            }
+            else if (comparator_name == "success_error_ratio") {
+                chosen_comparator = new SuccessErrorRatioComparator(application_specs);
+            }
+            else {
+                throw std::invalid_argument("Unknown static comparator '" + comparator_name + "'");
+            }
+
+            // Create appropriate greedy variant
+            if (variant == "foresighted") {
+                if (incrementing == "incrementing") {
+                    return std::make_shared<SchedulingAlgorithmGreedyForesightedIncrementing>(
+                        application_specs, exec_options, probability_computation, chosen_comparator);
+                }
+                else if (incrementing == "decrementing") {
+                    return std::make_shared<SchedulingAlgorithmGreedyForesightedDecrementing>(
+                        application_specs, exec_options, probability_computation, chosen_comparator);
+                }
+                else {
+                    throw std::invalid_argument("Unknown greedy incrementing variant '" + incrementing + "'");
+                }
+            }
+            else if (variant == "nearsighted") {
+                if (incrementing == "incrementing") {
+                    return std::make_shared<SchedulingAlgorithmGreedyNearsightedIncrementing>(
+                        application_specs, exec_options, probability_computation, chosen_comparator);
+                }
+                else if (incrementing == "decrementing") {
+                    return std::make_shared<SchedulingAlgorithmGreedyNearsightedDecrementing>(
+                        application_specs, exec_options, probability_computation, chosen_comparator);
+                }
+                else {
+                    throw std::invalid_argument("Unknown greedy incrementing variant '" + incrementing + "'");
+                }
+            }
+            else {
+                throw std::invalid_argument("Unknown greedy variant '" + variant + "'");
             }
         }
         else if (type == "random") {

@@ -34,6 +34,7 @@ namespace wrench {
         struct ExecOptionDecisionNode {
             std::vector<std::shared_ptr<ExecOptionDecisionNode>> children;
             std::string task;
+            std::string next_task;
             std::string execution_option;
 
             int num_children;

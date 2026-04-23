@@ -156,7 +156,6 @@ namespace wrench {
         }
     }
 
-
     std::string ApplicationSpecs::get_task(const int index) {
         if (index < 0 || index >= _num_tasks) {
             return "";

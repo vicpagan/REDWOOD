@@ -33,7 +33,14 @@
   - Test one-host heuristics with higher delta_t and compare
   - Run heuristics with temporal redundancy on/off
     - Should run with the higher delta_t so it doesn't take forever
-  - 
+  - Change OptionComparator class too work with combinations of options instead of just a single option
+    - Want to abstract it so it works with foresighted and nearsighted scheduling heuristics
+  - Allow the resetting of decisions in the scheduler to take into consideration if temporal redundancy is enabled
+    - If its enabled and stop running jobs is disabled, it should not reset the entire decision tree upon completion
+    - It should only reset the decisions for a single host
+    - Multi-host heuristics should use the decision tree for its list of options to consider since options are removed with temporal redundancy
+  - Implement different options for stop running jobs hack
+
 
 EXPERIMENTS:
   - Test cancel useless runs of tasks upon a single host completing hack
@@ -54,3 +61,7 @@ NOTES:
       - b) Run the preprocessing from the deadline for ALL tasks in the chain, even if it should be impossible for some
       - c) Use the compressed table as a guideline to "fill in" the unknown values (WHAT WERE DOING RIGHT NOW)
         - i.e. just use whichever choice is "nearest"
+
+PAPER:
+  - Include section on how temporal redundancy is always good, but at the cost of recalculation during the execution
+    - For the purposes of our paper, just assume the recalculation is free
