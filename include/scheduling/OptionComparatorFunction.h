@@ -97,6 +97,8 @@ namespace wrench {
 
         bool is_minimizing() const override { return true; }
 
+        double get_prob_success_threshold() const { return _prob_success_threshold; }
+
     private:
         double _io_read_bandwidth_per_node;
         double _io_write_bandwidth_per_node;

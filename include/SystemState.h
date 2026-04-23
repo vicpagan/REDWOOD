@@ -37,12 +37,11 @@ namespace wrench {
             const std::string& execution_option,
             double start_time);
 
-         // void untrack_job(const std::shared_ptr<CompoundJob>& compound_job);
          void untrack_job(const std::string& hostname);
 
          bool is_a_job_running(const std::string& hostname);
-         // std::shared_ptr<RunningJob> get_running_job(const std::shared_ptr<CompoundJob>& compound_job);
          std::shared_ptr<CompoundJob> get_running_job(const std::string& hostname);
+         const std::string& get_host_current_task(const std::string& hostname);
 
          static std::shared_ptr<SystemState> create_tracker(const std::vector<std::string>& hostnames) {
            return std::shared_ptr<SystemState>(new SystemState(hostnames));

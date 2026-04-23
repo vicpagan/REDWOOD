@@ -53,7 +53,7 @@ namespace wrench {
 
         const double probability_success = probability_computation->compute_probability(exec_option_time_total, remaining_time, false);
 
-        if (probability_success < _prob_success_threshold) {
+        if (probability_success <= _prob_success_threshold) {
             return std::numeric_limits<double>::max();
         }
         return exec_option_error;

@@ -12,21 +12,25 @@ namespace wrench {
     void SchedulingAlgorithmStaticForesighted::preprocess_decisions(
         const double initial_data_size,
         const double initial_error_level,
-        const double remaining_time,
+        const double deadline,
         const bool lower_bound) {
 
         if (_delta_t_scheme == "fixed") {
             _delta_t = _delta_t_parameter;
-        } else {
+        }
+        else if (_delta_t_scheme == "compute") {
             throw std::invalid_argument("Static foresighted does not support 'compute' delta_t_scheme");
+        }
+        else {
+            throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
         }
         _probability_computation->set_delta_t(_delta_t);
 
 #if OPTIMISTIC_EXECUTION
-        const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
+        const auto n = static_cast<long>(std::floor(deadline / _delta_t));
         const auto R = static_cast<long>(std::floor(_application_specs->get_restart_overhead() / _delta_t));
 #else
-        const auto n = ceiling_division(remaining_time, _delta_t);
+        const auto n = ceiling_division(deadline, _delta_t);
         const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
 #endif
 
@@ -45,18 +49,17 @@ namespace wrench {
 
             double value;
             if (dynamic_cast<ExpectedErrorComparator*>(_comparator_function)) {
-                value = calculate_expected_error(
+                double ps    = calculate_prob_success(
                     num_tasks, 0, initial_data_size, initial_error_level,
                     _delta_t, dp, _application_specs->get_decision_tree_root(),
                     combo, n, R, n, lower_bound);
+                double el    = calculate_error_level(_application_specs->get_decision_tree_root(), combo, 0);
+                value = ps * el + (1.0 - ps) * _application_specs->get_e_fail();
             } else if (dynamic_cast<ProbabilitySuccessComparator*>(_comparator_function)) {
                 value = calculate_prob_success(
                     num_tasks, 0, initial_data_size, initial_error_level,
                     _delta_t, dp, _application_specs->get_decision_tree_root(),
                     combo, n, R, n, lower_bound);
-            } else if (dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
-                value = calculate_error_level(
-                    _application_specs->get_decision_tree_root(), combo, 0);
             } else if (dynamic_cast<SuccessErrorRatioComparator*>(_comparator_function)) {
                 std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp2;
                 double ps = calculate_prob_success(
@@ -66,6 +69,9 @@ namespace wrench {
                 double el = calculate_error_level(
                     _application_specs->get_decision_tree_root(), combo, 0);
                 value = ps / el;
+            } else if (dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
+                value = calculate_error_level(
+                    _application_specs->get_decision_tree_root(), combo, 0);
             } else {
                 throw std::runtime_error("Unknown comparator type");
             }

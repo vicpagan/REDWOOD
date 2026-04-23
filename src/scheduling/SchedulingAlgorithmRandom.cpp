@@ -17,9 +17,9 @@ namespace wrench {
     }
 
     void SchedulingAlgorithmRandom::preprocess_decisions(
-        const double input_data_size,
-        const double input_error_level,
-        const double remaining_time,
+        const double initial_data_size,
+        const double initial_error_level,
+        const double deadline,
         const bool lower_bound) {
     }
 

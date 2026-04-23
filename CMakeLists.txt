@@ -88,6 +88,13 @@ set(SIMULATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
         src/scheduling/SchedulingAlgorithmStaticNearsighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedy.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
         src/SystemState.cpp
         src/Utils.cpp
@@ -102,6 +109,13 @@ set(SIMULATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithmStatic.h
         include/scheduling/SchedulingAlgorithmStaticForesighted.h
         include/scheduling/SchedulingAlgorithmStaticNearsighted.h
+        include/scheduling/SchedulingAlgorithmGreedy.h
+        include/scheduling/SchedulingAlgorithmGreedyForesighted.h
+        include/scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsighted.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.h
         include/scheduling/SchedulingAlgorithmRandom.h
         include/SystemState.h
         include/Utils.h
@@ -159,6 +173,13 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
         src/scheduling/SchedulingAlgorithmStaticNearsighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedy.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
         src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
@@ -171,6 +192,13 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithmStatic.h
         include/scheduling/SchedulingAlgorithmStaticForesighted.h
         include/scheduling/SchedulingAlgorithmStaticNearsighted.h
+        include/scheduling/SchedulingAlgorithmGreedy.h
+        include/scheduling/SchedulingAlgorithmGreedyForesighted.h
+        include/scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsighted.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.h
         include/scheduling/SchedulingAlgorithmRandom.h
         include/scheduling/OptionComparatorFunction.h
         include/SystemState.h
@@ -195,6 +223,13 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
         src/scheduling/SchedulingAlgorithmStaticNearsighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedy.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsighted.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.cpp
+        src/scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
         src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
@@ -205,6 +240,15 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
+        include/scheduling/SchedulingAlgorithmStaticForesighted.h
+        include/scheduling/SchedulingAlgorithmStaticNearsighted.h
+        include/scheduling/SchedulingAlgorithmGreedy.h
+        include/scheduling/SchedulingAlgorithmGreedyForesighted.h
+        include/scheduling/SchedulingAlgorithmGreedyForesightedIncrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyForesightedDecrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsighted.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsightedIncrementing.h
+        include/scheduling/SchedulingAlgorithmGreedyNearsightedDecrementing.h
         include/scheduling/SchedulingAlgorithmRandom.h
         include/scheduling/OptionComparatorFunction.h
         include/SystemState.h

@@ -10,13 +10,17 @@ namespace wrench {
     void SchedulingAlgorithmStaticNearsighted::preprocess_decisions(
         const double initial_data_size,
         const double initial_error_level,
-        const double remaining_time,
+        const double deadline,
         const bool lower_bound) {
 
         if (_delta_t_scheme == "fixed") {
             _delta_t = _delta_t_parameter;
-        } else {
-            throw std::invalid_argument("Static nearsighted does not support 'compute' delta_t_scheme");
+        }
+        else if (_delta_t_scheme == "compute") {
+            throw std::invalid_argument("Static foresighted does not support 'compute' delta_t_scheme");
+        }
+        else {
+            throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
         }
         _probability_computation->set_delta_t(_delta_t);
     }

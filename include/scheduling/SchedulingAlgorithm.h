@@ -46,9 +46,9 @@ namespace wrench {
 
         virtual double get_expected_error() const = 0;
 
-        virtual void preprocess_decisions(double input_data_size,
-            double input_error_level,
-            double remaining_time,
+        virtual void preprocess_decisions(double initial_data_size,
+            double initial_error_level,
+            double deadline,
             bool lower_bound) = 0;
 
         virtual std::vector<SchedulingDecision> make_decisions(
