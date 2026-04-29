@@ -94,13 +94,13 @@ namespace wrench {
             }
 
             while (num_nodes_scheduled < _num_compute_nodes) {
-                double best_exp_err = -std::numeric_limits<double>::infinity();
+                double best_exp_err = std::numeric_limits<double>::infinity();
                 std::vector<std::string> combo_to_add;
 
                 for (const auto &combo : _all_combinations) {
                     _nodes_per_combo_decision[combo]++;
                     double exp_err = this->calculate_expected_error(ps_by_combo, el_by_combo);
-                    if (exp_err > best_exp_err) {
+                    if (exp_err < best_exp_err) {
                         best_exp_err = exp_err;
                         combo_to_add = combo;
                     }

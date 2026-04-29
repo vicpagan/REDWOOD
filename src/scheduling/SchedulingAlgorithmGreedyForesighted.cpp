@@ -180,14 +180,16 @@ namespace wrench {
         for (const auto& entry : *system_state_tracker) {
             std::string hostname = entry.first;
 
-            // auto current_decision_node = system_state_tracker->get_host_current_decision_node(hostname);
-            // if (current_decision_node == nullptr) {
-            //     current_decision_node = _application_specs->get_decision_tree_root();
-            // }
-            // auto task_to_schedule = current_decision_node->children[0]->task; // Should never activate for leaf nodes
-
             if (_static_decisions_per_node.find(hostname) == _static_decisions_per_node.end()) {
                 preprocess_decisions(input_data_size, input_error_level, remaining_time, true);
+
+                // for (const auto &[combo, num_nodes] : _nodes_per_combo_decision) {
+                //     std::cout << "Combo :";
+                //     for (const auto &option : combo) {
+                //         std::cout << option << ", ";
+                //     }
+                //     std::cout << " -------- num_nodes = " << num_nodes << std::endl;
+                // }
 
                 // Transform _nodes_per_option_decision into _static_decisions_per_node
                 auto hostname_iterator = system_state_tracker->begin();
@@ -204,8 +206,6 @@ namespace wrench {
                     }
                 }
             }
-
-
 
             if (!system_state_tracker->is_host_idle(hostname)) continue; // Host is not idle
 

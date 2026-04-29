@@ -78,8 +78,6 @@ namespace wrench {
             // }
         }
 
-        std::cout << "making decisions for scheduling\n";
-
         std::vector<SchedulingDecision> decisions;
         for (const auto& entry : *system_state_tracker) {
             std::string hostname = entry.first;

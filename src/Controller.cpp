@@ -67,13 +67,7 @@ namespace wrench {
 
         /* Determine the list of scheduling algorithms */
         /* Determine/validate the scheduling algorithms to use */
-        std::string scheduling_type;
-        if (_application_spec.at("tasks").as_array().size() == 1) {
-            scheduling_type = "one_task";
-        } else {
-            scheduling_type = "multi_task";
-        }
-        for (auto const &alg_name: _scheduling_spec.at("algorithms").at(scheduling_type).as_array()) {
+        for (auto const &alg_name: _scheduling_spec.at("algorithms").as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
                 boost::json::value_to<string>(alg_name), _application_specs, _task_functions,
                 _probability_computation.get());
@@ -222,7 +216,7 @@ namespace wrench {
                 /* Create an alarm for the deadline */
                 auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _application_specs->get_deadline();
                 // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
-                this->setTimer(time_to_deadline, "time_out:" + std::to_string(repeat));
+                this->setTimer(time_to_deadline, "time_out:" + algorithm->get_name() + "-" + std::to_string(repeat));
 
                 /* Running values of output data size and error level */
                 auto running_output_data_size = initial_data_size;
@@ -236,8 +230,7 @@ namespace wrench {
                 /* Build/reset decision tree to use for temporal redundancy */
                 _application_specs->prune_decision_tree(0.0);
                 _application_specs->build_decision_tree();
-                algorithm->preprocess_decisions(initial_data_size, initial_error_level,
-                                _application_specs->get_deadline(), OPTIMISTIC_DISCRETIZATION);
+                algorithm->reset_preprocessed_decisions();
 
                 /* Reset all current decision nodes for all hosts in the state tracker */
                 _system_state_tracker->reset_all_hosts();
@@ -324,10 +317,6 @@ namespace wrench {
                             algorithm->reset_preprocessed_decisions();
                             _system_state_tracker->reset_all_hosts();
                             _system_state_tracker->initialize_all_hosts_decision_nodes(_application_specs->get_decision_tree_root());
-
-                            algorithm->preprocess_decisions(initial_data_size, initial_error_level,
-                                _application_specs->get_deadline(),
-                                OPTIMISTIC_DISCRETIZATION);
                         } else {
                             // were not done, update all hosts decision nodes to reflect completed task
                             // TODO: Change this for stop_running_jobs hack
@@ -367,10 +356,13 @@ namespace wrench {
 
                         // Is it a timeout?
                         if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
-                            size_t pos = timer_event->message.find(':');
-                            // Check if the colon exists
-                            std::string repeat_id = timer_event->message.substr(pos + 1);
-                            if (repeat_id != std::to_string(repeat)) {
+                            // Check if the colon and hyphen exist
+                            size_t colon_pos = timer_event->message.find(':');
+                            size_t hyphen_pos = timer_event->message.find('-');
+
+                            std::string algorithm_name = timer_event->message.substr(colon_pos + 1, hyphen_pos - colon_pos - 1);
+                            std::string repeat_id = timer_event->message.substr(hyphen_pos + 1);
+                            if (algorithm_name != algorithm->get_name() || repeat_id != std::to_string(repeat)) {
                                 continue; // Spurious timeout
                             }
                             if (best_error == _application_specs->get_e_fail()) {
