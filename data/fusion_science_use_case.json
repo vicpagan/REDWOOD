@@ -400,7 +400,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 50,
+    "num_repeats": 2,
     "deadline_comment": "120 minutes",
     "deadline": 10000,
     "e_fail": 100.0
@@ -412,10 +412,7 @@
       "parameter_comments": "Either a fixed value or a precision value",
       "parameter": 5.0
     },
-    "algorithms": {
-      "one_task": ["static_nearsighted_error_level"],
-      "multi_task": ["greedy_foresighted_decrementing_probability_success"]
-    },
+    "algorithms": ["dynamic", "random", "static_nearsighted_error_level", "greedy_foresighted_decrementing_expected_error"],
     "hacks": {
       "temporal_redundancy": false,
       "stop_running_jobs": false

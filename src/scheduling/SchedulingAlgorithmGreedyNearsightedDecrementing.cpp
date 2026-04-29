@@ -98,7 +98,6 @@ namespace wrench {
                 std::string option_to_remove;
 
                 for (const auto &option : _list_of_options) {
-                    std::cout << "Option " << option << std::endl;
                     _nodes_per_initial_option_decision[option]--;
                     if (_nodes_per_initial_option_decision[option] >= 0) {
                         double exp_err = this->calculate_expected_error(ps_by_option, el_by_option);
