@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <boost/json/value_to.hpp>
+#include <stack>
 
 #include "FunctionGenerator.h"
 
