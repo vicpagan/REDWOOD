@@ -14,19 +14,21 @@ namespace wrench {
 
         double get_expected_error() const override;
 
-        void preprocess_decisions(double initial_data_size,
+        void preprocess_host_decisions(const std::string& hostname,
+                                 double initial_data_size,
                                  double initial_error_level,
                                  double deadline,
                                  bool lower_bound) override;
 
         std::vector<SchedulingDecision> make_decisions(
             SystemState* system_state_tracker,
-            const std::string& task_to_schedule,
-            double input_data_size,
-            double input_error_level,
             double remaining_time) override;
 
-        void reset_preprocessed_decisions() override {
+        void reset_host_preprocessed_decisions(const std::string& hostname) override {
+            // No preprocessing, so nothing to reset
+        }
+
+        void reset_all_preprocessed_decisions() override {
             // No preprocessing, so nothing to reset
         }
 

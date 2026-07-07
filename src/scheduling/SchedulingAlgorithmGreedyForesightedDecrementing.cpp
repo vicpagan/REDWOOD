@@ -9,11 +9,7 @@
 
 namespace wrench {
 
-    void SchedulingAlgorithmGreedyForesightedDecrementing::preprocess_decisions(
-        const double initial_data_size,
-        const double initial_error_level,
-        const double deadline,
-        const bool lower_bound) {
+    void SchedulingAlgorithmGreedyForesightedDecrementing::initial_decisions(const std::string& hostname, double initial_data_size, double initial_error_level, double deadline, bool lower_bound) {
 
         if (_delta_t_scheme == "fixed") {
             _delta_t = _delta_t_parameter;
@@ -34,24 +30,28 @@ namespace wrench {
         const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
 #endif
 
+        const int num_tasks = static_cast<int>(_exec_options.size()) - 1;
+        const ApplicationSpecs::ExecOptionDecisionNode *current_decision_node = _application_specs->get_host_current_decision_node(hostname);
+
         // initialize list of combinations
+        std::vector<std::vector<std::string>> all_combinations;
         std::vector<std::string> current_path;
-        collect_combinations(_application_specs->get_decision_tree_root(), current_path);
+        collect_combinations(all_combinations, current_decision_node, current_path);
 
         // sort list of combinations by error level
         std::map<std::vector<std::string>, double> el_by_combo;
-        for (const auto &combo : _all_combinations) {
-            el_by_combo.emplace(combo, calculate_error_level_one_host(_application_specs->get_decision_tree_root(), combo, 0));
+        for (const auto &combo : all_combinations) {
+            el_by_combo.emplace(combo, calculate_error_level_one_host(current_decision_node, combo, 0));
         }
-        std::sort(_all_combinations.begin(), _all_combinations.end(), [&](const auto &a, const auto &b) {
+        std::sort(all_combinations.begin(), all_combinations.end(), [&](const auto &a, const auto &b) {
             return el_by_combo.at(a) < el_by_combo.at(b);
         });
 
         // initialize the decisions starting at N nodes per combination
-        for (const auto &combo : _all_combinations) {
+        for (const auto &combo : all_combinations) {
             _nodes_per_combo_decision[combo] = _num_compute_nodes;
         }
-        long num_nodes_scheduled = _num_compute_nodes * static_cast<long>(_all_combinations.size());
+        long num_nodes_scheduled = _num_compute_nodes * static_cast<long>(all_combinations.size());
 
         // Select combo with the highest probability of success
         // Schedules this combo on all compute nodes
@@ -60,13 +60,13 @@ namespace wrench {
             std::vector<std::string> best_combo;
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : _all_combinations) {
-                const int num_tasks = static_cast<int>(combo.size()) - 1;
+            for (const auto &combo : all_combinations) {
 
                 double ps = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
-                    _delta_t, dp, _application_specs->get_decision_tree_root(),
-                    combo, d, R, d, lower_bound);
+                    _delta_t, dp, current_decision_node,
+                    combo, 0,
+                    d, R, d, lower_bound);
                 dp.clear();
 
                 if (ps > best_ps) {
@@ -75,7 +75,7 @@ namespace wrench {
                 }
             }
 
-            for (const auto &combo : _all_combinations) {
+            for (const auto &combo : all_combinations) {
                 if (combo != best_combo) {
                     _nodes_per_combo_decision[combo] = 0;
                 }
@@ -86,13 +86,13 @@ namespace wrench {
             std::map<std::vector<std::string>, double> ps_by_combo;
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : _all_combinations) {
-                const int num_tasks = static_cast<int>(combo.size()) - 1;
+            for (const auto &combo : all_combinations) {
 
                 ps_by_combo[combo] = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
-                    _delta_t, dp, _application_specs->get_decision_tree_root(),
-                    combo, d, R, d, lower_bound);
+                    _delta_t, dp, current_decision_node,
+                    combo, 0,
+                    d, R, d, lower_bound);
                 dp.clear();
             }
 
@@ -100,10 +100,10 @@ namespace wrench {
                 double best_exp_err = std::numeric_limits<double>::infinity();
                 std::vector<std::string> combo_to_remove;
 
-                for (const auto &combo : _all_combinations) {
+                for (const auto &combo : all_combinations) {
                     _nodes_per_combo_decision[combo]--;
                     if (_nodes_per_combo_decision[combo] >= 0) {
-                        double exp_err = this->calculate_expected_error(ps_by_combo, el_by_combo);
+                        double exp_err = this->calculate_expected_error(all_combinations, ps_by_combo, el_by_combo);
                         if (exp_err < best_exp_err) {
                             best_exp_err = exp_err;
                             combo_to_remove = combo;
@@ -121,13 +121,13 @@ namespace wrench {
             std::vector<std::string> best_combo;
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : _all_combinations) {
-                const int num_tasks = static_cast<int>(combo.size()) - 1;
+            for (const auto &combo : all_combinations) {
 
                 double ps = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
-                    _delta_t, dp, _application_specs->get_decision_tree_root(),
-                    combo, d, R, d, lower_bound);
+                    _delta_t, dp, current_decision_node,
+                    combo, 0,
+                    d, R, d, lower_bound);
                 dp.clear();
                 double el = el_by_combo[combo];
 
@@ -139,37 +139,37 @@ namespace wrench {
                 }
             }
 
-            for (const auto &combo : _all_combinations) {
+            for (const auto &combo : all_combinations) {
                 if (combo != best_combo) {
                     _nodes_per_combo_decision[combo] = 0;
                 }
             }
         }
         else if (auto error_level_comparator_function = dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
-            double best_el = -std::numeric_limits<double>::infinity();
+            double best_el = std::numeric_limits<double>::infinity();
             std::vector<std::string> best_combo;
             double ps_threshold = error_level_comparator_function->get_prob_success_threshold();
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : _all_combinations) {
-                const int num_tasks = static_cast<int>(combo.size()) - 1;
+            for (const auto &combo : all_combinations) {
 
                 double ps = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
-                    _delta_t, dp, _application_specs->get_decision_tree_root(),
-                    combo, d, R, d, lower_bound);
+                    _delta_t, dp, current_decision_node,
+                    combo, 0,
+                    d, R, d, lower_bound);
                 dp.clear();
                 double el = el_by_combo[combo];
 
                 if (ps > ps_threshold) {
-                    if (el > best_el) {
+                    if (el < best_el) {
                         best_el = el;
                         best_combo = combo;
                     }
                 }
             }
 
-            for (const auto &combo : _all_combinations) {
+            for (const auto &combo : all_combinations) {
                 if (combo != best_combo) {
                     _nodes_per_combo_decision[combo] = 0;
                 }

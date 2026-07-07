@@ -51,6 +51,8 @@ namespace wrench {
                                         double restart_overhead,
                                         S4U_CommPort* notify_commport);
 
+        static void stop_node_killer(const std::string &victim_hostname);
+
     private:
         [[noreturn]] int main() override;
         static std::shared_ptr<NodeKiller> start_node_killer(Simulation* simulation,

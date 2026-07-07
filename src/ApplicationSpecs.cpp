@@ -13,7 +13,8 @@ namespace wrench {
                                        const boost::json::object& failure_spec,
                                        const boost::json::object& application_spec,
                                        const boost::json::object& execution_spec,
-                                       const boost::json::object& scheduling_spec) {
+                                       const boost::json::object& scheduling_spec,
+                                       const std::vector<std::string>& hostnames) : _hostnames(hostnames) {
 
         _num_compute_nodes = boost::json::value_to<int>(platform_spec.at("num_compute_nodes"));
 
@@ -65,7 +66,11 @@ namespace wrench {
         _initial_data_size = boost::json::value_to<double>(application_spec.at("initial_data_size"));
         _initial_error_level = boost::json::value_to<double>(application_spec.at("initial_error_level"));
 
-        _exec_option_decision_tree = std::make_shared<ExecOptionDecisionTree>(ExecOptionDecisionTree(this, ExecOptionDecisionNode::create_decision_node("", "", false)));
+        for (const auto& hostname : _hostnames) {
+            _hosts_decision_trees[hostname] = std::make_shared<ExecOptionDecisionTree>(ExecOptionDecisionTree(this, ExecOptionDecisionNode::create_decision_node("", "", false)));
+            _hosts_current_scheduled_tasks[hostname] = _task_order.at(0);
+            _hosts_running_data_size_and_error_level[hostname] = {_initial_data_size, _initial_error_level};
+        }
     }
 
     std::shared_ptr<ApplicationSpecs> ApplicationSpecs::create_application_specs(
@@ -73,9 +78,10 @@ namespace wrench {
         const boost::json::object& failure_spec,
         const boost::json::object& application_spec,
         const boost::json::object& execution_spec,
-        const boost::json::object& scheduling_spec) {
+        const boost::json::object& scheduling_spec,
+        const std::vector<std::string>& hostnames) {
 
-        return std::make_shared<ApplicationSpecs>(platform_spec, failure_spec, application_spec, execution_spec, scheduling_spec);
+        return std::make_shared<ApplicationSpecs>(platform_spec, failure_spec, application_spec, execution_spec, scheduling_spec, hostnames);
     }
 
     void ApplicationSpecs::merge_in_situ_tasks(std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& task_functions) {
@@ -156,41 +162,259 @@ namespace wrench {
         }
     }
 
-    std::string ApplicationSpecs::get_task(const int index) {
+    void ApplicationSpecs::update_host_running_data_size(const std::string& hostname, const double data_size) {
+        _hosts_running_data_size_and_error_level[hostname].first = data_size;
+    }
+
+    void ApplicationSpecs::update_host_running_error_level(const std::string& hostname, const double error_level) {
+        _hosts_running_data_size_and_error_level[hostname].second = error_level;
+    }
+
+    double ApplicationSpecs::get_host_running_data_size(const std::string& hostname) const {
+        return _hosts_running_data_size_and_error_level.at(hostname).first;
+    }
+
+    double ApplicationSpecs::get_host_running_error_level(const std::string& hostname) const {
+        return _hosts_running_data_size_and_error_level.at(hostname).second;
+    }
+
+    void ApplicationSpecs::update_host_task_to_schedule(const std::string& hostname, const int task_index) {
+        _hosts_current_scheduled_tasks[hostname] = _task_order.at(task_index);
+    }
+
+    void ApplicationSpecs::update_host_task_to_schedule(const std::string& hostname, const std::string& task_name) {
+        _hosts_current_scheduled_tasks[hostname] = task_name;
+    }
+
+    void ApplicationSpecs::increment_host_task_to_schedule(const std::string& hostname) {
+        std::string current_task = _hosts_current_scheduled_tasks[hostname];
+        size_t i = 0;
+        while (_task_order.at(i) != current_task) {
+            i++;
+        }
+        i++;
+
+        if (i < _num_tasks) {
+            _hosts_current_scheduled_tasks[hostname] = _task_order.at(i);
+        } else {
+            _hosts_current_scheduled_tasks[hostname] = "";
+        }
+    }
+
+    std::string ApplicationSpecs::get_host_task_to_schedule(const std::string& hostname) const {
+        std::cerr << "TESTABLE HOSTNAME = " << hostname << "\n";
+        return _hosts_current_scheduled_tasks.at(hostname);
+    }
+
+    int ApplicationSpecs::get_host_task_to_schedule_index(const std::string& hostname) const {
+        std::string current_task = _hosts_current_scheduled_tasks.at(hostname);
+        std::cerr << "Host " << hostname << " current task: " << current_task << std::endl;
+        return get_task_index(_hosts_current_scheduled_tasks.at(hostname));
+    }
+
+    std::string ApplicationSpecs::get_task(const int index) const {
         if (index < 0 || index >= _num_tasks) {
             return "";
         }
         return _task_order.at(index);
     }
 
-    void ApplicationSpecs::build_decision_tree() const {
-        _exec_option_decision_tree->build_tree();
+    int ApplicationSpecs::get_task_index(const std::string& task_name) const {
+        std::cerr << "Getting task index for task " << task_name << std::endl;
+        std::string current_task = _task_order[0];
+        int i = 0;
+        while (current_task != task_name && i < _num_tasks) {
+            i++;
+            current_task = _task_order.at(i);
+        }
+        if (i == _num_tasks) {
+            return -1;
+        }
+        return i;
     }
 
-    void ApplicationSpecs::prune_decision_tree(const double best_error) const {
-        _exec_option_decision_tree->prune_tree(best_error);
+    const ApplicationSpecs::ExecOptionDecisionNode* ApplicationSpecs::get_host_current_decision_node(const std::string& hostname) const {
+        return _hosts_current_decision_nodes.at(hostname).get();
     }
 
-    bool ApplicationSpecs::decision_tree_empty() const {
-        if (_exec_option_decision_tree->root == nullptr || _exec_option_decision_tree->root->num_children == 0) {
+    void ApplicationSpecs::increment_host_current_decision_node(const std::string& hostname, const std::string &task_name, const std::string &execution_option) {
+        auto decision_node = _hosts_current_decision_nodes.at(hostname);
+        if (!decision_node->is_leaf) {
+            for (const auto& child : decision_node->children) {
+                if (child->task == task_name && child->execution_option == execution_option) {
+                    decision_node = child;
+                    break;
+                }
+            }
+            _hosts_current_decision_nodes[hostname] = decision_node;
+            _hosts_decision_history[hostname].push_back(execution_option);
+        } else {
+            std::cerr << "Host has finished its execution" << std::endl;
+        }
+    }
+
+    void ApplicationSpecs::update_host_current_decision_node(const std::string& hostname, const std::string& reference_hostname) {
+        std::cerr << "updating " << hostname << " current decision node with reference hostname " << reference_hostname << std::endl;
+        auto current_decision_node = _hosts_decision_trees.at(hostname)->root;
+        for (const auto& entry : _hosts_decision_history[reference_hostname]) {
+            std::cerr << "current entry: " << entry << std::endl;
+            bool found = false;
+            for (const auto& child : current_decision_node->children) {
+                if (child->execution_option == entry) {
+                    current_decision_node = child;
+                    found = true;
+                    std::cerr << "FOUND!" << std::endl;
+                    break;
+                }
+            }
+
+            if (!found) {
+                std::string available;
+                for (const auto& child : current_decision_node->children) {
+                    available += child->execution_option + " ";
+                }
+
+                throw std::runtime_error("No matching execution_option='" + entry + "' at node. Available: " + available);
+            }
+        }
+        _hosts_current_decision_nodes[hostname] = current_decision_node;
+        std::cerr << "node ptr: " << current_decision_node << "\n";
+        _hosts_decision_history[hostname] = _hosts_decision_history.at(reference_hostname);
+    }
+
+    bool ApplicationSpecs::can_possibly_do_better(const std::string& hostname, const std::string& reference_hostname) const {
+        double min_error_factor = std::numeric_limits<double>::infinity();
+        double max_error_factor = -std::numeric_limits<double>::infinity();
+        const auto current_host_decision_node = _hosts_current_decision_nodes.at(hostname);
+        const auto reference_host_decision_node = _hosts_current_decision_nodes.at(reference_hostname);
+
+        std::stack<std::shared_ptr<ExecOptionDecisionNode>> stack;
+        stack.push(current_host_decision_node);
+        while (!stack.empty()) {
+            const auto current_decision_node = stack.top();
+            stack.pop();
+
+            if (current_decision_node->is_leaf) {
+                min_error_factor = std::min(min_error_factor, current_decision_node->cumulative_error_factor);
+            } else {
+                for (const auto& child : current_decision_node->children) {
+                    stack.push(child);
+                }
+            }
+        }
+
+        stack.push(reference_host_decision_node);
+        while (!stack.empty()) {
+            const auto current_decision_node = stack.top();
+            stack.pop();
+
+            if (current_decision_node->is_leaf) {
+                max_error_factor = std::max(max_error_factor, current_decision_node->cumulative_error_factor);
+            } else {
+                for (const auto& child : current_decision_node->children) {
+                    stack.push(child);
+                }
+            }
+        }
+
+        return min_error_factor < max_error_factor;
+    }
+
+    void ApplicationSpecs::reset_host_current_decision_node(const std::string& hostname) {
+        _hosts_current_decision_nodes[hostname] = _hosts_decision_trees.at(hostname)->root;
+    }
+
+    void ApplicationSpecs::reset_all_hosts_current_decision_nodes() {
+        for (const auto& hostname : _hostnames) {
+            _hosts_current_decision_nodes[hostname] = _hosts_decision_trees.at(hostname)->root;
+        }
+    }
+
+    void ApplicationSpecs::update_host_decision_history(const std::string& hostname, const std::string& reference_hostname) {
+        _hosts_decision_history[hostname] = _hosts_decision_history.at(reference_hostname);
+    }
+
+    void ApplicationSpecs::reset_host_decision_history(const std::string& hostname) {
+        _hosts_decision_history[hostname].clear();
+    }
+
+    void ApplicationSpecs::reset_all_hosts_decision_history() {
+        for (const auto& hostname : _hostnames) {
+            _hosts_decision_history[hostname].clear();
+        }
+    }
+
+    ////////////////// DECISION TREE MANAGEMENT METHODS //////////////////
+    
+    void ApplicationSpecs::build_decision_trees() const {
+        for (const auto& hostname : _hostnames) {
+            this->build_decision_tree(hostname);
+        }
+    }
+
+    void ApplicationSpecs::prune_decision_trees(const double best_error) const {
+        for (const auto& hostname : _hostnames) {
+            this->prune_decision_tree(hostname, best_error);
+        }
+    }
+
+    void ApplicationSpecs::clear_decision_trees() const {
+        for (const auto& hostname : _hostnames) {
+            this->clear_decision_tree(hostname);
+        }
+    }
+
+    void ApplicationSpecs::build_decision_tree(const std::string& hostname) const {
+        _hosts_decision_trees.at(hostname)->build_tree();
+    }
+
+    void ApplicationSpecs::prune_decision_tree(const std::string& hostname, const double best_error) const {
+        _hosts_decision_trees.at(hostname)->prune_tree(best_error);
+    }
+
+    void ApplicationSpecs::clear_decision_tree(const std::string& hostname) const {
+        _hosts_decision_trees.at(hostname)->prune_tree(0.0);
+    }
+
+    bool ApplicationSpecs::decision_tree_empty(const std::string& hostname) const {
+        std::function<void(const std::shared_ptr<ExecOptionDecisionNode>&, int)> print_tree = [&](const std::shared_ptr<ExecOptionDecisionNode>& node, int depth) {
+            if (!node) return;
+
+            std::string indent(depth * 2, ' ');
+
+            std::cout << indent
+                      << "execution_option: " << node->execution_option
+                      << " | task: " << node->task
+                      << " | error_lvl: " << node->cumulative_error_factor
+                      << std::endl;
+
+            for (const auto& child : node->children) {
+                print_tree(child, depth + 1);
+            }
+        };
+        print_tree(_hosts_decision_trees.at(hostname)->root, 0);
+
+        if (_hosts_decision_trees.at(hostname)->root == nullptr || _hosts_decision_trees.at(hostname)->root->num_children == 0) {
             return true;
         }
         return false;
     }
 
-    void ApplicationSpecs::ExecOptionDecisionTree::build_tree() {
+    ////////////////// DECISION TREE INTERNAL METHODS //////////////////
+
+    void ApplicationSpecs::ExecOptionDecisionTree::build_tree() const {
         if (application_specs->_num_tasks == 0) {
             std::cerr << "No tasks!" << std::endl;
             return;
         }
 
-        build_tree_helper(0, application_specs->_exec_option_decision_tree->root, 1.0, 1.0);
+        build_tree_helper(0, root, 1.0, 1.0);
     }
 
     void ApplicationSpecs::ExecOptionDecisionTree::build_tree_helper(const int task_index,
                                                                      const std::shared_ptr<ExecOptionDecisionNode>& parent,
                                                                      const double running_data_size_factor,
-                                                                     const double running_error_factor) {
+                                                                     const double running_error_factor) const {
 
         if (task_index >= application_specs->_num_tasks) {
             parent->is_leaf = true;
@@ -214,11 +438,11 @@ namespace wrench {
         }
     }
 
-    void ApplicationSpecs::ExecOptionDecisionTree::prune_tree(const double best_error) {
+    void ApplicationSpecs::ExecOptionDecisionTree::prune_tree(const double best_error) const {
         prune_tree_helper(root, best_error);
     }
 
-    bool ApplicationSpecs::ExecOptionDecisionTree::prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, const double best_error) {
+    bool ApplicationSpecs::ExecOptionDecisionTree::prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, const double best_error) const {
         if (!node) {
             return true;
         }
@@ -242,6 +466,5 @@ namespace wrench {
         // If after pruning all children are gone, prune this node as well
         return children.empty();
     }
-
 
 }

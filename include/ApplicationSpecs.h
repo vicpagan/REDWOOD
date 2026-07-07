@@ -18,14 +18,16 @@ namespace wrench {
             const boost::json::object& failure_spec,
             const boost::json::object& application_spec,
             const boost::json::object& execution_spec,
-            const boost::json::object& scheduling_spec);
+            const boost::json::object& scheduling_spec,
+            const std::vector<std::string>& hostnames);
 
         static std::shared_ptr<ApplicationSpecs> create_application_specs(
             const boost::json::object& platform_spec,
             const boost::json::object& failure_spec,
             const boost::json::object& application_spec,
             const boost::json::object& execution_spec,
-            const boost::json::object& scheduling_spec);
+            const boost::json::object& scheduling_spec,
+            const std::vector<std::string>& hostnames);
 
 
         friend struct ExecOptionDecisionNode;
@@ -65,23 +67,29 @@ namespace wrench {
                 root(std::move(root)) {
             }
 
-            void build_tree();
+            void build_tree() const;
 
             void build_tree_helper(int task_index,
                                    const std::shared_ptr<ExecOptionDecisionNode>& parent,
                                    double running_data_size_factor,
-                                   double running_error_factor);
+                                   double running_error_factor) const;
 
-            void prune_tree(double best_error);
+            void prune_tree(double best_error) const;
 
-            bool prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, double best_error);
+            bool prune_tree_helper(const std::shared_ptr<ExecOptionDecisionNode>& node, double best_error) const;
         };
 
-        void build_decision_tree() const;
-        void prune_decision_tree(double best_error) const;
-        bool decision_tree_empty() const;
+        void build_decision_trees() const;
+        void prune_decision_trees(double best_error) const;
+        void clear_decision_trees() const;
 
-        ExecOptionDecisionNode* get_decision_tree_root() const { return _exec_option_decision_tree->root.get(); }
+        void build_decision_tree(const std::string& hostname) const;
+        void prune_decision_tree(const std::string& hostname, double best_error) const;
+        void clear_decision_tree(const std::string &hostname) const;
+
+        bool decision_tree_empty(const std::string& hostname) const;
+
+        const ExecOptionDecisionNode* get_decision_tree_root(const std::string& hostname) const { return _hosts_decision_trees.at(hostname)->root.get(); }
 
         void merge_in_situ_tasks(std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& task_functions);
 
@@ -103,7 +111,31 @@ namespace wrench {
         double get_initial_data_size() const { return _initial_data_size; }
         double get_initial_error_level() const { return _initial_error_level; }
 
-        std::string get_task(int index);
+        void update_host_running_data_size(const std::string& hostname, double data_size);
+        void update_host_running_error_level(const std::string& hostname, double error_level);
+        double get_host_running_data_size(const std::string& hostname) const;
+        double get_host_running_error_level(const std::string& hostname) const;
+
+        std::string get_task(int index) const;
+        int get_task_index(const std::string& task_name) const;
+
+        std::string get_host_task_to_schedule(const std::string& hostname) const;
+        int get_host_task_to_schedule_index(const std::string& hostname) const;
+        void update_host_task_to_schedule(const std::string& hostname, int task_index);
+        void update_host_task_to_schedule(const std::string& hostname, const std::string& task_name);
+        void increment_host_task_to_schedule(const std::string& hostname);
+
+        const ExecOptionDecisionNode* get_host_current_decision_node(const std::string& hostname) const;
+        void increment_host_current_decision_node(const std::string& hostname, const std::string &task_name, const std::string &execution_option);
+        void update_host_current_decision_node(const std::string& hostname, const std::string& reference_hostname);
+        void reset_host_current_decision_node(const std::string& hostname);
+        void reset_all_hosts_current_decision_nodes();
+
+        void update_host_decision_history(const std::string& hostname, const std::string& reference_hostname);
+        void reset_host_decision_history(const std::string& hostname);
+        void reset_all_hosts_decision_history();
+
+        bool can_possibly_do_better(const std::string& hostname, const std::string& reference_hostname) const;
 
     protected:
         int _num_compute_nodes;
@@ -124,9 +156,15 @@ namespace wrench {
         std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>
         _task_functions;
         std::map<std::string, bool> _in_situ_tasks;
+        std::vector<std::string> _hostnames;
         std::vector<std::string> _task_order;
         int _num_tasks;
-        std::shared_ptr<ExecOptionDecisionTree> _exec_option_decision_tree;
+
+        std::map<std::string, std::shared_ptr<ExecOptionDecisionTree>> _hosts_decision_trees;
+        std::map<std::string, std::shared_ptr<ExecOptionDecisionNode>> _hosts_current_decision_nodes;
+        std::map<std::string, std::vector<std::string>> _hosts_decision_history;
+        std::map<std::string, std::string> _hosts_current_scheduled_tasks;
+        std::map<std::string, std::pair<double, double>> _hosts_running_data_size_and_error_level;
     };
 }
 

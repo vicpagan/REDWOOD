@@ -40,7 +40,8 @@
     - It should only reset the decisions for a single host
     - Multi-host heuristics should use the decision tree for its list of options to consider since options are removed with temporal redundancy
   - Implement different options for stop running jobs hack
-
+  - Create MongoDB database and populate with subset of all configurations
+  - Write 
 
 EXPERIMENTS:
   - Test cancel useless runs of tasks upon a single host completing hack

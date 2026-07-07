@@ -20,17 +20,12 @@ namespace wrench {
             : SchedulingAlgorithmStatic(application_specs, "static_nearsighted", exec_options,
                                        probability_computation, comparator_function) {}
 
-        void preprocess_decisions(double initial_data_size,
+        void preprocess_host_decisions(const std::string& hostname,
+                                 double initial_data_size,
                                  double initial_error_level,
                                  double deadline,
                                  bool lower_bound) override;
 
-        std::vector<SchedulingAlgorithm::SchedulingDecision> make_decisions(
-            SystemState* system_state_tracker,
-            const std::string& task_to_schedule,
-            double input_data_size,
-            double input_error_level,
-            double remaining_time) override;
     };
 
 }

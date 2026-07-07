@@ -46,16 +46,15 @@ namespace wrench {
 
         virtual double get_expected_error() const = 0;
 
-        virtual void preprocess_decisions(double initial_data_size,
+        virtual void preprocess_host_decisions(
+            const std::string& hostname,
+            double initial_data_size,
             double initial_error_level,
             double deadline,
             bool lower_bound) = 0;
 
         virtual std::vector<SchedulingDecision> make_decisions(
             SystemState* system_state_tracker,
-            const std::string& task_to_schedule,
-            double input_data_size,
-            double input_error_level,
             double remaining_time) = 0;
 
 
@@ -71,7 +70,8 @@ namespace wrench {
             _delta_t = delta_t;
         }
 
-        virtual void reset_preprocessed_decisions() = 0;
+        virtual void reset_host_preprocessed_decisions(const std::string& hostname) = 0;
+        virtual void reset_all_preprocessed_decisions() = 0;
 
     protected:
         std::shared_ptr<ApplicationSpecs> _application_specs;

@@ -159,4 +159,10 @@ namespace wrench {
         }
     }
 
+    void NodeKiller::stop_node_killer(const std::string &victim_hostname) {
+        if (_node_killers.find(victim_hostname) != _node_killers.end()) {
+            _node_killers[victim_hostname]->killActor();
+        }
+    }
+
 }

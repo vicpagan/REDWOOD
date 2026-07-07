@@ -1,6 +1,7 @@
 #include "scheduling/SchedulingAlgorithmRandom.h"
 #include <random>
 #include <chrono>
+#include <iostream>
 
 namespace wrench {
 
@@ -16,7 +17,8 @@ namespace wrench {
         return _e_fail;
     }
 
-    void SchedulingAlgorithmRandom::preprocess_decisions(
+    void SchedulingAlgorithmRandom::preprocess_host_decisions(
+        const std::string& hostname,
         const double initial_data_size,
         const double initial_error_level,
         const double deadline,
@@ -25,29 +27,31 @@ namespace wrench {
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmRandom::make_decisions(
         SystemState* system_state_tracker,
-        const std::string& task_to_schedule,
-        const double input_data_size,
-        const double input_error_level,
         const double remaining_time) {
 
         std::vector<SchedulingDecision> decisions;
 
-        // Get all execution options for this task
-        const auto& task_options = _exec_options.at(task_to_schedule);
-
-        // Create a vector of option names
-        std::vector<std::string> option_names;
-        for (const auto& [option_name, _] : task_options) {
-            option_names.push_back(option_name);
-        }
-
-        // Randomly select an option for each idle host
-        std::uniform_int_distribution<size_t> dist(0, option_names.size() - 1);
-
         for (const auto& entry : *system_state_tracker) {
             std::string hostname = entry.first;
+            std::cerr << "HOSTNAME RANDOM MAKE DECISIONS = " << hostname << "\n";
+            std::string task_to_schedule = _application_specs->get_host_task_to_schedule(hostname);
 
             if (system_state_tracker->is_host_idle(hostname)) {
+                // Get all execution options for this task
+                const auto current_decision_node = _application_specs->get_host_current_decision_node(hostname);
+
+                // Create a vector of option names
+                std::vector<std::string> option_names;
+                std::cerr << "Options available for host " << hostname << ": ";
+                for (const auto& child : current_decision_node->children) {
+                    std::cerr << child->execution_option << "   ";
+                    option_names.push_back(child->execution_option);
+                }
+                std::cerr << std::endl;
+
+                // Randomly select an option for each idle host
+                std::uniform_int_distribution<size_t> dist(0, option_names.size() - 1);
+
                 std::string random_option = option_names[dist(_rng)];
                 decisions.push_back({hostname, task_to_schedule, random_option});
             }

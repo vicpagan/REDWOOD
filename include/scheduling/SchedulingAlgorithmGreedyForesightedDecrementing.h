@@ -21,7 +21,8 @@ namespace wrench {
                                        probability_computation, comparator_function) {
         }
 
-        void preprocess_decisions(double initial_data_size,
+        void initial_decisions(const std::string& hostname,
+                                 double initial_data_size,
                                  double initial_error_level,
                                  double deadline,
                                  bool lower_bound) override;

@@ -13,7 +13,8 @@
 
 namespace wrench {
 
-    void SchedulingAlgorithmDynamic::preprocess_decisions(const double initial_data_size,
+    void SchedulingAlgorithmDynamic::preprocess_host_decisions(const std::string& hostname,
+        const double initial_data_size,
         const double initial_error_level,
         const double deadline,
         const bool lower_bound) {
@@ -24,7 +25,8 @@ namespace wrench {
             if (_delta_t_scheme == "fixed") {
                 selected_delta_t = _delta_t_parameter;
             } else if (_delta_t_scheme == "compute") {
-                selected_delta_t = this->compute_best_delta_t(initial_data_size, initial_error_level, deadline, 1e-2);
+                throw std::invalid_argument("Delta T computation unavailable at the moment (under construction sorry!)");
+                // selected_delta_t = this->compute_best_delta_t(initial_data_size, initial_error_level, deadline, 1e-2);
             } else {
                 throw std::invalid_argument("Unknown delta_t_scheme '" + _delta_t_scheme + "'");
             }
@@ -35,8 +37,8 @@ namespace wrench {
             _probability_computation->set_delta_t(selected_delta_t);
         }
 
-        _preprocessed_decisions.clear();
-        this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, lower_bound);
+        _preprocessed_decisions_by_host.erase(hostname);
+        this->fill_host_preprocessing_table(hostname, initial_data_size, initial_error_level, deadline, lower_bound);
     }
 
     double SchedulingAlgorithmDynamic::calculate_expected_error(
@@ -160,12 +162,14 @@ namespace wrench {
      * DYNAMIC SCHEDULING ALGORITHM
      *
      * @brief Selects the best execution option based on the lowest E(x, y, n)
+     * @param hostname The name of the host duh
      * @param input_data_size This is our x
      * @param input_error_level This is our y
      * @param remaining_time This is our n, which is the remaining time until the deadline
      * @return The name of the best execution option
      */
-    void SchedulingAlgorithmDynamic::fill_preprocessing_table(const double input_data_size,
+    void SchedulingAlgorithmDynamic::fill_host_preprocessing_table(const std::string& hostname,
+        const double input_data_size,
         const double input_error_level,
         const double remaining_time,
         const bool lower_bound) {
@@ -183,10 +187,13 @@ namespace wrench {
         std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<std::string, double>>> dp;
 
         // FIXME: Not a big fan of this brute forcing but whatever
+        const int num_tasks = static_cast<int>(_exec_options.size()) - 1;
+        const int task_to_schedule_index = _application_specs->get_host_task_to_schedule_index(hostname);
+        const ApplicationSpecs::ExecOptionDecisionNode *current_decision_node = _application_specs->get_host_current_decision_node(hostname);
         for (long i = 0; i <= n; i++) {
             // std::cout << "ITERATION i = " << i << std::endl;
-            calculate_expected_error(static_cast<int>(_exec_options.size()) - 1, 0, input_data_size, input_error_level, _delta_t, dp,
-                                 _application_specs->get_decision_tree_root(), i, R, n, lower_bound);
+            calculate_expected_error(num_tasks - task_to_schedule_index, task_to_schedule_index, input_data_size, input_error_level, _delta_t, dp,
+                                 current_decision_node, i, R, n, lower_bound);
         }
 
         // for (auto &entry : dp) {
@@ -195,7 +202,7 @@ namespace wrench {
         //     }
         // }
 
-        _optimal_EV = dp[_application_specs->get_decision_tree_root()][n].second;
+        _optimal_EV = dp[_application_specs->get_host_current_decision_node(hostname)][n].second;
 
         for (auto &entry : dp) {
             std::vector<std::pair<long, std::string>> compressed;
@@ -211,7 +218,7 @@ namespace wrench {
                     last_option = option;
                 }
             }
-            _preprocessed_decisions.emplace(entry.first, std::move(compressed));
+            _preprocessed_decisions_by_host[hostname].emplace(entry.first, std::move(compressed));
         }
 
         // for (auto &entry : _preprocessed_decisions) {
@@ -223,98 +230,113 @@ namespace wrench {
         // }
     }
 
-    double SchedulingAlgorithmDynamic::compute_best_delta_t(const double initial_data_size,
-        const double initial_error_level,
-        const double deadline,
-        double precision) {
 
-        // Remember the current delta to restore it later (pretty hacky)
-        double current_delta_t = _delta_t;
-
-        double lo = 1.0; // What to put here?
-        double hi = 10000.0; // What to put here?
-        double best_deltat = lo;
-
-        while (std::abs(hi - lo) / hi > precision) {
-            std::cerr << "HI=" << hi << "  LO=" <<  lo << std::endl;
-            double mid = (lo + hi) / 2;
-
-            _probability_computation->set_delta_t(mid);
-            _delta_t = mid;
-
-            // Lower bound
-            _preprocessed_decisions.clear();
-            this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, true);
-            double result_lower_bound = this->get_expected_error();
-
-            // Upper bound
-            _preprocessed_decisions.clear();
-            this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, false);
-            double result_upper_bound = this->get_expected_error();
-
-            double result_avg = (result_upper_bound + result_lower_bound) / 2;
-            std::cerr << "EV(MID) UPPER BOUND = " << result_upper_bound <<
-                "   EV(MID) LOWER BOUND = " << result_lower_bound <<
-                "   EV(MID) AVG = " << result_avg << std::endl;
-
-            if ((std::abs(result_upper_bound - result_lower_bound) / result_upper_bound) < precision) {
-                // Precision is good enough — try a larger deltat
-                std::cerr << "Precision is good enough - trying a larger deltat    Current deltat " << mid << std::endl << std::endl;
-                best_deltat = mid;
-                lo = mid;
-            } else {
-                // Not precise enough — reduce deltat
-                std::cerr << "Not precise enough - reducing deltat    Current deltat = " << mid << std::endl << std::endl;
-                hi = mid;
-            }
-        }
-
-        // Restore original delta_t
-        _delta_t = current_delta_t;
-        _probability_computation->set_delta_t(current_delta_t);
-
-        return best_deltat;
-    }
+    // FIXME: This needs to be moved to another file anyway
+    // double SchedulingAlgorithmDynamic::compute_best_delta_t(const double initial_data_size,
+    //     const double initial_error_level,
+    //     const double deadline,
+    //     double precision) {
+    //
+    //     // Remember the current delta to restore it later (pretty hacky)
+    //     double current_delta_t = _delta_t;
+    //
+    //     double lo = 1.0; // What to put here?
+    //     double hi = 10000.0; // What to put here?
+    //     double best_deltat = lo;
+    //
+    //     while (std::abs(hi - lo) / hi > precision) {
+    //         std::cerr << "HI=" << hi << "  LO=" <<  lo << std::endl;
+    //         double mid = (lo + hi) / 2;
+    //
+    //         _probability_computation->set_delta_t(mid);
+    //         _delta_t = mid;
+    //
+    //         // Lower bound
+    //         _preprocessed_decisions.clear();
+    //         this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, true);
+    //         double result_lower_bound = this->get_expected_error();
+    //
+    //         // Upper bound
+    //         _preprocessed_decisions.clear();
+    //         this->fill_preprocessing_table(initial_data_size, initial_error_level, deadline, false);
+    //         double result_upper_bound = this->get_expected_error();
+    //
+    //         double result_avg = (result_upper_bound + result_lower_bound) / 2;
+    //         std::cerr << "EV(MID) UPPER BOUND = " << result_upper_bound <<
+    //             "   EV(MID) LOWER BOUND = " << result_lower_bound <<
+    //             "   EV(MID) AVG = " << result_avg << std::endl;
+    //
+    //         if ((std::abs(result_upper_bound - result_lower_bound) / result_upper_bound) < precision) {
+    //             // Precision is good enough — try a larger deltat
+    //             std::cerr << "Precision is good enough - trying a larger deltat    Current deltat " << mid << std::endl << std::endl;
+    //             best_deltat = mid;
+    //             lo = mid;
+    //         } else {
+    //             // Not precise enough — reduce deltat
+    //             std::cerr << "Not precise enough - reducing deltat    Current deltat = " << mid << std::endl << std::endl;
+    //             hi = mid;
+    //         }
+    //     }
+    //
+    //     // Restore original delta_t
+    //     _delta_t = current_delta_t;
+    //     _probability_computation->set_delta_t(current_delta_t);
+    //
+    //     return best_deltat;
+    // }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmDynamic::make_decisions(
         SystemState* system_state_tracker,
-        const std::string& task_to_schedule,
-        const double input_data_size,
-        const double input_error_level,
         const double remaining_time) {
-
-        if (_preprocessed_decisions.empty()) {
-            preprocess_decisions(input_data_size, input_error_level, remaining_time, true);
-        }
 
         // Make a decision for each host that's currently idle
         // All these decisions are independent so that makes it easy
         std::vector<SchedulingDecision> decisions;
         for (const auto& entry : *system_state_tracker) {
             std::string hostname = entry.first;
+            std::string task_to_schedule = _application_specs->get_host_task_to_schedule(hostname);
 
-            if (!system_state_tracker->is_host_idle(hostname)) continue; // Host is not idle
-
-            const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node;
-            if (system_state_tracker->get_host_current_decision_node(hostname) == nullptr) {
-                current_decision_node = _application_specs->get_decision_tree_root();
-            } else {
-                current_decision_node = system_state_tracker->get_host_current_decision_node(hostname);
+            if (_preprocessed_decisions_by_host.find(hostname) == _preprocessed_decisions_by_host.end()) {
+                // std::cerr << "preprocessing for host " << hostname << " not found" << std::endl;
+                // std::function<void(const ApplicationSpecs::ExecOptionDecisionNode*, int)> print_tree = [&](const ApplicationSpecs::ExecOptionDecisionNode* node, int depth) {
+                //     if (!node) return;
+                //
+                //     std::string indent(depth * 2, ' ');
+                //
+                //     std::cout << indent
+                //               << "execution_option: " << node->execution_option
+                //               << " | task: " << node->task
+                //               << " | error_lvl: " << node->cumulative_error_factor
+                //               << std::endl;
+                //
+                //     for (const auto& child : node->children) {
+                //         print_tree(child.get(), depth + 1);
+                //     }
+                // };
+                // print_tree(_application_specs->get_decision_tree_root(hostname), 0);
+                double host_running_data_size = _application_specs->get_host_running_data_size(hostname);
+                double host_running_error_level = _application_specs->get_host_running_error_level(hostname);
+                preprocess_host_decisions(hostname, host_running_data_size, host_running_error_level, remaining_time, true);
             }
-            const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
 
-            const auto& curr_node_decisions = _preprocessed_decisions.at(current_decision_node);
+            if (system_state_tracker->is_host_idle(hostname)) {
+                const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node = _application_specs->get_host_current_decision_node(hostname);
+                const auto n = static_cast<long>(std::floor(remaining_time / _delta_t));
 
-            auto it = std::upper_bound(curr_node_decisions.begin(), curr_node_decisions.end(), n,
-                [](long time, const std::pair<long, std::string>& entry) {
-                    return time < entry.first;
-                });
-            --it;
-            const std::string& execution_option = it->second;
+                const auto& curr_node_decisions = _preprocessed_decisions_by_host.at(hostname).at(current_decision_node);
 
-            std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
-                " on host " << hostname << " with remaining time " << remaining_time << std::endl;
-            decisions.push_back({hostname, task_to_schedule, execution_option});
+
+                auto it = std::upper_bound(curr_node_decisions.begin(), curr_node_decisions.end(), n,
+                    [](long time, const std::pair<long, std::string>& entry) {
+                        return time < entry.first;
+                    });
+                --it;
+                const std::string& execution_option = it->second;
+
+                // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
+                //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+                decisions.push_back({hostname, task_to_schedule, execution_option});
+            }
         }
         return decisions;
     }
