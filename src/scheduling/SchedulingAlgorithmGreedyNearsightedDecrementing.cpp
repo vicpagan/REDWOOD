@@ -10,6 +10,7 @@
 namespace wrench {
 
     void SchedulingAlgorithmGreedyNearsightedDecrementing::initial_decisions(
+        const std::string& hostname,
         const double initial_data_size,
         const double initial_error_level,
         const double deadline,
@@ -36,12 +37,13 @@ namespace wrench {
 
         // initialize list of combinations
         std::string first_task = _application_specs->get_task(0);
+        const auto current_decision_node = _application_specs->get_host_current_decision_node(hostname);
 
         // sort list of combinations by error level
         std::map<std::string, double> el_by_option;
-        for (const auto &option : _exec_options.at(first_task)) {
-            _list_of_options.push_back(option.first);
-            el_by_option.emplace(option.first, _exec_options.at(first_task).at(option.first).at("e_function")(1,1));
+        for (const auto &child : current_decision_node->children) {
+            _list_of_options.push_back(child->execution_option);
+            el_by_option.emplace(child->execution_option, _exec_options.at(first_task).at(child->execution_option).at("e_function")(1,1));
         }
         std::sort(_list_of_options.begin(), _list_of_options.end(), [&](const auto &a, const auto &b) {
             return el_by_option.at(a) < el_by_option.at(b);
@@ -137,10 +139,31 @@ namespace wrench {
                 }
             }
         }
-        else if (dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
-            const std::string& option_to_keep = _list_of_options.front();
+        else if (auto error_level_comparator_function = dynamic_cast<ErrorLevelComparator*>(_comparator_function)) {
+            double best_el = std::numeric_limits<double>::infinity();
+            std::string best_option;
+            double ps_threshold = error_level_comparator_function->get_prob_success_threshold();
+
+            std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
             for (const auto &option : _list_of_options) {
-                if (option != option_to_keep) {
+
+                double ps = _comparator_function->comp_value(_probability_computation,
+                    _exec_options.at(first_task).at(option),
+                    initial_data_size,
+                    initial_error_level,
+                    deadline);
+                double el = el_by_option[option];
+
+                if (ps > ps_threshold) {
+                    if (el < best_el) {
+                        best_el = el;
+                        best_option = option;
+                    }
+                }
+            }
+
+            for (const auto &option : _list_of_options) {
+                if (option != best_option) {
                     _nodes_per_initial_option_decision[option] = 0;
                 }
             }

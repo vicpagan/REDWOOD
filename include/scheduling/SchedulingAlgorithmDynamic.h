@@ -24,20 +24,23 @@ namespace wrench {
 
         std::vector<SchedulingDecision> make_decisions(
             SystemState *system_state_tracker,
-            const std::string &task_to_schedule,
-            double input_data_size,
-            double input_error_level,
             double remaining_time) override;
 
         double get_expected_error() const override { return _optimal_EV; };
 
-        void preprocess_decisions(double initial_data_size,
+        void preprocess_host_decisions(
+            const std::string& hostname,
+            double initial_data_size,
             double initial_error_level,
             double deadline,
             bool lower_bound) override;
 
-        void reset_preprocessed_decisions() override {
-            _preprocessed_decisions.clear();
+        void reset_all_preprocessed_decisions() override {
+            _preprocessed_decisions_by_host.clear();
+        }
+
+        void reset_host_preprocessed_decisions(const std::string& hostname) override {
+            _preprocessed_decisions_by_host.erase(hostname);
         }
 
     private:
@@ -55,20 +58,23 @@ namespace wrench {
             long deadline,
             bool lower_bound) const;
 
-        double compute_best_delta_t(
-            double initial_data_size,
-            double initial_error_level,
-            double deadline,
-            double precision);
+        // FIXME: This needs to be moved to another file
+        // double compute_best_delta_t(
+        //     double initial_data_size,
+        //     double initial_error_level,
+        //     double deadline,
+        //     double precision);
 
-        void fill_preprocessing_table(
+        void fill_host_preprocessing_table(
+            const std::string& hostname,
             double input_data_size,
             double input_error_level,
             double remaining_time,
             bool lower_bound);
 
-        double _optimal_EV;
-        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<long, std::string>>> _preprocessed_decisions;
+
+        double _optimal_EV = 0;
+        std::map<std::string, std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<std::pair<long, std::string>>>> _preprocessed_decisions_by_host;
     };
 }
 

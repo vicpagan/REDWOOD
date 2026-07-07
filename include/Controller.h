@@ -64,8 +64,8 @@ namespace wrench {
         std::shared_ptr<JobManager> _job_manager;
 
         long _num_repeats;
-        bool _temporal_redundancy;
-        bool _stop_running_jobs;
+        std::string _temporal_redundancy;
+        std::string _stop_running_jobs;
 
         const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &
         _task_functions;

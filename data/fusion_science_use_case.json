@@ -400,9 +400,9 @@
     ]
   },
   "execution": {
-    "num_repeats": 2,
+    "num_repeats": 15,
     "deadline_comment": "120 minutes",
-    "deadline": 10000,
+    "deadline": 15000,
     "e_fail": 100.0
   },
   "scheduling": {
@@ -412,10 +412,12 @@
       "parameter_comments": "Either a fixed value or a precision value",
       "parameter": 5.0
     },
-    "algorithms": ["dynamic", "random", "static_nearsighted_error_level", "greedy_foresighted_decrementing_expected_error"],
+    "algorithms": ["greedy_nearsighted_decrementing_probability_success"],
     "hacks": {
-      "temporal_redundancy": false,
-      "stop_running_jobs": false
+      "temporal_redundancy_comment" : "Options: off, independent, dependent, aggressive",
+      "temporal_redundancy": "aggressive",
+      "stop_running_jobs_comment" : "Options: off, variant, aggressive",
+      "stop_running_jobs": "off"
     }
   }
 }

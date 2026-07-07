@@ -107,12 +107,15 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     input["platform"].get_object()["io_read_bandwidth_per_node"] = std::to_string(static_cast<double>(num_compute_nodes) * original_io_read_bandwidth_per_node);
     input["platform"].get_object()["io_write_bandwidth_per_node"] = std::to_string(static_cast<double>(num_compute_nodes) * original_io_write_bandwidth_per_node);
 
+    std::vector<std::string> hostnames = {"ComputeHost_1"};
+
     auto application_specs = wrench::ApplicationSpecs::create_application_specs(
         input.at("platform").as_object(),
         input.at("failures").as_object(),
         input.at("application").as_object(),
         input.at("execution").as_object(),
-        input.at("scheduling").as_object());
+        input.at("scheduling").as_object(),
+        hostnames);
 
     // Create the task functions
     const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>&
@@ -128,9 +131,10 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     double initial_data_size = input.at("application").as_object().at("initial_data_size").to_number<double>();
     double initial_error_level = input.at("application").as_object().at("initial_error_level").to_number<double>();
 
-    application_specs->prune_decision_tree(0.0);
-    application_specs->build_decision_tree();
-    algorithm->preprocess_decisions(initial_data_size,
+    application_specs->prune_decision_trees(0.0);
+    application_specs->build_decision_trees();
+    algorithm->preprocess_host_decisions("ComputeHost_1",
+                                    initial_data_size,
                                     initial_error_level,
                                     application_specs->get_deadline(),
                                     false);

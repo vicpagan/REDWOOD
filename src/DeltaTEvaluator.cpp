@@ -22,13 +22,17 @@ namespace wrench {
     std::vector<DeltaTResult> DeltaTEvaluator::evaluate(double min_delta_t, double max_delta_t, double step_size) {
         std::vector<DeltaTResult> results;
 
+        auto num_compute_nodes = boost::json::value_to<int>(json_input.at("platform").at("num_compute_nodes"));
+        std::vector<std::string> hostnames = {"ComputeHost_1"};
+
         // Setup application specs
         auto application_specs = ApplicationSpecs::create_application_specs(
             json_input.at("platform").as_object(),
             json_input.at("failures").as_object(),
             json_input.at("application").as_object(),
             json_input.at("execution").as_object(),
-            json_input.at("scheduling").as_object());
+            json_input.at("scheduling").as_object(),
+            hostnames);
 
         auto task_functions = application_specs->get_task_functions();
 
@@ -40,8 +44,8 @@ namespace wrench {
         double initial_error_level = json_input.at("application").as_object().at("initial_error_level").to_number<double>();
         double deadline = json_input.at("execution").as_object().at("deadline").to_number<double>();
 
-        application_specs->prune_decision_tree(0.0);
-        application_specs->build_decision_tree();
+        application_specs->prune_decision_trees(0.0);
+        application_specs->build_decision_trees();
 
         // Evaluate each delta_t value
         for (double delta_t = min_delta_t; delta_t <= max_delta_t; delta_t += step_size) {
@@ -56,8 +60,9 @@ namespace wrench {
             auto start_time = std::chrono::high_resolution_clock::now();
 
             // Lower bound
-            algorithm->reset_preprocessed_decisions();
-            algorithm->preprocess_decisions(
+            algorithm->reset_all_preprocessed_decisions();
+            algorithm->preprocess_host_decisions(
+                "ComputeHost_1",
                 initial_data_size,
                 initial_error_level,
                 deadline,
@@ -66,8 +71,9 @@ namespace wrench {
             result.lower_bound_error = algorithm->get_expected_error();
 
             // Upper bound
-            algorithm->reset_preprocessed_decisions();
-            algorithm->preprocess_decisions(
+            algorithm->reset_all_preprocessed_decisions();
+            algorithm->preprocess_host_decisions(
+                "ComputeHost_1",
                 initial_data_size,
                 initial_error_level,
                 deadline,

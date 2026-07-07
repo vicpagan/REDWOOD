@@ -22,29 +22,28 @@ namespace wrench {
                                        probability_computation, comparator_function) {
         }
 
-        void preprocess_decisions(double initial_data_size,
+        void preprocess_host_decisions(const std::string& hostname,
+                                 double initial_data_size,
                                  double initial_error_level,
                                  double deadline,
-                                 bool lower_bound) override = 0;
+                                 bool lower_bound) override;
 
-        std::vector<SchedulingDecision> make_decisions(
-            SystemState* system_state_tracker,
-            const std::string& task_to_schedule,
-            double input_data_size,
-            double input_error_level,
-            double remaining_time) override;
+        // FIXME: Change combinations storing to be reused for every scheduling calculation
+        void reset_host_preprocessed_decisions(const std::string& hostname) override {
+            SchedulingAlgorithmGreedy::reset_host_preprocessed_decisions(hostname);
+            _nodes_per_combo_decision.clear();
+        }
 
-        void reset_preprocessed_decisions() override {
-            SchedulingAlgorithmGreedy::reset_preprocessed_decisions();
-            _all_combinations.clear();
+        void reset_all_preprocessed_decisions() override {
+            SchedulingAlgorithmGreedy::reset_all_preprocessed_decisions();
             _nodes_per_combo_decision.clear();
         }
 
     protected:
-        std::vector<std::vector<std::string>> _all_combinations;
         std::map<std::vector<std::string>, long> _nodes_per_combo_decision;
 
-        void collect_combinations(const ApplicationSpecs::ExecOptionDecisionNode *node,
+        void collect_combinations(std::vector<std::vector<std::string>> &all_combinations,
+            const ApplicationSpecs::ExecOptionDecisionNode *node,
             std::vector<std::string> &current_path);
 
         double calculate_prob_success_one_host(
@@ -56,6 +55,7 @@ namespace wrench {
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> &dp,
             const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
             const std::vector<std::string> &combo,
+            int relative_task_index,
             long n, long R,
             long deadline,
             bool lower_bound) const;
@@ -63,11 +63,14 @@ namespace wrench {
         double calculate_error_level_one_host(
             const ApplicationSpecs::ExecOptionDecisionNode* current_node,
             const std::vector<std::string> &combo,
-            int task_index) const;
+            int relative_task_index) const;
 
         double calculate_expected_error(
+            const std::vector<std::vector<std::string>> &all_combinations,
             const std::map<std::vector<std::string>, double> &ps_by_combo,
             const std::map<std::vector<std::string>, double> &el_by_combo) const;
+
+        void translate_to_static_decisions(SystemState* system_state_tracker) override;
 
     };
 

@@ -20,23 +20,27 @@ namespace wrench {
             : SchedulingAlgorithmStatic(application_specs, "static_foresighted", exec_options,
                                        probability_computation, comparator_function) {}
 
-        void preprocess_decisions(double initial_data_size,
+        void preprocess_host_decisions(const std::string& hostname,
+                                 double initial_data_size,
                                  double initial_error_level,
                                  double deadline,
                                  bool lower_bound) override;
 
-        void reset_preprocessed_decisions() override {
-            SchedulingAlgorithmStatic::reset_preprocessed_decisions();
-            _all_combinations.clear();
+        void reset_host_preprocessed_decisions(const std::string &hostname) override {
+            SchedulingAlgorithmStatic::reset_host_preprocessed_decisions(hostname);
+        }
+
+        void reset_all_preprocessed_decisions() override {
+            SchedulingAlgorithmStatic::reset_all_preprocessed_decisions();
         }
 
     private:
-        std::vector<std::vector<std::string>> _all_combinations;
 
-        void collect_combinations(const ApplicationSpecs::ExecOptionDecisionNode *node,
+        void collect_combinations(std::vector<std::vector<std::string>> &all_combinations,
+            const ApplicationSpecs::ExecOptionDecisionNode *node,
             std::vector<std::string> &current_path);
 
-        double calculate_expected_error(
+        double calculate_prob_success_one_host(
             int remaining_tasks,
             int task_index,
             double running_input_data_size,
@@ -45,24 +49,12 @@ namespace wrench {
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> &dp,
             const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
             const std::vector<std::string> &combo,
+            int relative_task_index,
             long n, long R,
             long deadline,
             bool lower_bound) const;
 
-        double calculate_prob_success(
-            int remaining_tasks,
-            int task_index,
-            double running_input_data_size,
-            double running_input_error_level,
-            double selected_delta_t,
-            std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> &dp,
-            const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
-            const std::vector<std::string> &combo,
-            long n, long R,
-            long deadline,
-            bool lower_bound) const;
-
-        double calculate_error_level(
+        double calculate_error_level_one_host(
             const ApplicationSpecs::ExecOptionDecisionNode* current_node,
             const std::vector<std::string> &combo,
             int task_index) const;

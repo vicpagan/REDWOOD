@@ -22,25 +22,20 @@ namespace wrench {
                                        probability_computation, comparator_function) {
         }
 
-        void preprocess_decisions(double initial_data_size,
+        void preprocess_host_decisions(const std::string& hostname,
+                                 double initial_data_size,
                                  double initial_error_level,
                                  double deadline,
                                  bool lower_bound) override;
 
-        virtual void initial_decisions(double initial_data_size,
-                                 double initial_error_level,
-                                 double deadline,
-                                 bool lower_bound) = 0;
+        void reset_host_preprocessed_decisions(const std::string& hostname) override {
+            SchedulingAlgorithmGreedy::reset_host_preprocessed_decisions(hostname);
+            _nodes_per_initial_option_decision.clear();
+            _list_of_options.clear();
+        }
 
-        std::vector<SchedulingAlgorithm::SchedulingDecision> make_decisions(
-            SystemState* system_state_tracker,
-            const std::string& task_to_schedule,
-            double input_data_size,
-            double input_error_level,
-            double remaining_time) override;
-
-        void reset_preprocessed_decisions() override {
-            SchedulingAlgorithmGreedy::reset_preprocessed_decisions();
+        void reset_all_preprocessed_decisions() override {
+            SchedulingAlgorithmGreedy::reset_all_preprocessed_decisions();
             _nodes_per_initial_option_decision.clear();
             _list_of_options.clear();
         }
@@ -53,6 +48,8 @@ namespace wrench {
         double calculate_expected_error(
             const std::map<std::string, double> &ps_by_option,
             const std::map<std::string, double> &el_by_option) const;
+
+        void translate_to_static_decisions(SystemState* system_state_tracker) override;
 
     };
 
