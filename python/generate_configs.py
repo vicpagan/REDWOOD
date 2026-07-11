@@ -16,14 +16,14 @@ DELTA_T          = 5.0
 DEADLINE         = 10000
 RESTART_OVERHEAD = 0
 INITIAL_ERROR    = 1.0
-NUM_REPEATS      = 100
+NUM_REPEATS      = 25
 TARGET_CONFIGS   = 10
 
 P_MIN_SINGLE = 0.15
 P_MAX_SINGLE = 0.85
 
-NUM_NODES_OPTIONS   = [2, 4, 8, 16, 32]
-E_FAIL_MULTIPLIERS  = [1.5, 2.0, 2.5, 3.0]
+NUM_NODES_OPTIONS   = [2, 4, 8, 16]
+E_FAIL_MULTIPLIERS  = [1.5, 3.0]
 REPETITIONS_PER_ROW = 10
 
 # ─── Heuristics ───────────────────────────────────────────────────────────────

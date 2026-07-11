@@ -225,6 +225,8 @@ namespace wrench {
                 /* Current task for all hosts is the first task */
                 for (auto const& entry : _compute_services) {
                     _application_specs->update_host_task_to_schedule(entry.first, 0);
+                    _application_specs->update_host_running_data_size(entry.first, initial_data_size);
+                    _application_specs->update_host_running_error_level(entry.first, initial_error_level);
                 }
 
                 /* Build/reset decision trees to use for temporal redundancy */

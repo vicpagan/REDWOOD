@@ -6,8 +6,8 @@ For each (app_config, num_nodes, e_fail_multiplier) combo:
   - Ensures result rows exist in the DB for each repetition
   - For each heuristic column that is NULL, runs the simulator and fills it in
   - Skips any heuristic that already has a result
-  - Runs combos in parallel, each process handles one (app_config, num_nodes,
-    e_fail_multiplier, heuristic) at a time to avoid write conflicts
+  - Runs combos in parallel, each process handles one unique
+    (app_config_id, num_nodes, e_fail_mult, heuristic) to avoid write conflicts
 """
 
 import sqlite3
@@ -55,21 +55,18 @@ HEURISTIC_COLS = [heuristic_col(*h) for h in ALL_HEURISTICS]
 
 def get_connection(db_path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path, timeout=30)
-    conn.execute("PRAGMA journal_mode=WAL")  # allows concurrent reads during writes
+    conn.execute("PRAGMA journal_mode=WAL")
     return conn
-
 
 def ensure_result_rows(conn: sqlite3.Connection, app_config_id: int,
                        num_nodes: int, e_fail_multiplier: float,
                        e_fail: float, num_repetitions: int,
                        lambda_: float, restart_overhead: float,
                        deadline: float, delta_t: float):
-    """
-    Insert result rows for each repetition if they don't already exist.
-    """
-    c = conn.cursor()
-    null_cols  = ", ".join(HEURISTIC_COLS)
+    c          = conn.cursor()
+    col_names  = ", ".join(HEURISTIC_COLS)
     null_vals  = ", ".join(["NULL"] * len(HEURISTIC_COLS))
+    inserted   = 0
 
     for rep_id in range(num_repetitions):
         c.execute("""
@@ -82,40 +79,35 @@ def ensure_result_rows(conn: sqlite3.Connection, app_config_id: int,
                     repetition_id, app_config_id, num_nodes,
                     e_fail_multiplier, e_fail, lambda,
                     restart_overhead, deadline, delta_t,
-                    {null_cols}
+                    {col_names}
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, {null_vals})
             """, (rep_id, app_config_id, num_nodes, e_fail_multiplier,
                   e_fail, lambda_, restart_overhead, deadline, delta_t))
-    conn.commit()
+            inserted += 1
 
+    if inserted:
+        print(f"  [DB] Inserted {inserted} new result rows for "
+              f"config={app_config_id} nodes={num_nodes} e_fail_mult={e_fail_multiplier}",
+              flush=True)
+    conn.commit()
 
 def get_null_heuristics(conn: sqlite3.Connection, app_config_id: int,
                         num_nodes: int, e_fail_multiplier: float) -> list:
-    """
-    Return list of heuristic column names that still have NULL results
-    for ANY repetition of this combo. Only need to run heuristics with nulls.
-    """
-    c = conn.cursor()
-    null_heuristics = []
+    c            = conn.cursor()
+    null_cols    = []
     for col in HEURISTIC_COLS:
         c.execute(f"""
             SELECT COUNT(*) FROM results
             WHERE app_config_id=? AND num_nodes=? AND e_fail_multiplier=?
             AND {col} IS NULL
         """, (app_config_id, num_nodes, e_fail_multiplier))
-        count = c.fetchone()[0]
-        if count > 0:
-            null_heuristics.append(col)
-    return null_heuristics
-
+        if c.fetchone()[0] > 0:
+            null_cols.append(col)
+    return null_cols
 
 def update_repetition_results(conn: sqlite3.Connection, app_config_id: int,
                               num_nodes: int, e_fail_multiplier: float,
                               col: str, results_by_rep: dict):
-    """
-    Update the heuristic column for each repetition row with the simulator result.
-    results_by_rep: {repetition_id -> error_level}
-    """
     c = conn.cursor()
     for rep_id, error_val in results_by_rep.items():
         c.execute(f"""
@@ -124,14 +116,9 @@ def update_repetition_results(conn: sqlite3.Connection, app_config_id: int,
         """, (error_val, app_config_id, num_nodes, e_fail_multiplier, rep_id))
     conn.commit()
 
-
 # ─── Simulator ────────────────────────────────────────────────────────────────
 
 def parse_repetition_results(output: str, num_repetitions: int) -> dict | None:
-    """
-    Parse the FINAL RESULTS PER REPETITION block from simulator output.
-    Returns {rep_id -> error_level} or None if parsing fails.
-    """
     results = {}
     for i in range(num_repetitions):
         match = re.search(rf'Repetition\s+{i}\s*:\s*([0-9.eE+\-]+)', output)
@@ -141,29 +128,29 @@ def parse_repetition_results(output: str, num_repetitions: int) -> dict | None:
             return None
     return results
 
-
 def build_sim_config(base_config: dict, num_nodes: int, e_fail: float,
                      algo: str, tr: str, srj: str, num_repetitions: int) -> dict:
-    """Build a complete simulator config for one heuristic run."""
-    config = json.loads(json.dumps(base_config))  # deep copy
-    config["platform"]["num_compute_nodes"] = num_nodes
-    config["execution"]["e_fail"]           = e_fail
-    config["execution"]["num_repeats"]      = num_repetitions
-    config["scheduling"]["algorithms"]      = [algo]
+    config = json.loads(json.dumps(base_config))
+    config["platform"]["num_compute_nodes"]              = num_nodes
+    config["execution"]["e_fail"]                        = e_fail
+    config["execution"]["num_repeats"]                   = num_repetitions
+    config["scheduling"]["algorithms"]                   = [algo]
     config["scheduling"]["hacks"]["temporal_redundancy"] = tr
     config["scheduling"]["hacks"]["stop_running_jobs"]   = srj
     return config
 
-
 def run_heuristic(args: tuple) -> tuple:
     """
-    Run the simulator for one (app_config_id, num_nodes, e_fail_multiplier, heuristic).
+    Run simulator for one (app_config_id, num_nodes, e_fail_multiplier, heuristic).
     Returns (app_config_id, num_nodes, e_fail_multiplier, col, results_by_rep, error_msg).
     """
     (db_path, app_config_id, base_config_json, num_nodes, e_fail_multiplier,
      e_fail, algo, tr, srj, num_repetitions, sim_executable) = args
 
-    col = heuristic_col(algo, tr, srj)
+    col    = heuristic_col(algo, tr, srj)
+    label  = f"config={app_config_id} nodes={num_nodes} e_mult={e_fail_multiplier} [{col}]"
+
+    print(f"  [RUN] {label}", flush=True)
 
     config = build_sim_config(
         json.loads(base_config_json),
@@ -174,6 +161,8 @@ def run_heuristic(args: tuple) -> tuple:
         json.dump(config, tmp, indent=2)
         tmp_path = tmp.name
 
+    print(f"  [SIM] Writing config to {tmp_path}", flush=True)
+
     try:
         result = subprocess.run(
             [sim_executable, "--json", tmp_path],
@@ -181,94 +170,86 @@ def run_heuristic(args: tuple) -> tuple:
         )
 
         if result.returncode != 0:
-            return (app_config_id, num_nodes, e_fail_multiplier, col, None,
-                    f"Simulator failed: {result.stderr[:200]}")
+            err = f"Simulator returned non-zero exit code: {result.returncode}\n{result.stderr[:300]}"
+            print(f"  [FAIL] {label}: {err}", flush=True)
+            return (app_config_id, num_nodes, e_fail_multiplier, col, None, err)
+
+        print(f"  [SIM] Simulator finished for {label}", flush=True)
+        print(f"  [SIM] stdout preview: {result.stdout[-300:]}", flush=True)
 
         results_by_rep = parse_repetition_results(result.stdout, num_repetitions)
         if results_by_rep is None:
-            return (app_config_id, num_nodes, e_fail_multiplier, col, None,
-                    f"Could not parse output:\n{result.stdout[:300]}")
+            err = f"Could not parse FINAL RESULTS PER REPETITION from output:\n{result.stdout[-300:]}"
+            print(f"  [FAIL] {label}: {err}", flush=True)
+            return (app_config_id, num_nodes, e_fail_multiplier, col, None, err)
 
-        print(f"  Done: config={app_config_id} nodes={num_nodes} "
-              f"e_fail_mult={e_fail_multiplier} heuristic={col}", flush=True)
-        return app_config_id, num_nodes, e_fail_multiplier, col, results_by_rep, None
+        print(f"  [OK] {label} -> {results_by_rep}", flush=True)
+        return (app_config_id, num_nodes, e_fail_multiplier, col, results_by_rep, None)
 
     finally:
         os.unlink(tmp_path)
-
+        print(f"  [SIM] Cleaned up temp file {tmp_path}", flush=True)
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
+    print(f"\n{'='*60}")
+    print(f"Redwood Simulator Runner")
+    print(f"  DB         : {os.path.abspath(DB_PATH)}")
+    print(f"  Executable : {os.path.abspath(SIM_EXECUTABLE)}")
+    print(f"{'='*60}\n")
+
     if not os.path.exists(DB_PATH):
-        print(f"Error: database not found at {DB_PATH}")
+        print(f"[ERROR] Database not found at {DB_PATH}")
         sys.exit(1)
 
     if not os.path.exists(SIM_EXECUTABLE):
-        print(f"Error: simulator not found at {SIM_EXECUTABLE}")
+        print(f"[ERROR] Simulator not found at {SIM_EXECUTABLE}")
         sys.exit(1)
 
     conn = get_connection(DB_PATH)
     c    = conn.cursor()
 
-    # Load all app configs
     c.execute("SELECT app_config_id, config_json FROM app_configs")
     app_configs = c.fetchall()
-    print(f"Loaded {len(app_configs)} app configs from {DB_PATH}")
+    print(f"[DB] Loaded {len(app_configs)} app configs", flush=True)
 
-    # Load execution parameters from first result row (same for all)
+    # Read execution parameters from existing result rows
     c.execute("SELECT lambda, restart_overhead, deadline, delta_t FROM results LIMIT 1")
     row = c.fetchone()
-    if row:
-        lambda_, restart_overhead, deadline, delta_t = row
-    else:
-        # Fall back to defaults if results table is empty
-        lambda_, restart_overhead, deadline, delta_t = 0.001, 0.0, 10000.0, 5.0
+    lambda_, restart_overhead, deadline, delta_t = row if row else (0.001, 0.0, 10000.0, 5.0)
+    print(f"[DB] Execution params: lambda={lambda_} restart_overhead={restart_overhead} "
+          f"deadline={deadline} delta_t={delta_t}", flush=True)
 
-    # Load e_fail multipliers and num_nodes from generate script constants
-    # (read them from existing rows or derive from config)
-    c.execute("""
-              SELECT DISTINCT num_nodes, e_fail_multiplier, e_fail
-              FROM results LIMIT 1
-              """)
-    # Build combos from the DB itself so this script stays in sync
     c.execute("SELECT DISTINCT num_nodes FROM results ORDER BY num_nodes")
     num_nodes_options = [r[0] for r in c.fetchall()]
+    print(f"[DB] num_nodes options: {num_nodes_options}", flush=True)
 
     c.execute("SELECT DISTINCT e_fail_multiplier, e_fail FROM results ORDER BY e_fail_multiplier")
-    e_fail_combos = c.fetchall()  # [(multiplier, e_fail), ...]
+    e_fail_combos = c.fetchall()
+    print(f"[DB] e_fail combos: {e_fail_combos}", flush=True)
 
-    if not num_nodes_options:
-        # DB has no rows yet — derive from generate script defaults
-        num_nodes_options = [2, 4, 8, 16, 32]
-        e_fail_combos     = []  # will be computed per config
-
-    conn.close()
-
-    # ── Build job list ─────────────────────────────────────────────────────────
-    # Each job = one (app_config, num_nodes, e_fail_multiplier, heuristic) tuple
-    # Only jobs where the heuristic column is still NULL for any repetition
-
+    # Build job list
+    print(f"\n[JOBS] Scanning for NULL heuristic cells...", flush=True)
     jobs = []
-    conn = get_connection(DB_PATH)
 
     for app_config_id, config_json in app_configs:
-        base_config    = json.loads(config_json)
+        base_config     = json.loads(config_json)
         num_repetitions = base_config["execution"]["num_repeats"]
 
         for num_nodes in num_nodes_options:
             for e_mult, e_fail in e_fail_combos:
-                # Ensure rows exist for all repetitions
                 ensure_result_rows(
                     conn, app_config_id, num_nodes, e_mult, e_fail,
                     num_repetitions, lambda_, restart_overhead, deadline, delta_t
                 )
 
-                # Find which heuristics still need to be run
                 null_cols = get_null_heuristics(conn, app_config_id, num_nodes, e_mult)
+                print(f"  config={app_config_id} nodes={num_nodes} e_mult={e_mult}: "
+                      f"{len(null_cols)}/{len(HEURISTIC_COLS)} heuristics need running",
+                      flush=True)
 
                 for col in null_cols:
-                    # Reverse-lookup heuristic from column name
                     algo, tr, srj = col.split("__")
                     jobs.append((
                         DB_PATH, app_config_id, config_json,
@@ -280,15 +261,13 @@ def main():
     conn.close()
 
     total = len(jobs)
-    print(f"\nJobs to run: {total}")
+    print(f"\n[JOBS] Total jobs to run: {total}", flush=True)
     if total == 0:
-        print("All results already filled in. Nothing to do.")
+        print("[JOBS] All results already filled in. Nothing to do.")
         return
 
-    # ── Run in parallel ────────────────────────────────────────────────────────
-    # Each job writes to a unique (app_config_id, num_nodes, e_fail_mult, col)
-    # so there are no write conflicts between parallel processes
-
+    # Run in parallel
+    print(f"\n[RUN] Starting parallel execution...\n", flush=True)
     completed = 0
     failed    = 0
 
@@ -299,13 +278,11 @@ def main():
             app_config_id, num_nodes, e_fail_multiplier, col, results_by_rep, err = future.result()
 
             if err:
-                print(f"  FAILED config={app_config_id} nodes={num_nodes} "
-                      f"e_fail_mult={e_fail_multiplier} col={col}: {err}",
-                      flush=True)
+                print(f"[FAIL] config={app_config_id} nodes={num_nodes} "
+                      f"e_mult={e_fail_multiplier} col={col}\n  Error: {err}", flush=True)
                 failed += 1
                 continue
 
-            # Write results back to DB
             write_conn = get_connection(DB_PATH)
             update_repetition_results(
                 write_conn, app_config_id, num_nodes,
@@ -314,8 +291,16 @@ def main():
             write_conn.close()
             completed += 1
 
-    print(f"\nFinished. Completed: {completed}  Failed: {failed}  Total: {total}")
+            print(f"[DONE] {completed}/{total} | config={app_config_id} "
+                  f"nodes={num_nodes} e_mult={e_fail_multiplier} col={col}",
+                  flush=True)
 
+    print(f"\n{'='*60}")
+    print(f"Run complete.")
+    print(f"  Completed : {completed}")
+    print(f"  Failed    : {failed}")
+    print(f"  Total     : {total}")
+    print(f"{'='*60}")
 
 if __name__ == "__main__":
     main()
