@@ -8,9 +8,12 @@ import json
 import random
 import math
 import os
+import argparse
 from itertools import product as iterproduct
 
 # ─── Fixed simulation parameters ──────────────────────────────────────────────
+SEED_MIN         = 0
+SEED_MAX         = 2**31 - 1
 LAMBDA           = 0.001
 DELTA_T          = 5.0
 DEADLINE         = 10000
@@ -23,22 +26,37 @@ P_MIN_SINGLE = 0.15
 P_MAX_SINGLE = 0.85
 
 NUM_NODES_OPTIONS   = [2, 4, 8, 16]
-E_FAIL_MULTIPLIERS  = [1.5, 3.0]
+E_FAIL_MULTIPLIERS  = [2, 5]
 REPETITIONS_PER_ROW = 10
 
 # ─── Heuristics ───────────────────────────────────────────────────────────────
 ALGORITHMS = [
     "dynamic",
     "random",
-    "static_nearsighted_error_level",
-    "static_nearsighted_expected_error",
-    "static_nearsighted_probability_success",
-    "static_nearsighted_success_error_ratio",
-    "static_foresighted_error_level",
     "static_foresighted_expected_error",
+    "static_foresighted_error_level",
     "static_foresighted_probability_success",
     "static_foresighted_success_error_ratio",
+    "static_nearsighted_expected_error",
+    "static_nearsighted_error_level",
+    "static_nearsighted_probability_success",
+    "static_nearsighted_success_error_ratio",
+    "greedy_foresighted_incrementing_expected_error",
+    "greedy_foresighted_incrementing_error_level",
+    "greedy_foresighted_incrementing_probability_success",
+    "greedy_foresighted_incrementing_success_error_ratio",
     "greedy_foresighted_decrementing_expected_error",
+    "greedy_foresighted_decrementing_error_level",
+    "greedy_foresighted_decrementing_probability_success",
+    "greedy_foresighted_decrementing_success_error_ratio",
+    "greedy_nearsighted_incrementing_expected_error",
+    "greedy_nearsighted_incrementing_error_level",
+    "greedy_nearsighted_incrementing_probability_success",
+    "greedy_nearsighted_incrementing_success_error_ratio",
+    "greedy_nearsighted_decrementing_expected_error",
+    "greedy_nearsighted_decrementing_error_level",
+    "greedy_nearsighted_decrementing_probability_success",
+    "greedy_nearsighted_decrementing_success_error_ratio",
 ]
 TEMPORAL_REDUNDANCY_OPTIONS = ["off", "independent", "dependent", "aggressive"]
 STOP_RUNNING_JOBS_OPTIONS   = ["off", "variant", "aggressive"]
@@ -158,6 +176,8 @@ def generate_config(attempt: int) -> tuple | None:
     max_error = compute_max_error(tasks)
     print(f"    ACCEPTED: max_error={max_error:.4f}", flush=True)
 
+    seed = random.randint(SEED_MIN, SEED_MAX)
+
     config = {
         "platform": {
             "num_compute_nodes": 2,
@@ -167,7 +187,7 @@ def generate_config(attempt: int) -> tuple | None:
         "failures": {
             "restart_overhead": RESTART_OVERHEAD,
             "lambda": LAMBDA,
-            "seed": -1,
+            "seed": seed,
         },
         "application": {
             "initial_data_size": round(random.uniform(1e6, 1e10), 2),
@@ -294,10 +314,29 @@ def insert_result_rows(conn: sqlite3.Connection, app_config_id: int, max_error: 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
-    db_path = "configurations.db"
-    if os.path.exists(db_path):
-        print(f"Removing existing database: {db_path}", flush=True)
+    parser = argparse.ArgumentParser(description="Generate Redwood app configs.")
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Delete the existing database and start fresh. "
+             "If omitted, new configs are appended to the existing database.",
+    )
+    args = parser.parse_args()
+
+    db_path = "../database/configs.db"
+
+    if args.reset and os.path.exists(db_path):
+        print(f"--reset passed: removing existing database: {db_path}", flush=True)
         os.remove(db_path)
+    elif os.path.exists(db_path):
+        print(f"Appending to existing database: {db_path}", flush=True)
+    else:
+        print(f"No existing database found. Creating new one: {db_path}", flush=True)
+
+    db_dir = os.path.dirname(db_path)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"  Created missing directory: {db_dir}", flush=True)
 
     conn = create_database(db_path)
 

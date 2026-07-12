@@ -12,3 +12,6 @@ experiment/*
 
 # Object files
 *.o
+
+# Database files
+**/*.db
