@@ -29,30 +29,18 @@ ALGORITHMS = [
     "static_foresighted_expected_error",
     "static_foresighted_error_level",
     "static_foresighted_probability_success",
-    "static_foresighted_success_error_ratio",
     "static_nearsighted_expected_error",
     "static_nearsighted_error_level",
     "static_nearsighted_probability_success",
-    "static_nearsighted_success_error_ratio",
     "greedy_foresighted_incrementing_expected_error",
     "greedy_foresighted_incrementing_error_level",
     "greedy_foresighted_incrementing_probability_success",
-    "greedy_foresighted_incrementing_success_error_ratio",
-    "greedy_foresighted_decrementing_expected_error",
-    "greedy_foresighted_decrementing_error_level",
-    "greedy_foresighted_decrementing_probability_success",
-    "greedy_foresighted_decrementing_success_error_ratio",
     "greedy_nearsighted_incrementing_expected_error",
     "greedy_nearsighted_incrementing_error_level",
     "greedy_nearsighted_incrementing_probability_success",
-    "greedy_nearsighted_incrementing_success_error_ratio",
-    "greedy_nearsighted_decrementing_expected_error",
-    "greedy_nearsighted_decrementing_error_level",
-    "greedy_nearsighted_decrementing_probability_success",
-    "greedy_nearsighted_decrementing_success_error_ratio",
 ]
-TEMPORAL_REDUNDANCY_OPTIONS = ["off", "independent", "dependent", "aggressive"]
-STOP_RUNNING_JOBS_OPTIONS   = ["off", "variant", "aggressive"]
+TEMPORAL_REDUNDANCY_OPTIONS = ["independent", "dependent", "aggressive"]
+STOP_RUNNING_JOBS_OPTIONS   = ["variant", "aggressive"]
 
 ALL_HEURISTICS = [
     (algo, tr, srj)
