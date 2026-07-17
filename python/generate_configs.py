@@ -19,7 +19,7 @@ DELTA_T          = 5.0
 DEADLINE         = 10000
 RESTART_OVERHEAD = 0
 INITIAL_ERROR    = 1.0
-NUM_REPEATS      = 25
+NUM_REPEATS      = 100
 TARGET_CONFIGS   = 10
 
 P_MIN_SINGLE = 0.15
@@ -27,7 +27,6 @@ P_MAX_SINGLE = 0.85
 
 NUM_NODES_OPTIONS   = [2, 4, 8, 16]
 E_FAIL_MULTIPLIERS  = [2, 5]
-REPETITIONS_PER_ROW = 10
 
 # ─── Heuristics ───────────────────────────────────────────────────────────────
 ALGORITHMS = [
@@ -241,7 +240,7 @@ def create_database(db_path: str) -> sqlite3.Connection:
             lambda              REAL    NOT NULL,
             restart_overhead    REAL    NOT NULL,
             deadline            REAL    NOT NULL,
-            delta_t             REAL    NOT NULL,
+            delta_t              REAL    NOT NULL,
             {heuristic_col_defs},
             FOREIGN KEY (app_config_id) REFERENCES app_configs(app_config_id)
         )
@@ -277,7 +276,7 @@ def insert_result_rows(conn: sqlite3.Connection, app_config_id: int, max_error: 
     placeholder = ", ".join(["?"] * 9)
 
     rows = []
-    for rep_id in range(REPETITIONS_PER_ROW):
+    for rep_id in range(NUM_REPEATS):
         for num_nodes in NUM_NODES_OPTIONS:
             for e_mult in E_FAIL_MULTIPLIERS:
                 e_fail = round(max_error * e_mult, 4)
@@ -328,7 +327,7 @@ def main():
 
     conn = create_database(db_path)
 
-    rows_per_config = REPETITIONS_PER_ROW * len(NUM_NODES_OPTIONS) * len(E_FAIL_MULTIPLIERS)
+    rows_per_config = NUM_REPEATS * len(NUM_NODES_OPTIONS) * len(E_FAIL_MULTIPLIERS)
 
     print(f"\n{'='*60}")
     print(f"Generating {TARGET_CONFIGS} app configs")
@@ -337,7 +336,7 @@ def main():
     print(f"  single-node P range: [{P_MIN_SINGLE}, {P_MAX_SINGLE}]")
     print(f"  num_nodes options  : {NUM_NODES_OPTIONS}")
     print(f"  e_fail multipliers : {E_FAIL_MULTIPLIERS}")
-    print(f"  repetitions/combo  : {REPETITIONS_PER_ROW}")
+    print(f"  repetitions/combo  : {NUM_REPEATS}")
     print(f"  heuristics         : {len(ALL_HEURISTICS)}")
     print(f"  rows per config    : {rows_per_config}")
     print(f"  total result rows  : {TARGET_CONFIGS * rows_per_config}")
