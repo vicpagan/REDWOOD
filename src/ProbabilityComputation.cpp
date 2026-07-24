@@ -4,6 +4,8 @@
 
 #include "ProbabilityComputation.h"
 
+#include "Utils.h"
+
 
 // This is e^(-u * lambda * delta_t)
 double inline ProbabilityComputation::success_probability(const long u) const {
@@ -23,11 +25,23 @@ double ProbabilityComputation::compute_probability(const double task_time, const
     }
 
     // Discretize time
-    const long m = (lower_bound)
-                       ? static_cast<long>(ceil(task_time / _delta_t)) - 1
-                       : static_cast<long>(ceil(task_time / _delta_t));
-    const long n = static_cast<long>(ceil(time_to_deadline / _delta_t));
-    const long R = (_restart_overhead > 0.0) ? static_cast<long>(ceil(_restart_overhead / _delta_t)) : 0L;
+    // const long m = (lower_bound)
+    //                    ? static_cast<long>(ceil(task_time / _delta_t)) - 1
+    //                    : static_cast<long>(ceil(task_time / _delta_t));
+    // const long n = static_cast<long>(ceil(time_to_deadline / _delta_t));
+    // const long R = (_restart_overhead > 0.0) ? static_cast<long>(ceil(_restart_overhead / _delta_t)) : 0L;
+
+    const long m = (lower_bound
+        ? floor_division(task_time, _delta_t)
+        : ceiling_division(task_time, _delta_t));
+    const long n = (lower_bound
+        ? ceiling_division(time_to_deadline, _delta_t)
+        : floor_division(time_to_deadline, _delta_t));
+    const long R = (_restart_overhead > 0.0 ? (lower_bound
+        ? floor_division(_restart_overhead, _delta_t)
+        : ceiling_division(_restart_overhead, _delta_t))
+        : 0L);
+
 
     // Allocate memoization array
     // TODO: Bound that perhaps? (i.e., only memoize "small" values...)
