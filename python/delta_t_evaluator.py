@@ -25,6 +25,38 @@ def get_executable_names(base_evaluator, base_sim, optimistic_exec, optimistic_s
 
     return evaluator, sim
 
+def force_required_config_values(config):
+    """Force the config to be compatible with the delta_t evaluator:
+    - exactly 1 compute node
+    - the only scheduling algorithm is 'dynamic'
+    - temporal_redundancy and stop_running_jobs hacks are both 'off'
+
+    Mutates and returns the given config dict in place.
+    """
+    config.setdefault('platform', {})
+    config['platform']['num_compute_nodes'] = 1
+
+    config.setdefault('scheduling', {})
+    config['scheduling']['algorithms'] = ["dynamic"]
+
+    config['scheduling'].setdefault('hacks', {})
+    config['scheduling']['hacks']['temporal_redundancy'] = "off"
+    config['scheduling']['hacks']['stop_running_jobs'] = "off"
+
+    return config
+
+def prepare_config_file(json_file):
+    """Load json_file, force the required values into it, and write the
+    result to a temp file. Returns the path to the temp file."""
+    with open(json_file, 'r') as f:
+        config = json.load(f)
+
+    force_required_config_values(config)
+
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
+        json.dump(config, tmp, indent=2)
+        return tmp.name
+
 def run_evaluator(json_file, min_delta_t, max_delta_t, step_size, executable):
     """Run the C++ evaluator and parse results"""
     cmd = [
@@ -50,12 +82,29 @@ def run_simulation(json_file, delta_t, num_repeats, sim_executable):
     with open(json_file, 'r') as f:
         config = json.load(f)
 
-    # Modify the config for this delta_t
-    config['scheduling']['delta_t_scheme'] = {
-        "scheme": "fixed",
-        "parameter": delta_t
-    }
+    # Modify the config for this delta_t.
+    # NOTE: the current config schema nests the scheduling block under
+    # "scheduling" -> "delta_t_scheme" and also carries extra metadata
+    # ("delta_t_scheme_comments", "parameter_comments") as well as sibling
+    # keys ("algorithms", "hacks") that must be preserved rather than
+    # clobbered. We therefore update the existing dict in place instead of
+    # replacing "scheduling" (or "delta_t_scheme") wholesale.
+    config.setdefault('scheduling', {})
+    existing_scheme = config['scheduling'].get('delta_t_scheme', {})
+
+    updated_scheme = dict(existing_scheme)  # keep any *_comments fields intact
+    updated_scheme['scheme'] = 'fixed'
+    updated_scheme['parameter'] = delta_t
+
+    config['scheduling']['delta_t_scheme'] = updated_scheme
+
+    # "num_repeats" lives under "execution" in the current schema
+    config.setdefault('execution', {})
     config['execution']['num_repeats'] = num_repeats
+
+    # Force the same required values as the evaluator config: 1 host,
+    # dynamic-only scheduling, both hacks off
+    force_required_config_values(config)
 
     # Write to a temporary file
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
@@ -233,7 +282,7 @@ def main():
     if len(sys.argv) < 5:
         print("Usage: python delta_t_evaluator.py <json_file> <min_delta_t> <max_delta_t> <step_size> [options]")
         print("\nOptions:")
-        print("  --executable <path>          Path to delta_t_evaluator executable (default: ./delta_t_evaluator)")
+        print("  --executable <path>          Path to delta_t_evaluator executable (default: ../build/delta_t_evaluator)")
         print("  --sim-executable <path>      Path to simulation executable (default: ../build/redwood_sim)")
         print("  --run-sims                   Run actual simulations")
         print("  --num-repeats <n>            Number of simulation repeats (default: 1000)")
@@ -251,8 +300,15 @@ def main():
     max_delta_t = float(sys.argv[3])
     step_size = float(sys.argv[4])
 
+    # Force the config to be compatible with the delta_t evaluator (1 host,
+    # dynamic-only scheduling, both hacks off) rather than erroring out, and
+    # use the resulting temp file for everything below. This avoids the
+    # single-host-only ExecOptionDecisionNode map lookups crashing deep
+    # inside the C++ evaluator.
+    prepared_json_file = prepare_config_file(json_file)
+
     # Parse remaining arguments
-    base_executable = "./delta_t_evaluator"
+    base_executable = "../build/delta_t_evaluator"
     base_sim_executable = "../build/redwood_sim"
     run_sims = False
     num_repeats = 1000
@@ -307,7 +363,7 @@ def main():
             sys.exit(1)
 
         # Run evaluator
-        data = run_evaluator(json_file, min_delta_t, max_delta_t, step_size, evaluator_exe)
+        data = run_evaluator(prepared_json_file, min_delta_t, max_delta_t, step_size, evaluator_exe)
 
         # Run simulations if requested
         sim_results = None
@@ -321,7 +377,7 @@ def main():
                 delta_t_values = data["delta_t"]
 
                 for dt in delta_t_values:
-                    avg_error = run_simulation(json_file, dt, num_repeats, sim_exe)
+                    avg_error = run_simulation(prepared_json_file, dt, num_repeats, sim_exe)
                     sim_results[dt] = avg_error
 
                 print("\nSimulation results:")
@@ -349,6 +405,8 @@ def main():
     with open("delta_t_results.json", "w") as f:
         json.dump(output_data, f, indent=2)
     print("\nRaw data saved to delta_t_results.json")
+
+    os.unlink(prepared_json_file)
 
 if __name__ == "__main__":
     main()

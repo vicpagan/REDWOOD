@@ -12,8 +12,6 @@ namespace wrench {
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             ProbabilityComputation* probability_computation);
 
-        double get_expected_error() const override;
-
         void preprocess_host_decisions(const std::string& hostname,
                                  double initial_data_size,
                                  double initial_error_level,

@@ -83,7 +83,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": false
       },
       {
         "name": "task2",
@@ -154,7 +155,8 @@
               }
             }
           }
-        ]
+        ],
+        "in_situ_with_next_task": false
       }
     ]
   },
@@ -170,13 +172,12 @@
       "parameter_comments": "Either a fixed value or a precision value",
       "parameter": 1.0
     },
-    "algorithms": {
-      "one_task": ["dynamic"],
-      "multi_task": ["dynamic"]
-    },
+    "algorithms": ["dynamic"],
     "hacks": {
-      "temporal_redundancy": false,
-      "stop_running_jobs": true
+      "temporal_redundancy_comment" : "Options: off, independent, dependent, aggressive",
+      "temporal_redundancy": "off",
+      "stop_running_jobs_comment" : "Options: off, variant, aggressive",
+      "stop_running_jobs": "off"
     }
   }
 }

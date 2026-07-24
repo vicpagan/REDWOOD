@@ -24,6 +24,8 @@
 
 #include <wrench/util/UnitParser.h>
 
+#include "scheduling/SchedulingAlgorithmDynamic.h"
+
 namespace po = boost::program_options;
 
 wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_input,
@@ -125,8 +127,9 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
     auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
 
     // Create an unused scheduling algorithm
-    auto algorithm = SchedulingAlgorithm::create_scheduling_algorithm(
-                            "dynamic", application_specs, task_functions, probability_computation.get());
+    auto algorithm = std::dynamic_pointer_cast<SchedulingAlgorithmDynamic>(SchedulingAlgorithm::create_scheduling_algorithm(
+                            "dynamic", application_specs, task_functions, probability_computation.get()));
+
 
     double initial_data_size = input.at("application").as_object().at("initial_data_size").to_number<double>();
     double initial_error_level = input.at("application").as_object().at("initial_error_level").to_number<double>();

@@ -1,6 +1,6 @@
 {
   "platform": {
-    "num_compute_nodes": 2,
+    "num_compute_nodes": 1,
     "bandwidth_comment": "Reported on Summit: 4000-nodes 4.2TB - 7.8TB)",
     "io_read_bandwidth_per_node": "2GBps",
     "io_write_bandwidth_per_node": "1GBps"

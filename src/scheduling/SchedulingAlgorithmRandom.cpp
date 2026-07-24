@@ -13,10 +13,6 @@ namespace wrench {
           _rng(std::chrono::steady_clock::now().time_since_epoch().count()) {
     }
 
-    double SchedulingAlgorithmRandom::get_expected_error() const {
-        return _e_fail;
-    }
-
     void SchedulingAlgorithmRandom::preprocess_host_decisions(
         const std::string& hostname,
         const double initial_data_size,

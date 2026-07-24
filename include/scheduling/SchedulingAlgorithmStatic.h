@@ -15,8 +15,6 @@ namespace wrench {
             : SchedulingAlgorithm(application_specs, name, exec_options, probability_computation),
               _comparator_function(comparator_function) {}
 
-        double get_expected_error() const override { return _expected_error; }
-
         void preprocess_host_decisions(const std::string& hostname,
             double initial_data_size,
             double initial_error_level,

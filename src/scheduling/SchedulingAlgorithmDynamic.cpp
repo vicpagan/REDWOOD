@@ -202,7 +202,7 @@ namespace wrench {
         //     }
         // }
 
-        _optimal_EV = dp[_application_specs->get_host_current_decision_node(hostname)][n].second;
+        _optimal_EV = dp[_application_specs->get_decision_tree_root(hostname)][n].second;
 
         for (auto &entry : dp) {
             std::vector<std::pair<long, std::string>> compressed;
