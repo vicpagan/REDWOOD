@@ -12,6 +12,7 @@
 #include "FunctionGenerator.h"
 #include "Utils.h"
 #include "scheduling/SchedulingAlgorithm.h"
+#include "scheduling/SchedulingAlgorithmDynamic.h"
 
 namespace po = boost::program_options;
 
@@ -38,14 +39,20 @@ namespace wrench {
 
         // Create algorithm and probability computation
         auto probability_computation = std::make_unique<ProbabilityComputation>(application_specs);
-        auto algorithm = SchedulingAlgorithm::create_scheduling_algorithm("dynamic", application_specs, task_functions, probability_computation.get());
+        auto algorithm = std::dynamic_pointer_cast<SchedulingAlgorithmDynamic>(SchedulingAlgorithm::create_scheduling_algorithm(
+                                    "dynamic", application_specs, task_functions, probability_computation.get()));
 
         double initial_data_size = json_input.at("application").as_object().at("initial_data_size").to_number<double>();
         double initial_error_level = json_input.at("application").as_object().at("initial_error_level").to_number<double>();
         double deadline = json_input.at("execution").as_object().at("deadline").to_number<double>();
 
+        application_specs->update_host_task_to_schedule("ComputeHost_1", 0);
+        application_specs->update_host_running_data_size("ComputeHost_1", initial_data_size);
+        application_specs->update_host_running_error_level("ComputeHost_1", initial_error_level);
+
         application_specs->prune_decision_trees(0.0);
         application_specs->build_decision_trees();
+        application_specs->reset_all_hosts_current_decision_nodes();
 
         // Evaluate each delta_t value
         for (double delta_t = min_delta_t; delta_t <= max_delta_t; delta_t += step_size) {

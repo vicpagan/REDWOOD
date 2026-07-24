@@ -44,8 +44,6 @@ namespace wrench {
             std::string execution_option;
         };
 
-        virtual double get_expected_error() const = 0;
-
         virtual void preprocess_host_decisions(
             const std::string& hostname,
             double initial_data_size,

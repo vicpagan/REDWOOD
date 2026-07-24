@@ -26,7 +26,7 @@ namespace wrench {
             SystemState *system_state_tracker,
             double remaining_time) override;
 
-        double get_expected_error() const override { return _optimal_EV; };
+        double get_expected_error() const { return _optimal_EV; };
 
         void preprocess_host_decisions(
             const std::string& hostname,
