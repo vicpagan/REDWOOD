@@ -32,7 +32,6 @@ namespace wrench {
         const double initial_error_level,
         const double deadline,
         const bool lower_bound) {
-
         if (_delta_t_scheme == "fixed") {
             _delta_t = _delta_t_parameter;
         }
@@ -44,13 +43,12 @@ namespace wrench {
         }
         _probability_computation->set_delta_t(_delta_t);
 
-#if OPTIMISTIC_EXECUTION
-        const auto d = static_cast<long>(std::floor(deadline / _delta_t));
-        const auto R = static_cast<long>(std::floor(_application_specs->get_restart_overhead() / _delta_t));
-#else
-        const auto d = ceiling_division(deadline, _delta_t);
-        const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
-#endif
+        const long d = lower_bound ?
+            ceiling_division(deadline, _delta_t) :
+            floor_division(deadline, _delta_t);
+        const long R = lower_bound ?
+            floor_division(_application_specs->get_restart_overhead(), _delta_t) :
+            ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
 
         const int num_tasks = static_cast<int>(_exec_options.size()) - 1;
         const int task_to_schedule_index = _application_specs->get_host_task_to_schedule_index(hostname);
@@ -215,20 +213,22 @@ namespace wrench {
 
         auto option_functions = _exec_options.at(task_name).at(option_name);
 
-#if OPTIMISTIC_EXECUTION
-        const long exec_time = static_cast<long>(std::floor(
-            ((running_input_data_size / _io_read_bandwidth_per_node)
-            + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
-            + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
-               / _io_write_bandwidth_per_node)) / selected_delta_t));
-#else
-        const long exec_time = ceiling_division(
-            ((running_input_data_size / _io_read_bandwidth_per_node)
-            + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
-            + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
-               / _io_write_bandwidth_per_node)),
-            selected_delta_t);
-#endif
+        long exec_time;
+        if (lower_bound) {
+            exec_time = floor_division(
+                ((running_input_data_size / _io_read_bandwidth_per_node)
+                + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
+                + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
+                   / _io_write_bandwidth_per_node)),
+                selected_delta_t);
+        } else {
+            exec_time = ceiling_division(
+                ((running_input_data_size / _io_read_bandwidth_per_node)
+                + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
+                + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
+                   / _io_write_bandwidth_per_node)),
+                selected_delta_t);
+        }
 
         double probability;
 
