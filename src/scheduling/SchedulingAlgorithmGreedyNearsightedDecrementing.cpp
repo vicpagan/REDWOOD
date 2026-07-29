@@ -27,13 +27,12 @@ namespace wrench {
         }
         _probability_computation->set_delta_t(_delta_t);
 
-#if OPTIMISTIC_EXECUTION
-        const auto d = static_cast<long>(std::floor(deadline / _delta_t));
-        const auto R = static_cast<long>(std::floor(_application_specs->get_restart_overhead() / _delta_t));
-#else
-        const auto d = ceiling_division(deadline, _delta_t);
-        const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
-#endif
+        // const long d = lower_bound ?
+        //     ceiling_division(deadline, _delta_t) :
+        //     floor_division(deadline, _delta_t);
+        // const long R = lower_bound ?
+        //     floor_division(_application_specs->get_restart_overhead(), _delta_t) :
+        //     ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
 
         // initialize list of combinations
         std::string first_task = _application_specs->get_task(0);

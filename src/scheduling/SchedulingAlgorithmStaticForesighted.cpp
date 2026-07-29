@@ -8,14 +8,12 @@
 #include "Utils.h"
 
 namespace wrench {
-
     void SchedulingAlgorithmStaticForesighted::preprocess_host_decisions(
         const std::string& hostname,
         const double initial_data_size,
         const double initial_error_level,
         const double deadline,
         const bool lower_bound) {
-
         if (_delta_t_scheme == "fixed") {
             _delta_t = _delta_t_parameter;
         }
@@ -27,17 +25,17 @@ namespace wrench {
         }
         _probability_computation->set_delta_t(_delta_t);
 
-#if OPTIMISTIC_EXECUTION
-        const auto d = static_cast<long>(std::floor(deadline / _delta_t));
-        const auto R = static_cast<long>(std::floor(_application_specs->get_restart_overhead() / _delta_t));
-#else
-        const auto d = ceiling_division(deadline, _delta_t);
-        const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
-#endif
+        const long d = lower_bound ?
+            ceiling_division(deadline, _delta_t) :
+            floor_division(deadline, _delta_t);
+        const long R = lower_bound ?
+            floor_division(_application_specs->get_restart_overhead(), _delta_t) :
+            ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
 
         const int num_tasks = static_cast<int>(_exec_options.size()) - 1;
         const int task_to_schedule_index = _application_specs->get_host_task_to_schedule_index(hostname);
-        const ApplicationSpecs::ExecOptionDecisionNode *current_decision_node = _application_specs->get_host_current_decision_node(hostname);
+        const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node = _application_specs->
+            get_host_current_decision_node(hostname);
 
         std::cerr << "task_to_schedule_index = " << task_to_schedule_index << std::endl;
         std::cerr << "current_decision_node_task = " << current_decision_node->task << std::endl;
@@ -50,10 +48,10 @@ namespace wrench {
 
         // sort list of combinations by error level
         std::map<std::vector<std::string>, double> el_by_combo;
-        for (const auto &combo : all_combinations) {
+        for (const auto& combo : all_combinations) {
             el_by_combo.emplace(combo, calculate_error_level_one_host(current_decision_node, combo, 0));
         }
-        std::sort(all_combinations.begin(), all_combinations.end(), [&](const auto &a, const auto &b) {
+        std::sort(all_combinations.begin(), all_combinations.end(), [&](const auto& a, const auto& b) {
             return el_by_combo.at(a) < el_by_combo.at(b);
         });
 
@@ -65,8 +63,7 @@ namespace wrench {
             best_value = -std::numeric_limits<double>::infinity();
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 double ps = calculate_prob_success_one_host(
                     num_tasks - task_to_schedule_index, task_to_schedule_index, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -85,8 +82,7 @@ namespace wrench {
             best_value = std::numeric_limits<double>::infinity();
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 double ps = calculate_prob_success_one_host(
                     num_tasks - task_to_schedule_index, task_to_schedule_index, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -107,8 +103,7 @@ namespace wrench {
             best_value = -std::numeric_limits<double>::infinity();
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 double ps = calculate_prob_success_one_host(
                     num_tasks - task_to_schedule_index, task_to_schedule_index, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -130,8 +125,7 @@ namespace wrench {
             double ps_threshold = error_level_comparator_function->get_prob_success_threshold();
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 double ps = calculate_prob_success_one_host(
                     num_tasks - task_to_schedule_index, task_to_schedule_index, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -158,26 +152,24 @@ namespace wrench {
         }
 
         std::cout << "best_combo size = " << best_combo.size()
-          << " for host " << hostname << std::endl;
+            << " for host " << hostname << std::endl;
 
         int task_idx = task_to_schedule_index;
-        for (const auto &option : best_combo) {
+        for (const auto& option : best_combo) {
             _static_decisions_per_host[hostname][_application_specs->get_task(task_idx++)] = option;
         }
-
     }
 
     void SchedulingAlgorithmStaticForesighted::collect_combinations(
-        std::vector<std::vector<std::string>> &all_combinations,
-        const ApplicationSpecs::ExecOptionDecisionNode *node,
-        std::vector<std::string> &current_path) {
-
+        std::vector<std::vector<std::string>>& all_combinations,
+        const ApplicationSpecs::ExecOptionDecisionNode* node,
+        std::vector<std::string>& current_path) {
         if (node->is_leaf) {
             all_combinations.push_back(current_path);
             return;
         }
 
-        for (const auto &child : node->children) {
+        for (const auto& child : node->children) {
             current_path.push_back(child->execution_option);
             collect_combinations(all_combinations, child.get(), current_path);
             current_path.pop_back();
@@ -190,14 +182,13 @@ namespace wrench {
         double running_input_data_size,
         double running_input_error_level,
         double selected_delta_t,
-        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> &dp,
+        std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>>& dp,
         const ApplicationSpecs::ExecOptionDecisionNode* current_task_node,
-        const std::vector<std::string> &combo,
+        const std::vector<std::string>& combo,
         int relative_task_index,
         const long n, const long R,
         const long deadline,
         const bool lower_bound) const {
-
         if (dp.find(current_task_node) == dp.end()) {
             dp[current_task_node] = std::vector<double>(deadline + 1, -1.0);
         }
@@ -210,7 +201,7 @@ namespace wrench {
         const std::string& option_name = combo[relative_task_index];
 
         const ApplicationSpecs::ExecOptionDecisionNode* current_child_node = nullptr;
-        for (const auto &child : current_task_node->children) {
+        for (const auto& child : current_task_node->children) {
             if (child->execution_option == option_name) {
                 current_child_node = child.get();
                 break;
@@ -219,32 +210,39 @@ namespace wrench {
 
         auto option_functions = _exec_options.at(task_name).at(option_name);
 
-#if OPTIMISTIC_EXECUTION
-        const long exec_time = static_cast<long>(std::floor(
-            ((running_input_data_size / _io_read_bandwidth_per_node)
-            + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
-            + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
-               / _io_write_bandwidth_per_node)) / selected_delta_t));
-#else
-        const long exec_time = ceiling_division(
-            ((running_input_data_size / _io_read_bandwidth_per_node)
-            + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
-            + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
-               / _io_write_bandwidth_per_node)),
-            selected_delta_t);
-#endif
+        long exec_time;
+        if (lower_bound) {
+            exec_time = floor_division(
+                ((running_input_data_size / _io_read_bandwidth_per_node)
+                    + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
+                    + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
+                        / _io_write_bandwidth_per_node)),
+                selected_delta_t);
+        }
+        else {
+            exec_time = ceiling_division(
+                ((running_input_data_size / _io_read_bandwidth_per_node)
+                    + option_functions.at("t_function")(running_input_data_size, running_input_error_level)
+                    + (option_functions.at("d_function")(running_input_data_size, running_input_error_level)
+                        / _io_write_bandwidth_per_node)),
+                selected_delta_t);
+        }
 
         double probability;
 
         if (n < exec_time) {
             probability = 0.0;
-        } else {
-            double updated_input_size  = option_functions.at("d_function")(running_input_data_size, running_input_error_level);
-            double updated_error_level = option_functions.at("e_function")(running_input_data_size, running_input_error_level);
+        }
+        else {
+            double updated_input_size = option_functions.at("d_function")(
+                running_input_data_size, running_input_error_level);
+            double updated_error_level = option_functions.at("e_function")(
+                running_input_data_size, running_input_error_level);
 
             if (remaining_tasks == 0) {
                 probability = _probability_computation->success_probability(exec_time) * 1.0;
-            } else {
+            }
+            else {
                 double next_task_probability = calculate_prob_success_one_host(
                     remaining_tasks - 1,
                     task_index + 1,
@@ -266,12 +264,14 @@ namespace wrench {
                 if (lower_bound) {
                     if (u == 0) {
                         remaining_time_after_failure = (R == 0)
-                            ? std::max(n - 1, 0L)
-                            : std::max(n - R, 0L);
-                    } else {
+                                                           ? std::max(n - 1, 0L)
+                                                           : std::max(n - R, 0L);
+                    }
+                    else {
                         remaining_time_after_failure = std::max(n - u - R, 0L);
                     }
-                } else {
+                }
+                else {
                     remaining_time_after_failure = std::max(n - u - R - 1, 0L);
                 }
 
@@ -297,14 +297,13 @@ namespace wrench {
 
     double SchedulingAlgorithmStaticForesighted::calculate_error_level_one_host(
         const ApplicationSpecs::ExecOptionDecisionNode* current_node,
-        const std::vector<std::string> &combo,
+        const std::vector<std::string>& combo,
         int relative_task_index) const {
-
         if (current_node->is_leaf) {
             return current_node->cumulative_error_factor;
         }
 
-        for (const auto &child : current_node->children) {
+        for (const auto& child : current_node->children) {
             if (child->execution_option == combo[relative_task_index]) {
                 return calculate_error_level_one_host(child.get(), combo, relative_task_index + 1);
             }
@@ -312,6 +311,4 @@ namespace wrench {
 
         throw std::runtime_error("No matching child found for option: " + combo[relative_task_index]);
     }
-
-
 }
