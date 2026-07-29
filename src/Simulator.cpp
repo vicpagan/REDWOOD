@@ -117,8 +117,12 @@ int main(int argc, char** argv) {
         json_input.at("scheduling").get_object().at("delta_t_scheme").get_object().at("parameter") = delta_t;
     }
 
-    if (vm.count("fake_io") == 1) {
-        json_input.at("platform").get_object().at("fake_io") = true;
+    if (fake_io) {
+        auto& platform_obj = json_input.at("platform").as_object();
+        auto it = platform_obj.find("fake_io");
+        if (it != platform_obj.end()) {
+            it->value() = fake_io;
+        }
     }
 
     /* Instantiating the platform */
