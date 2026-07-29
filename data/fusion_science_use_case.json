@@ -400,7 +400,7 @@
     ]
   },
   "execution": {
-    "num_repeats": 25,
+    "num_repeats": 100,
     "deadline_comment": "120 minutes",
     "deadline": 15000,
     "e_fail": 100.0

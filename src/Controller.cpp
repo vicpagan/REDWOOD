@@ -230,11 +230,13 @@ namespace wrench {
                 }
 
                 /* Build/reset decision trees to use for temporal redundancy */
-                _application_specs->clear_decision_trees();
-                _application_specs->build_decision_trees();
+                if (repeat == 0) {
+                    _application_specs->clear_decision_trees();
+                    _application_specs->build_decision_trees();
+                }
                 _application_specs->reset_all_hosts_current_decision_nodes();
                 _application_specs->reset_all_hosts_decision_history();
-                algorithm->reset_all_preprocessed_decisions();
+                // algorithm->reset_all_preprocessed_decisions();
 
                 _system_state_tracker->reset_all_hosts();
 
@@ -546,7 +548,7 @@ namespace wrench {
                                     if (_application_specs->get_host_task_to_schedule(hostname).empty() && !_system_state_tracker->is_host_finished(hostname)) {
                                         best_error_level_by_host[hostname] = _application_specs->get_host_running_error_level(hostname);
 
-                                        algorithm->reset_host_preprocessed_decisions(hostname);
+                                        // algorithm->reset_host_preprocessed_decisions(hostname);
 
                                         _application_specs->update_host_running_data_size(hostname, initial_data_size);
                                         _application_specs->update_host_running_error_level(hostname, initial_error_level);
@@ -554,9 +556,9 @@ namespace wrench {
                                         _application_specs->reset_host_current_decision_node(hostname);
 
                                         _application_specs->reset_host_decision_history(hostname);
-                                        _application_specs->clear_decision_tree(hostname);
-                                        _application_specs->build_decision_tree(hostname);
-                                        _application_specs->prune_decision_tree(hostname, final_error_level);
+                                        // _application_specs->clear_decision_tree(hostname);
+                                        // _application_specs->build_decision_tree(hostname);
+                                        // _application_specs->prune_decision_tree(hostname, final_error_level);
 
                                         std::cerr << "Stopping host " << hostname << std::endl;
                                         if (_system_state_tracker->is_a_job_running(hostname)) {
@@ -580,14 +582,14 @@ namespace wrench {
 
                             if (_application_specs->decision_tree_empty(success_hostname)) {
                                 std::cout << "Best possible error level achieved." << std::endl;
-                                algorithm->reset_all_preprocessed_decisions();
+                                // algorithm->reset_all_preprocessed_decisions();
                                 _system_state_tracker->reset_all_hosts();
                                 break;
                             }
 
                             if (_system_state_tracker->are_all_hosts_finished()) {
                                 std::cout << "All hosts finished." << std::endl;
-                                algorithm->reset_all_preprocessed_decisions();
+                                // algorithm->reset_all_preprocessed_decisions();
                                 _system_state_tracker->reset_all_hosts();
                                 break;
                             }
@@ -637,7 +639,7 @@ namespace wrench {
                             WRENCH_INFO("Deadline reached");
                             std::cout << "Error: " << repetition_results[repeat].second << std::endl;
 
-                            algorithm->reset_all_preprocessed_decisions();
+                            // algorithm->reset_all_preprocessed_decisions();
                             this->restart_system();
                             break;
                         }

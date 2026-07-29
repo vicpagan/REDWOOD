@@ -195,10 +195,12 @@ namespace wrench {
             calculate_expected_error(num_tasks - task_to_schedule_index, task_to_schedule_index, input_data_size, input_error_level, _delta_t, dp,
                                  current_decision_node, i, R, n, lower_bound);
         }
-
+        
         // for (auto &entry : dp) {
-        //     for (int j = 0; j < dp[entry.first].size(); j++) {
-        //         std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
+        //     if (entry.first->task.empty()) {
+        //         for (int j = 0; j < dp[entry.first].size(); j++) {
+        //             std::cerr << "dp[" << entry.first->task << ", " << entry.first->execution_option <<"][" << j << "] = (" << dp[entry.first][j].first << ", " << dp[entry.first][j].second << ")" << std::endl;
+        //         }
         //     }
         // }
 
