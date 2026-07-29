@@ -121,42 +121,8 @@ set(SIMULATOR_SOURCE_FILES
         include/Utils.h
 )
 
-# Default simulator
 add_executable(redwood_sim ${SIMULATOR_SOURCE_FILES})
 target_link_libraries(redwood_sim
-        ${WRENCH_LIBRARY}
-        ${SimGrid_LIBRARY}
-        ${FSMOD_LIBRARY}
-        ${Boost_LIBRARIES}
-        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-)
-
-# Optimistic execution variant
-add_executable(redwood_sim_opt_exec ${SIMULATOR_SOURCE_FILES})
-target_compile_definitions(redwood_sim_opt_exec PRIVATE OPTIMISTIC_EXECUTION)
-target_link_libraries(redwood_sim_opt_exec
-        ${WRENCH_LIBRARY}
-        ${SimGrid_LIBRARY}
-        ${FSMOD_LIBRARY}
-        ${Boost_LIBRARIES}
-        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-)
-
-# Optimistic scheduling variant
-add_executable(redwood_sim_opt_sched ${SIMULATOR_SOURCE_FILES})
-target_compile_definitions(redwood_sim_opt_sched PRIVATE OPTIMISTIC_DISCRETIZATION)
-target_link_libraries(redwood_sim_opt_sched
-        ${WRENCH_LIBRARY}
-        ${SimGrid_LIBRARY}
-        ${FSMOD_LIBRARY}
-        ${Boost_LIBRARIES}
-        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-)
-
-# Both optimistic flags
-add_executable(redwood_sim_opt_both ${SIMULATOR_SOURCE_FILES})
-target_compile_definitions(redwood_sim_opt_both PRIVATE OPTIMISTIC_EXECUTION OPTIMISTIC_DISCRETIZATION)
-target_link_libraries(redwood_sim_opt_both
         ${WRENCH_LIBRARY}
         ${SimGrid_LIBRARY}
         ${FSMOD_LIBRARY}
@@ -256,7 +222,6 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/ProbabilityComputation.h
 )
 
-# Default delta_t_evaluator
 add_executable(delta_t_evaluator ${DELTA_T_EVALUATOR_SOURCE_FILES})
 target_link_libraries(delta_t_evaluator
         ${WRENCH_LIBRARY}   # For UnitParser :)
@@ -264,33 +229,6 @@ target_link_libraries(delta_t_evaluator
         ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
 )
 
-# Optimistic execution variant
-add_executable(delta_t_evaluator_opt_exec ${DELTA_T_EVALUATOR_SOURCE_FILES})
-target_compile_definitions(delta_t_evaluator_opt_exec PRIVATE OPTIMISTIC_EXECUTION)
-target_link_libraries(delta_t_evaluator_opt_exec
-        ${WRENCH_LIBRARY}
-        ${Boost_LIBRARIES}
-        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-)
-
-# Optimistic scheduling variant
-add_executable(delta_t_evaluator_opt_sched ${DELTA_T_EVALUATOR_SOURCE_FILES})
-target_compile_definitions(delta_t_evaluator_opt_sched PRIVATE OPTIMISTIC_DISCRETIZATION)
-target_link_libraries(delta_t_evaluator_opt_sched
-        ${WRENCH_LIBRARY}
-        ${Boost_LIBRARIES}
-        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-)
-
-# Both optimistic flags
-add_executable(delta_t_evaluator_opt_both ${DELTA_T_EVALUATOR_SOURCE_FILES})
-target_compile_definitions(delta_t_evaluator_opt_both PRIVATE OPTIMISTIC_EXECUTION OPTIMISTIC_DISCRETIZATION)
-target_link_libraries(delta_t_evaluator_opt_both
-        ${WRENCH_LIBRARY}
-        ${Boost_LIBRARIES}
-        ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
-)
-
-install(TARGETS redwood_sim redwood_sim_opt_exec redwood_sim_opt_sched redwood_sim_opt_both DESTINATION bin)
+install(TARGETS redwood_sim DESTINATION bin)
 install(TARGETS data_parallel_evaluator DESTINATION bin)
-install(TARGETS delta_t_evaluator delta_t_evaluator_opt_exec delta_t_evaluator_opt_sched delta_t_evaluator_opt_both DESTINATION bin)
+install(TARGETS delta_t_evaluator DESTINATION bin)

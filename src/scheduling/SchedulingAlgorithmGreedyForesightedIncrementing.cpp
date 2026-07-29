@@ -8,14 +8,12 @@
 #include "Utils.h"
 
 namespace wrench {
-
     void SchedulingAlgorithmGreedyForesightedIncrementing::initial_decisions(
-        const std::string &hostname,
+        const std::string& hostname,
         const double initial_data_size,
         const double initial_error_level,
         const double deadline,
         const bool lower_bound) {
-
         if (_delta_t_scheme == "fixed") {
             _delta_t = _delta_t_parameter;
         }
@@ -27,16 +25,16 @@ namespace wrench {
         }
         _probability_computation->set_delta_t(_delta_t);
 
-#if OPTIMISTIC_EXECUTION
-        const auto d = static_cast<long>(std::floor(deadline / _delta_t));
-        const auto R = static_cast<long>(std::floor(_application_specs->get_restart_overhead() / _delta_t));
-#else
-        const auto d = ceiling_division(deadline, _delta_t);
-        const auto R = ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
-#endif
+        const long d = lower_bound ?
+            ceiling_division(deadline, _delta_t) :
+            floor_division(deadline, _delta_t);
+        const long R = lower_bound ?
+            floor_division(_application_specs->get_restart_overhead(), _delta_t) :
+            ceiling_division(_application_specs->get_restart_overhead(), _delta_t);
 
         const int num_tasks = static_cast<int>(_exec_options.size()) - 1;
-        const ApplicationSpecs::ExecOptionDecisionNode *current_decision_node = _application_specs->get_host_current_decision_node(hostname);
+        const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node = _application_specs->
+            get_host_current_decision_node(hostname);
 
         // initialize list of combinations
         std::vector<std::vector<std::string>> all_combinations;
@@ -45,15 +43,15 @@ namespace wrench {
 
         // sort list of combinations by error level
         std::map<std::vector<std::string>, double> el_by_combo;
-        for (const auto &combo : all_combinations) {
+        for (const auto& combo : all_combinations) {
             el_by_combo.emplace(combo, calculate_error_level_one_host(current_decision_node, combo, 0));
         }
-        std::sort(all_combinations.begin(), all_combinations.end(), [&](const auto &a, const auto &b) {
+        std::sort(all_combinations.begin(), all_combinations.end(), [&](const auto& a, const auto& b) {
             return el_by_combo.at(a) < el_by_combo.at(b);
         });
 
         // initialize the decisions starting at N nodes per combination
-        for (const auto &combo : all_combinations) {
+        for (const auto& combo : all_combinations) {
             _nodes_per_combo_decision[combo] = 0;
         }
         long num_nodes_scheduled = 0;
@@ -65,7 +63,7 @@ namespace wrench {
             std::vector<std::string> best_combo;
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
+            for (const auto& combo : all_combinations) {
                 // std::cout << "trying combo" << std::endl;
 
                 double ps = calculate_prob_success_one_host(
@@ -88,8 +86,7 @@ namespace wrench {
             std::map<std::vector<std::string>, double> ps_by_combo;
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 ps_by_combo[combo] = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -102,7 +99,7 @@ namespace wrench {
                 double best_exp_err = std::numeric_limits<double>::infinity();
                 std::vector<std::string> combo_to_add;
 
-                for (const auto &combo : all_combinations) {
+                for (const auto& combo : all_combinations) {
                     _nodes_per_combo_decision[combo]++;
                     double exp_err = this->calculate_expected_error(all_combinations, ps_by_combo, el_by_combo);
                     if (exp_err < best_exp_err) {
@@ -121,8 +118,7 @@ namespace wrench {
             std::vector<std::string> best_combo;
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 double ps = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -146,8 +142,7 @@ namespace wrench {
             double ps_threshold = error_level_comparator_function->get_prob_success_threshold();
 
             std::map<const ApplicationSpecs::ExecOptionDecisionNode*, std::vector<double>> dp;
-            for (const auto &combo : all_combinations) {
-
+            for (const auto& combo : all_combinations) {
                 double ps = calculate_prob_success_one_host(
                     num_tasks, 0, initial_data_size, initial_error_level,
                     _delta_t, dp, current_decision_node,
@@ -170,5 +165,4 @@ namespace wrench {
             throw std::runtime_error("Unknown comparator type");
         }
     }
-
 }
