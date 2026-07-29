@@ -2,7 +2,8 @@
   "platform": {
     "num_compute_nodes": 1,
     "io_read_bandwidth_per_node": "200MBps",
-    "io_write_bandwidth_per_node": "200MBps"
+    "io_write_bandwidth_per_node": "200MBps",
+    "fake_io": false
   },
   "failures": {
     "restart_overhead": 10.0,

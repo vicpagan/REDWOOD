@@ -35,12 +35,12 @@ namespace wrench {
     /**
      * @brief Constructor
      *
-     * @param platform_spec: platform specifications
-     * @param failure_spec: failure specifications
+     * @param application_spec: application specification
+     * @param execution_spec: execution specification
+     * @param scheduling_spec: scheduling specification
      * @param application_spec: application specifications
-     * @param execution_spec: application specifications
-     * @param scheduling_spec: scheduling specifications
      * @param compute_services: a set of compute services available to run actions
+     * @param fake_io: Whether to fake I/O operations or not
      * @param hostname: the name of the host on which to start the Execution Controller
      */
     Controller::Controller(const boost::json::object& application_spec,
@@ -48,14 +48,15 @@ namespace wrench {
                            const boost::json::object& scheduling_spec,
                            const std::shared_ptr<ApplicationSpecs>& application_specs,
                            const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
+                           const bool fake_io,
                            const std::string& hostname) : ExecutionController(hostname, "controller"),
                                                           _application_specs(application_specs),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
                                                           _scheduling_spec(scheduling_spec),
                                                           _compute_services(compute_services),
+                                                          _fake_io(fake_io),
                                                           _task_functions(_application_specs->get_task_functions()) {
-
         _num_repeats = boost::json::value_to<long>(_execution_spec.at("num_repeats"));
         _temporal_redundancy = boost::json::value_to<std::string>(
             _scheduling_spec.at("hacks").as_object().at("temporal_redundancy"));
@@ -67,7 +68,7 @@ namespace wrench {
 
         /* Determine the list of scheduling algorithms */
         /* Determine/validate the scheduling algorithms to use */
-        for (auto const &alg_name: _scheduling_spec.at("algorithms").as_array()) {
+        for (auto const& alg_name : _scheduling_spec.at("algorithms").as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
                 boost::json::value_to<string>(alg_name), _application_specs, _task_functions,
                 _probability_computation.get());
@@ -96,42 +97,57 @@ namespace wrench {
         //     " on host " << hostname << std::endl;
 
         const auto read_input_action = job->addCustomAction("read", 0, 1,
-                                                      [this, running_output_data_size](
-                                                      const std::shared_ptr<wrench::ActionExecutor>& action_executor) {
-                                                          auto disk = wrench::S4U_Simulation::hostHasMountPoint(action_executor->hostname, "/");
-                                                          disk->write(
-                                                              static_cast<sg_size_t>(running_output_data_size));
-                                                      },
-                                                      [](const std::shared_ptr<wrench::ActionExecutor>&
-                                                      action_executor) {
-                                                      });
+                                                            [this, running_output_data_size](
+                                                            const std::shared_ptr<wrench::ActionExecutor>&
+                                                            action_executor) {
+                                                                auto disk = wrench::S4U_Simulation::hostHasMountPoint(
+                                                                    action_executor->hostname, "/");
+                                                                if (_fake_io) {
+                                                                    Simulation::sleep(running_output_data_size /
+                                                                    disk->get_read_bandwidth());
+                                                                }
+                                                                else {
+                                                                    disk->write(static_cast<sg_size_t>(running_output_data_size));
+                                                                }
+                                                            },
+                                                            [](const std::shared_ptr<wrench::ActionExecutor>&
+                                                            action_executor) {
+                                                            });
 
         // std::cerr << "Read input action for task " << task_name << " with execution option " << execution_option <<
         //     " on host " << hostname << std::endl;
 
         const auto compute_action = job->addComputeAction("compute",
-                                                    _task_functions.at(task_name).at(execution_option).at("t_function")
-                                                    (running_output_data_size, running_output_error_level),
-                                                    0.0,
-                                                    1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
+                                                          _task_functions.at(task_name).at(execution_option).at(
+                                                              "t_function")
+                                                          (running_output_data_size, running_output_error_level),
+                                                          0.0,
+                                                          1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
 
         // std::cerr << "Compute action for task " << task_name << " with execution option " << execution_option <<
         //     " on host " << hostname << std::endl;
 
         const auto write_output_action = job->addCustomAction("write", 0, 1,
-                                                        [this, task_name, execution_option, running_output_data_size,
-                                                            running_output_error_level](
-                                                        const std::shared_ptr<wrench::ActionExecutor>&
-                                                        action_executor) {
-                                                            auto disk = wrench::S4U_Simulation::hostHasMountPoint(action_executor->hostname, "/");
-                                                            disk->write(static_cast<sg_size_t>(
-                                                                _task_functions.at(task_name).at(execution_option).at("d_function")
-                                                                (running_output_data_size,
-                                                                 running_output_error_level)));
-                                                        },
-                                                        [](const std::shared_ptr<wrench::ActionExecutor>&
-                                                        action_executor) {
-                                                        });
+                                                              [this, task_name, execution_option,
+                                                                  running_output_data_size,
+                                                                  running_output_error_level](
+                                                              const std::shared_ptr<wrench::ActionExecutor>&
+                                                              action_executor) {
+                                                                  auto num_bytes = _task_functions.at(task_name).at(execution_option)
+                                                                        .at("d_function")
+                                                                        (running_output_data_size,
+                                                                         running_output_error_level);
+                                                                  auto disk = wrench::S4U_Simulation::hostHasMountPoint(
+                                                                      action_executor->hostname, "/");
+                                                                  if (_fake_io) {
+                                                                    Simulation::sleep(num_bytes / disk->get_write_bandwidth());
+                                                                } else {
+                                                                    disk->write(static_cast<sg_size_t>(num_bytes));
+                                                                }
+                                                              },
+                                                              [](const std::shared_ptr<wrench::ActionExecutor>&
+                                                              action_executor) {
+                                                              });
 
         // std::cerr << "Write output action for task " << task_name << " with execution option " << execution_option <<
         //     " on host " << hostname << std::endl;
@@ -142,7 +158,8 @@ namespace wrench {
         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
         _job_manager->submitJob(job, _compute_services.at(hostname));
 
-        _system_state_tracker->track_job(job, hostname, task_name, execution_option, Simulation::getCurrentSimulatedDate());
+        _system_state_tracker->track_job(job, hostname, task_name, execution_option,
+                                         Simulation::getCurrentSimulatedDate());
     }
 
     void Controller::restart_system() const {
@@ -182,7 +199,7 @@ namespace wrench {
 
         /* Create the system state tracker */
         std::vector<std::string> hostnames;
-        for (auto const &entry : _compute_services) { hostnames.push_back(entry.first); }
+        for (auto const& entry : _compute_services) { hostnames.push_back(entry.first); }
         _system_state_tracker = SystemState::create_tracker(hostnames);
 
         /* Get initial x (data size) and y (error) from the JSON file */
@@ -195,7 +212,9 @@ namespace wrench {
             WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
 
             /* Keep track of number of successes */
-            std::vector<std::pair<bool, double>> repetition_results(_num_repeats, {false, _application_specs->get_e_fail()});
+            std::vector<std::pair<bool, double>> repetition_results(_num_repeats, {
+                                                                        false, _application_specs->get_e_fail()
+                                                                    });
 
             /* Do all the repeats */
             for (int repeat = 0; repeat < _num_repeats; repeat++) {
@@ -218,7 +237,7 @@ namespace wrench {
 
                 /* Running values of output data size, error level, and the best error level for each host */
                 std::map<std::string, double> best_error_level_by_host;
-                for (auto &entry : _compute_services) {
+                for (auto& entry : _compute_services) {
                     best_error_level_by_host[entry.first] = _application_specs->get_e_fail();
                 }
 
@@ -243,10 +262,10 @@ namespace wrench {
                     // Invoke the scheduler
                     auto decisions =
                         algorithm->make_decisions(_system_state_tracker.get(),
-                           time_to_deadline - Simulation::getCurrentSimulatedDate());
+                                                  time_to_deadline - Simulation::getCurrentSimulatedDate());
 
                     // Implement the scheduling decisions
-                    for (const auto &[hostname, task, execution_option] : decisions) {
+                    for (const auto& [hostname, task, execution_option] : decisions) {
                         // std::cerr << "Scheduling decision: run task " << task <<
                         //     " with option " << execution_option <<
                         //     " on host " << hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
@@ -264,12 +283,14 @@ namespace wrench {
                         auto success_hostname = success_event->compute_service->getHosts().at(0);
 
                         auto job_task_name = success_event->job->getName();
-                        auto success_host_completed_task_name = _system_state_tracker->get_host_current_task(success_hostname);
+                        auto success_host_completed_task_name = _system_state_tracker->get_host_current_task(
+                            success_hostname);
 
                         // checks if the task completed in the event is the same as the current task the host is working on
                         // if its different, we know the host in question has already been reset and rescheduled
                         // if its the same, then we have to reset the host
-                        if (job_task_name.compare(0, success_host_completed_task_name.length(), success_host_completed_task_name)) {
+                        if (job_task_name.compare(0, success_host_completed_task_name.length(),
+                                                  success_host_completed_task_name)) {
                             // spurious timeout or whatever its called
                             continue;
                         }
@@ -277,46 +298,69 @@ namespace wrench {
                         // checks if the task completed in the event is the same as the current task the host SHOULD have been working on
                         // if its different, then we have to reset the host to make sure it gets rescheduled to the proper task
                         // if its the same, then we know it completed what it set out to do successfully
-                        std::string success_host_current_task_to_schedule = _application_specs->get_host_task_to_schedule(success_hostname);
-                        if (job_task_name.compare(0, success_host_current_task_to_schedule.length(), success_host_current_task_to_schedule)) {
+                        std::string success_host_current_task_to_schedule = _application_specs->
+                            get_host_task_to_schedule(success_hostname);
+                        if (job_task_name.compare(0, success_host_current_task_to_schedule.length(),
+                                                  success_host_current_task_to_schedule)) {
                             _system_state_tracker->reset_host(success_hostname);
                             _system_state_tracker->untrack_job(success_hostname);
                             continue;
                         }
-                        std::cout << job_task_name << " completed successfully by host " << success_hostname << " at " << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
+                        std::cout << job_task_name << " completed successfully by host " << success_hostname << " at "
+                            << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
 
-                        std::string success_host_selected_option = job_task_name.substr(success_host_completed_task_name.length() + 1);
-                        double success_host_running_data_size = _application_specs->get_host_running_data_size(success_hostname);
-                        double success_host_running_error_level = _application_specs->get_host_running_error_level(success_hostname);
+                        std::string success_host_selected_option = job_task_name.substr(
+                            success_host_completed_task_name.length() + 1);
+                        double success_host_running_data_size = _application_specs->get_host_running_data_size(
+                            success_hostname);
+                        double success_host_running_error_level = _application_specs->get_host_running_error_level(
+                            success_hostname);
 
                         // update data size and error level trackers
                         std::cerr << "success_host_completed_task_name = " << success_host_completed_task_name << "\n";
                         std::cerr << "Completed task name: " << success_host_completed_task_name << std::endl;
                         std::cerr << "Completed selected option: " << success_host_selected_option << std::endl;
-                        _application_specs->update_host_running_data_size(success_hostname, _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).at("d_function")(success_host_running_data_size, success_host_running_error_level));
-                        _application_specs->update_host_running_error_level(success_hostname, _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).at("e_function")(success_host_running_data_size, success_host_running_error_level));
+                        _application_specs->update_host_running_data_size(
+                            success_hostname,
+                            _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).
+                                            at("d_function")(success_host_running_data_size,
+                                                             success_host_running_error_level));
+                        _application_specs->update_host_running_error_level(
+                            success_hostname,
+                            _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).
+                                            at("e_function")(success_host_running_data_size,
+                                                             success_host_running_error_level));
                         _application_specs->increment_host_task_to_schedule(success_hostname);
-                        _application_specs->increment_host_current_decision_node(success_hostname, success_host_completed_task_name, success_host_selected_option);
+                        _application_specs->increment_host_current_decision_node(
+                            success_hostname, success_host_completed_task_name, success_host_selected_option);
 
                         // update local trackers
-                        success_host_current_task_to_schedule = _application_specs->get_host_task_to_schedule(success_hostname);
-                        success_host_running_data_size = _application_specs->get_host_running_data_size(success_hostname);
-                        success_host_running_error_level = _application_specs->get_host_running_error_level(success_hostname);
+                        success_host_current_task_to_schedule = _application_specs->get_host_task_to_schedule(
+                            success_hostname);
+                        success_host_running_data_size = _application_specs->get_host_running_data_size(
+                            success_hostname);
+                        success_host_running_error_level = _application_specs->get_host_running_error_level(
+                            success_hostname);
 
                         if (_stop_running_jobs == "aggressive") {
                             for (const auto& entry : _compute_services) {
                                 std::string hostname = entry.first;
-                                if (hostname != success_hostname && !_system_state_tracker->is_host_finished(hostname)) {
+                                if (hostname != success_hostname && !_system_state_tracker->
+                                    is_host_finished(hostname)) {
                                     algorithm->reset_host_preprocessed_decisions(hostname);
 
-                                    _application_specs->update_host_running_data_size(hostname, success_host_running_data_size);
-                                    _application_specs->update_host_running_error_level(hostname, success_host_running_error_level);
-                                    _application_specs->update_host_task_to_schedule(hostname, success_host_current_task_to_schedule);
+                                    _application_specs->update_host_running_data_size(
+                                        hostname, success_host_running_data_size);
+                                    _application_specs->update_host_running_error_level(
+                                        hostname, success_host_running_error_level);
+                                    _application_specs->update_host_task_to_schedule(
+                                        hostname, success_host_current_task_to_schedule);
 
                                     _application_specs->update_host_decision_history(hostname, success_hostname);
                                     _application_specs->clear_decision_tree(hostname);
                                     _application_specs->build_decision_tree(hostname);
-                                    _application_specs->prune_decision_tree(hostname, best_error_level_by_host.at(success_hostname));
+                                    _application_specs->prune_decision_tree(
+                                        hostname, best_error_level_by_host.at(success_hostname));
                                     _application_specs->update_host_current_decision_node(hostname, success_hostname);
 
                                     if (_system_state_tracker->is_a_job_running(hostname)) {
@@ -325,7 +369,8 @@ namespace wrench {
                                                 _system_state_tracker->get_running_job(hostname));
                                         }
                                         catch (ExecutionException&) {
-                                            std::cerr << "Tried to terminate job on host: " << hostname << " with SRJ AGG" << std::endl;
+                                            std::cerr << "Tried to terminate job on host: " << hostname <<
+                                                " with SRJ AGG" << std::endl;
                                         }
                                     }
                                     _system_state_tracker->untrack_job(hostname);
@@ -345,22 +390,29 @@ namespace wrench {
                                     // _system_state_tracker->untrack_job(hostname);
                                 }
                             }
-                        } else if (_stop_running_jobs == "variant") {
+                        }
+                        else if (_stop_running_jobs == "variant") {
                             for (const auto& entry : _compute_services) {
                                 std::string hostname = entry.first;
                                 if (hostname != success_hostname) {
-                                    if (!_application_specs->can_possibly_do_better(hostname, success_hostname) && !_system_state_tracker->is_host_finished(hostname)) {
+                                    if (!_application_specs->can_possibly_do_better(hostname, success_hostname) && !
+                                        _system_state_tracker->is_host_finished(hostname)) {
                                         algorithm->reset_host_preprocessed_decisions(hostname);
 
-                                        _application_specs->update_host_running_data_size(hostname, success_host_running_data_size);
-                                        _application_specs->update_host_running_error_level(hostname, success_host_running_error_level);
-                                        _application_specs->update_host_task_to_schedule(hostname, success_host_current_task_to_schedule);
+                                        _application_specs->update_host_running_data_size(
+                                            hostname, success_host_running_data_size);
+                                        _application_specs->update_host_running_error_level(
+                                            hostname, success_host_running_error_level);
+                                        _application_specs->update_host_task_to_schedule(
+                                            hostname, success_host_current_task_to_schedule);
 
                                         _application_specs->update_host_decision_history(hostname, success_hostname);
                                         _application_specs->clear_decision_tree(hostname);
                                         _application_specs->build_decision_tree(hostname);
-                                        _application_specs->prune_decision_tree(hostname, best_error_level_by_host.at(success_hostname));
-                                        _application_specs->update_host_current_decision_node(hostname, success_hostname);
+                                        _application_specs->prune_decision_tree(
+                                            hostname, best_error_level_by_host.at(success_hostname));
+                                        _application_specs->update_host_current_decision_node(
+                                            hostname, success_hostname);
 
                                         if (_system_state_tracker->is_a_job_running(hostname)) {
                                             try {
@@ -368,7 +420,8 @@ namespace wrench {
                                                     _system_state_tracker->get_running_job(hostname));
                                             }
                                             catch (ExecutionException&) {
-                                                std::cerr << "Tried to terminate job on host: " << hostname << " with SRJ VAR" << std::endl;
+                                                std::cerr << "Tried to terminate job on host: " << hostname <<
+                                                    " with SRJ VAR" << std::endl;
                                             }
                                         }
                                         _system_state_tracker->untrack_job(hostname);
@@ -392,7 +445,6 @@ namespace wrench {
                         }
 
 
-
                         // this host has finished their task chain
                         if (_application_specs->get_host_task_to_schedule(success_hostname).empty()) {
                             double final_error_level = success_host_running_error_level;
@@ -400,14 +452,16 @@ namespace wrench {
                                 repetition_results[repeat] = {true, final_error_level};
                             }
 
-                            std::cout << "Host " << success_hostname << " succeeded with error: " << final_error_level << std::endl;
+                            std::cout << "Host " << success_hostname << " succeeded with error: " << final_error_level
+                                << std::endl;
 
                             // once any host finishes, restart every host with the completed chain in consideration
                             if (_temporal_redundancy == "aggressive") {
                                 for (const auto& entry : _compute_services) {
                                     std::string hostname = entry.first;
 
-                                    best_error_level_by_host[hostname] = std::min(best_error_level_by_host[hostname], final_error_level);
+                                    best_error_level_by_host[hostname] = std::min(
+                                        best_error_level_by_host[hostname], final_error_level);
 
                                     algorithm->reset_host_preprocessed_decisions(hostname);
 
@@ -427,7 +481,8 @@ namespace wrench {
                                                 _system_state_tracker->get_running_job(hostname));
                                         }
                                         catch (ExecutionException&) {
-                                            std::cerr << "Tried to terminate job on host: " << hostname << " after finish with TR AGG" << std::endl;
+                                            std::cerr << "Tried to terminate job on host: " << hostname <<
+                                                " after finish with TR AGG" << std::endl;
                                         }
                                     }
                                     _system_state_tracker->untrack_job(hostname);
@@ -451,13 +506,17 @@ namespace wrench {
                                 for (const auto& entry : _compute_services) {
                                     std::string hostname = entry.first;
 
-                                    if ((!_application_specs->can_possibly_do_better(hostname, success_hostname) || _application_specs->get_host_task_to_schedule(hostname).empty()) && !_system_state_tracker->is_host_finished(hostname)) {
-                                        best_error_level_by_host[hostname] = std::min(best_error_level_by_host[hostname], final_error_level);
+                                    if ((!_application_specs->can_possibly_do_better(hostname, success_hostname) ||
+                                            _application_specs->get_host_task_to_schedule(hostname).empty()) && !
+                                        _system_state_tracker->is_host_finished(hostname)) {
+                                        best_error_level_by_host[hostname] = std::min(
+                                            best_error_level_by_host[hostname], final_error_level);
 
                                         algorithm->reset_host_preprocessed_decisions(hostname);
 
                                         _application_specs->update_host_running_data_size(hostname, initial_data_size);
-                                        _application_specs->update_host_running_error_level(hostname, initial_error_level);
+                                        _application_specs->update_host_running_error_level(
+                                            hostname, initial_error_level);
                                         _application_specs->update_host_task_to_schedule(hostname, 0);
                                         _application_specs->reset_host_current_decision_node(hostname);
 
@@ -472,7 +531,8 @@ namespace wrench {
                                                     _system_state_tracker->get_running_job(hostname));
                                             }
                                             catch (ExecutionException&) {
-                                                std::cerr << "Tried to terminate job on host: " << hostname << " after finish with TR DEP" << std::endl;
+                                                std::cerr << "Tried to terminate job on host: " << hostname <<
+                                                    " after finish with TR DEP" << std::endl;
                                             }
                                         }
                                         _system_state_tracker->untrack_job(hostname);
@@ -497,13 +557,16 @@ namespace wrench {
                                 for (const auto& entry : _compute_services) {
                                     std::string hostname = entry.first;
 
-                                    if (_application_specs->get_host_task_to_schedule(hostname).empty() && !_system_state_tracker->is_host_finished(hostname)) {
-                                        best_error_level_by_host[hostname] = _application_specs->get_host_running_error_level(hostname);
+                                    if (_application_specs->get_host_task_to_schedule(hostname).empty() && !
+                                        _system_state_tracker->is_host_finished(hostname)) {
+                                        best_error_level_by_host[hostname] = _application_specs->
+                                            get_host_running_error_level(hostname);
 
                                         algorithm->reset_host_preprocessed_decisions(hostname);
 
                                         _application_specs->update_host_running_data_size(hostname, initial_data_size);
-                                        _application_specs->update_host_running_error_level(hostname, initial_error_level);
+                                        _application_specs->update_host_running_error_level(
+                                            hostname, initial_error_level);
                                         _application_specs->update_host_task_to_schedule(hostname, 0);
                                         _application_specs->reset_host_current_decision_node(hostname);
 
@@ -518,7 +581,8 @@ namespace wrench {
                                                     _system_state_tracker->get_running_job(hostname));
                                             }
                                             catch (ExecutionException&) {
-                                                std::cerr << "Tried to terminate job on host: " << hostname << " after finish with TR INDEP" << std::endl;
+                                                std::cerr << "Tried to terminate job on host: " << hostname <<
+                                                    " after finish with TR INDEP" << std::endl;
                                             }
                                         }
                                         _system_state_tracker->untrack_job(hostname);
@@ -543,13 +607,16 @@ namespace wrench {
                                 for (const auto& entry : _compute_services) {
                                     std::string hostname = entry.first;
 
-                                    if (_application_specs->get_host_task_to_schedule(hostname).empty() && !_system_state_tracker->is_host_finished(hostname)) {
-                                        best_error_level_by_host[hostname] = _application_specs->get_host_running_error_level(hostname);
+                                    if (_application_specs->get_host_task_to_schedule(hostname).empty() && !
+                                        _system_state_tracker->is_host_finished(hostname)) {
+                                        best_error_level_by_host[hostname] = _application_specs->
+                                            get_host_running_error_level(hostname);
 
                                         algorithm->reset_host_preprocessed_decisions(hostname);
 
                                         _application_specs->update_host_running_data_size(hostname, initial_data_size);
-                                        _application_specs->update_host_running_error_level(hostname, initial_error_level);
+                                        _application_specs->update_host_running_error_level(
+                                            hostname, initial_error_level);
                                         _application_specs->update_host_task_to_schedule(hostname, 0);
                                         _application_specs->reset_host_current_decision_node(hostname);
 
@@ -565,7 +632,8 @@ namespace wrench {
                                                     _system_state_tracker->get_running_job(hostname));
                                             }
                                             catch (ExecutionException&) {
-                                                std::cerr << "Tried to terminate job on host: " << hostname << " after finish with TR OFF" << std::endl;
+                                                std::cerr << "Tried to terminate job on host: " << hostname <<
+                                                    " after finish with TR OFF" << std::endl;
                                             }
                                         }
                                         _system_state_tracker->untrack_job(hostname);
@@ -600,15 +668,16 @@ namespace wrench {
                                         _system_state_tracker->get_running_job(success_hostname));
                                 }
                                 catch (ExecutionException&) {
-                                    std::cerr << "Tried to terminate job on host: " << success_hostname << " after task success" << std::endl;
+                                    std::cerr << "Tried to terminate job on host: " << success_hostname <<
+                                        " after task success" << std::endl;
                                 }
                             }
                             _system_state_tracker->untrack_job(success_hostname);
                             NodeKiller::reset_node_killer(this->getSimulation(),
-                                               success_hostname,
-                                               _application_specs->get_exponential_distribution(),
-                                               _application_specs->get_restart_overhead(),
-                                               this->commport);
+                                                          success_hostname,
+                                                          _application_specs->get_exponential_distribution(),
+                                                          _application_specs->get_restart_overhead(),
+                                                          this->commport);
                             _system_state_tracker->reset_host(success_hostname);
                             // _system_state_tracker->untrack_job(success_hostname);
                         }
@@ -625,14 +694,16 @@ namespace wrench {
                             size_t colon_pos = timer_event->message.find(':');
                             size_t hyphen_pos = timer_event->message.find('-');
 
-                            std::string algorithm_name = timer_event->message.substr(colon_pos + 1, hyphen_pos - colon_pos - 1);
+                            std::string algorithm_name = timer_event->message.substr(
+                                colon_pos + 1, hyphen_pos - colon_pos - 1);
                             std::string repeat_id = timer_event->message.substr(hyphen_pos + 1);
                             if (algorithm_name != algorithm->get_name() || repeat_id != std::to_string(repeat)) {
                                 continue; // Spurious timeout
                             }
                             if (!repetition_results[repeat].first) {
                                 std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
-                                Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" << std::endl;
+                                    Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" <<
+                                    std::endl;
                             }
                             WRENCH_INFO("Deadline reached");
                             std::cout << "Error: " << repetition_results[repeat].second << std::endl;
@@ -646,7 +717,8 @@ namespace wrench {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
                             // Reset the host's entry to nullptr, so that we now know it's idle
-                            std::cerr << "Host " << hostname.c_str() << " is back up at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            std::cerr << "Host " << hostname.c_str() << " is back up at time " <<
+                                Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
 
                             WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
                             _system_state_tracker->set_host_up(hostname);
@@ -656,7 +728,8 @@ namespace wrench {
                         if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
                             size_t pos = timer_event->message.find(':');
                             std::string hostname = timer_event->message.substr(pos + 1);
-                            std::cerr << "Host " << hostname.c_str() << " is down at time " << Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+                            std::cerr << "Host " << hostname.c_str() << " is down at time " <<
+                                Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
 
                             // Cancel the job
                             WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());
@@ -666,7 +739,8 @@ namespace wrench {
                                         _system_state_tracker->get_running_job(hostname));
                                 }
                                 catch (ExecutionException&) {
-                                    std::cerr << "Tried to terminate job on down host: " << hostname << " for host going down" << std::endl;
+                                    std::cerr << "Tried to terminate job on down host: " << hostname <<
+                                        " for host going down" << std::endl;
                                 }
                             }
 
@@ -687,7 +761,8 @@ namespace wrench {
                                 _system_state_tracker->get_running_job(hostname));
                         }
                         catch (ExecutionException&) {
-                            std::cerr << "Tried to terminate job on host: " << hostname << " at the end of the repetition" << std::endl;
+                            std::cerr << "Tried to terminate job on host: " << hostname <<
+                                " at the end of the repetition" << std::endl;
                         }
                     }
                 }
@@ -706,10 +781,12 @@ namespace wrench {
 
             std::cout << "Total repeats: " << _num_repeats << "\n";
             std::cout << "Num successes: " << num_successes << "\n";
-            std::cout << "Success rate: " << static_cast<double>(num_successes)/static_cast<double>(_num_repeats) << "\n";
-            std::cout << "Avg error level: " << cumulative_error_level/static_cast<double>(_num_repeats) << "\n";
+            std::cout << "Success rate: " << static_cast<double>(num_successes) / static_cast<double>(_num_repeats) <<
+                "\n";
+            std::cout << "Avg error level: " << cumulative_error_level / static_cast<double>(_num_repeats) << "\n";
             if (num_successes > 0) {
-                std::cout << "Avg error level of successes: " << cumulative_error_level_successes/static_cast<double>(num_successes) << "\n\n";
+                std::cout << "Avg error level of successes: " << cumulative_error_level_successes / static_cast<double>(
+                    num_successes) << "\n\n";
             }
             else {
                 std::cout << "Avg error level of successes: N/A\n\n";

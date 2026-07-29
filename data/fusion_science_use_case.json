@@ -3,7 +3,8 @@
     "num_compute_nodes": 1,
     "bandwidth_comment": "Reported on Summit: 4000-nodes 4.2TB - 7.8TB)",
     "io_read_bandwidth_per_node": "2GBps",
-    "io_write_bandwidth_per_node": "1GBps"
+    "io_write_bandwidth_per_node": "1GBps",
+    "fake_io": false
   },
   "failures": {
     "restart_overhead_comment": "Fred is thinking of a 'reasonable value'",

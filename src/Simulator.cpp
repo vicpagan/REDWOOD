@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
     double lambda;
     double e_fail;
     double delta_t;
+    bool fake_io;
     po::options_description desc("Allowed arguments");
     desc.add_options()
     ("help",
@@ -60,7 +61,9 @@ int main(int argc, char** argv) {
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
          "Error associated to a failed execution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<fixed delta_t>"),
-         "delta_t value - will override JSON-provided scheme/value\n");
+         "delta_t value - will override JSON-provided scheme/value\n")
+    ("fake_io", po::bool_switch(&fake_io),
+         "Pass this flag to fake all I/O - will override JSON-provided scheme\n");
     // Parse command-line arguments
     po::variables_map vm;
     po::store(
@@ -114,6 +117,10 @@ int main(int argc, char** argv) {
         json_input.at("scheduling").get_object().at("delta_t_scheme").get_object().at("parameter") = delta_t;
     }
 
+    if (vm.count("fake_io") == 1) {
+        json_input.at("platform").get_object().at("fake_io") = true;
+    }
+
     /* Instantiating the platform */
     simulation->instantiatePlatform(PlatformCreator(json_input["platform"].as_object()));
 
@@ -144,7 +151,8 @@ int main(int argc, char** argv) {
             json_input["execution"].as_object(),
             json_input["scheduling"].as_object(),
             application_specs,
-            compute_services, "ControllerHost"));
+            compute_services,
+            fake_io, "ControllerHost"));
 
     /* Launch the simulation */
     simulation->launch();

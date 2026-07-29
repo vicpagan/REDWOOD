@@ -37,6 +37,7 @@ namespace wrench {
             const boost::json::object& scheduling_spec,
             const std::shared_ptr<ApplicationSpecs>& _application_specs,
             const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
+            const bool fake_io,
             const std::string& hostname);
 
 
@@ -59,6 +60,7 @@ namespace wrench {
         const boost::json::object _execution_spec;
         const boost::json::object _scheduling_spec;
         const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
+        const bool _fake_io;
 
         std::shared_ptr<SystemState> _system_state_tracker;
         std::shared_ptr<JobManager> _job_manager;

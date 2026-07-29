@@ -113,7 +113,7 @@ def run_simulation(json_file, delta_t, num_repeats, sim_executable):
 
     try:
         # Run the simulation
-        cmd = [sim_executable, "--json", tmp_file]
+        cmd = [sim_executable, "--json", tmp_file, "--fake_io"]
         print(f"  Running simulation for delta_t={delta_t}...", end=' ', flush=True)
         result = subprocess.run(cmd, capture_output=True, text=True)
 
