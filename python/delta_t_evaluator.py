@@ -8,6 +8,7 @@ import numpy as np
 import re
 import tempfile
 import os
+import math
 
 def get_executable_names(base_evaluator, base_sim, optimistic_exec, optimistic_sched):
     """Get the appropriate executable names based on flags"""
@@ -129,10 +130,26 @@ def run_simulation(json_file, delta_t, num_repeats, sim_executable):
         if match:
             avg_error = float(match.group(1))
             print(f"Avg error: {avg_error:.3f}")
-            return avg_error
         else:
             print(f"Could not parse avg error from output")
-            return None
+            return [None,None]
+
+        # Collect all individual errors for all repeats
+        got_to_section = False
+        individual_errors = []
+        for line in output.splitlines():
+            if not got_to_section and "FINAL RESULTS PER REPETITION" not in line:
+                continue
+            if "FINAL RESULTS PER REPETITION" in line:
+                got_to_section = True
+                continue
+            achieved_error = line.rstrip().split(" ")[2]
+            individual_errors.append(float(achieved_error))
+
+        return [avg_error, individual_errors]
+
+
+
 
     finally:
         # Clean up temp file
@@ -218,13 +235,20 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
 
         # Simulation results (as lines instead of markers)
         if sim_results:
+
+            confidence_interval_delta = 0
             sim_delta_t = []
             sim_avg_error = []
-
-            for dt, err in sim_results.items():
-                if err is not None:
+            for dt, [avg, errors] in sim_results.items():
+                if avg is not None:
                     sim_delta_t.append(dt)
-                    sim_avg_error.append(err)
+                    sim_avg_error.append(avg)
+                    s_square = 0
+                    for e in errors:
+                        s_square += (e - avg) * (e - avg)
+                    s_square = s_square / (len(errors) - 1)
+                    confidence_interval_delta = 1.96 * math.sqrt(s_square) / math.sqrt(len(errors))
+                    print(f"Error = {avg} +/- {confidence_interval_delta}")
 
             if sim_delta_t:
                 line_sim = ax1.plot(
@@ -237,6 +261,13 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
                     alpha=0.9
                 )
                 all_lines.extend(line_sim)
+
+            # Confidence interval half-width
+            lower = [x - confidence_interval_delta for x in sim_avg_error]
+            upper = [x + confidence_interval_delta for x in sim_avg_error]
+            ax1.fill_between(sim_delta_t, lower, upper, alpha=0.3, color='C0', label='Confidence interval')
+
+
 
     ax1.grid(True, alpha=0.3)
 
@@ -377,11 +408,11 @@ def main():
                 delta_t_values = data["delta_t"]
 
                 for dt in delta_t_values:
-                    avg_error = run_simulation(prepared_json_file, dt, num_repeats, sim_exe)
-                    sim_results[dt] = avg_error
+                    [avg_error, errors] = run_simulation(prepared_json_file, dt, num_repeats, sim_exe)
+                    sim_results[dt] = [avg_error, errors]
 
                 print("\nSimulation results:")
-                for dt, err in sim_results.items():
+                for dt, [err, errors] in sim_results.items():
                     if err is not None:
                         print(f"  delta_t={dt}: avg_error={err:.3f}")
 
