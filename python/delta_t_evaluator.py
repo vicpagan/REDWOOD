@@ -164,7 +164,7 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
         'default': {
             'color_u': 'tab:red',
             'color_l': 'tab:blue',
-            'label_prefix': 'Default',
+            'label_prefix': '',
             'sim_color': 'purple'
         },
         'opt_exec': {
@@ -187,8 +187,8 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
         }
     }
 
-    ax1.set_xlabel('Delta_t (time discretization)', fontsize=12)
-    ax1.set_ylabel('Expected Error', color='black', fontsize=12)
+    ax1.set_xlabel(r'Discrete time-step $\delta$ (sec)', fontsize=14)
+    ax1.set_ylabel('Expected Error', color='k', fontsize=14)
 
     all_lines = []
 
@@ -208,8 +208,9 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
         line_u = ax1.plot(
             delta_t, upper_bound,
             color=cfg['color_u'],
-            linewidth=2,
-            label=f"{cfg['label_prefix']} Upper",
+            linewidth=4,
+            marker='o',
+            label=f"{cfg['label_prefix']} Upper bound",
             alpha=0.8
         )
 
@@ -217,8 +218,9 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
         line_l = ax1.plot(
             delta_t, lower_bound,
             color=cfg['color_l'],
-            linewidth=2,
-            label=f"{cfg['label_prefix']} Lower",
+            linewidth=4,
+            marker='o',
+            label=f"{cfg['label_prefix']} Lower bound",
             alpha=0.8
         )
 
@@ -270,38 +272,40 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
 
 
     ax1.grid(True, alpha=0.3)
+    ax1.tick_params(axis='y', labelsize=14)
+    ax1.tick_params(axis='x', labelsize=14)
 
     # Computation time (no markers)
     if 'default' in all_results and all_results['default'] is not None:
         ax2 = ax1.twinx()
-        comp_time = np.array(all_results['default']['data']["computation_time_ms"])
+        comp_time = np.array(all_results['default']['data']["computation_time_ms"]) / 1000.0
         delta_t = np.array(all_results['default']['data']["delta_t"])
 
         color3 = 'tab:green'
-        ax2.set_ylabel('Computation Time (ms)', color=color3, fontsize=12)
+        ax2.set_ylabel('Compute Time (sec)', fontsize=14)
 
         line_time = ax2.plot(
             delta_t,
             comp_time,
             color=color3,
-            linewidth=2,
-            linestyle='-.',
+            linewidth=4,
+            linestyle='--',
             label='Preprocessing time',
             alpha=0.7
         )
 
-        ax2.tick_params(axis='y', labelcolor=color3)
+        ax2.tick_params(axis='y', labelsize=14)
         all_lines.extend(line_time)
 
     labels = [l.get_label() for l in all_lines]
-    ax1.legend(all_lines, labels, loc='best', fontsize=8, ncol=2)
+    ax1.legend(all_lines, labels, loc='lower left', fontsize=16, ncol=1)
 
-    plt.title(
-        'Delta_t Impact on Expected Error (Multiple Configurations)',
-        fontsize=14,
-        fontweight='bold',
-        pad=20
-    )
+#    plt.title(
+#        'Delta_t Impact on Expected Error (Multiple Configurations)',
+#        fontsize=14,
+#        fontweight='bold',
+#        pad=20
+#    )
 
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
@@ -423,6 +427,7 @@ def main():
 
     # Create visualization
     plot_results(all_results)
+    print(all_results)
 
     # Save raw data
     output_data = {}
