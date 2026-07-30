@@ -399,6 +399,7 @@ def main():
 
         # Run evaluator
         data = run_evaluator(prepared_json_file, min_delta_t, max_delta_t, step_size, evaluator_exe)
+        print(f"Bounds results: {data}")
 
         # Run simulations if requested
         sim_results = None
