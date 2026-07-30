@@ -419,19 +419,23 @@ def main():
                     # Deal with repeats (too many repeats, i.e., in the millions, make things crash!)
                     num_repeats_done = 0
                     seed = 5123
+                    running_sum = 0
                     while num_repeats_done < num_repeats:
                         num_repeats_to_do = min(num_repeats - num_repeats_done, batch_size)
                         [batch_avg_error, batch_error_counts] = run_simulation(prepared_json_file, dt, num_repeats_to_do, seed, sim_exe)
                         seed += num_repeats_to_do
+                        num_repeats_done += num_repeats_to_do
+                        running_sum += batch_avg_error * num_repeats_to_do
+                        print(f"Average error after {num_repeats_done} repeats: {running_sum / (num_repeats_done)}")
                         # Accumulate into error_counts
                         for error, count in batch_error_counts.items():
                             if error not in error_counts:
                                 error_counts[error] = count
                             else:
                                 error_counts[error] += count
-                        num_repeats_done += num_repeats_to_do
 
-                    # Compute avg_error
+
+                    # Compute avg_error from scratch
                     avg_error = 0
                     num_samples = 0
                     print(error_counts)
