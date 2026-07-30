@@ -92,64 +92,116 @@ namespace wrench {
         // std::cerr << "Submitting job for task " << task_name << " with execution option " << execution_option <<
         //     " on host " << hostname << std::endl;
 
-        const auto read_input_action = job->addCustomAction("read", 0, 1,
-                                                            [this, running_output_data_size](
-                                                            const std::shared_ptr<wrench::ActionExecutor>&
-                                                            action_executor) {
-                                                                auto disk = wrench::S4U_Simulation::hostHasMountPoint(
-                                                                    action_executor->hostname, "/");
-                                                                if (_fake_io) {
-                                                                    Simulation::sleep(running_output_data_size /
-                                                                    disk->get_read_bandwidth());
-                                                                }
-                                                                else {
-                                                                    disk->write(static_cast<sg_size_t>(running_output_data_size));
-                                                                }
-                                                            },
-                                                            [](const std::shared_ptr<wrench::ActionExecutor>&
-                                                            action_executor) {
-                                                            });
+        if (_fake_io) {
+            job->addCustomAction(
+                "fake_io_task", 0, 1,
+                [this, task_name, execution_option,
+                    running_output_error_level, running_output_data_size
+                ](
+                const std::shared_ptr<wrench::ActionExecutor>&
+                action_executor) {
+                    auto disk =
+                        wrench::S4U_Simulation::hostHasMountPoint(
+                            action_executor->hostname, "/");
+                    double read_time = running_output_data_size /
+                        disk->get_read_bandwidth();
+                    double flops = _task_functions.at(task_name).at(
+                        execution_option).at(
+                        "t_function")
+                    (running_output_data_size,
+                     running_output_error_level);
+                    double compute_time = flops /
+                        S4U_Simulation::getHostFlopRate(
+                            action_executor->hostname);
 
-        // std::cerr << "Read input action for task " << task_name << " with execution option " << execution_option <<
-        //     " on host " << hostname << std::endl;
+                    auto num_out_bytes = _task_functions.at(task_name).
+                                                         at(execution_option)
+                                                         .at("d_function")
+                                                         (running_output_data_size,
+                                                          running_output_error_level);
 
-        const auto compute_action = job->addComputeAction("compute",
-                                                          _task_functions.at(task_name).at(execution_option).at(
-                                                              "t_function")
-                                                          (running_output_data_size, running_output_error_level),
-                                                          0.0,
-                                                          1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
+                    double write_time = num_out_bytes / disk->
+                        get_write_bandwidth();
 
-        // std::cerr << "Compute action for task " << task_name << " with execution option " << execution_option <<
-        //     " on host " << hostname << std::endl;
+                    S4U_Simulation::sleep(read_time + compute_time + write_time);
+                },
+                [](const std::shared_ptr<wrench::ActionExecutor>&
+                action_executor) {
+                });
+        } else {
+            const auto read_input_action =
+                job->addCustomAction(
+                    "read", 0, 1,
+                    [this, running_output_data_size](
+                    const std::shared_ptr<wrench::ActionExecutor>&
+                    action_executor) {
+                        auto disk =
+                            wrench::S4U_Simulation::hostHasMountPoint(
+                                action_executor->hostname, "/");
+                        if (_fake_io) {
+                            Simulation::sleep(running_output_data_size /
+                                disk->get_read_bandwidth());
+                        }
+                        else {
+                            disk->write(
+                                static_cast<sg_size_t>(
+                                    running_output_data_size));
+                        }
+                    },
+                    [](const std::shared_ptr<wrench::ActionExecutor>&
+                    action_executor) {
+                    });
 
-        const auto write_output_action = job->addCustomAction("write", 0, 1,
-                                                              [this, task_name, execution_option,
-                                                                  running_output_data_size,
-                                                                  running_output_error_level](
-                                                              const std::shared_ptr<wrench::ActionExecutor>&
-                                                              action_executor) {
-                                                                  auto num_bytes = _task_functions.at(task_name).at(execution_option)
-                                                                        .at("d_function")
-                                                                        (running_output_data_size,
-                                                                         running_output_error_level);
-                                                                  auto disk = wrench::S4U_Simulation::hostHasMountPoint(
-                                                                      action_executor->hostname, "/");
-                                                                  if (_fake_io) {
-                                                                    Simulation::sleep(num_bytes / disk->get_write_bandwidth());
-                                                                } else {
-                                                                    disk->write(static_cast<sg_size_t>(num_bytes));
-                                                                }
-                                                              },
-                                                              [](const std::shared_ptr<wrench::ActionExecutor>&
-                                                              action_executor) {
-                                                              });
+            // std::cerr << "Read input action for task " << task_name << " with execution option " << execution_option <<
+            //     " on host " << hostname << std::endl;
 
-        // std::cerr << "Write output action for task " << task_name << " with execution option " << execution_option <<
-        //     " on host " << hostname << std::endl;
+            const auto compute_action =
+                job->addComputeAction(
+                    "compute",
+                    _task_functions.at(task_name).at(execution_option).at(
+                        "t_function")
+                    (running_output_data_size, running_output_error_level),
+                    0.0,
+                    1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
 
-        job->addActionDependency(read_input_action, compute_action);
-        job->addActionDependency(compute_action, write_output_action);
+            // std::cerr << "Compute action for task " << task_name << " with execution option " << execution_option <<
+            //     " on host " << hostname << std::endl;
+
+            const auto write_output_action =
+                job->addCustomAction(
+                    "write", 0, 1,
+                    [this, task_name, execution_option,
+                        running_output_data_size,
+                        running_output_error_level](
+                    const std::shared_ptr<wrench::ActionExecutor>&
+                    action_executor) {
+                        auto num_bytes = _task_functions.at(task_name).at(
+                                                            execution_option)
+                                                        .at("d_function")
+                                                        (running_output_data_size,
+                                                         running_output_error_level);
+                        auto disk =
+                            wrench::S4U_Simulation::hostHasMountPoint(
+                                action_executor->hostname, "/");
+                        if (_fake_io) {
+                            Simulation::sleep(
+                                num_bytes / disk->get_write_bandwidth());
+                        }
+                        else {
+                            disk->write(
+                                static_cast<sg_size_t>(num_bytes));
+                        }
+                    },
+                    [](const std::shared_ptr<wrench::ActionExecutor>&
+                    action_executor) {
+                    });
+
+            // std::cerr << "Write output action for task " << task_name << " with execution option " << execution_option <<
+            //     " on host " << hostname << std::endl;
+
+            job->addActionDependency(read_input_action, compute_action);
+            job->addActionDependency(compute_action, write_output_action);
+        }
 
         WRENCH_INFO("Submitting a new job to %s", hostname.c_str());
         _job_manager->submitJob(job, _compute_services.at(hostname));
@@ -514,7 +566,8 @@ namespace wrench {
                                         best_error_level_by_host[hostname] = std::min(
                                             best_error_level_by_host[hostname], final_error_level);
 
-                                        if (_temporal_redundancy != "off" || _stop_running_jobs != "off" || repeat != 0) {
+                                        if (_temporal_redundancy != "off" || _stop_running_jobs != "off" || repeat !=
+                                            0) {
                                             algorithm->reset_host_preprocessed_decisions(hostname);
                                         }
 
