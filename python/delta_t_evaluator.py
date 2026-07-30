@@ -77,7 +77,7 @@ def run_evaluator(json_file, min_delta_t, max_delta_t, step_size, executable):
 
     return json.loads(result.stdout)
 
-def run_simulation(json_file, delta_t, num_repeats, sim_executable):
+def run_simulation(json_file, delta_t, num_repeats, seed, sim_executable):
     """Run simulation for a specific delta_t value"""
     # Load the original JSON
     with open(json_file, 'r') as f:
@@ -114,7 +114,7 @@ def run_simulation(json_file, delta_t, num_repeats, sim_executable):
 
     try:
         # Run the simulation
-        cmd = [sim_executable, "--json", tmp_file, "--fake_io"]
+        cmd = [sim_executable, "--json", tmp_file, "--seed", str(seed), "--fake_io"]
         print(f"  Running simulation for delta_t={delta_t}...", end=' ', flush=True)
         result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -407,12 +407,38 @@ def main():
                 print(f"ERROR: Simulation executable not found: {sim_exe}")
                 print(f"Skipping simulations for {config_name}")
             else:
-                print("\n=== Running Simulations ===")
+                batch_size = 100000
+                print(f"\n=== Running Simulations (in batches of {batch_size} repeats) ===")
                 sim_results = {}
                 delta_t_values = data["delta_t"]
 
                 for dt in delta_t_values:
-                    [avg_error, error_counts] = run_simulation(prepared_json_file, dt, num_repeats, sim_exe)
+
+                    error_counts = {}
+                    # Deal with repeats (too many repeats, i.e., in the millions, make things crash!)
+                    num_repeats_done = 0
+                    seed = 5123
+                    while num_repeats_done < num_repeats:
+                        num_repeats_to_do = min(num_repeats - num_repeats_done, batch_size)
+                        [batch_avg_error, batch_error_counts] = run_simulation(prepared_json_file, dt, num_repeats_to_do, seed, sim_exe)
+                        seed += num_repeats_to_do
+                        # Accumulate into error_counts
+                        for error, count in batch_error_counts.items():
+                            if error not in error_counts:
+                                error_counts[error] = count
+                            else:
+                                error_counts[error] += count
+                        num_repeats_done += num_repeats_to_do
+
+                    # Compute avg_error
+                    avg_error = 0
+                    num_samples = 0
+                    print(error_counts)
+                    for error, count in error_counts.items():
+                        avg_error += count * error
+                        num_samples += count
+                    avg_error /= num_samples
+
                     sim_results[dt] = [avg_error, error_counts]
 
                 print("\nSimulation results:")
