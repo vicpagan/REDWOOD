@@ -136,19 +136,17 @@ def run_simulation(json_file, delta_t, num_repeats, sim_executable):
 
         # Collect all individual errors for all repeats
         got_to_section = False
-        individual_errors = []
+        error_counts = {}
         for line in output.splitlines():
             if not got_to_section and "FINAL RESULTS PER REPETITION" not in line:
                 continue
             if "FINAL RESULTS PER REPETITION" in line:
                 got_to_section = True
                 continue
-            achieved_error = line.rstrip().split(" ")[2]
-            individual_errors.append(float(achieved_error))
+            [achieved_error, repeat_count] = line.rstrip().split(" ")
+            error_counts[float(achieved_error)] = int(repeat_count)
 
-        return [avg_error, individual_errors]
-
-
+        return [avg_error, error_counts]
 
 
     finally:
@@ -241,15 +239,17 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
             confidence_interval_delta = 0
             sim_delta_t = []
             sim_avg_error = []
-            for dt, [avg, errors] in sim_results.items():
+            for dt, [avg, error_counts] in sim_results.items():
                 if avg is not None:
                     sim_delta_t.append(dt)
                     sim_avg_error.append(avg)
                     s_square = 0
-                    for e in errors:
-                        s_square += (e - avg) * (e - avg)
-                    s_square = s_square / (len(errors) - 1)
-                    confidence_interval_delta = 1.96 * math.sqrt(s_square) / math.sqrt(len(errors))
+                    num_repeats = 0
+                    for error, count in error_counts.items():
+                        s_square += count * (error - avg) * (error - avg)
+                        num_repeats += count
+                    s_square = s_square / (num_repeats - 1)
+                    confidence_interval_delta = 1.96 * math.sqrt(s_square) / math.sqrt(num_repeats)
                     print(f"Error = {avg} +/- {confidence_interval_delta}")
 
             if sim_delta_t:
@@ -412,8 +412,8 @@ def main():
                 delta_t_values = data["delta_t"]
 
                 for dt in delta_t_values:
-                    [avg_error, errors] = run_simulation(prepared_json_file, dt, num_repeats, sim_exe)
-                    sim_results[dt] = [avg_error, errors]
+                    [avg_error, error_counts] = run_simulation(prepared_json_file, dt, num_repeats, sim_exe)
+                    sim_results[dt] = [avg_error, error_counts]
 
                 print("\nSimulation results:")
                 for dt, [err, errors] in sim_results.items():

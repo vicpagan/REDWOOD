@@ -856,8 +856,17 @@ namespace wrench {
                 std::cout << "Avg error level of successes: N/A\n\n";
             }
             std::cout << "FINAL RESULTS PER REPETITION:\n";
+            std::map<double, unsigned long> final_results_per_repetition;
             for (int repeat = 0; repeat < _num_repeats; repeat++) {
-                std::cout << "Repetition " << repeat << ": " << repetition_results[repeat].second << "\n";
+                double error = repetition_results[repeat].second;
+                if (final_results_per_repetition.find(error)  == final_results_per_repetition.end()) {
+                    final_results_per_repetition[error] = 1;
+                } else {
+                    final_results_per_repetition[error]++;
+                }
+            }
+            for (const auto& entry : final_results_per_repetition) {
+                std::cout << entry.first << " " << entry.second << "\n";
             }
         }
         return 0;
