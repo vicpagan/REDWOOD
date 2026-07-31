@@ -10,7 +10,7 @@ import tempfile
 import os
 import math
 
-def plot_results(all_results, output_file="delta_t_analysis.png"):
+def plot_results(all_results, output_file="delta_t_analysis.pdf"):
     """Create visualization of delta_t analysis"""
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
@@ -50,7 +50,6 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
     for config_key, data in all_results.items():
         if data is None:
             continue
-        print(data)
         cfg = configs[config_key]
         delta_t = np.array(data["delta_t"])
         upper_bound = np.array(data["upper_bound"])
@@ -105,7 +104,7 @@ def plot_results(all_results, output_file="delta_t_analysis.png"):
                         num_repeats += count
                     s_square = s_square / (num_repeats - 1)
                     confidence_interval_delta = 1.96 * math.sqrt(s_square) / math.sqrt(num_repeats)
-                    print(f"Error = {avg} +/- {confidence_interval_delta}")
+#                    print(f"Error = {avg} +/- {confidence_interval_delta}")
 
             line_sim = ax1.plot(
                 delta_t,
