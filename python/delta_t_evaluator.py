@@ -259,7 +259,7 @@ def main():
                     error_counts = {}
                     # Deal with repeats (too many repeats, i.e., in the millions, make things crash!)
                     num_repeats_done = 0
-                    seed = 5123
+                    seed = 31212342
                     running_sum = 0
                     while num_repeats_done < num_repeats:
                         num_repeats_to_do = min(num_repeats - num_repeats_done, batch_size)
