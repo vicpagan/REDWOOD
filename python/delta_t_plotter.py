@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 import re
 import tempfile
@@ -12,6 +13,8 @@ import math
 
 def plot_results(all_results, output_file="delta_t_results.pdf"):
     """Create visualization of delta_t analysis"""
+
+    fontsize = 24
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
 
@@ -42,8 +45,8 @@ def plot_results(all_results, output_file="delta_t_results.pdf"):
         }
     }
 
-    ax1.set_xlabel(r'Discrete time-step $\delta$ (sec)', fontsize=14)
-    ax1.set_ylabel('Expected Error', color='k', fontsize=14)
+    ax1.set_xlabel(r'Discrete time-step $\delta$ (sec)', fontsize=fontsize)
+    ax1.set_ylabel('Error', color='k', fontsize=fontsize)
 
     all_lines = []
 
@@ -112,7 +115,7 @@ def plot_results(all_results, output_file="delta_t_results.pdf"):
                 color=cfg['sim_color'],
                 linewidth=2,
                 linestyle='--',
-                label=f"{cfg['label_prefix']} Sim",
+                label=f"{cfg['label_prefix']} Simulated average",
                 alpha=0.9
             )
             all_lines.extend(line_sim)
@@ -125,17 +128,25 @@ def plot_results(all_results, output_file="delta_t_results.pdf"):
 
 
     ax1.grid(True, alpha=0.3)
-    ax1.tick_params(axis='y', labelsize=14)
-    ax1.tick_params(axis='x', labelsize=14)
+    ax1.tick_params(axis='y', labelsize=fontsize)
+    ax1.tick_params(axis='x', labelsize=fontsize)
 
     # Computation time (no markers)
     if 'default' in all_results and all_results['default'] is not None:
         ax2 = ax1.twinx()
+        ax2.set_yscale('log')
         comp_time = np.array(all_results['default']["computation_time_ms"]) / 1000.0
         delta_t = np.array(all_results['default']["delta_t"])
 
         color3 = 'tab:green'
-        ax2.set_ylabel('Compute Time (sec)', fontsize=14)
+        ax2.set_ylabel('Compute Time (sec)', fontsize=fontsize)
+
+        ax2.set_yticks([1,2, 10, 100])
+        ax2.set_ylim(1, max(comp_time))
+        ax2.yaxis.set_major_formatter(
+            ticker.FuncFormatter(lambda value, position: f'{value:g}')
+        )
+        ax2.yaxis.set_minor_formatter(ticker.NullFormatter())
 
         line_time = ax2.plot(
             delta_t,
@@ -147,11 +158,24 @@ def plot_results(all_results, output_file="delta_t_results.pdf"):
             alpha=0.7
         )
 
-        ax2.tick_params(axis='y', labelsize=14)
+        ax2.tick_params(axis='y', labelsize=fontsize)
         all_lines.extend(line_time)
 
     labels = [l.get_label() for l in all_lines]
-    ax1.legend(all_lines, labels, loc='lower left', fontsize=16, ncol=1)
+
+    legend_ax = ax2 if ax2 is not None else ax1
+
+    leg = legend_ax.legend(
+    all_lines,
+    labels,
+    loc='lower left',
+    fontsize=fontsize,
+    ncol=1,
+    frameon=True,
+    facecolor='white',
+    edgecolor='black',
+    framealpha=0.5
+    )
 
 #    plt.title(
 #        'Delta_t Impact on Expected Error (Multiple Configurations)',
