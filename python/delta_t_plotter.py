@@ -177,18 +177,28 @@ def plot_results(all_results, output_file="delta_t_results.pdf"):
     framealpha=0.5
     )
 
-#    plt.title(
-#        'Delta_t Impact on Expected Error (Multiple Configurations)',
-#        fontsize=14,
-#        fontweight='bold',
-#        pad=20
-#    )
 
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"Plot saved to {output_file}")
 
     return fig
+
+def compute_statistics(all_results):
+    data = all_results["default"]
+    delta_t = np.array(data["delta_t"])
+    upper_bound = np.array(data["upper_bound"])
+    lower_bound = np.array(data["lower_bound"])
+    sim_results = data["simulation_avg_error"]
+    comp_time = np.array(data["computation_time_ms"]) / 1000.0
+
+    for idx in range(0, len(delta_t)):
+        d = delta_t[idx]
+        ct = comp_time[idx]
+        bound_diff = upper_bound[idx] - lower_bound[idx]
+        perct = 100.0 * bound_diff / upper_bound[idx]
+        print(f"delta_t: {d}   %bound-diff = {perct:.32}%       time: {ct}")
+
 
 def main():
     if len(sys.argv) != 2:
@@ -199,7 +209,11 @@ def main():
     with open(json_file, 'r') as f:
         all_results = json.load(f)
 
+    # Generate plot
     plot_results(all_results)
+
+    # Generate statistics/data
+    compute_statistics(all_results)
 
 if __name__ == "__main__":
     main()
