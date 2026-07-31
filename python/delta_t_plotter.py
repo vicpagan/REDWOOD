@@ -10,7 +10,7 @@ import tempfile
 import os
 import math
 
-def plot_results(all_results, output_file="delta_t_analysis.pdf"):
+def plot_results(all_results, output_file="delta_t_results.pdf"):
     """Create visualization of delta_t analysis"""
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
