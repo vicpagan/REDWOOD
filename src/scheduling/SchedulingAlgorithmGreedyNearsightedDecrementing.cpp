@@ -161,6 +161,10 @@ namespace wrench {
                 }
             }
 
+            if (best_option.empty()) {
+                best_option = _list_of_options.front();
+            }
+
             for (const auto &option : _list_of_options) {
                 if (option != best_option) {
                     _nodes_per_initial_option_decision[option] = 0;

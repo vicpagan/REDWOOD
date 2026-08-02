@@ -79,14 +79,23 @@ namespace wrench {
     }
 
     void SchedulingAlgorithmGreedyNearsighted::translate_to_static_decisions(SystemState* system_state_tracker) {
-        // Transform _nodes_per_option_decision into _static_decisions_per_host
         auto hostname_iterator = system_state_tracker->begin();
-        std::string current_hostname = hostname_iterator->first;
+        if (hostname_iterator == system_state_tracker->end()) {
+            throw std::runtime_error("translate_to_static_decisions: system_state_tracker has no hosts");
+        }
+        std::string current_hostname;
+
         for (const auto& [option, num_nodes] : _nodes_per_initial_option_decision) {
             for (int i = 0; i < num_nodes; i++) {
+                if (hostname_iterator == system_state_tracker->end()) {
+                    throw std::runtime_error(
+                        "translate_to_static_decisions: ran out of hosts -- "
+                        "total decided node count exceeds system_state_tracker's host count"
+                    );
+                }
+                current_hostname = hostname_iterator->first;
                 _static_decisions_per_host[current_hostname][_application_specs->get_task(0)] = option;
                 ++hostname_iterator;
-                current_hostname = hostname_iterator->first;
             }
         }
     }

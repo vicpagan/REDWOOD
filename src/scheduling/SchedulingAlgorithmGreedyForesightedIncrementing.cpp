@@ -159,6 +159,10 @@ namespace wrench {
                 }
             }
 
+            if (best_combo.empty()) {
+                best_combo = all_combinations.front();
+            }
+
             _nodes_per_combo_decision[best_combo] = _num_compute_nodes;
         }
         else {

@@ -203,7 +203,7 @@ namespace wrench {
     }
 
     std::string ApplicationSpecs::get_host_task_to_schedule(const std::string& hostname) const {
-        std::cerr << "TESTABLE HOSTNAME = " << hostname << "\n";
+        std::cerr << "Task to schedule for host " << hostname << " is " << _hosts_current_scheduled_tasks.at(hostname) << "\n";
         return _hosts_current_scheduled_tasks.at(hostname);
     }
 

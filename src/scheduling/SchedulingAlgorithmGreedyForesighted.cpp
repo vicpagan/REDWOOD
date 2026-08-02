@@ -331,18 +331,35 @@ namespace wrench {
     //FIXME: Does not properly handle when scheduling every host on a task that is NOT the first task
     void SchedulingAlgorithmGreedyForesighted::translate_to_static_decisions(SystemState* system_state_tracker) {
 
-        // Transform _nodes_per_option_decision into _static_decisions_per_host
+        for (const auto& [combo, num_nodes] : _nodes_per_combo_decision) {
+            std::cerr << "[DEBUG]   combo = [";
+            for (const auto& option : combo) {
+                std::cerr << option << ", ";
+            }
+            std::cerr << "]  num_nodes = " << num_nodes << std::endl;
+        }
+
         auto hostname_iterator = system_state_tracker->begin();
-        std::string current_hostname = hostname_iterator->first;
+        if (hostname_iterator == system_state_tracker->end()) {
+            throw std::runtime_error("translate_to_static_decisions: system_state_tracker has no hosts");
+        }
+        std::string current_hostname;
+
         for (const auto& [combo, num_nodes] : _nodes_per_combo_decision) {
             for (int i = 0; i < num_nodes; i++) {
+                if (hostname_iterator == system_state_tracker->end()) {
+                    throw std::runtime_error(
+                        "translate_to_static_decisions: ran out of hosts -- "
+                        "total decided node count exceeds system_state_tracker's host count"
+                    );
+                }
+                current_hostname = hostname_iterator->first;
                 int task_idx = 0;
                 for (const auto& option : combo) {
                     _static_decisions_per_host[current_hostname][_application_specs->get_task(task_idx)] = option;
                     task_idx++;
                 }
                 ++hostname_iterator;
-                current_hostname = hostname_iterator->first;
             }
         }
     }
