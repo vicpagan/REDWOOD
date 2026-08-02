@@ -168,6 +168,10 @@ namespace wrench {
                 }
             }
 
+            if (best_combo.empty()) {
+                best_combo = all_combinations.front();
+            }
+
             for (const auto &combo : all_combinations) {
                 if (combo != best_combo) {
                     _nodes_per_combo_decision[combo] = 0;
