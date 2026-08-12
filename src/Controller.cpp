@@ -16,6 +16,7 @@
 #define GBYTE (1000.0 * 1000.0 * 1000.0)
 
 #include <iostream>
+#include <limits>
 #include <wrench/util/UnitParser.h>
 
 #include "Controller.h"
@@ -288,8 +289,10 @@ namespace wrench {
 
                 /* Running values of output data size, error level, and the best error level for each host */
                 std::map<std::string, double> best_error_level_by_host;
+                std::map<std::string, double> tree_prune_threshold_by_host;
                 for (auto& entry : _compute_services) {
                     best_error_level_by_host[entry.first] = _application_specs->get_e_fail();
+                    tree_prune_threshold_by_host[entry.first] = std::numeric_limits<double>::infinity();
                 }
 
                 /* Current task for all hosts is the first task */
@@ -396,6 +399,8 @@ namespace wrench {
                         success_host_running_error_level = _application_specs->get_host_running_error_level(
                             success_hostname);
 
+                        const double success_host_tree_prune_threshold = tree_prune_threshold_by_host.at(success_hostname);
+
                         if (_stop_running_jobs == "aggressive") {
                             for (const auto& entry : _compute_services) {
                                 std::string hostname = entry.first;
@@ -410,11 +415,12 @@ namespace wrench {
                                     _application_specs->update_host_task_to_schedule(
                                         hostname, success_host_current_task_to_schedule);
 
-                                    _application_specs->update_host_decision_history(hostname, success_hostname);
                                     _application_specs->clear_decision_tree(hostname);
                                     _application_specs->build_decision_tree(hostname);
                                     _application_specs->prune_decision_tree(
-                                        hostname, best_error_level_by_host.at(success_hostname));
+                                        hostname, success_host_tree_prune_threshold);
+                                    tree_prune_threshold_by_host[hostname] = success_host_tree_prune_threshold;
+
                                     _application_specs->update_host_current_decision_node(hostname, success_hostname);
 
                                     if (_system_state_tracker->is_a_job_running(hostname)) {
@@ -460,11 +466,12 @@ namespace wrench {
                                         _application_specs->update_host_task_to_schedule(
                                             hostname, success_host_current_task_to_schedule);
 
-                                        _application_specs->update_host_decision_history(hostname, success_hostname);
                                         _application_specs->clear_decision_tree(hostname);
                                         _application_specs->build_decision_tree(hostname);
                                         _application_specs->prune_decision_tree(
-                                            hostname, best_error_level_by_host.at(success_hostname));
+                                            hostname, success_host_tree_prune_threshold);
+                                        tree_prune_threshold_by_host[hostname] = success_host_tree_prune_threshold;
+
                                         _application_specs->update_host_current_decision_node(
                                             hostname, success_hostname);
 
@@ -528,6 +535,7 @@ namespace wrench {
                                     _application_specs->clear_decision_tree(hostname);
                                     _application_specs->build_decision_tree(hostname);
                                     _application_specs->prune_decision_tree(hostname, final_error_level);
+                                    tree_prune_threshold_by_host[hostname] = final_error_level;
 
                                     if (_system_state_tracker->is_a_job_running(hostname)) {
                                         try {
@@ -581,6 +589,7 @@ namespace wrench {
                                         _application_specs->clear_decision_tree(hostname);
                                         _application_specs->build_decision_tree(hostname);
                                         _application_specs->prune_decision_tree(hostname, final_error_level);
+                                        tree_prune_threshold_by_host[hostname] = final_error_level;
 
                                         if (_system_state_tracker->is_a_job_running(hostname)) {
                                             try {
@@ -631,6 +640,7 @@ namespace wrench {
                                         _application_specs->clear_decision_tree(hostname);
                                         _application_specs->build_decision_tree(hostname);
                                         _application_specs->prune_decision_tree(hostname, final_error_level);
+                                        tree_prune_threshold_by_host[hostname] = final_error_level;
 
                                         if (_system_state_tracker->is_a_job_running(hostname)) {
                                             try {
@@ -674,6 +684,7 @@ namespace wrench {
                                             _application_specs->clear_decision_tree(hostname);
                                             _application_specs->build_decision_tree(hostname);
                                             _application_specs->prune_decision_tree(hostname, final_error_level);
+                                            tree_prune_threshold_by_host[hostname] = final_error_level;
                                         }
 
                                         _application_specs->update_host_running_data_size(hostname, initial_data_size);
@@ -843,6 +854,7 @@ namespace wrench {
                 cumulative_error_level += repetition_results[repeat].second;
             }
 
+            std::cout << std::endl;
             std::cout << "Total repeats: " << _num_repeats << "\n";
             std::cout << "Num successes: " << num_successes << "\n";
             std::cout << "Success rate: " << static_cast<double>(num_successes) / static_cast<double>(_num_repeats) <<
@@ -855,6 +867,11 @@ namespace wrench {
             else {
                 std::cout << "Avg error level of successes: N/A\n\n";
             }
+            for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                std::cout << "Repetition " << repeat << ": " << repetition_results[repeat].second << std::endl;
+            }
+            std::cout << std::endl;
+
             std::cout << "FINAL RESULTS PER REPETITION:\n";
             std::map<double, unsigned long> final_results_per_repetition;
             for (int repeat = 0; repeat < _num_repeats; repeat++) {
