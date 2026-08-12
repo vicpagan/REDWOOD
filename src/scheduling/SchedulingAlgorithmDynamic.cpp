@@ -49,6 +49,7 @@ namespace wrench {
         const long n, const long R,
         const long deadline,
         const bool lower_bound) const {
+
         // NOTE: simpler than initializing it all at once which requires tree traversal
         if (dp.find(current_task_node) == dp.end()) {
             dp[current_task_node] = std::vector<std::pair<std::string, double>>(
@@ -167,6 +168,7 @@ namespace wrench {
 
         // std::cout << "Best option: " << best_option << " at time "<< n << " for task number " << task_index << std::endl;
         dp[current_task_node][n] = std::make_pair(best_option, min_expected_error);
+
         return min_expected_error;
     }
 
@@ -201,6 +203,7 @@ namespace wrench {
         const int task_to_schedule_index = _application_specs->get_host_task_to_schedule_index(hostname);
         const ApplicationSpecs::ExecOptionDecisionNode* current_decision_node = _application_specs->
             get_host_current_decision_node(hostname);
+
         for (long i = 0; i <= n; i++) {
             // std::cout << "ITERATION i = " << i << std::endl;
             calculate_expected_error(num_tasks - task_to_schedule_index, task_to_schedule_index, input_data_size,
@@ -214,7 +217,9 @@ namespace wrench {
         //     }
         // }
 
-        _optimal_EV = dp[_application_specs->get_decision_tree_root(hostname)][n].second;
+        if (_application_specs->get_host_task_to_schedule_index(hostname) == 0) {
+            _optimal_EV = dp[_application_specs->get_host_current_decision_node(hostname)][n].second;
+        }
 
         for (auto& entry : dp) {
             std::vector<std::pair<long, std::string>> compressed;

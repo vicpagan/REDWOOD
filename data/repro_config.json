@@ -1,0 +1,302 @@
+{
+  "platform": {
+    "num_compute_nodes": 16,
+    "io_read_bandwidth_per_node": "2GBps",
+    "io_write_bandwidth_per_node": "1GBps"
+  },
+  "failures": {
+    "restart_overhead": 0,
+    "lambda": 0.001,
+    "seed": 1791958496
+  },
+  "application": {
+    "initial_data_size": 9065959040.31,
+    "initial_error_level": 1.0,
+    "tasks": [
+      {
+        "name": "task_0",
+        "execution_options": [
+          {
+            "name": "option_0",
+            "amhdal_parallelizable_fraction": 0.9641,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 236.1687,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 273120901072.62,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 7.043405
+              }
+            }
+          },
+          {
+            "name": "option_1",
+            "amhdal_parallelizable_fraction": 0.9464,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 672.7711,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 9362194319.11,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 3.676964
+              }
+            }
+          }
+        ],
+        "in_situ_with_next_task": false
+      },
+      {
+        "name": "task_1",
+        "execution_options": [
+          {
+            "name": "option_0",
+            "amhdal_parallelizable_fraction": 0.9703,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 543.2791,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 322201750332.01,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 3.087615
+              }
+            }
+          },
+          {
+            "name": "option_1",
+            "amhdal_parallelizable_fraction": 0.9034,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1212.6332,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 220010443842.0,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 2.42761
+              }
+            }
+          },
+          {
+            "name": "option_2",
+            "amhdal_parallelizable_fraction": 0.9638,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1881.9873,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 117819137351.99,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.767605
+              }
+            }
+          },
+          {
+            "name": "option_3",
+            "amhdal_parallelizable_fraction": 0.9488,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 2551.3414,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 15627830861.98,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.1076
+              }
+            }
+          }
+        ],
+        "in_situ_with_next_task": false
+      },
+      {
+        "name": "task_2",
+        "execution_options": [
+          {
+            "name": "option_0",
+            "amhdal_parallelizable_fraction": 0.8844,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 267.2257,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 227771174764.98,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 6.71107
+              }
+            }
+          },
+          {
+            "name": "option_1",
+            "amhdal_parallelizable_fraction": 0.8815,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 932.768,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 26959936868.83,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 2.366391
+              }
+            }
+          }
+        ],
+        "in_situ_with_next_task": false
+      }
+    ]
+  },
+  "execution": {
+    "num_repeats": 10,
+    "deadline": 10000,
+    "e_fail": 729.739
+  },
+  "scheduling": {
+    "delta_t_scheme": {
+      "scheme": "fixed",
+      "parameter": 5.0
+    },
+    "algorithms": [
+      "static_nearsighted_expected_error"
+    ],
+    "hacks": {
+      "temporal_redundancy": "dependent",
+      "stop_running_jobs": "variant"
+    }
+  }
+}

@@ -222,7 +222,7 @@ namespace wrench {
 
     int ApplicationSpecs::get_task_index(const std::string& task_name) const {
         std::cerr << "Getting task index for task " << task_name << std::endl;
-        std::string current_task = _task_order[0];
+        std::string current_task = _task_order.at(0);
         int i = 0;
         while (current_task != task_name && i < _num_tasks) {
             i++;
@@ -450,7 +450,7 @@ namespace wrench {
 
         // If this is a leaf node
         if (node->children.empty()) {
-            return node->cumulative_error_factor >= best_error;
+            return node->cumulative_error_factor > best_error;
         }
 
         // Otherwise, recursively prune children
