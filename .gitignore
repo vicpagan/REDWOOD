@@ -15,3 +15,6 @@ experiment/*
 
 # Database files
 **/*.db
+
+# Python venv
+.python-version
