@@ -157,10 +157,27 @@ def parse_heuristic_name(name: str) -> dict[str, object]:
     return result
 
 
+def build_heuristic_lookup(heuristic_names: pd.Series) -> pd.DataFrame:
+    """Parse each unique heuristic exactly once."""
+    records = []
+
+    for name in heuristic_names.dropna().unique():
+        parsed = parse_heuristic_name(str(name))
+        records.append(
+            {
+                "heuristic": name,
+                "family": parsed["family"],
+                "foresight": parsed["foresight"],
+                "direction": parsed["direction"],
+                "comparator": parsed["comparator"],
+            }
+        )
+
+    return pd.DataFrame(records)
+
+
 def wide_to_long(df: pd.DataFrame, value_name: str) -> tuple[pd.DataFrame, list[str]]:
-    """
-    Convert heuristic columns from wide format to long format.
-    """
+    """Convert heuristic columns from wide format to long format."""
     heuristic_columns = [
         column for column in df.columns
         if is_heuristic_column(column)
@@ -190,18 +207,24 @@ def wide_to_long(df: pd.DataFrame, value_name: str) -> tuple[pd.DataFrame, list[
         expand=True,
     )
 
+    if parsed.shape[1] != 3:
+        raise ValueError(
+            "Could not parse heuristic columns. Expected "
+            "<heuristic>__<temporal_redundancy>__<reactive_rescheduling>."
+        )
+
     long_df["heuristic"] = parsed[0]
     long_df["temporal_redundancy"] = parsed[1]
     long_df["reactive_rescheduling"] = parsed[2]
-
-    heuristic_parts = (
-        long_df["heuristic"]
-        .apply(parse_heuristic_name)
-        .apply(pd.Series)
-    )
-
-    long_df = pd.concat([long_df, heuristic_parts], axis=1)
     long_df = long_df.drop(columns="_configuration")
+
+    heuristic_lookup = build_heuristic_lookup(long_df["heuristic"])
+    long_df = long_df.merge(
+        heuristic_lookup,
+        on="heuristic",
+        how="left",
+        validate="many_to_one",
+    )
 
     preferred_order = [
         *config_columns,
@@ -215,9 +238,7 @@ def wide_to_long(df: pd.DataFrame, value_name: str) -> tuple[pd.DataFrame, list[
         value_name,
     ]
 
-    long_df = long_df[preferred_order]
-
-    return long_df, config_columns
+    return long_df[preferred_order], config_columns
 
 
 def parse_filter_value(raw: str) -> object:
@@ -321,7 +342,7 @@ def summarize_repetitions(
     ]
 
     summary = (
-        df.groupby(group_columns, dropna=False)[value_name]
+        df.groupby(group_columns, dropna=False, observed=True, sort=False)[value_name]
         .agg(
             mean="mean",
             std="std",
@@ -341,36 +362,42 @@ def make_node_comparison(
         value_name: str,
 ) -> pd.DataFrame:
     """
-    Human-readable pivot table.
+    Detailed human-readable comparison table.
 
-    Rows are experiment parameters + num_nodes + heuristic.
-    Columns are temporal redundancy / reactive rescheduling combinations.
-
-    repetition_id is excluded so repeated runs are averaged.
+    Group observed rows first, then pivot. This avoids the enormous Cartesian
+    product that pd.pivot_table(..., dropna=False) can construct.
     """
     row_columns = [
         column for column in config_columns
         if column != "repetition_id"
     ]
-
-    # Keep heuristic last so node/config groupings are easy to scan.
     row_columns.append("heuristic")
 
-    comparison = pd.pivot_table(
-        df,
+    grouping_columns = row_columns + [
+        "temporal_redundancy",
+        "reactive_rescheduling",
+    ]
+
+    grouped = (
+        df.groupby(
+            grouping_columns,
+            dropna=False,
+            observed=True,
+            sort=False,
+        )[value_name]
+        .mean()
+        .reset_index()
+    )
+
+    comparison = grouped.pivot(
         index=row_columns,
         columns=[
             "temporal_redundancy",
             "reactive_rescheduling",
         ],
         values=value_name,
-        aggfunc="mean",
-        dropna=False,
     )
 
-    comparison = comparison.sort_index()
-
-    # Flatten the MultiIndex columns for easy CSV viewing.
     comparison.columns = [
         f"temporal={temporal} | reactive={reactive}"
         for temporal, reactive in comparison.columns
@@ -383,24 +410,35 @@ def make_compact_node_comparison(
         df: pd.DataFrame,
         value_name: str,
 ) -> pd.DataFrame:
-    """
-    A compact comparison using only num_nodes + heuristic as rows.
-
-    This is most meaningful when the user has filtered the input to one
-    experiment configuration (e.g. a single e_fail_multiplier/deadline/etc.).
-    """
+    """Compact num_nodes + heuristic comparison table."""
     if "num_nodes" not in df.columns:
         raise ValueError("The CSV does not contain a 'num_nodes' column.")
 
-    comparison = pd.pivot_table(
-        df,
+    grouping_columns = [
+        "num_nodes",
+        "heuristic",
+        "temporal_redundancy",
+        "reactive_rescheduling",
+    ]
+
+    grouped = (
+        df.groupby(
+            grouping_columns,
+            dropna=False,
+            observed=True,
+            sort=False,
+        )[value_name]
+        .mean()
+        .reset_index()
+    )
+
+    comparison = grouped.pivot(
         index=["num_nodes", "heuristic"],
         columns=[
             "temporal_redundancy",
             "reactive_rescheduling",
         ],
         values=value_name,
-        aggfunc="mean",
     )
 
     comparison.columns = [
@@ -471,17 +509,21 @@ def generate_plots(
                 "reactive_rescheduling",
             ],
             dropna=False,
+            observed=True,
+            sort=False,
         )[value_name]
         .mean()
         .reset_index()
     )
 
-    for heuristic, heuristic_df in plot_data.groupby("heuristic"):
+    for heuristic, heuristic_df in plot_data.groupby("heuristic", sort=False):
         fig, ax = plt.subplots(figsize=(10, 6))
 
         for (temporal, reactive), hack_df in heuristic_df.groupby(
                 ["temporal_redundancy", "reactive_rescheduling"],
                 dropna=False,
+                observed=True,
+                sort=False,
         ):
             hack_df = hack_df.sort_values("num_nodes")
 
@@ -770,13 +812,20 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Reading {args.csv_file} ...")
+    print(f"Reading {args.csv_file} ...", flush=True)
     raw_df = pd.read_csv(args.csv_file)
+    print(
+        f"Loaded {len(raw_df):,} source rows and {len(raw_df.columns):,} columns.",
+        flush=True,
+    )
 
+    print("Converting wide results to long format ...", flush=True)
     long_df, config_columns = wide_to_long(
         raw_df,
         value_name=args.value_name,
     )
+
+    print(f"Normalized to {len(long_df):,} rows.", flush=True)
 
     print_dataset_overview(
         long_df,
@@ -786,6 +835,7 @@ def main() -> None:
 
     # Always save the complete normalized form before filters.
     long_file = args.output_dir / "results_long.csv"
+    print(f"Writing {long_file} ...", flush=True)
     long_df.to_csv(long_file, index=False)
 
     filtered_df, parsed_filters = apply_filters(
@@ -802,6 +852,7 @@ def main() -> None:
 
     # Detailed summary: repetitions are averaged but other experiment
     # parameters remain distinct.
+    print("Summarizing repetitions ...", flush=True)
     detailed_summary = summarize_repetitions(
         filtered_df,
         config_columns,
@@ -813,6 +864,7 @@ def main() -> None:
 
     # Safe/detailed comparison retains every original config field except
     # repetition_id.
+    print("Building detailed node comparison ...", flush=True)
     node_comparison = make_node_comparison(
         filtered_df,
         config_columns,
@@ -823,6 +875,7 @@ def main() -> None:
     node_comparison.to_csv(comparison_file, index=False)
 
     # Compact version is the one most useful for visual inspection.
+    print("Building compact node comparison ...", flush=True)
     compact_comparison = make_compact_node_comparison(
         filtered_df,
         args.value_name,
