@@ -155,6 +155,30 @@ with st.sidebar:
                 )
             filtered = filtered[app_num.between(app_range[0], app_range[1])]
 
+    if "repetition_id" in filtered.columns:
+        repetition_num = pd.to_numeric(filtered["repetition_id"], errors="coerce")
+        valid = repetition_num.dropna()
+        if not valid.empty:
+            lo, hi = int(valid.min()), int(valid.max())
+            if lo == hi:
+                repetition_range = (lo, hi)
+                st.write(f"repetition_id: {lo}")
+            else:
+                repetition_range = st.slider(
+                    "repetition_id range",
+                    min_value=lo,
+                    max_value=hi,
+                    value=(lo, hi),
+                    step=1,
+                )
+
+            filtered = filtered[
+                repetition_num.between(
+                    repetition_range[0],
+                    repetition_range[1],
+                )
+            ]
+
     if "num_nodes" in filtered.columns:
         opts = unique_sorted(filtered["num_nodes"])
         selected = st.multiselect("Number of nodes", opts, default=opts)
