@@ -214,13 +214,6 @@ with st.sidebar:
             filtered["foresight"].isna() | filtered["foresight"].isin(selected)
             ]
 
-    direction_opts = unique_sorted(filtered["direction"])
-    if direction_opts:
-        selected = st.multiselect("Direction", direction_opts, default=direction_opts)
-        filtered = filtered[
-            filtered["direction"].isna() | filtered["direction"].isin(selected)
-            ]
-
     st.divider()
     st.subheader("Hacks")
 
@@ -334,6 +327,190 @@ plot_table = plot_summary.pivot(
 ).sort_index()
 
 st.line_chart(plot_table, x_label="Number of nodes", y_label=metric_label)
+
+
+# -------------------------- Flexible comparison --------------------------
+st.header("Compare settings")
+st.caption(
+    "Compare one experiment setting using the current sidebar filters. "
+    "Lower average error is better. The overall table pools all selected "
+    "heuristics; the second table shows the same comparison within each heuristic."
+)
+
+comparison_candidates = {
+    "Temporal redundancy": "temporal_redundancy",
+    "Reactive rescheduling": "reactive_rescheduling",
+    "Heuristic": "heuristic",
+    "Heuristic family": "family",
+    "Foresight": "foresight",
+    "Comparator": "comparator",
+    "Number of nodes": "num_nodes",
+    "e_fail_multiplier": "e_fail_multiplier",
+}
+
+comparison_candidates = {
+    label: column
+    for label, column in comparison_candidates.items()
+    if column in filtered.columns
+       and filtered[column].dropna().nunique() > 0
+}
+
+if comparison_candidates:
+    comparison_label = st.selectbox(
+        "Compare by",
+        list(comparison_candidates.keys()),
+        index=0,
+    )
+    comparison_col = comparison_candidates[comparison_label]
+
+    compare_data = filtered[
+        filtered[comparison_col].notna()
+        & pd.to_numeric(filtered[metric], errors="coerce").notna()
+        ].copy()
+
+    if compare_data.empty:
+        st.info("No non-null values are available for this comparison.")
+    else:
+        # ---- Overall comparison across all currently selected heuristics ----
+        overall_compare = (
+            compare_data.groupby(
+                comparison_col,
+                dropna=False,
+                observed=True,
+                sort=False,
+            )[metric]
+            .agg(mean="mean", std="std", count="count")
+            .reset_index()
+        )
+
+        best_mean = overall_compare["mean"].min()
+        overall_compare["Difference from best"] = (
+                overall_compare["mean"] - best_mean
+        )
+
+        if best_mean != 0:
+            overall_compare["% above best"] = (
+                    overall_compare["Difference from best"] / abs(best_mean) * 100
+            )
+        else:
+            overall_compare["% above best"] = pd.NA
+
+        overall_compare = overall_compare.rename(
+            columns={
+                comparison_col: comparison_label,
+                "mean": metric_label,
+                "std": "Standard deviation",
+                "count": "Values averaged",
+            }
+        ).sort_values(metric_label, ascending=True)
+
+        st.subheader("Overall comparison")
+        st.caption(
+            "This averages across every heuristic and other setting still included "
+            "by the sidebar filters."
+        )
+        st.dataframe(
+            overall_compare,
+            width="stretch",
+            hide_index=True,
+        )
+
+        best_overall = overall_compare.iloc[0]
+        st.metric(
+            f"Best {comparison_label}",
+            str(best_overall[comparison_label]),
+            help=f"Lowest {metric_label.lower()} among the currently filtered data.",
+        )
+
+        chart_data = overall_compare.set_index(comparison_label)[metric_label]
+        st.bar_chart(
+            chart_data,
+            x_label=comparison_label,
+            y_label=metric_label,
+        )
+
+        # ---- Same comparison independently within every heuristic ----
+        if comparison_col != "heuristic" and "heuristic" in compare_data.columns:
+            st.subheader("Comparison within each heuristic")
+            st.caption(
+                f"Each row is one heuristic. Columns are the available "
+                f"{comparison_label.lower()} values. Each cell is the mean using "
+                "only that heuristic and the current sidebar filters."
+            )
+
+            within_heuristic = (
+                compare_data.groupby(
+                    ["heuristic", comparison_col],
+                    dropna=False,
+                    observed=True,
+                    sort=False,
+                )[metric]
+                .agg(mean="mean", std="std", count="count")
+                .reset_index()
+            )
+
+            heuristic_comparison = within_heuristic.pivot(
+                index="heuristic",
+                columns=comparison_col,
+                values="mean",
+            ).reset_index()
+
+            st.dataframe(
+                heuristic_comparison,
+                width="stretch",
+                hide_index=True,
+            )
+
+            # Find the lowest-error setting independently for each heuristic.
+            best_rows = (
+                within_heuristic.sort_values(
+                    ["heuristic", "mean"],
+                    ascending=[True, True],
+                )
+                .groupby("heuristic", as_index=False, sort=False)
+                .first()
+                .rename(
+                    columns={
+                        comparison_col: f"Best {comparison_label}",
+                        "mean": metric_label,
+                        "std": "Standard deviation",
+                        "count": "Values averaged",
+                    }
+                )
+            )
+
+            st.subheader("Best setting for each heuristic")
+            st.dataframe(
+                best_rows[
+                    [
+                        "heuristic",
+                        f"Best {comparison_label}",
+                        metric_label,
+                        "Standard deviation",
+                        "Values averaged",
+                    ]
+                ],
+                width="stretch",
+                hide_index=True,
+            )
+
+            with st.expander("Detailed within-heuristic comparison"):
+                detailed_compare = within_heuristic.rename(
+                    columns={
+                        comparison_col: comparison_label,
+                        "mean": metric_label,
+                        "std": "Standard deviation",
+                        "count": "Values averaged",
+                    }
+                )
+                st.dataframe(
+                    detailed_compare,
+                    width="stretch",
+                    hide_index=True,
+                )
+
+else:
+    st.info("No columns with comparable values are available in the current view.")
 
 
 # ------------------------- App-level breakdown -------------------------
