@@ -136,6 +136,8 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
 
     application_specs->prune_decision_trees(0.0);
     application_specs->build_decision_trees();
+    application_specs->reset_all_hosts_current_decision_nodes();
+
     algorithm->preprocess_host_decisions("ComputeHost_1",
                                     initial_data_size,
                                     initial_error_level,
