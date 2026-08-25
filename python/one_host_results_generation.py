@@ -1,70 +1,172 @@
 #!/usr/bin/env python3
-"""Confidence intervals for two paired algorithm columns in a CSV file."""
+"""Generate summary statistics and plots for one-host scheduling results."""
 
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping, Sequence
+from pathlib import Path
+from typing import TypedDict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import t
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import t
+
+
+# CSV naming conventions.
+WITHOUT_TEMPORAL_REDUNDANCY_SUFFIX = "__off__off"
+WITH_TEMPORAL_REDUNDANCY_SUFFIX = "__independent__off"
+E_FAIL_MULTIPLIER_COLUMN = "e_fail_multiplier"
+
+# Analysis choices.
+REFERENCE_ALGORITHM = "dynamic"
+BEST_HEURISTIC = "static_foresighted_expected_error"
+DEFAULT_CONFIDENCE = 0.95
+DEFAULT_BOOTSTRAP_RESAMPLES = 20_000
+DEFAULT_RANDOM_SEED = 20260821
+
+E_FAIL_GROUPS: dict[str, tuple[float, ...]] = {
+    "2.0": (2.0,),
+    "5.0": (5.0,),
+    "any": (2.0, 5.0),
+}
+
+
+class WinTieLossStats(TypedDict):
+    """Per-instance comparison statistics from the reference perspective."""
+
+    wins: int
+    ties: int
+    losses: int
+    mean_comparison_degradation_when_losing: float | None
+    mean_comparison_improvement_when_winning: float | None
+
+
+def algorithm_column(algorithm_name: str, suffix: str) -> str:
+    """Return the CSV column name for an algorithm and execution mode."""
+    return f"{algorithm_name}{suffix}"
+
+
+def discover_algorithm_names(frame: pd.DataFrame) -> list[str]:
+    """Discover algorithms that have both temporal-redundancy variants.
+
+    Algorithms are returned in their CSV column order. This avoids relying on
+    fixed metadata-column positions and gives deterministic plot ordering when
+    means are equal.
+    """
+    columns = set(frame.columns)
+    algorithm_names: list[str] = []
+
+    for column in frame.columns:
+        if not column.endswith(WITHOUT_TEMPORAL_REDUNDANCY_SUFFIX):
+            continue
+
+        algorithm_name = column[: -len(WITHOUT_TEMPORAL_REDUNDANCY_SUFFIX)]
+        with_tr_column = algorithm_column(
+            algorithm_name,
+            WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+        )
+        if with_tr_column in columns:
+            algorithm_names.append(algorithm_name)
+
+    if not algorithm_names:
+        raise ValueError(
+            "Could not find any algorithms with both '__off__off' and "
+            "'__independent__off' columns."
+        )
+
+    return algorithm_names
+
+
+def require_columns(frame: pd.DataFrame, columns: Sequence[str]) -> None:
+    """Raise a clear error if any required CSV columns are absent."""
+    missing = sorted(set(columns) - set(frame.columns))
+    if missing:
+        raise KeyError(f"Missing CSV column(s): {missing}")
+
+
+def numeric_pairs(
+    frame: pd.DataFrame,
+    reference_column: str,
+    comparison_column: str,
+    *,
+    row_mask: pd.Series | np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Extract complete, finite paired values from two CSV columns."""
+    require_columns(frame, [reference_column, comparison_column])
+
+    selected = frame if row_mask is None else frame.loc[row_mask]
+    pairs = selected[[reference_column, comparison_column]].apply(
+        pd.to_numeric,
+        errors="coerce",
+    )
+    finite_rows = np.isfinite(pairs.to_numpy()).all(axis=1)
+    pairs = pairs.loc[finite_rows]
+
+    if pairs.empty:
+        raise ValueError(
+            "The selected rows contain no complete finite pairs for "
+            f"{reference_column!r} and {comparison_column!r}."
+        )
+
+    reference = pairs[reference_column].to_numpy(dtype=float)
+    comparison = pairs[comparison_column].to_numpy(dtype=float)
+    return reference, comparison
+
+
+def collect_algorithm_values(
+    frame: pd.DataFrame,
+    algorithm_names: Sequence[str],
+    *,
+    suffix: str,
+    row_mask: pd.Series | np.ndarray | None = None,
+) -> dict[str, np.ndarray]:
+    """Collect one aligned array per algorithm for a selected set of rows.
+
+    Invalid values are represented by NaN here and filtered later, either per
+    algorithm or per algorithm pair. Keeping the arrays aligned preserves the
+    paired experimental design.
+    """
+    columns = [algorithm_column(name, suffix) for name in algorithm_names]
+    require_columns(frame, columns)
+
+    selected = frame if row_mask is None else frame.loc[row_mask]
+    if selected.empty:
+        raise ValueError("The selected row subset is empty.")
+
+    values_by_algorithm: dict[str, np.ndarray] = {}
+    for algorithm_name, column in zip(algorithm_names, columns, strict=True):
+        values_by_algorithm[algorithm_name] = pd.to_numeric(
+            selected[column],
+            errors="coerce",
+        ).to_numpy(dtype=float)
+
+    return values_by_algorithm
 
 
 def count_wins_ties_losses(
-        reference: np.ndarray,
-        comparison: np.ndarray,
-        *,
-        rtol: float = 1e-9,
-        atol: float = 1e-12,
-) -> dict[str, int | float | None]:
-    """
-    Summarize per-instance wins, ties, and losses.
+    reference: np.ndarray,
+    comparison: np.ndarray,
+    *,
+    rtol: float = 1e-9,
+    atol: float = 1e-12,
+) -> WinTieLossStats:
+    """Summarize wins, ties, losses, and their conditional effect sizes.
 
-    Lower values are assumed to be better. Win and loss counts are from the
-    reference algorithm's perspective. Conditional relative gains and losses
-    are reported from the comparison algorithm's perspective, always using
-    the reference value as the denominator:
-
-        comparison loss = (comparison - reference) / reference
-        comparison gain = (reference - comparison) / reference
-
-    The first quantity is averaged only over instances where the comparison
-    algorithm loses; the second is averaged only over instances where it wins.
-
-    Two values are considered tied when
-
-        abs(reference - comparison)
-            <= atol + rtol * max(abs(reference), abs(comparison))
-
-    Parameters
-    ----------
-    reference:
-        Error values produced by the reference algorithm.
-    comparison:
-        Error values produced by the comparison algorithm.
-    rtol:
-        Relative tolerance used to identify ties.
-    atol:
-        Absolute tolerance used to identify ties.
-
-    Returns
-    -------
-    A dictionary containing the numbers of reference wins, ties, and reference
-    losses, plus the comparison algorithm's mean relative degradation when it
-    loses and mean relative improvement when it wins. A conditional mean is
-    None if there are no observations in the corresponding category.
+    Lower values are better. Counts are from the reference algorithm's
+    perspective. Relative gains and degradations are from the comparison
+    algorithm's perspective and use the reference value as denominator.
     """
     reference = np.asarray(reference, dtype=float)
     comparison = np.asarray(comparison, dtype=float)
 
     if reference.shape != comparison.shape:
-        raise ValueError(
-            "reference and comparison must have the same shape"
-        )
-
+        raise ValueError("reference and comparison must have the same shape")
+    if reference.size == 0:
+        raise ValueError("reference and comparison must not be empty")
+    if not np.isfinite(reference).all() or not np.isfinite(comparison).all():
+        raise ValueError("reference and comparison must contain finite values")
     if np.any(reference <= 0.0):
         raise ValueError(
             "All reference values must be positive to compute relative "
@@ -75,13 +177,11 @@ def count_wins_ties_losses(
         np.abs(reference),
         np.abs(comparison),
     )
-
     ties = np.abs(reference - comparison) <= tolerance
     reference_wins = (reference < comparison) & ~ties
     reference_losses = (reference > comparison) & ~ties
 
     relative_difference = (comparison - reference) / reference
-
     mean_comparison_degradation = (
         float(np.mean(relative_difference[reference_wins]))
         if np.any(reference_wins)
@@ -106,42 +206,62 @@ def count_wins_ties_losses(
     }
 
 
-
 def mean_t_confidence_interval(
-        values: np.ndarray, confidence: float
+    values: np.ndarray,
+    confidence: float,
 ) -> tuple[float, float, float]:
     """Return (sample mean, lower bound, upper bound) for a t interval."""
-    n = values.size
-    if n < 2:
-        raise ValueError("At least two paired observations are required.")
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+
+    if values.size < 2:
+        raise ValueError("At least two finite observations are required.")
+    if not 0.0 < confidence < 1.0:
+        raise ValueError("confidence must be strictly between 0 and 1")
 
     estimate = float(np.mean(values))
-    standard_error = float(np.std(values, ddof=1) / np.sqrt(n))
+    standard_error = float(np.std(values, ddof=1) / np.sqrt(values.size))
     alpha = 1.0 - confidence
-    critical_value = float(t.ppf(1.0 - alpha / 2.0, df=n - 1))
+    critical_value = float(
+        t.ppf(1.0 - alpha / 2.0, df=values.size - 1)
+    )
     margin = critical_value * standard_error
     return estimate, estimate - margin, estimate + margin
 
 
-
 def paired_bootstrap_ratio_of_means(
-        reference: np.ndarray,
-        comparison: np.ndarray,
-        confidence: float,
-        resamples: int,
-        seed: int,
-        batch_size: int = 200,
+    reference: np.ndarray,
+    comparison: np.ndarray,
+    confidence: float,
+    resamples: int,
+    seed: int,
+    batch_size: int = 200,
 ) -> tuple[float, float, float]:
-    """Percentile-bootstrap CI for E[comparison]/E[reference] - 1.
+    """Percentile-bootstrap CI for E[comparison] / E[reference] - 1.
 
     Rows are resampled as pairs, preserving the paired experimental design.
     """
+    reference = np.asarray(reference, dtype=float)
+    comparison = np.asarray(comparison, dtype=float)
+
+    if reference.shape != comparison.shape:
+        raise ValueError("reference and comparison must have the same shape")
+    if reference.size < 2:
+        raise ValueError("At least two paired observations are required.")
+    if not np.isfinite(reference).all() or not np.isfinite(comparison).all():
+        raise ValueError("reference and comparison must contain finite values")
+    if reference.mean() <= 0.0:
+        raise ValueError("The mean reference value must be positive.")
+    if not 0.0 < confidence < 1.0:
+        raise ValueError("confidence must be strictly between 0 and 1")
     if resamples < 1:
         raise ValueError("The number of bootstrap resamples must be positive.")
+    if batch_size < 1:
+        raise ValueError("batch_size must be positive.")
 
-    n = reference.size
     rng = np.random.default_rng(seed)
     bootstrap_estimates = np.empty(resamples, dtype=float)
+    n = reference.size
 
     for start in range(0, resamples, batch_size):
         stop = min(start + batch_size, resamples)
@@ -149,152 +269,118 @@ def paired_bootstrap_ratio_of_means(
         reference_means = reference[indices].mean(axis=1)
         comparison_means = comparison[indices].mean(axis=1)
         bootstrap_estimates[start:stop] = (
-                comparison_means / reference_means - 1.0
+            comparison_means / reference_means - 1.0
         )
 
     alpha = 1.0 - confidence
     low, high = np.quantile(
-        bootstrap_estimates, [alpha / 2.0, 1.0 - alpha / 2.0]
+        bootstrap_estimates,
+        [alpha / 2.0, 1.0 - alpha / 2.0],
     )
     estimate = float(comparison.mean() / reference.mean() - 1.0)
     return estimate, float(low), float(high)
 
+
+def relative_improvement_between_means(
+    baseline: np.ndarray,
+    improved: np.ndarray,
+) -> float:
+    """Return (mean(baseline) - mean(improved)) / mean(baseline)."""
+    baseline_mean = float(np.mean(baseline))
+    improved_mean = float(np.mean(improved))
+
+    if baseline_mean <= 0.0:
+        raise ValueError("The baseline mean must be positive.")
+
+    return (baseline_mean - improved_mean) / baseline_mean
+
+
+def save_or_show_figure(fig: plt.Figure, output_file: Path | None) -> None:
+    """Save a figure and close it, or display it when no path is supplied."""
+    fig.tight_layout()
+
+    if output_file is None:
+        plt.show()
+        return
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_file, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  Saved plot to {output_file}")
+
+
 def plot_average_errors(
-        values_by_algorithm: dict[str, list[float]],
-        confidence: float = 0.95,
-        output_file: str | None = None,
+    values_by_algorithm: Mapping[str, Sequence[float] | np.ndarray],
+    *,
+    confidence: float = DEFAULT_CONFIDENCE,
+    output_file: Path | None = None,
 ) -> None:
-    """
-    Plot mean error and confidence interval for each algorithm.
-
-    Algorithms are sorted by increasing mean error, so the best algorithm
-    appears at the top. Lower error is assumed to be better.
-    """
-    if not 0.0 < confidence < 1.0:
-        raise ValueError("confidence must be strictly between 0 and 1")
-
-    results = []
+    """Plot each algorithm's mean error and t confidence interval."""
+    results: list[tuple[str, float, float, float]] = []
 
     for algorithm_name, values in values_by_algorithm.items():
-        values_array = np.asarray(values, dtype=float)
-
-        # Remove NaN and infinite values.
-        values_array = values_array[np.isfinite(values_array)]
-
-        if values_array.size < 2:
-            raise ValueError(
-                f"{algorithm_name!r} has fewer than two valid values."
-            )
-
-        mean = float(np.mean(values_array))
-
-        standard_error = float(
-            np.std(values_array, ddof=1)
-            / np.sqrt(values_array.size)
+        mean, low, high = mean_t_confidence_interval(
+            np.asarray(values, dtype=float),
+            confidence,
         )
+        results.append((algorithm_name, mean, low, high))
 
-        alpha = 1.0 - confidence
-        critical_value = float(
-            t.ppf(
-                1.0 - alpha / 2.0,
-                df=values_array.size - 1,
-                )
-        )
-
-        confidence_interval_half_width = (
-                critical_value * standard_error
-        )
-
-        results.append(
-            (
-                algorithm_name,
-                mean,
-                confidence_interval_half_width,
-                values_array.size,
-            )
-        )
-
-    # Sort by increasing mean error.
+    # Lower error is better, so display the smallest mean first.
     results.sort(key=lambda result: result[1])
 
     algorithm_names = [result[0] for result in results]
     means = np.array([result[1] for result in results])
-    error_bars = np.array([result[2] for result in results])
-
-    # Increase the figure height when there are many algorithms.
-    figure_height = max(4.0, 0.55 * len(algorithm_names))
-
-    fig, ax = plt.subplots(
-        figsize=(10, figure_height)
+    lower_bounds = np.array([result[2] for result in results])
+    upper_bounds = np.array([result[3] for result in results])
+    error_bars = np.vstack(
+        [means - lower_bounds, upper_bounds - means]
     )
 
+    figure_height = max(4.0, 0.55 * len(algorithm_names))
+    fig, ax = plt.subplots(figsize=(10, figure_height))
     ax.barh(
         algorithm_names,
         means,
         xerr=error_bars,
         capsize=4,
     )
-
-    # Because results are sorted in increasing order, put the smallest
-    # mean at the top rather than at the bottom.
     ax.invert_yaxis()
-
-    confidence_percent = 100.0 * confidence
-
     ax.set_xlabel("Mean error")
     ax.set_ylabel("Algorithm")
     ax.set_title(
-        f"Mean error by algorithm "
-        f"({confidence_percent:g}% confidence intervals)"
+        "Mean error by algorithm "
+        f"({100.0 * confidence:g}% confidence intervals)"
     )
-
-    # Horizontal grid lines would cross the bars; vertical lines help
-    # compare their lengths.
     ax.grid(axis="x", alpha=0.3)
 
-    # Add the numerical mean and confidence interval next to each bar.
-    for y_position, (mean, half_width) in enumerate(
-            zip(means, error_bars)
+    for y_position, (mean, low, high) in enumerate(
+        zip(means, lower_bounds, upper_bounds, strict=True)
     ):
-        lower = mean - half_width
-        upper = mean + half_width
-
         ax.text(
-            upper,
+            high,
             y_position,
-            f"  {mean:.2f} [{lower:.2f}, {upper:.2f}]",
+            f"  {mean:.2f} [{low:.2f}, {high:.2f}]",
             va="center",
             ha="left",
         )
 
-    # Leave some room on the right for the numerical labels.
     ax.margins(x=0.20)
-
-    fig.tight_layout()
-
-    if output_file is not None:
-        fig.savefig(
-            output_file,
-            dpi=300,
-            bbox_inches="tight",
-        )
-        print("  Saved plot to", output_file)
+    save_or_show_figure(fig, output_file)
 
 
 def plot_relative_errors_vs_reference(
-        values_by_algorithm: dict[str, list[float]],
-        reference_name: str = "dynamic",
-        confidence: float = 0.95,
-        bootstrap_resamples: int = 20_000,
-        seed: int = 20260821,
-        output_file: str | None = None,
+    values_by_algorithm: Mapping[str, Sequence[float] | np.ndarray],
+    *,
+    reference_name: str = REFERENCE_ALGORITHM,
+    confidence: float = DEFAULT_CONFIDENCE,
+    bootstrap_resamples: int = DEFAULT_BOOTSTRAP_RESAMPLES,
+    seed: int = DEFAULT_RANDOM_SEED,
+    output_file: Path | None = None,
 ) -> None:
-    """
-    Plot each algorithm's relative difference in mean error compared
-    with a reference algorithm.
+    """Plot relative mean error versus a reference algorithm.
 
-    Positive values mean that the algorithm has higher mean error than
-    the reference and is therefore worse.
+    Positive values mean that an algorithm has a higher mean error than the
+    reference and is therefore worse.
     """
     if reference_name not in values_by_algorithm:
         raise KeyError(
@@ -305,37 +391,26 @@ def plot_relative_errors_vs_reference(
         values_by_algorithm[reference_name],
         dtype=float,
     )
-
-    results = []
+    results: list[tuple[str, float, float, float]] = []
 
     for algorithm_name, algorithm_values in values_by_algorithm.items():
         if algorithm_name == reference_name:
             continue
 
-        comparison_all = np.asarray(
-            algorithm_values,
-            dtype=float,
-        )
-
+        comparison_all = np.asarray(algorithm_values, dtype=float)
         if reference_all.shape != comparison_all.shape:
             raise ValueError(
-                f"{algorithm_name!r} and {reference_name!r} "
-                "do not have the same number of values."
+                f"{algorithm_name!r} and {reference_name!r} do not have "
+                "the same number of values."
             )
 
-        # Keep only rows for which both algorithms have finite values.
-        finite = (
-                np.isfinite(reference_all)
-                & np.isfinite(comparison_all)
-        )
-
-        reference = reference_all[finite]
-        comparison = comparison_all[finite]
+        finite_rows = np.isfinite(reference_all) & np.isfinite(comparison_all)
+        reference = reference_all[finite_rows]
+        comparison = comparison_all[finite_rows]
 
         if reference.size < 2:
             raise ValueError(
-                f"Not enough valid paired values for "
-                f"{algorithm_name!r}."
+                f"Not enough valid paired values for {algorithm_name!r}."
             )
 
         estimate, low, high = paired_bootstrap_ratio_of_means(
@@ -345,7 +420,6 @@ def plot_relative_errors_vs_reference(
             resamples=bootstrap_resamples,
             seed=seed,
         )
-
         results.append(
             (
                 algorithm_name,
@@ -362,35 +436,24 @@ def plot_relative_errors_vs_reference(
     estimates = np.array([result[1] for result in results])
     lower_bounds = np.array([result[2] for result in results])
     upper_bounds = np.array([result[3] for result in results])
-
-    # Matplotlib expects distances from the point estimate, not bounds.
-    asymmetric_error_bars = np.vstack(
-        [
-            estimates - lower_bounds,
-            upper_bounds - estimates,
-            ]
+    error_bars = np.vstack(
+        [estimates - lower_bounds, upper_bounds - estimates]
     )
-
     y_positions = np.arange(len(algorithm_names))
 
     figure_height = max(4.0, 0.55 * len(algorithm_names))
     fig, ax = plt.subplots(figsize=(10, figure_height))
-
     ax.errorbar(
         estimates,
         y_positions,
-        xerr=asymmetric_error_bars,
+        xerr=error_bars,
         fmt="o",
         capsize=4,
     )
-
-    # Zero means equal mean error to the reference algorithm.
     ax.axvline(0.0, linewidth=1.0)
-
     ax.set_yticks(y_positions)
     ax.set_yticklabels(algorithm_names)
     ax.invert_yaxis()
-
     ax.set_xlabel(
         f"Increase in mean error relative to {reference_name} (%)"
     )
@@ -399,341 +462,270 @@ def plot_relative_errors_vs_reference(
         f"Relative mean error compared with {reference_name} "
         f"({100.0 * confidence:g}% paired-bootstrap intervals)"
     )
-
     ax.grid(axis="x", alpha=0.3)
 
-    fig.tight_layout()
+    save_or_show_figure(fig, output_file)
 
-    if output_file is not None:
-        fig.savefig(
-            output_file,
-            dpi=300,
-            bbox_inches="tight",
+
+def report_temporal_redundancy_improvements(
+    frame: pd.DataFrame,
+    algorithm_names: Sequence[str],
+) -> None:
+    """Print the mean-error improvement due to temporal redundancy."""
+    print("\n** IMPROVEMENT DUE TO TEMPORAL REDUNDANCY **")
+    improvements: dict[str, float] = {}
+
+    for algorithm_name in algorithm_names:
+        # The random policy is not meaningful for this design comparison.
+        if algorithm_name == "random":
+            continue
+
+        without_tr_column = algorithm_column(
+            algorithm_name,
+            WITHOUT_TEMPORAL_REDUNDANCY_SUFFIX,
         )
-        print("  Saved plot to", output_file)
+        with_tr_column = algorithm_column(
+            algorithm_name,
+            WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+        )
+        without_tr, with_tr = numeric_pairs(
+            frame,
+            without_tr_column,
+            with_tr_column,
+        )
+        improvements[algorithm_name] = 100.0 * (
+            relative_improvement_between_means(without_tr, with_tr)
+        )
 
+    for algorithm_name, improvement in sorted(
+        improvements.items(),
+        key=lambda item: item[1],
+    ):
+        print(f"  - {algorithm_name}: {improvement:.2f}%")
+
+    if improvements:
+        print(
+            "  Average improvement across algorithms: "
+            f"{np.mean(list(improvements.values())):.2f}%"
+        )
+
+
+def generate_average_error_plots(
+    frame: pd.DataFrame,
+    algorithm_names: Sequence[str],
+    *,
+    output_dir: Path,
+    confidence: float,
+    bootstrap_resamples: int,
+    seed: int,
+) -> None:
+    """Generate absolute- and relative-error plots by failure multiplier."""
+    print("\n** AVERAGE ERRORS **")
+    require_columns(frame, [E_FAIL_MULTIPLIER_COLUMN])
+
+    for group_name, multipliers in E_FAIL_GROUPS.items():
+        row_mask = frame[E_FAIL_MULTIPLIER_COLUMN].isin(multipliers)
+        matching_rows = int(row_mask.sum())
+        if matching_rows == 0:
+            raise ValueError(
+                f"No rows match {E_FAIL_MULTIPLIER_COLUMN} in "
+                f"{list(multipliers)}."
+            )
+
+        print(
+            f"  {E_FAIL_MULTIPLIER_COLUMN} in {list(multipliers)}: "
+            f"{matching_rows} rows"
+        )
+        values_by_algorithm = collect_algorithm_values(
+            frame,
+            algorithm_names,
+            suffix=WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+            row_mask=row_mask,
+        )
+
+        plot_average_errors(
+            values_by_algorithm,
+            confidence=confidence,
+            output_file=(
+                output_dir / f"average_error_plot_efail_{group_name}.pdf"
+            ),
+        )
+        plot_relative_errors_vs_reference(
+            values_by_algorithm,
+            reference_name=REFERENCE_ALGORITHM,
+            confidence=confidence,
+            bootstrap_resamples=bootstrap_resamples,
+            seed=seed,
+            output_file=(
+                output_dir
+                / f"relative_error_vs_dynamic_efail_{group_name}.pdf"
+            ),
+        )
+
+
+def print_pair_comparison(
+    reference: np.ndarray,
+    comparison: np.ndarray,
+    *,
+    reference_label: str,
+    comparison_label: str,
+    confidence: float,
+    bootstrap_resamples: int,
+    seed: int,
+) -> None:
+    """Print a paired ratio-of-means analysis and win/tie/loss summary."""
+    estimate, low, high = paired_bootstrap_ratio_of_means(
+        reference,
+        comparison,
+        confidence=confidence,
+        resamples=bootstrap_resamples,
+        seed=seed,
+    )
+
+    print("\n  Relative difference between the two means")
+    print("    theta = E[comparison] / E[reference] - 1")
+    print(f"    Estimate: {100.0 * estimate:.4f}%")
+    print(
+        f"    {100.0 * confidence:g}% paired-bootstrap interval: "
+        f"[{100.0 * low:.4f}%, {100.0 * high:.4f}%]"
+    )
+
+    counts = count_wins_ties_losses(reference, comparison)
+    degradation = counts["mean_comparison_degradation_when_losing"]
+    improvement = counts["mean_comparison_improvement_when_winning"]
+
+    print("\n  Per-instance comparison")
+    print(
+        f"    {reference_label} wins / {comparison_label} losses: "
+        f"{counts['wins']:6d}"
+    )
+    if degradation is None:
+        print("      Mean comparison degradation: n/a (no comparison losses)")
+    else:
+        print(
+            "      Mean comparison degradation when losing: "
+            f"{100.0 * degradation:.4f}%"
+        )
+
+    print(
+        f"    {reference_label} losses / {comparison_label} wins: "
+        f"{counts['losses']:6d}"
+    )
+    if improvement is None:
+        print("      Mean comparison improvement: n/a (no comparison wins)")
+    else:
+        print(
+            "      Mean comparison improvement when winning: "
+            f"{100.0 * improvement:.4f}%"
+        )
+
+    print(f"    Ties: {counts['ties']:6d}")
+
+
+def report_dynamic_vs_best_heuristic(
+    frame: pd.DataFrame,
+    *,
+    confidence: float,
+    bootstrap_resamples: int,
+    seed: int,
+) -> None:
+    """Compare the dynamic policy with the selected best static heuristic."""
+    print("\n** COMPARISON BETWEEN DYNAMIC AND BEST HEURISTIC **")
+
+    reference_column = algorithm_column(
+        REFERENCE_ALGORITHM,
+        WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+    )
+    comparison_column = algorithm_column(
+        BEST_HEURISTIC,
+        WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+    )
+    reference, comparison = numeric_pairs(
+        frame,
+        reference_column,
+        comparison_column,
+    )
+
+    print_pair_comparison(
+        reference,
+        comparison,
+        reference_label="Dynamic",
+        comparison_label="best heuristic",
+        confidence=confidence,
+        bootstrap_resamples=bootstrap_resamples,
+        seed=seed,
+    )
+
+
+def build_argument_parser() -> argparse.ArgumentParser:
+    """Create the command-line parser."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Generate statistics and plots for one-host scheduling results. "
+            "Lower error values are assumed to be better."
+        )
+    )
+    parser.add_argument("csv_file", type=Path, help="Input CSV file")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("."),
+        help="Directory for generated plots (default: current directory)",
+    )
+    parser.add_argument(
+        "--confidence",
+        type=float,
+        default=DEFAULT_CONFIDENCE,
+        help=f"Confidence level (default: {DEFAULT_CONFIDENCE})",
+    )
+    parser.add_argument(
+        "--bootstrap-resamples",
+        type=int,
+        default=DEFAULT_BOOTSTRAP_RESAMPLES,
+        help=(
+            "Number of paired-bootstrap resamples "
+            f"(default: {DEFAULT_BOOTSTRAP_RESAMPLES})"
+        ),
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=DEFAULT_RANDOM_SEED,
+        help=f"Random seed (default: {DEFAULT_RANDOM_SEED})",
+    )
+    return parser
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Compare two paired algorithm columns in a CSV file. "
-            "Lower values are assumed to be better."
-        )
-    )
-    parser.add_argument("csv_file", help="Input CSV file")
-    args = parser.parse_args()
+    args = build_argument_parser().parse_args()
+
+    if not 0.0 < args.confidence < 1.0:
+        raise ValueError("--confidence must be strictly between 0 and 1.")
+    if args.bootstrap_resamples < 1:
+        raise ValueError("--bootstrap-resamples must be positive.")
 
     frame = pd.read_csv(args.csv_file)
-    total_rows = len(frame)
-    column_names = frame.columns.tolist()
-    # print(column_names)
-    algorithm_names = list(set([name.split('__')[0] for name in column_names[9:-5]]))
+    algorithm_names = discover_algorithm_names(frame)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Determining the impact of temporal redundancy
-    print("\n** IMPROVEMENT DUE TO TEMPORAL REDUNDANCY **")
-    perc_improvement_tr = {}
-    for algorithm_name in algorithm_names:
-        # Ignore the random algorithm
-        if algorithm_name == "random":
-            continue
-        algorithm_without_temporal_redundancy = algorithm_name+"__off__off"
-        algorithm_with_temporal_redundancy = algorithm_name+"__independent__off"
-        pairs = frame[[algorithm_without_temporal_redundancy, algorithm_with_temporal_redundancy]].apply(
-            pd.to_numeric, errors="coerce"
-        )
-        finite = np.isfinite(pairs.to_numpy()).all(axis=1)
-        pairs = pairs.loc[finite]
+    print(f"Loaded {len(frame)} rows from {args.csv_file}")
+    print(f"Discovered {len(algorithm_names)} algorithms")
 
-        if pairs.empty:
-            raise ValueError(
-                "The selected row range contains no complete finite pairs."
-            )
-
-        without_tr = pairs[algorithm_without_temporal_redundancy].to_numpy(dtype=float)
-        with_tr = pairs[algorithm_with_temporal_redundancy].to_numpy(dtype=float)
-        mean_without = without_tr.mean()
-        mean_with = with_tr.mean()
-        relative_improvement = 100.0* (mean_without - mean_with) / mean_without
-        perc_improvement_tr[algorithm_name] = relative_improvement
-    for algorithm_name, perc_improvement in sorted(
-            perc_improvement_tr.items(),
-            key=lambda item: item[1]):
-        print(f"  - {algorithm_name}: {perc_improvement:.2f}%")
-    print(f" Average improvement: {sum(perc_improvement_tr.values()) / len(perc_improvement_tr):.2f}%")
-
-    # Generate average error plots for our own purposes for different e-fails
-    print("\n** AVERAGE ERRORS **")
-    efail_values = {"2.0": [2.0], "5.0": [5.0], "any": [2.0,5.0]}
-    for efail_key, efail_values in efail_values.items():
-        result_dict = {}
-        for algorithm_name in algorithm_names:
-            algorithm = algorithm_name+"__independent__off"
-            error_values = frame.loc[
-                frame["e_fail_multiplier"].isin(efail_values),
-                algorithm,
-            ].tolist()
-            result_dict[algorithm_name] = error_values
-        plot_average_errors(result_dict, confidence=.95,
-                            output_file="average_error_plot_efail_" + str(efail_key) + ".pdf")
-        plot_relative_errors_vs_reference(result_dict,reference_name="dynamic", confidence=0.95,
-                                          output_file="relative_error_vs_dynamic_efail_" + str(efail_key) + ".pdf")
-
-
-    # Talk about how far the best heuristic is from optimal: impact of efail, impact of difficulty
-    # Interpretation 2: percentage difference between the two population means.
-    print("\n** COMPARISON BETWEEN DYNAMIC AND BEST HEURISTIC **")
-    reference_column = "dynamic__independent__off"
-    comparison_column = "static_foresighted_expected_error__independent__off"
-    pairs = frame[[reference_column, comparison_column]].apply(
-        pd.to_numeric, errors="coerce"
+    report_temporal_redundancy_improvements(frame, algorithm_names)
+    generate_average_error_plots(
+        frame,
+        algorithm_names,
+        output_dir=args.output_dir,
+        confidence=args.confidence,
+        bootstrap_resamples=args.bootstrap_resamples,
+        seed=args.seed,
     )
-    finite = np.isfinite(pairs.to_numpy()).all(axis=1)
-    pairs = pairs.loc[finite]
-
-    if pairs.empty:
-        raise ValueError(
-            "The selected row range contains no complete finite pairs."
-        )
-
-    reference = pairs[reference_column].to_numpy(dtype=float)
-    comparison = pairs[comparison_column].to_numpy(dtype=float)
-    estimate2, low2, high2 = paired_bootstrap_ratio_of_means(
-        reference, comparison,
-        confidence=0.95, resamples=20_000, seed=20260821)
-    print()
-    print("  Relative difference between the two means")
-    print("    theta = E[comparison] / E[reference] - 1")
-    print(f"   Estimate: {100.0 * estimate2:.4f}%")
-    print(
-        f"    {95:g}% paired-bootstrap interval: "
-        f"[{100.0 * low2:.4f}%, {100.0 * high2:.4f}%]"
+    report_dynamic_vs_best_heuristic(
+        frame,
+        confidence=args.confidence,
+        bootstrap_resamples=args.bootstrap_resamples,
+        seed=args.seed,
     )
-
-    # Numbers of wins / losses / ties and conditional effect sizes.
-    counts = count_wins_ties_losses(reference, comparison)
-    comparison_degradation = counts[
-        "mean_comparison_degradation_when_losing"
-    ]
-    comparison_improvement = counts[
-        "mean_comparison_improvement_when_winning"
-    ]
-
-    print()
-    print("  Per-instance comparison")
-    print(
-        f"  Dynamic wins / best-heuristic losses: "
-        f"{counts['wins']:6d}"
-    )
-    if comparison_degradation is None:
-        print("    Mean comparison degradation: n/a (no comparison losses)")
-    else:
-        print(
-            "    Mean comparison degradation when losing: "
-            f"{100.0 * comparison_degradation:.4f}%"
-        )
-
-    print(
-        f"  Dynamic losses / best-heuristic wins: "
-        f"{counts['losses']:6d}"
-    )
-    if comparison_improvement is None:
-        print("    Mean comparison improvement: n/a (no comparison wins)")
-    else:
-        print(
-            "    Mean comparison improvement when winning: "
-            f"{100.0 * comparison_improvement:.4f}%"
-        )
-
-    print(f"  Ties:                              {counts['ties']:6d}")
-
-
-
-
-
-    # parser.add_argument(
-    #     "reference_algorithm",
-    #     metavar="REFERENCE_ALGORITHM",
-    #     help="Name of the CSV column for the reference algorithm",
-    # )
-    # parser.add_argument(
-    #     "comparison_algorithm",
-    #     metavar="COMPARISON_ALGORITHM",
-    #     help="Name of the CSV column for the comparison algorithm",
-    # )
-    # parser.add_argument(
-    #     "--start-row",
-    #     type=int,
-    #     default=0,
-    #     help=(
-    #         "Index of the first CSV row to process (0-based, inclusive). "
-    #         "Default: 0"
-    #     ),
-    # )
-    # parser.add_argument(
-    #     "--end-row",
-    #     type=int,
-    #     default=None,
-    #     help=(
-    #         "Index one past the last CSV row to process (0-based, exclusive). "
-    #         "Default: total number of rows"
-    #     ),
-    # )
-    # parser.add_argument(
-    #     "--confidence", type=float, default=0.95, help="Confidence level"
-    # )
-    # parser.add_argument(
-    #     "--bootstrap-resamples",
-    #     type=int,
-    #     default=20_000,
-    #     help="Bootstrap resamples for the ratio-of-means interval",
-    # )
-    # parser.add_argument("--seed", type=int, default=20260821)
-    # args = parser.parse_args()
-
-    # if not 0.0 < args.confidence < 1.0:
-    #     raise ValueError("--confidence must be strictly between 0 and 1.")
-    #
-    # if args.start_row < 0:
-    #     raise ValueError("--start-row must be nonnegative.")
-    #
-    # reference_column = args.reference_algorithm
-    # comparison_column = args.comparison_algorithm
-    #
-    # if reference_column == comparison_column:
-    #     raise ValueError(
-    #         "The reference and comparison algorithms must be different."
-    #     )
-    #
-    # frame = pd.read_csv(args.csv_file)
-    # total_rows = len(frame)
-    #
-    # end_row = total_rows if args.end_row is None else args.end_row
-    # if end_row < 0:
-    #     raise ValueError("--end-row must be nonnegative.")
-    # if args.start_row > end_row:
-    #     raise ValueError("--start-row cannot be greater than --end-row.")
-    # if args.start_row > total_rows:
-    #     raise ValueError(
-    #         f"--start-row ({args.start_row}) is beyond the total number "
-    #         f"of rows ({total_rows})."
-    #     )
-    # if end_row > total_rows:
-    #     raise ValueError(
-    #         f"--end-row ({end_row}) is beyond the total number of rows "
-    #         f"({total_rows})."
-    #     )
-    #
-    # frame = frame.iloc[args.start_row:end_row]
-    #
-    # missing_columns = {
-    #     reference_column,
-    #     comparison_column,
-    # } - set(frame.columns)
-    # if missing_columns:
-    #     raise KeyError(f"Missing CSV column(s): {sorted(missing_columns)}")
-    #
-    # pairs = frame[[reference_column, comparison_column]].apply(
-    #     pd.to_numeric, errors="coerce"
-    # )
-    # finite = np.isfinite(pairs.to_numpy()).all(axis=1)
-    # pairs = pairs.loc[finite]
-    #
-    # if pairs.empty:
-    #     raise ValueError(
-    #         "The selected row range contains no complete finite pairs."
-    #     )
-    #
-    # reference = pairs[reference_column].to_numpy(dtype=float)
-    # comparison = pairs[comparison_column].to_numpy(dtype=float)
-    #
-    # if np.any(reference <= 0.0):
-    #     count = int(np.count_nonzero(reference <= 0.0))
-    #     raise ValueError(
-    #         f"The reference column contains {count} nonpositive value(s); "
-    #         "a relative difference with this denominator is not meaningful."
-    #     )
-    #
-    # confidence_percent = 100.0 * args.confidence
-    #
-    # # Interpretation 1: average the paired, per-instance percentage changes.
-    # per_instance_relative_difference = (comparison - reference) / reference
-    # estimate, low, high = mean_t_confidence_interval(
-    #     per_instance_relative_difference, args.confidence
-    # )
-    #
-    # print(f"Total rows in CSV: {total_rows}")
-    # print(
-    #     f"Requested row range: [{args.start_row}, {end_row}) "
-    #     f"({end_row - args.start_row} rows)"
-    # )
-    # print(f"Usable paired rows: {reference.size}")
-    # print(f"Reference algorithm:  {reference_column}")
-    # print(f"Comparison algorithm: {comparison_column}")
-    # print(f"Mean {reference_column}: {reference.mean():.9g}")
-    # print(f"Mean {comparison_column}: {comparison.mean():.9g}")
-    # print()
-    # print("Mean of the per-instance relative differences")
-    # print("  r_i = (comparison_i - reference_i) / reference_i")
-    # print(f"  Estimate: {100.0 * estimate:.4f}%")
-    # print(
-    #     f"  {confidence_percent:g}% t confidence interval: "
-    #     f"[{100.0 * low:.4f}%, {100.0 * high:.4f}%]"
-    # )
-    #
-    # # Interpretation 2: percentage difference between the two population means.
-    # estimate2, low2, high2 = paired_bootstrap_ratio_of_means(
-    #     reference,
-    #     comparison,
-    #     confidence=args.confidence,
-    #     resamples=args.bootstrap_resamples,
-    #     seed=args.seed,
-    # )
-    # print()
-    # print("Relative difference between the two means")
-    # print("  theta = E[comparison] / E[reference] - 1")
-    # print(f"  Estimate: {100.0 * estimate2:.4f}%")
-    # print(
-    #     f"  {confidence_percent:g}% paired-bootstrap interval: "
-    #     f"[{100.0 * low2:.4f}%, {100.0 * high2:.4f}%]"
-    # )
-    #
-    # # Numbers of wins / losses / ties and conditional effect sizes.
-    # counts = count_wins_ties_losses(reference, comparison)
-    # comparison_degradation = counts[
-    #     "mean_comparison_degradation_when_losing"
-    # ]
-    # comparison_improvement = counts[
-    #     "mean_comparison_improvement_when_winning"
-    # ]
-    #
-    # print()
-    # print("Per-instance comparison")
-    # print(
-    #     f"  Reference wins / comparison losses: "
-    #     f"{counts['wins']:6d}"
-    # )
-    # if comparison_degradation is None:
-    #     print("    Mean comparison degradation: n/a (no comparison losses)")
-    # else:
-    #     print(
-    #         "    Mean comparison degradation when losing: "
-    #         f"{100.0 * comparison_degradation:.4f}%"
-    #     )
-    #
-    # print(
-    #     f"  Reference losses / comparison wins: "
-    #     f"{counts['losses']:6d}"
-    # )
-    # if comparison_improvement is None:
-    #     print("    Mean comparison improvement: n/a (no comparison wins)")
-    # else:
-    #     print(
-    #         "    Mean comparison improvement when winning: "
-    #         f"{100.0 * comparison_improvement:.4f}%"
-    #     )
-    #
-    # print(f"  Ties:                              {counts['ties']:6d}")
 
 
 if __name__ == "__main__":
