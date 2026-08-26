@@ -27,9 +27,22 @@ DEFAULT_BOOTSTRAP_RESAMPLES = 20_000
 DEFAULT_RANDOM_SEED = 20260821
 
 E_FAIL_GROUPS: dict[str, tuple[float, ...]] = {
-    "2.0": (2.0,),
-    "5.0": (5.0,),
+    # "2.0": (2.0,),
+    # "5.0": (5.0,),
     "any": (2.0, 5.0),
+}
+
+ALGORITHM_NAME_MAP : dict[str, str] = {
+    "dynamic": "Dyn",
+    "random": "Rand",
+    "static_foresighted_expected_error": "FS-X",
+    "static_foresighted_probability_success": "FS-P",
+    "static_foresighted_success_error_ratio": "FS-R",
+    "static_foresighted_error_level": "FS-E",
+    "static_nearsighted_expected_error": "NS-X",
+    "static_nearsighted_probability_success": "NS-P",
+    "static_nearsighted_success_error_ratio": "NS-R",
+    "static_nearsighted_error_level": "NS-E",
 }
 
 
@@ -328,7 +341,7 @@ def plot_average_errors(
     # Lower error is better, so display the smallest mean first.
     results.sort(key=lambda result: result[1])
 
-    algorithm_names = [result[0] for result in results]
+    algorithm_names = [ALGORITHM_NAME_MAP[result[0]] for result in results]
     means = np.array([result[1] for result in results])
     lower_bounds = np.array([result[2] for result in results])
     upper_bounds = np.array([result[3] for result in results])
@@ -448,21 +461,32 @@ def plot_relative_errors_vs_reference(
         y_positions,
         xerr=error_bars,
         fmt="o",
-        capsize=4,
+        capsize=6,
+        linewidth=3,
     )
-    ax.axvline(0.0, linewidth=1.0)
+
+    # Print text labels
+    for x,y in zip(estimates, y_positions):
+        ax.text(x-3, y-0.25,f"{x:.2f}%")
+
+    ax.axvline(0.0, linewidth=1.0, linestyle="--")
     ax.set_yticks(y_positions)
-    ax.set_yticklabels(algorithm_names)
+    ax.set_yticklabels([ALGORITHM_NAME_MAP[algorithm_name] for algorithm_name in algorithm_names], fontsize=12)
     ax.invert_yaxis()
     ax.set_xlabel(
-        f"Increase in mean error relative to {reference_name} (%)"
+        f"Increase in mean error relative to {ALGORITHM_NAME_MAP[reference_name]} (%)", fontsize=14
     )
-    ax.set_ylabel("Algorithm")
-    ax.set_title(
-        f"Relative mean error compared with {reference_name} "
-        f"({100.0 * confidence:g}% paired-bootstrap intervals)"
-    )
+    ax.tick_params(axis='x', labelsize=14)
+    ax.set_ylabel("Heuristic", fontsize=14)
+    # ax.set_title(
+    #     f"Relative mean error compared with {reference_name} "
+    #     f"({100.0 * confidence:g}% paired-bootstrap intervals)"
+    # )
     ax.grid(axis="x", alpha=0.3)
+
+    # Adjust the limits for prettiness
+    ax.set_ylim(ymax=ax.get_ylim()[1] - 0.5)
+    ax.set_xlim(xmin=-2)
 
     save_or_show_figure(fig, output_file)
 
@@ -657,6 +681,234 @@ def report_dynamic_vs_best_heuristic(
     )
 
 
+def report_split_half_stability(
+    frame: pd.DataFrame,
+    algorithm_names: Sequence[str],
+    *,
+    repeats: int = 500,
+    seed: int = DEFAULT_RANDOM_SEED,
+    group_column: str | None = "app_config_id",
+) -> None:
+    """
+    Assess whether the principal conclusions remain stable when using
+    only half of the independent sampling units.
+
+    When group_column is not None, all rows with the same group value
+    are kept in the same half. Use group_column=None to split rows
+    independently.
+    """
+    if repeats < 1:
+        raise ValueError("repeats must be positive")
+
+    names = list(algorithm_names)
+    columns = [
+        algorithm_column(
+            algorithm_name,
+            WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+        )
+        for algorithm_name in names
+    ]
+
+    require_columns(frame, columns)
+
+    if group_column is not None:
+        require_columns(frame, [group_column])
+
+    # Use exactly the same complete rows for every algorithm so that
+    # rankings are based on identical sets of observations.
+    numeric = frame[columns].apply(
+        pd.to_numeric,
+        errors="coerce",
+    )
+    finite = np.isfinite(numeric.to_numpy()).all(axis=1)
+    values = numeric.loc[finite].to_numpy(dtype=float)
+
+    if values.shape[0] < 4:
+        raise ValueError(
+            "At least four complete observations are required."
+        )
+
+    if group_column is None:
+        groups = None
+        units = np.arange(values.shape[0])
+        unit_description = "rows"
+    else:
+        groups = frame.loc[
+            finite,
+            group_column,
+        ].to_numpy()
+
+        units = pd.unique(groups)
+        unit_description = group_column
+
+    if len(units) < 4:
+        raise ValueError(
+            "At least four independent sampling units are required."
+        )
+
+    names_array = np.asarray(names, dtype=object)
+
+    reference_index = names.index(REFERENCE_ALGORITHM)
+    heuristic_index = names.index(BEST_HEURISTIC)
+
+    def get_row_indices(
+        selected_units: np.ndarray,
+    ) -> np.ndarray:
+        if groups is None:
+            return selected_units.astype(int)
+
+        return np.flatnonzero(
+            np.isin(groups, selected_units)
+        )
+
+    def summarize(
+        row_indices: np.ndarray,
+    ) -> tuple[tuple[str, ...], float]:
+        means = values[row_indices].mean(axis=0)
+
+        ranking = tuple(
+            names_array[np.argsort(means)]
+        )
+
+        heuristic_degradation = 100.0 * (
+            means[heuristic_index]
+            / means[reference_index]
+            - 1.0
+        )
+
+        return ranking, heuristic_degradation
+
+    # Full-data results.
+    all_rows = np.arange(values.shape[0])
+    full_ranking, full_degradation = summarize(all_rows)
+
+    rng = np.random.default_rng(seed)
+
+    half_rankings: list[tuple[str, ...]] = []
+    half_degradations: list[float] = []
+    half_to_half_differences: list[float] = []
+
+    both_halves_dynamic_first = 0
+    both_halves_same_top_two = 0
+
+    for _ in range(repeats):
+        shuffled_units = rng.permutation(units)
+        first_units, second_units = np.array_split(
+            shuffled_units,
+            2,
+        )
+
+        first_ranking, first_degradation = summarize(
+            get_row_indices(first_units)
+        )
+        second_ranking, second_degradation = summarize(
+            get_row_indices(second_units)
+        )
+
+        half_rankings.extend(
+            [first_ranking, second_ranking]
+        )
+        half_degradations.extend(
+            [first_degradation, second_degradation]
+        )
+
+        if (
+            first_ranking[0] == REFERENCE_ALGORITHM
+            and second_ranking[0] == REFERENCE_ALGORITHM
+        ):
+            both_halves_dynamic_first += 1
+
+        if (
+            first_ranking[:2] == full_ranking[:2]
+            and second_ranking[:2] == full_ranking[:2]
+        ):
+            both_halves_same_top_two += 1
+
+        half_to_half_differences.append(
+            abs(first_degradation - second_degradation)
+        )
+
+    dynamic_first_rate = np.mean(
+        [
+            ranking[0] == REFERENCE_ALGORITHM
+            for ranking in half_rankings
+        ]
+    )
+
+    same_top_two_rate = np.mean(
+        [
+            ranking[:2] == full_ranking[:2]
+            for ranking in half_rankings
+        ]
+    )
+
+    same_complete_ranking_rate = np.mean(
+        [
+            ranking == full_ranking
+            for ranking in half_rankings
+        ]
+    )
+
+    half_degradations_array = np.asarray(
+        half_degradations
+    )
+    degradation_low, degradation_median, degradation_high = (
+        np.quantile(
+            half_degradations_array,
+            [0.05, 0.50, 0.95],
+        )
+    )
+
+    print("\n** SPLIT-HALF STABILITY **")
+    print(
+        f"  Independent units: {len(units)} "
+        f"({unit_description})"
+    )
+    print(f"  Random partitions: {repeats}")
+    print(
+        "  Full-data top two: "
+        f"{full_ranking[0]}, {full_ranking[1]}"
+    )
+    print(
+        "  Full-data best-heuristic degradation: "
+        f"{full_degradation:.2f}%"
+    )
+
+    print(
+        "  Dynamic ranked first in half-samples: "
+        f"{100.0 * dynamic_first_rate:.1f}%"
+    )
+    print(
+        "  Full-data top two reproduced in half-samples: "
+        f"{100.0 * same_top_two_rate:.1f}%"
+    )
+    print(
+        "  Complete ranking reproduced in half-samples: "
+        f"{100.0 * same_complete_ranking_rate:.1f}%"
+    )
+    print(
+        "  Both halves ranked dynamic first: "
+        f"{100.0 * both_halves_dynamic_first / repeats:.1f}% "
+        "of partitions"
+    )
+    print(
+        "  Both halves reproduced the full-data top two: "
+        f"{100.0 * both_halves_same_top_two / repeats:.1f}% "
+        "of partitions"
+    )
+    print(
+        "  Half-sample best-heuristic degradation: "
+        f"median {degradation_median:.2f}%, "
+        "central 90% empirical range "
+        f"[{degradation_low:.2f}%, "
+        f"{degradation_high:.2f}%]"
+    )
+    print(
+        "  Median absolute difference between half estimates: "
+        f"{np.median(half_to_half_differences):.2f} "
+        "percentage points"
+    )
+
 def build_argument_parser() -> argparse.ArgumentParser:
     """Create the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -725,6 +977,13 @@ def main() -> None:
         confidence=args.confidence,
         bootstrap_resamples=args.bootstrap_resamples,
         seed=args.seed,
+    )
+    report_split_half_stability(
+        frame,
+        algorithm_names,
+        repeats=500,
+        seed=args.seed,
+        group_column="app_config_id",
     )
 
 
