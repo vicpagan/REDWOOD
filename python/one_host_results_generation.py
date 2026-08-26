@@ -297,7 +297,7 @@ def paired_bootstrap_ratio_of_means(
 def relative_improvement_between_means(
     baseline: np.ndarray,
     improved: np.ndarray,
-) -> float:
+) -> (float, float, float):
     """Return (mean(baseline) - mean(improved)) / mean(baseline)."""
     baseline_mean = float(np.mean(baseline))
     improved_mean = float(np.mean(improved))
@@ -305,7 +305,9 @@ def relative_improvement_between_means(
     if baseline_mean <= 0.0:
         raise ValueError("The baseline mean must be positive.")
 
-    return (baseline_mean - improved_mean) / baseline_mean
+    improvement = (baseline_mean - improved_mean) / baseline_mean
+
+    return improvement, baseline_mean, improved_mean
 
 
 def save_or_show_figure(fig: plt.Figure, output_file: Path | None) -> None:
@@ -467,17 +469,17 @@ def plot_relative_errors_vs_reference(
 
     # Print text labels
     for x,y in zip(estimates, y_positions):
-        ax.text(x-3, y-0.25,f"{x:.2f}%")
+        ax.text(x-3, y-0.25,f"{x:.2f}%", fontsize=16)
 
     ax.axvline(0.0, linewidth=1.0, linestyle="--")
     ax.set_yticks(y_positions)
-    ax.set_yticklabels([ALGORITHM_NAME_MAP[algorithm_name] for algorithm_name in algorithm_names], fontsize=12)
+    ax.set_yticklabels([ALGORITHM_NAME_MAP[algorithm_name] for algorithm_name in algorithm_names], fontsize=18)
     ax.invert_yaxis()
     ax.set_xlabel(
-        f"Increase in mean error relative to {ALGORITHM_NAME_MAP[reference_name]} (%)", fontsize=14
+        f"Increase in mean error relative to {ALGORITHM_NAME_MAP[reference_name]} (%)", fontsize=18
     )
-    ax.tick_params(axis='x', labelsize=14)
-    ax.set_ylabel("Heuristic", fontsize=14)
+    ax.tick_params(axis='x', labelsize=16)
+    ax.set_ylabel("Heuristic", fontsize=18)
     # ax.set_title(
     #     f"Relative mean error compared with {reference_name} "
     #     f"({100.0 * confidence:g}% paired-bootstrap intervals)"
@@ -497,7 +499,7 @@ def report_temporal_redundancy_improvements(
 ) -> None:
     """Print the mean-error improvement due to temporal redundancy."""
     print("\n** IMPROVEMENT DUE TO TEMPORAL REDUNDANCY **")
-    improvements: dict[str, float] = {}
+    improvements: dict[str, (float, float, float)] = {}
 
     for algorithm_name in algorithm_names:
         # The random policy is not meaningful for this design comparison.
@@ -517,20 +519,19 @@ def report_temporal_redundancy_improvements(
             without_tr_column,
             with_tr_column,
         )
-        improvements[algorithm_name] = 100.0 * (
-            relative_improvement_between_means(without_tr, with_tr)
-        )
+        improvement, without_tr, with_tr = relative_improvement_between_means(without_tr, with_tr)
+        improvements[algorithm_name] = (100.0 * improvement, without_tr, with_tr)
 
-    for algorithm_name, improvement in sorted(
+    for algorithm_name, (improvement, without_tr, with_tr) in sorted(
         improvements.items(),
         key=lambda item: item[1],
     ):
-        print(f"  - {algorithm_name}: {improvement:.2f}%")
+        print(f"  - {algorithm_name}: {improvement:.2f}%  (without tr: {without_tr:.2f}, with tr: {with_tr:.2f})")
 
     if improvements:
         print(
             "  Average improvement across algorithms: "
-            f"{np.mean(list(improvements.values())):.2f}%"
+            f"{np.mean(list([x[0] for x in improvements.values()])):.2f}%"
         )
 
 
