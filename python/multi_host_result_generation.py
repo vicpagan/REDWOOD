@@ -11,7 +11,9 @@ from typing import TypedDict
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from ipinfo.data import continents
 from scipy.stats import t
+import sys
 
 
 # CSV naming conventions.
@@ -85,11 +87,11 @@ def require_columns(frame: pd.DataFrame, columns: Sequence[str]) -> None:
 
 
 def numeric_pairs(
-    frame: pd.DataFrame,
-    reference_column: str,
-    comparison_column: str,
-    *,
-    row_mask: pd.Series | np.ndarray | None = None,
+        frame: pd.DataFrame,
+        reference_column: str,
+        comparison_column: str,
+        *,
+        row_mask: pd.Series | np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Extract complete, finite paired values from two CSV columns."""
     require_columns(frame, [reference_column, comparison_column])
@@ -114,11 +116,11 @@ def numeric_pairs(
 
 
 def collect_algorithm_values(
-    frame: pd.DataFrame,
-    algorithm_names: Sequence[str],
-    *,
-    suffix: str,
-    row_mask: pd.Series | np.ndarray | None = None,
+        frame: pd.DataFrame,
+        algorithm_names: Sequence[str],
+        *,
+        suffix: str,
+        row_mask: pd.Series | np.ndarray | None = None,
 ) -> dict[str, np.ndarray]:
     """Collect one aligned array per algorithm for a selected set of rows.
 
@@ -144,11 +146,11 @@ def collect_algorithm_values(
 
 
 def count_wins_ties_losses(
-    reference: np.ndarray,
-    comparison: np.ndarray,
-    *,
-    rtol: float = 1e-9,
-    atol: float = 1e-12,
+        reference: np.ndarray,
+        comparison: np.ndarray,
+        *,
+        rtol: float = 1e-9,
+        atol: float = 1e-12,
 ) -> WinTieLossStats:
     """Summarize wins, ties, losses, and their conditional effect sizes.
 
@@ -205,8 +207,8 @@ def count_wins_ties_losses(
 
 
 def mean_t_confidence_interval(
-    values: np.ndarray,
-    confidence: float,
+        values: np.ndarray,
+        confidence: float,
 ) -> tuple[float, float, float]:
     """Return (sample mean, lower bound, upper bound) for a t interval."""
     values = np.asarray(values, dtype=float)
@@ -228,12 +230,12 @@ def mean_t_confidence_interval(
 
 
 def paired_bootstrap_ratio_of_means(
-    reference: np.ndarray,
-    comparison: np.ndarray,
-    confidence: float,
-    resamples: int,
-    seed: int,
-    batch_size: int = 200,
+        reference: np.ndarray,
+        comparison: np.ndarray,
+        confidence: float,
+        resamples: int,
+        seed: int,
+        batch_size: int = 200,
 ) -> tuple[float, float, float]:
     """Percentile-bootstrap CI for E[comparison] / E[reference] - 1.
 
@@ -267,7 +269,7 @@ def paired_bootstrap_ratio_of_means(
         reference_means = reference[indices].mean(axis=1)
         comparison_means = comparison[indices].mean(axis=1)
         bootstrap_estimates[start:stop] = (
-            comparison_means / reference_means - 1.0
+                comparison_means / reference_means - 1.0
         )
 
     alpha = 1.0 - confidence
@@ -280,8 +282,8 @@ def paired_bootstrap_ratio_of_means(
 
 
 def relative_improvement_between_means(
-    baseline: np.ndarray,
-    improved: np.ndarray,
+        baseline: np.ndarray,
+        improved: np.ndarray,
 ) -> (float, float, float):
     """Return (mean(baseline) - mean(improved)) / mean(baseline)."""
     baseline_mean = float(np.mean(baseline))
@@ -574,14 +576,14 @@ def relative_improvement_between_means(
 #
 #
 def print_pair_comparison(
-    reference: np.ndarray,
-    comparison: np.ndarray,
-    *,
-    reference_label: str,
-    comparison_label: str,
-    confidence: float,
-    bootstrap_resamples: int,
-    seed: int,
+        reference: np.ndarray,
+        comparison: np.ndarray,
+        *,
+        reference_label: str,
+        comparison_label: str,
+        confidence: float,
+        bootstrap_resamples: int,
+        seed: int,
 ) -> None:
     """Print a paired ratio-of-means analysis and win/tie/loss summary."""
     estimate, low, high = paired_bootstrap_ratio_of_means(
@@ -895,67 +897,85 @@ def print_pair_comparison(
 #         "percentage points"
 #     )
 
-def report_temporal_redundancy_results(frame: pd.DataFrame,
-                                    algorithm_names: list[str],
-                                    confidence: float,
-                                    resamples: int,
-                                    seed: int) -> None:
-    print("\n** EVALUATION OF TEMPORAL REDUNDANCY OPTIONS **")
-    heuristic_options = set({})
-    temporal_redundancy_options = set({})
-    reactive_rescheduling_options = set({})
+def report_independent_temporal_redundancy_results(frame: pd.DataFrame,
+                                                   algorithm_names: list[str],
+                                                   confidence: float,
+                                                   resamples: int,
+                                                   seed: int) -> None:
+    print("\n** EVALUATION OF THE INDEPENDENT TEMPORAL REDUNDANCY OPTIONS **")
 
-    # Identify all the possible algorithm components
-    for algorithm_name in algorithm_names:
-        heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
-        if heuristic == "random":
-            continue
-        heuristic_options.add(heuristic)
-        temporal_redundancy_options.add(temporal_redundancy)
-        reactive_rescheduling_options.add(reactive_rescheduling)
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
 
-    # For a given heuristic and a given reactive rescheduling option,
-    # compare all temporal redundancy options, using "independent"
-    # as the reference
-    num_independent_wins = 0
-    num_independent_losses = 0
-    num_independent_ties = 0
-    average_win_margin = 0
-    average_loss_margin = 0
-    largest_loss = 0
-    largest_win = 0
-    for heuristic in heuristic_options:
-        for reactive_rescheduling in reactive_rescheduling_options:
-            # print(f"\n{heuristic} + {reactive_rescheduling}:")
-            reference_column = algorithm_column(heuristic + "__independent__" + reactive_rescheduling, "")
-            for temporal_redundancy in temporal_redundancy_options:
-                if temporal_redundancy == "independent":
-                    continue
-                comparison_column = algorithm_column(heuristic + "__" + temporal_redundancy + "__" + reactive_rescheduling, "")
-                reference, comparison = numeric_pairs(frame, reference_column, comparison_column)
+        heuristic_options = set({})
+        temporal_redundancy_options = set({})
+        reactive_rescheduling_options = set({})
 
-                estimate, low, high = paired_bootstrap_ratio_of_means(reference, comparison,
-                    confidence=confidence, resamples=resamples, seed=seed)
-                if low > 0:
-                    num_independent_wins += 1
-                    print(f"   * {heuristic}:{reactive_rescheduling}: independent WINS to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
-                    average_win_margin += estimate
-                    if estimate > largest_win:
-                        largest_win = estimate
-                elif high < 0:
-                    num_independent_losses += 1
-                    average_loss_margin += estimate
-                    print(f"   * {heuristic}:{reactive_rescheduling}: independent LOSES to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
-                    if abs(estimate) > largest_loss:
-                        largest_loss = abs(estimate)
-                else:
-                    num_independent_ties += 1
+        # Identify all the possible algorithm components
+        for algorithm_name in algorithm_names:
+            heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
+            if heuristic == "random":
+                continue
+            heuristic_options.add(heuristic)
+            temporal_redundancy_options.add(temporal_redundancy)
+            reactive_rescheduling_options.add(reactive_rescheduling)
 
-    average_loss_margin /= num_independent_losses
-    average_win_margin /= num_independent_wins
-    print(f"    {num_independent_wins} independent wins  (average win margin {100.0*average_win_margin:.2f}%, largest win: {100.0*largest_win:.2f}%)")
-    print(f"    {num_independent_losses} independent losses (average loss margin {100.0*average_loss_margin:.2f}%, largest loss: {100.0*largest_loss:.2f}%)")
-    print(f"    {num_independent_ties} independent ties")
+        # For a given heuristic and a given reactive rescheduling option,
+        # compare all temporal redundancy options, using "independent"
+        # as the reference
+        num_wins = 0
+        num_losses = 0
+        num_ties = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+        for heuristic in heuristic_options:
+            for reactive_rescheduling in reactive_rescheduling_options:
+                # print(f"\n{heuristic} + {reactive_rescheduling}:")
+                reference_column = algorithm_column(heuristic + "__independent__" + reactive_rescheduling, "")
+                for temporal_redundancy in temporal_redundancy_options:
+                    if temporal_redundancy == "independent":
+                        continue
+                    comparison_column = algorithm_column(heuristic + "__" + temporal_redundancy + "__" + reactive_rescheduling, "")
+                    reference, comparison = numeric_pairs(tmp_frame, reference_column, comparison_column)
+
+                    estimate, low, high = paired_bootstrap_ratio_of_means(reference, comparison,
+                                                                          confidence=confidence, resamples=resamples, seed=seed)
+                    if low > 0:
+                        num_wins += 1
+                        print(f"   * {heuristic}:{reactive_rescheduling}: independent WINS to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
+                        average_win_margin += estimate
+                        if estimate > largest_win:
+                            largest_win = estimate
+                    elif high < 0:
+                        num_losses += 1
+                        average_loss_margin += estimate
+                        print(f"   * {heuristic}:{reactive_rescheduling}: independent LOSES to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
+                        if abs(estimate) > largest_loss:
+                            largest_loss = abs(estimate)
+                    else:
+                        num_ties += 1
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(f"    {num_wins} independent wins  (average win margin {100.0*average_win_margin:.2f}%, largest win: {100.0*largest_win:.2f}%)")
+        print(f"    {num_losses} independent losses (average loss margin {100.0*average_loss_margin:.2f}%, largest loss: {100.0*largest_loss:.2f}%)")
+        print(f"    {num_ties} independent ties")
+
+    print("    WHEN IT LOSES, IT'S BY VERY LITTLE")
+
 
 
 def report_random_heuristic_results(frame: pd.DataFrame,
@@ -964,47 +984,560 @@ def report_random_heuristic_results(frame: pd.DataFrame,
                                     resamples: int,
                                     seed: int) -> None:
     print("\n** COMPARISON BETWEEN RANDOM AND ALL OTHER HEURISTICS **")
-    comparisons = {}
-    count = 0
-    for algorithm_name in algorithm_names:
-        count +=1
-        if "random" in algorithm_name:
-            continue
-        # if count % 10 == 0:
-        #     print(f"{100.0*(count / len(algorithm_names)):.1f}%")
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
 
-        # print(f"Comparing random to {algorithm_name}")
-        reference_column = algorithm_column(algorithm_name, "")
-        tokens = algorithm_name.split("__")
-        tokens[0] = "random"
-        random_algorithm_name = "__".join(tokens)
-        comparison_column = algorithm_column(random_algorithm_name, "")
-        reference, comparison = numeric_pairs(
-            frame,
-            reference_column,
-            comparison_column,
+        num_wins = 0
+        num_ties = 0
+        num_losses = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+        count = 0
+        for algorithm_name in algorithm_names:
+            count +=1
+            if "random" in algorithm_name:
+                continue
+            # if count % 10 == 0:
+            #     print(f"{100.0*(count / len(algorithm_names)):.1f}%")
+
+            # print(f"Comparing random to {algorithm_name}")
+            comparison_column = algorithm_column(algorithm_name, "")
+            tokens = algorithm_name.split("__")
+            tokens[0] = "random"
+            random_algorithm_name = "__".join(tokens)
+            reference_column = algorithm_column(random_algorithm_name, "")
+            reference, comparison = numeric_pairs(
+                tmp_frame,
+                reference_column,
+                comparison_column,
+            )
+
+            estimate, low, high = paired_bootstrap_ratio_of_means(
+                reference,
+                comparison,
+                confidence=confidence,
+                resamples=resamples,
+                seed=seed
+            )
+            # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
+            if low > 0:
+                num_wins += 1
+                average_win_margin += estimate
+                if estimate > largest_win:
+                    largest_win = estimate
+            elif high < 0:
+                num_losses += 1
+                average_loss_margin += estimate
+                if estimate < largest_loss:
+                    largest_loss = estimate
+            else:
+                num_ties += 1
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(
+            f"    {num_wins} RANDOM wins (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+        print(
+            f"    {num_losses} RANDOM losses (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+        print(
+            f"    {num_ties} RANDOM ties")
+
+
+def report_on_greedy_vs_static(frame: pd.DataFrame,
+                               algorithm_names: list[str],
+                               confidence: float,
+                               resamples: int,
+                               seed: int) -> None:
+    print("\n** COMPARISON BETWEEN THE GREEDY AND THE STATIC HEURISTICS **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        num_wins = 0
+        num_ties = 0
+        num_losses = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+
+        for algorithm_name in algorithm_names:
+            if not algorithm_name.startswith("greedy_"):
+                continue
+            reference_column = algorithm_name
+            comparison_column = algorithm_name.replace("greedy_", "static_")
+            # print(f"{reference_column} vs. {comparison_column}")
+
+            reference, comparison = numeric_pairs(tmp_frame, reference_column, comparison_column)
+
+            estimate, low, high = paired_bootstrap_ratio_of_means(reference, comparison,
+                                                                  confidence=confidence, resamples=resamples, seed=seed)
+
+            if low > 0:
+                num_wins += 1
+                average_win_margin += estimate
+                if estimate > largest_win:
+                    largest_win = estimate
+            elif high < 0:
+                num_losses += 1
+                average_loss_margin += estimate
+                if abs(estimate) > largest_loss:
+                    largest_loss = abs(estimate)
+            else:
+                num_ties += 1
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(
+            f"    - {num_wins} GREEDY wins (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+        print(
+            f"    - {num_losses} GREEDY losses (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+        print(
+            f"    - {num_ties} GREEDY ties")
+
+    print("GREEDY IS BETTER THAN STATIC")
+
+
+
+def report_on_criterion(frame: pd.DataFrame,
+                        algorithm_names: list[str],
+                        reference_criterion: str,
+                        confidence: float,
+                        resamples: int,
+                        seed: int) -> None:
+    print(f"\n** COMPARISON BETWEEN THE {reference_criterion} CRITERION AND ALL OTHER CRITERIA **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        heuristic_options = set({})
+        temporal_redundancy_options = set({})
+        reactive_rescheduling_options = set({})
+
+        # Identify all the possible algorithm components
+        for algorithm_name in algorithm_names:
+            heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
+            if heuristic == "random" or heuristic == "dynamic":
+                continue
+            heuristic_options.add(heuristic)
+            temporal_redundancy_options.add(temporal_redundancy)
+            reactive_rescheduling_options.add(reactive_rescheduling)
+
+        # Identify all the possible criteria
+        criteria = set({})
+        for heuristic in heuristic_options:
+            tokens = heuristic.split("_")
+            heuristic_category = "_".join(tokens[:2])
+            criterion = "_".join(tokens[2:])
+            criteria.add(criterion)
+
+        num_wins = 0
+        num_losses = 0
+        num_ties = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+        num_times_its_better_than_others = 0
+        for temporal_redundancy in temporal_redundancy_options:
+            for reactive_rescheduling in reactive_rescheduling_options:
+                for heuristic in heuristic_options:
+                    # Skip over criteria-less algorithms
+                    if "foresighted" not in heuristic and "nearsighted" not in heuristic:
+                        continue
+
+                    tokens = heuristic.split("_")
+                    heuristic_category = "_".join(tokens[:2])
+
+                    wins_over_all_others = True
+                    for criterion in criteria:
+                        if criterion == reference_criterion:
+                            continue
+                        # print(f"{heuristic_category}: compare {reference_criterion} to {criterion}")
+
+                        reference_column = heuristic_category + "_" + reference_criterion + "__" + temporal_redundancy + "__" + reactive_rescheduling
+                        comparison_column = heuristic_category + "_" + criterion + "__" + temporal_redundancy + "__" + reactive_rescheduling
+
+                        reference, comparison = numeric_pairs(
+                            tmp_frame,
+                            reference_column,
+                            comparison_column,
+                        )
+
+                        estimate, low, high = paired_bootstrap_ratio_of_means(
+                            reference,
+                            comparison,
+                            confidence=confidence,
+                            resamples=resamples,
+                            seed=seed
+                        )
+
+                        # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
+                        if high < 0:
+                            wins_over_all_others = False
+
+                        if low > 0:
+                            num_wins += 1
+                            average_win_margin += estimate
+                            if estimate > largest_win:
+                                largest_win = estimate
+                        elif high < 0:
+                            num_losses += 1
+                            average_loss_margin += estimate
+                            if estimate < largest_loss:
+                                largest_loss = estimate
+                        else:
+                            num_ties += 1
+
+                    if wins_over_all_others:
+                        num_times_its_better_than_others += 1
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(
+            f"      {num_wins} {reference_criterion} wins (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+        print(
+            f"      {num_losses} {reference_criterion} losses (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+        print(
+            f"      {num_ties} {reference_criterion} ties")
+
+        print(
+            f"      Number of times it's better/same than all its competitors, everything else being equal: {num_times_its_better_than_others}"
         )
 
-        estimate, low, high = paired_bootstrap_ratio_of_means(
-            reference,
-            comparison,
-            confidence=confidence,
-            resamples=resamples,
-            seed=seed
+def compare_two_criteria(frame: pd.DataFrame,
+                        algorithm_names: list[str],
+                        c1: str,
+                        c2: str,
+                        confidence: float,
+                        resamples: int,
+                        seed: int) -> None:
+    print(f"\n** COMPARISON BETWEEN THE {c1} AND {c2} CRITERIA **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        heuristic_options = set({})
+        temporal_redundancy_options = set({})
+        reactive_rescheduling_options = set({})
+
+        # Identify all the possible algorithm components
+        for algorithm_name in algorithm_names:
+            heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
+            if heuristic == "random" or heuristic == "dynamic":
+                continue
+            heuristic_options.add(heuristic)
+            temporal_redundancy_options.add(temporal_redundancy)
+            reactive_rescheduling_options.add(reactive_rescheduling)
+
+        num_wins = 0
+        num_losses = 0
+        num_ties = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+        num_times_its_better_than_others = 0
+        for algorithm_name in algorithm_names:
+            if c1 not in algorithm_name:
+                continue
+
+
+            reference_column = algorithm_name
+            comparison_column = algorithm_name.replace(c1, c2)
+
+            reference, comparison = numeric_pairs(
+                tmp_frame,
+                reference_column,
+                comparison_column,
+            )
+
+            estimate, low, high = paired_bootstrap_ratio_of_means(
+                reference,
+                comparison,
+                confidence=confidence,
+                resamples=resamples,
+                seed=seed
+            )
+
+            # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
+            if low > 0:
+                num_wins += 1
+                average_win_margin += estimate
+                if estimate > largest_win:
+                    largest_win = estimate
+            elif high < 0:
+                num_losses += 1
+                average_loss_margin += estimate
+                if estimate < largest_loss:
+                    largest_loss = estimate
+            else:
+                num_ties += 1
+
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(
+            f"      {num_wins} {c1} wins over {c2} (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+        print(
+            f"      {num_losses} {c1} losses to {c2} (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+        print(
+            f"      {num_ties} {c1} and {c2} ties")
+
+def report_on_foresighted(frame: pd.DataFrame,
+                          algorithm_names: list[str],
+                          confidence: float,
+                          resamples: int,
+                          seed: int) -> None:
+    print(f"\n** COMPARISON BETWEEN THE FORESIGHTED CRITERION AND THE NEARSIGHTED CRITERION **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        heuristic_options = set({})
+        temporal_redundancy_options = set({})
+        reactive_rescheduling_options = set({})
+
+        num_wins = 0
+        num_losses = 0
+        num_ties = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+        for algorithm_name in algorithm_names:
+            if "foresighted" not in algorithm_name:
+                continue
+
+            reference_column = algorithm_name
+            comparison_column = algorithm_name.replace("foresighted", "nearsighted")
+
+            reference, comparison = numeric_pairs(
+                tmp_frame,
+                reference_column,
+                comparison_column,
+            )
+
+            estimate, low, high = paired_bootstrap_ratio_of_means(
+                reference,
+                comparison,
+                confidence=confidence,
+                resamples=resamples,
+                seed=seed
+            )
+            # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
+            if low <= 0:
+                wins_over_all_others = False
+
+            if low > 0:
+                num_wins += 1
+                average_win_margin += estimate
+                if estimate > largest_win:
+                    largest_win = estimate
+            elif high < 0:
+                num_losses += 1
+                average_loss_margin += estimate
+                if estimate < largest_loss:
+                    largest_loss = estimate
+            else:
+                num_ties += 1
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(
+            f"      {num_wins} foresighted wins (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+        print(
+            f"      {num_losses} foresighted losses (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+        print(
+            f"      {num_ties} foresighted ties")
+
+        print("  When it wins it wins big, when it loses it loses very small")
+
+
+def report_on_reactive(frame: pd.DataFrame,
+                       algorithm_names: list[str],
+                       reference_reactive: str,
+                       confidence: float,
+                       resamples: int,
+                       seed: int) -> None:
+    print(f"\n** COMPARISON BETWEEN THE {reference_reactive} REACTIVE OPTION AND ALL OTHER OPTIONS **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        heuristic_options = set({})
+        temporal_redundancy_options = set({})
+        reactive_rescheduling_options = set({})
+
+        # Identify all the possible algorithm components
+        for algorithm_name in algorithm_names:
+            heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
+            if heuristic == "random" or heuristic == "dynamic":
+                continue
+            heuristic_options.add(heuristic)
+            temporal_redundancy_options.add(temporal_redundancy)
+            reactive_rescheduling_options.add(reactive_rescheduling)
+
+        num_wins = 0
+        num_losses = 0
+        num_ties = 0
+        average_win_margin = 0
+        average_loss_margin = 0
+        largest_loss = 0
+        largest_win = 0
+        num_times_its_better_than_others = 0
+        for heuristic in heuristic_options:
+            for temporal_redundancy in temporal_redundancy_options:
+                num_local_wins = 0
+                for reactive_rescheduling in reactive_rescheduling_options:
+
+                    if reactive_rescheduling == reference_reactive:
+                        continue
+
+                    reference_column = heuristic + "__" + temporal_redundancy + "__" + reference_reactive
+                    comparison_column = heuristic + "__" + temporal_redundancy + "__" + reactive_rescheduling
+
+                    reference, comparison = numeric_pairs(
+                        tmp_frame,
+                        reference_column,
+                        comparison_column,
+                    )
+
+                    estimate, low, high = paired_bootstrap_ratio_of_means(
+                        reference,
+                        comparison,
+                        confidence=confidence,
+                        resamples=resamples,
+                        seed=seed
+                    )
+
+                    if low > 0:
+                        num_local_wins += 1
+                        num_wins += 1
+                        average_win_margin += estimate
+                        if estimate > largest_win:
+                            largest_win = estimate
+                    elif high < 0:
+                        num_losses += 1
+                        average_loss_margin += estimate
+                        if estimate < largest_loss:
+                            largest_loss = estimate
+                    else:
+                        num_ties += 1
+
+                if num_local_wins == len(reactive_rescheduling_options) - 1:
+                    num_times_its_better_than_others += 1
+
+        if num_losses > 0:
+            average_loss_margin /= num_losses
+        else:
+            average_loss_margin = 0
+        if num_wins > 0:
+            average_win_margin /= num_wins
+        else:
+            average_win_margin = 0
+
+        print(
+            f"      {num_wins} {reference_reactive} wins (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+        print(
+            f"      {num_losses} {reference_reactive} losses (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+        print(
+            f"      {num_ties} {reference_reactive} ties")
+
+        print(
+            f"      Number of times it's better than all its competitors, everything else being equal: {num_times_its_better_than_others}"
         )
-        # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
-        comparisons[algorithm_name] = (estimate * 100.0, low * 100.0, high * 100.0)
 
-    # Count how many competitor have lower mean error
-    print("  Results for the relative difference in mean error between random and other heuristics, "
-          "for the same temporal redundancy and reactive rescheduling options:")
-    num_losses = sum([x[1] > 0.0 for x in comparisons.values()])
-    print(f"    - Numbers of losses against other heuristics (full confidence interval > 0): {num_losses} / {len(comparisons)}")
-    num_ties = sum([x[1] < 0.0 for x in comparisons.values()])
-    print(f"    - Number of ties with other heuristics (confidence intervals that include 0): {num_ties} / {len(comparisons)}")
-    num_wins = sum([x[2] < 0.0 for x in comparisons.values()])
-    print(f"    - Number of wins against other heuristics (full confidence interval < 0): {num_wins} / {len(comparisons)}")
 
+def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
+
+    print(f"\n** ALGORITHM RANKING **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        print(f"  * {num_nodes} nodes:")
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        mean_errors = {}
+        for algorithm_name in algorithm_names:
+            column_name = algorithm_column(algorithm_name, "")
+            values = tmp_frame[column_name].to_numpy(dtype=float)
+            mean_error = values.mean()
+            # print(f"{column_name}: {values.mean():.2f}")
+            mean_errors[column_name] = mean_error
+        lowest_mean_error = min(mean_errors.values())
+        for algorithm_name, mean_value in mean_errors.items():
+            mean_errors[algorithm_name] = (mean_errors[algorithm_name] - lowest_mean_error) / lowest_mean_error
+
+        for key, value in sorted(mean_errors.items(), key=lambda item: item[1]):
+            print(f"    {key}: {100.0 * value:.2f}")
+
+#
+# Filtering methods
+#
 
 def keep_independent_temporal_redundancy_columns(frame: pd.DataFrame,) -> pd.DataFrame:
     """Remove algorithm columns whose middle component is not independent.
@@ -1033,8 +1566,8 @@ def keep_independent_temporal_redundancy_columns(frame: pd.DataFrame,) -> pd.Dat
 
     return frame.drop(columns=columns_to_drop)
 
-def filter_out_random(frame: pd.DataFrame,) -> pd.DataFrame:
-    """Remove the random heuristics.
+def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str, starts_with: bool) -> pd.DataFrame:
+    """ Filter out heuristics
     """
     columns_to_drop: list[str] = []
 
@@ -1046,15 +1579,41 @@ def filter_out_random(frame: pd.DataFrame,) -> pd.DataFrame:
 
         heuristic, _, _ = components
 
-        if heuristic == "random":
-            columns_to_drop.append(column)
+        if starts_with:
+            if heuristic.startswith(substring):
+                columns_to_drop.append(column)
+        else:
+            if substring in heuristic:
+                columns_to_drop.append(column)
 
     print(
-        f"Removed {len(columns_to_drop)} algorithm columns for the random heuristic"
+        f"Removed {len(columns_to_drop)} algorithm columns for heuristic with substring '{substring}'"
     )
 
     return frame.drop(columns=columns_to_drop)
 
+
+def filter_out_reactive_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFrame:
+    """ Filter out reactive option
+    """
+    columns_to_drop: list[str] = []
+
+    for column in frame.columns:
+        components = column.rsplit("__", maxsplit=2)
+
+        if len(components) != 3:
+            continue
+
+        _, _, reactive = components
+
+        if reactive == to_remove:
+                columns_to_drop.append(column)
+
+    print(
+        f"Removed {len(columns_to_drop)} algorithm columns for the 'off' reactive rescheduling option"
+    )
+
+    return frame.drop(columns=columns_to_drop)
 
 def filter_out_efail_multiplier_rows(frame: pd.DataFrame, to_keep: float) -> pd.DataFrame:
     original_row_count = len(frame)
@@ -1095,21 +1654,7 @@ def filter_out_efail_multiplier_rows(frame: pd.DataFrame, to_keep: float) -> pd.
     )
     return frame
 
-def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
 
-    mean_errors = {}
-    for algorithm_name in algorithm_names:
-        column_name = algorithm_column(algorithm_name, "")
-        values = frame[column_name].to_numpy(dtype=float)
-        mean_error = values.mean()
-        # print(f"{column_name}: {values.mean():.2f}")
-        mean_errors[column_name] = mean_error
-    lowest_mean_error = min(mean_errors.values())
-    for algorithm_name, neam_value in mean_errors.items():
-        mean_errors[algorithm_name] = (mean_errors[algorithm_name] - lowest_mean_error) / lowest_mean_error
-
-    for key, value in sorted(mean_errors.items(), key=lambda item: item[1]):
-        print(f"{key}: {100.0 * value:.2f}")
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -1166,12 +1711,45 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--ignore-random",
+        "--exclude-random",
         action="store_true",
         help=(
             "Exclude the 'random' heuristic from all results."
         ),
     )
+
+    parser.add_argument(
+        "--exclude-static",
+        action="store_true",
+        help=(
+            "Exclude the 'static_' (as opposed to 'greedy_') heuristics from all results."
+        ),
+    )
+
+    parser.add_argument(
+        "--exclude-nearsighted",
+        action="store_true",
+        help=(
+            "Exclude the 'nearsighted_' (as opposed to 'foresighted_') heuritics from all results."
+        ),
+    )
+
+    parser.add_argument(
+        "--exclude-reactive-off",
+        action="store_true",
+        help=(
+            "Exclude the 'off' reactive rescheduling option from all results."
+        ),
+    )
+
+    parser.add_argument(
+        "--exclude-probability-success",
+        action="store_true",
+        help=(
+            "Exclude the 'probability_success' criterion from all results."
+        ),
+    )
+
     return parser
 
 
@@ -1197,8 +1775,24 @@ def main() -> None:
         frame = keep_independent_temporal_redundancy_columns(frame)
 
     # Filter out the random algorithm
-    if args.ignore_random:
-        frame = filter_out_random(frame)
+    if args.exclude_random:
+        frame = filter_out_heuristic_with_substring(frame, "random", True)
+
+    # Filter out the static_* heuristics
+    if args.exclude_static:
+        frame = filter_out_heuristic_with_substring(frame, "static_", True)
+
+    # Filter out the reactive=off versions
+    if args.exclude_reactive_off:
+        frame = filter_out_reactive_option(frame, "off")
+
+    # Filter out the nearsighted_ heuristics
+    if args.exclude_nearsighted:
+        frame = filter_out_heuristic_with_substring(frame, "nearsighted", False)
+
+    # Filter out the error_level criterion
+    if args.exclude_probability_success:
+        frame = filter_out_heuristic_with_substring(frame, "probability_success", False)
 
     # Figure out all the algorithms
     algorithm_names = discover_algorithm_names(frame)
@@ -1206,20 +1800,75 @@ def main() -> None:
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
 
-    # Start generating reports
-    if not args.ignore_random:
+
+
+    if not args.temporal_independent_only:
+        report_independent_temporal_redundancy_results(frame,
+                                                       algorithm_names,
+                                                       args.confidence,
+                                                       args.bootstrap_resamples,
+                                                       args.seed)
+        print("Rerun with --temporal-independent-only to exclude all other temporal redundancy options from any further results")
+        sys.exit(0)
+
+    if not args.exclude_static:
+        report_on_greedy_vs_static(frame,
+                                   algorithm_names,
+                                   args.confidence,
+                                   args.bootstrap_resamples,
+                                   args.seed)
+        print("Rerun with --exclude-static to exclude greedy heuristics")
+        sys.exit(0)
+
+
+
+    if not args.exclude_nearsighted:
+        report_on_foresighted(frame,
+                              algorithm_names,
+                              args.confidence,
+                              args.bootstrap_resamples,
+                              args.seed)
+        print("Rerun with --exclude-nearsighted to exclude the nearsighted heuristics")
+        sys.exit(0)
+
+
+    if not args.exclude_reactive_off:
+        report_on_reactive(frame,
+                           algorithm_names,
+                           "off",
+                           args.confidence,
+                           args.bootstrap_resamples,
+                           args.seed)
+        print("Rerun with --exclude-reactive-off to exclude reactive=off")
+        sys.exit(0)
+
+    if not args.exclude_random:
         report_random_heuristic_results(frame,
                                         algorithm_names,
                                         args.confidence,
                                         args.bootstrap_resamples,
                                         args.seed)
+        print("Rerun with --exclude-random to exclude random from any further results")
+        sys.exit(0)
 
-    if not args.temporal_independent_only:
-        report_temporal_redundancy_results(frame,
-                                           algorithm_names,
-                                           args.confidence,
-                                           args.bootstrap_resamples,
-                                           args.seed)
+    if not args.exclude_probability_success:
+        compare_two_criteria(frame,
+                             algorithm_names,
+                             "expected_error", "probability_success",
+                             args.confidence,
+                             args.bootstrap_resamples,
+                             args.seed)
+        print("probability_success is dominated by expected_error")
+        print("Rerun with --exclude-probability-success to exclude random from any further results")
+        sys.exit(0)
+
+    # report_on_criterion(frame,
+    #                     algorithm_names,
+    #                     "expected_error",
+    #                     args.confidence,
+    #                     args.bootstrap_resamples,
+    #                     args.seed)
+    #
 
     report_algorithm_ranking(frame, algorithm_names)
 
