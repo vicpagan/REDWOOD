@@ -948,14 +948,14 @@ def report_independent_temporal_redundancy_results(frame: pd.DataFrame,
                                                                           confidence=confidence, resamples=resamples, seed=seed)
                     if low > 0:
                         num_wins += 1
-                        print(f"   * {heuristic}:{reactive_rescheduling}: independent WINS to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
+                        # print(f"   * {heuristic}:{reactive_rescheduling}: independent WINS to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
                         average_win_margin += estimate
                         if estimate > largest_win:
                             largest_win = estimate
                     elif high < 0:
                         num_losses += 1
                         average_loss_margin += estimate
-                        print(f"   * {heuristic}:{reactive_rescheduling}: independent LOSES to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
+                        # print(f"   * {heuristic}:{reactive_rescheduling}: independent LOSES to {temporal_redundancy}: {100.0 * estimate:.2f}%  [{100.0 * low:.2f}, {100.0 * high:.2f}]")
                         if abs(estimate) > largest_loss:
                             largest_loss = abs(estimate)
                     else:
@@ -974,7 +974,7 @@ def report_independent_temporal_redundancy_results(frame: pd.DataFrame,
         print(f"    {num_losses} independent losses (average loss margin {100.0*average_loss_margin:.2f}%, largest loss: {100.0*largest_loss:.2f}%)")
         print(f"    {num_ties} independent ties")
 
-    print("    WHEN IT LOSES, IT'S BY VERY LITTLE")
+    print("    WHEN independent LOSES, IT'S BY VERY LITTLE")
 
 
 
@@ -1055,6 +1055,8 @@ def report_random_heuristic_results(frame: pd.DataFrame,
         print(
             f"    {num_ties} RANDOM ties")
 
+    print("\n** RANDOM MOSTLY LOSES (IT LIKELY WINS OFTEN AGAINST HEURISTICS THAT HAVE BEEN WEEDED OUT, WHICH WE COULD QUANTIFY) **")
+
 
 def report_on_greedy_vs_static(frame: pd.DataFrame,
                                algorithm_names: list[str],
@@ -1121,6 +1123,29 @@ def report_on_greedy_vs_static(frame: pd.DataFrame,
 
     print("GREEDY IS BETTER THAN STATIC")
 
+
+def compare_two_heuristics(frame: pd.DataFrame,
+                           reference_heuristic,
+                           comparison_heuristic,
+                           confidence: float,
+                           resamples: int,
+                           seed: int) -> None:
+    print(f"\n** COMPARISON OF THE {reference_heuristic} AND THE {comparison_heuristic} HEURISTICS **")
+
+    # Identify all number of nodes
+    num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
+    for num_nodes in num_nodes_values:
+        matching_rows = np.equal(frame["num_nodes"], num_nodes)
+        tmp_frame = frame.loc[matching_rows].copy()
+
+        reference, comparison = numeric_pairs(tmp_frame, reference_heuristic, comparison_heuristic)
+
+        estimate, low, high = paired_bootstrap_ratio_of_means(reference, comparison,
+                                                              confidence=confidence, resamples=resamples, seed=seed)
+
+        print(
+            f"  * {num_nodes} nodes: Estimate={100.0* estimate:.2f} [{100.0 * low:.2f}, {100.0 * high:.2f}]"
+        )
 
 
 def report_on_criterion(frame: pd.DataFrame,
@@ -1241,12 +1266,12 @@ def report_on_criterion(frame: pd.DataFrame,
         )
 
 def compare_two_criteria(frame: pd.DataFrame,
-                        algorithm_names: list[str],
-                        c1: str,
-                        c2: str,
-                        confidence: float,
-                        resamples: int,
-                        seed: int) -> None:
+                         algorithm_names: list[str],
+                         c1: str,
+                         c2: str,
+                         confidence: float,
+                         resamples: int,
+                         seed: int) -> None:
     print(f"\n** COMPARISON BETWEEN THE {c1} AND {c2} CRITERIA **")
 
     # Identify all number of nodes
@@ -1335,7 +1360,7 @@ def report_on_foresighted(frame: pd.DataFrame,
                           confidence: float,
                           resamples: int,
                           seed: int) -> None:
-    print(f"\n** COMPARISON BETWEEN THE FORESIGHTED CRITERION AND THE NEARSIGHTED CRITERION **")
+    print(f"\n** COMPARISON BETWEEN THE FORESIGHTED AND THE NEARSIGHTED HEURISTICS **")
 
     # Identify all number of nodes
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
@@ -1408,7 +1433,7 @@ def report_on_foresighted(frame: pd.DataFrame,
         print(
             f"      {num_ties} foresighted ties")
 
-        print("  When it wins it wins big, when it loses it loses very small")
+        print("  FORESIGHTED WINS MORE OFTEN AND, WHEN IT WINS IT WINS BIG AND WHEN IT LOSES IT LOSES SMALL")
 
 
 def report_on_reactive(frame: pd.DataFrame,
@@ -1506,7 +1531,7 @@ def report_on_reactive(frame: pd.DataFrame,
             f"      {num_ties} {reference_reactive} ties")
 
         print(
-            f"      Number of times it's better than all its competitors, everything else being equal: {num_times_its_better_than_others}"
+            f"      NUMBER OF TIMES 'off' IS BETTER THAN ALL ITS COMPETITORS, EVERYTHING ELSE BEING EQUAL: {num_times_its_better_than_others}"
         )
 
 
@@ -1607,7 +1632,7 @@ def filter_out_reactive_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFr
         _, _, reactive = components
 
         if reactive == to_remove:
-                columns_to_drop.append(column)
+            columns_to_drop.append(column)
 
     print(
         f"Removed {len(columns_to_drop)} algorithm columns for the 'off' reactive rescheduling option"
@@ -1842,6 +1867,18 @@ def main() -> None:
         print("Rerun with --exclude-reactive-off to exclude reactive=off")
         sys.exit(0)
 
+
+    if not args.exclude_probability_success:
+        compare_two_criteria(frame,
+                             algorithm_names,
+                             "expected_error", "probability_success",
+                             args.confidence,
+                             args.bootstrap_resamples,
+                             args.seed)
+        print("probability_success IS DOMINATED BY expected_error")
+        print("Rerun with --exclude-probability-success to exclude random from any further results")
+        sys.exit(0)
+
     if not args.exclude_random:
         report_random_heuristic_results(frame,
                                         algorithm_names,
@@ -1851,16 +1888,32 @@ def main() -> None:
         print("Rerun with --exclude-random to exclude random from any further results")
         sys.exit(0)
 
-    if not args.exclude_probability_success:
-        compare_two_criteria(frame,
-                             algorithm_names,
-                             "expected_error", "probability_success",
-                             args.confidence,
-                             args.bootstrap_resamples,
-                             args.seed)
-        print("probability_success is dominated by expected_error")
-        print("Rerun with --exclude-probability-success to exclude random from any further results")
-        sys.exit(0)
+    print("\n*** RANKING AFTER WEEDING OUT CLASSES OF APPROACHES **\n")
+    report_algorithm_ranking(frame, algorithm_names)
+    print("\n*** FROM THE ABOVE WE CAN DRAW CONCLUSIONS/FINDINGS **\n")
+
+    print("\n** PROVING SOME DIRECT DOMINANCE **")
+
+    for dominating, dominated in [
+        ("dynamic__independent__aggressive", "dynamic__independent__variant"),
+        ("dynamic__independent__aggressive", "greedy_foresighted_expected_error__independent__aggressive"),
+        ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_success_error_ratio__independent__variant"),
+        ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_error_level__independent__variant"),
+        ("greedy_foresighted_success_error_ratio__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
+        ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
+        ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_error_level__independent__variant"),
+    ]:
+
+        compare_two_heuristics(frame,
+                               dominating,
+                               dominated,
+                               args.confidence,
+                               args.bootstrap_resamples,
+                               args.seed)
+        if dominated in algorithm_names:
+            print(f"    ** REMOVING {dominated} FROM CONSIDERATION **\n")
+            algorithm_names.remove(dominated)
+
 
     # report_on_criterion(frame,
     #                     algorithm_names,
@@ -1870,8 +1923,11 @@ def main() -> None:
     #                     args.seed)
     #
 
+    print("\n*** RANKING AFTER WEEDING OUT DOMINATED HEURISTICS **\n")
+
     report_algorithm_ranking(frame, algorithm_names)
 
+    print("\n*** WE HAVE TO DRAW CONCLUSIONS/FINDINGS FROM THE ABOVE **\n")
 
 if __name__ == "__main__":
     main()
