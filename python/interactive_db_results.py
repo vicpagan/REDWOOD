@@ -20,21 +20,19 @@ def is_heuristic_column(name: str) -> bool:
 
 
 def parse_heuristic(name: str) -> dict[str, object]:
-    out = {"family": None, "foresight": None, "direction": None, "comparator": None}
+    # "direction" (the old "incrementing" segment) no longer exists for greedy
+    # heuristics -- greedy names now have the same shape as static names:
+    # <family>_<foresight>_<comparator>, e.g. greedy_foresighted_expected_error
+    out = {"family": None, "foresight": None, "comparator": None}
     if name in {"dynamic", "random"}:
         out["family"] = name
         return out
 
     parts = name.split("_")
-    if len(parts) >= 3 and parts[0] == "static":
-        out["family"] = "static"
+    if len(parts) >= 3 and parts[0] in {"static", "greedy"}:
+        out["family"] = parts[0]
         out["foresight"] = parts[1]
         out["comparator"] = "_".join(parts[2:])
-    elif len(parts) >= 4 and parts[0] == "greedy":
-        out["family"] = "greedy"
-        out["foresight"] = parts[1]
-        out["direction"] = parts[2]
-        out["comparator"] = "_".join(parts[3:])
     else:
         out["family"] = parts[0] if parts else name
     return out

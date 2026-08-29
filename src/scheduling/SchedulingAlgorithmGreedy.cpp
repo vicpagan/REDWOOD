@@ -15,8 +15,6 @@ namespace wrench {
             std::string hostname = entry.first;
             std::string task_to_schedule = _application_specs->get_host_task_to_schedule(hostname);
 
-
-
             // decision data structure is empty --> initialize
             if (_static_decisions_per_host.empty()) {
                 double initial_data_size = _application_specs->get_initial_data_size();
@@ -41,7 +39,6 @@ namespace wrench {
                     preprocess_host_decisions(hostname, host_running_data_size, host_running_error_level, remaining_time, true);
                 }
             }
-
 
             if (system_state_tracker->is_host_idle(hostname)) {
                 std::cout << "Choosing option for task" << task_to_schedule << " for host " << hostname << "\n";
