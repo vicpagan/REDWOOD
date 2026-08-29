@@ -946,6 +946,7 @@ def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
         matching_rows = np.equal(frame["num_nodes"], num_nodes)
         tmp_frame = frame.loc[matching_rows].copy()
 
+        # Compute mean error dfb
         mean_errors = {}
         for algorithm_name in algorithm_names:
             column_name = algorithm_column(algorithm_name, "")
@@ -957,8 +958,22 @@ def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
         for algorithm_name, mean_value in mean_errors.items():
             mean_errors[algorithm_name] = (mean_errors[algorithm_name] - lowest_mean_error) / lowest_mean_error
 
+
+
+        # Compute relative different with best-case
+        distance_from_optimal = {}
+        optimal_values = tmp_frame["min_error"].to_numpy(dtype=float)
+        for algorithm_name in algorithm_names:
+            column_name = algorithm_column(algorithm_name, "")
+            values = tmp_frame[column_name].to_numpy(dtype=float)
+            dfo = 0
+            for idx in range(len(values)):
+                dfo += (values[idx] - optimal_values[idx]) / optimal_values[idx]
+            dfo /= len(values)
+            distance_from_optimal[algorithm_name] = dfo
+
         for key, value in sorted(mean_errors.items(), key=lambda item: item[1]):
-            print(f"    {key}: {100.0 * value:.2f}")
+            print(f"    {key+":":64} dfb={100.0 * value:.2f}\tdfo={100.0 * distance_from_optimal[key]:.2f}")
 
 #
 # Filtering methods
