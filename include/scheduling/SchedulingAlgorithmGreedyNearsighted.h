@@ -14,13 +14,18 @@ namespace wrench {
     public:
         SchedulingAlgorithmGreedyNearsighted(
             const std::shared_ptr<ApplicationSpecs>& application_specs,
-            const std::string& name,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
             ProbabilityComputation* probability_computation,
             OptionComparatorFunction* comparator_function)
-            : SchedulingAlgorithmGreedy(application_specs, name, exec_options,
+            : SchedulingAlgorithmGreedy(application_specs, "greedy_nearsighted", exec_options,
                                        probability_computation, comparator_function) {
         }
+
+        void initial_decisions(const std::string& hostname,
+                                 double initial_data_size,
+                                 double initial_error_level,
+                                 double deadline,
+                                 bool lower_bound) override;
 
         void preprocess_host_decisions(const std::string& hostname,
                                  double initial_data_size,

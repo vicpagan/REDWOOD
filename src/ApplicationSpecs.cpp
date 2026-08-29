@@ -1,4 +1,3 @@
-
 #include "ApplicationSpecs.h"
 #include <wrench/util/UnitParser.h>
 
