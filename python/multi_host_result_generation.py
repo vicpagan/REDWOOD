@@ -1235,6 +1235,14 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--evaluate-reactive-aggressive",
+        action="store_true",
+        help=(
+            "Show results for reactive aggressive"
+        ),
+    )
+
+    parser.add_argument(
         "--show-ranking",
         action="store_true",
         help=(
@@ -1317,6 +1325,14 @@ def main() -> None:
         report_on_reactive(frame,
                            algorithm_names,
                            "off",
+                           args.confidence,
+                           args.bootstrap_resamples,
+                           args.seed)
+
+    if args.evaluate_reactive_aggressive:
+        report_on_reactive(frame,
+                           algorithm_names,
+                           "aggressive",
                            args.confidence,
                            args.bootstrap_resamples,
                            args.seed)
