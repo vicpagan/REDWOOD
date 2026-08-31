@@ -1340,34 +1340,33 @@ def main() -> None:
     if args.show_ranking:
         report_algorithm_ranking(frame, algorithm_names)
 
-    if (args.temporal_independent_only and args.exclude_static and args.exclude_reactive_off
-            and args.exclude_nearsighted and args.exclude_probability_success and args.exclude_foresighted):
+        if args.temporal_independent_only and args.exclude_static and args.exclude_reactive_off and args.exclude_nearsighted and args.exclude_probability_success and args.exclude_nearsighted:
 
-        print("\n** PROVING SOME DIRECT DOMINANCE: WARNING HARD-CODED ALGORITHM NAMES BASED ON KNOWN RESULTS**")
-        for dominating, dominated in [
-            ("dynamic__independent__aggressive", "dynamic__independent__variant"),
-            ("dynamic__independent__aggressive", "greedy_foresighted_expected_error__independent__aggressive"),
-            ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_success_error_ratio__independent__variant"),
-            ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_error_level__independent__variant"),
-            ("greedy_foresighted_success_error_ratio__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
-            ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
-            ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_error_level__independent__variant"),
-        ]:
-
-            compare_two_heuristics(frame,
-                                   dominating,
-                                   dominated,
-                                   args.confidence,
-                                   args.bootstrap_resamples,
-                                   args.seed)
-            if dominated in algorithm_names:
-                print(f"    ** REMOVING {dominated} FROM CONSIDERATION **\n")
-                algorithm_names.remove(dominated)
-
-
-        print("\n*** RANKING AFTER WEEDING OUT DOMINATED HEURISTICS **\n")
-
-        report_algorithm_ranking(frame, algorithm_names)
+            print("\n** PROVING SOME DIRECT DOMINANCE: WARNING HARD-CODED ALGORITHM NAMES BASED ON KNOWN RESULTS**")
+            for dominating, dominated in [
+                ("dynamic__independent__aggressive", "dynamic__independent__variant"),
+                ("dynamic__independent__aggressive", "greedy_foresighted_expected_error__independent__aggressive"),
+                ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_success_error_ratio__independent__variant"),
+                ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_error_level__independent__variant"),
+                ("greedy_foresighted_success_error_ratio__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
+                ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
+                ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_error_level__independent__variant"),
+            ]:
+    
+                compare_two_heuristics(frame,
+                                    dominating,
+                                    dominated,
+                                    args.confidence,
+                                    args.bootstrap_resamples,
+                                    args.seed)
+                if dominated in algorithm_names:
+                    print(f"    ** REMOVING {dominated} FROM CONSIDERATION **\n")
+                    algorithm_names.remove(dominated)
+    
+    
+                print("\n*** RANKING AFTER WEEDING OUT DOMINATED HEURISTICS **\n")
+    
+                report_algorithm_ranking(frame, algorithm_names)
 
 if __name__ == "__main__":
     main()
