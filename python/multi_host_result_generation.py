@@ -1141,6 +1141,9 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help=f"Efail multiplier to include (default: {DEFAULT_EFAIL_MULTIPLIER}, 0.0 means 'all')",
     )
 
+
+    # Exclusion arguments
+    ########################
     parser.add_argument(
         "--temporal-independent-only",
         action="store_true",
@@ -1187,6 +1190,65 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "Exclude the 'probability_success' criterion from all results."
+        ),
+    )
+
+    # Evaluation arguments
+    ########################
+    parser.add_argument(
+        "--evaluate-temporal-independent",
+        action="store_true",
+        help=(
+            "Obtain results that show that 'independent' temporal-redundancy "
+            "is 'better' than all other options"
+        ),
+    )
+
+    parser.add_argument(
+        "--evaluate-greedy",
+        action="store_true",
+        help=(
+            "Show results to show that 'greedy' is better than 'static'"
+        ),
+    )
+
+    parser.add_argument(
+        "--evaluate-foresighted",
+        action="store_true",
+        help=(
+            "Show results to show that 'foresighted' is better than 'nearsighted'"
+        ),
+    )
+
+    parser.add_argument(
+        "--evaluate-reactive-off",
+        action="store_true",
+        help=(
+            "Show results to show that 'off' reactive rescheduling is not a good idea"
+        ),
+    )
+
+    parser.add_argument(
+        "--evaluate-probability-success",
+        action="store_true",
+        help=(
+            "Show results to show that the 'probability_success' criterion is not a good idea"
+        ),
+    )
+
+    parser.add_argument(
+        "--evaluate-random",
+        action="store_true",
+        help=(
+            "Show results to show that 'random' is not a good idea"
+        ),
+    )
+
+    parser.add_argument(
+        "--show-ranking",
+        action="store_true",
+        help=(
+            "Show algorithm ranking"
         ),
     )
 
@@ -1240,50 +1302,36 @@ def main() -> None:
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
 
-
-
-    if not args.temporal_independent_only:
+    if not args.temporal_independent_only and args.evaluate_temporal_independent:
         report_independent_temporal_redundancy_results(frame,
                                                        algorithm_names,
                                                        args.confidence,
                                                        args.bootstrap_resamples,
                                                        args.seed)
-        print("Rerun with --temporal-independent-only to exclude all other temporal redundancy options from any further results")
-        sys.exit(0)
 
-    if not args.exclude_static:
+    if not args.exclude_static and args.evaluate_greedy:
         report_on_greedy_vs_static(frame,
                                    algorithm_names,
                                    args.confidence,
                                    args.bootstrap_resamples,
                                    args.seed)
-        print("Rerun with --exclude-static to exclude greedy heuristics")
-        sys.exit(0)
 
-
-
-    if not args.exclude_nearsighted:
+    if not args.exclude_nearsighted and args.evaluate_foresighted:
         report_on_foresighted(frame,
                               algorithm_names,
                               args.confidence,
                               args.bootstrap_resamples,
                               args.seed)
-        print("Rerun with --exclude-nearsighted to exclude the nearsighted heuristics")
-        sys.exit(0)
 
-
-    if not args.exclude_reactive_off:
+    if not args.exclude_reactive_off and args.evaluate_reactive_off:
         report_on_reactive(frame,
                            algorithm_names,
                            "off",
                            args.confidence,
                            args.bootstrap_resamples,
                            args.seed)
-        print("Rerun with --exclude-reactive-off to exclude reactive=off")
-        sys.exit(0)
 
-
-    if not args.exclude_probability_success:
+    if not args.exclude_probability_success and args.evaluate_probability_success:
         compare_two_criteria(frame,
                              algorithm_names,
                              "expected_error", "probability_success",
@@ -1291,58 +1339,45 @@ def main() -> None:
                              args.bootstrap_resamples,
                              args.seed)
         print("probability_success IS DOMINATED BY expected_error")
-        print("Rerun with --exclude-probability-success to exclude random from any further results")
-        sys.exit(0)
 
-    if not args.exclude_random:
+    if not args.exclude_random and args.evaluate_random:
         report_random_heuristic_results(frame,
                                         algorithm_names,
                                         args.confidence,
                                         args.bootstrap_resamples,
                                         args.seed)
-        print("Rerun with --exclude-random to exclude random from any further results")
-        sys.exit(0)
 
-    print("\n*** RANKING AFTER WEEDING OUT CLASSES OF APPROACHES **\n")
-    report_algorithm_ranking(frame, algorithm_names)
-    print("\n*** FROM THE ABOVE WE CAN DRAW CONCLUSIONS/FINDINGS **\n")
+    if args.show_ranking:
+        report_algorithm_ranking(frame, algorithm_names)
 
-    print("\n** PROVING SOME DIRECT DOMINANCE **")
+    if (args.temporal_independent_only and args.exclude_static and args.exclude_reactive_off
+            and args.exclude_nearsighted and args.exclude_probability_success and args.exlude_foresighted):
 
-    for dominating, dominated in [
-        ("dynamic__independent__aggressive", "dynamic__independent__variant"),
-        ("dynamic__independent__aggressive", "greedy_foresighted_expected_error__independent__aggressive"),
-        ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_success_error_ratio__independent__variant"),
-        ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_error_level__independent__variant"),
-        ("greedy_foresighted_success_error_ratio__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
-        ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
-        ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_error_level__independent__variant"),
-    ]:
+        print("\n** PROVING SOME DIRECT DOMINANCE: WARNING HARD-CODED ALGORITHM NAMES BASED ON KNOWN RESULTS**")
+        for dominating, dominated in [
+            ("dynamic__independent__aggressive", "dynamic__independent__variant"),
+            ("dynamic__independent__aggressive", "greedy_foresighted_expected_error__independent__aggressive"),
+            ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_success_error_ratio__independent__variant"),
+            ("greedy_foresighted_expected_error__independent__variant", "greedy_foresighted_error_level__independent__variant"),
+            ("greedy_foresighted_success_error_ratio__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
+            ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_success_error_ratio__independent__variant"),
+            ("greedy_foresighted_error_level__independent__aggressive", "greedy_foresighted_error_level__independent__variant"),
+        ]:
 
-        compare_two_heuristics(frame,
-                               dominating,
-                               dominated,
-                               args.confidence,
-                               args.bootstrap_resamples,
-                               args.seed)
-        if dominated in algorithm_names:
-            print(f"    ** REMOVING {dominated} FROM CONSIDERATION **\n")
-            algorithm_names.remove(dominated)
+            compare_two_heuristics(frame,
+                                   dominating,
+                                   dominated,
+                                   args.confidence,
+                                   args.bootstrap_resamples,
+                                   args.seed)
+            if dominated in algorithm_names:
+                print(f"    ** REMOVING {dominated} FROM CONSIDERATION **\n")
+                algorithm_names.remove(dominated)
 
 
-    # report_on_criterion(frame,
-    #                     algorithm_names,
-    #                     "expected_error",
-    #                     args.confidence,
-    #                     args.bootstrap_resamples,
-    #                     args.seed)
-    #
+        print("\n*** RANKING AFTER WEEDING OUT DOMINATED HEURISTICS **\n")
 
-    print("\n*** RANKING AFTER WEEDING OUT DOMINATED HEURISTICS **\n")
-
-    report_algorithm_ranking(frame, algorithm_names)
-
-    print("\n*** WE HAVE TO DRAW CONCLUSIONS/FINDINGS FROM THE ABOVE **\n")
+        report_algorithm_ranking(frame, algorithm_names)
 
 if __name__ == "__main__":
     main()
