@@ -302,7 +302,7 @@ def report_independent_temporal_redundancy_results(frame: pd.DataFrame,
                                                    confidence: float,
                                                    resamples: int,
                                                    seed: int) -> None:
-    print("\n** EVALUATION OF THE INDEPENDENT TEMPORAL REDUNDANCY OPTIONS **")
+    print("\n** EVALUATION OF THE INDEPENDENT TEMPORAL REDUNDANCY OPTION **")
 
     # Identify all number of nodes
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
@@ -373,9 +373,6 @@ def report_independent_temporal_redundancy_results(frame: pd.DataFrame,
         print(f"    {num_wins} independent wins  (average win margin {100.0*average_win_margin:.2f}%, largest win: {100.0*largest_win:.2f}%)")
         print(f"    {num_losses} independent losses (average loss margin {100.0*average_loss_margin:.2f}%, largest loss: {100.0*largest_loss:.2f}%)")
         print(f"    {num_ties} independent ties")
-
-    print("\nWHEN independent LOSES, IT'S BY VERY LITTLE")
-
 
 
 def report_random_heuristic_results(frame: pd.DataFrame,
@@ -455,8 +452,6 @@ def report_random_heuristic_results(frame: pd.DataFrame,
         print(
             f"    {num_ties} RANDOM ties")
 
-    print("\nRANDOM MOSTLY LOSES (IT LIKELY WINS OFTEN AGAINST HEURISTICS THAT HAVE BEEN WEEDED OUT, WHICH WE COULD QUANTIFY) **")
-
 
 def report_on_greedy_vs_static(frame: pd.DataFrame,
                                algorithm_names: list[str],
@@ -520,8 +515,6 @@ def report_on_greedy_vs_static(frame: pd.DataFrame,
             f"    - {num_losses} GREEDY losses (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
         print(
             f"    - {num_ties} GREEDY ties")
-
-    print("\nGREEDY IS BETTER THAN STATIC")
 
 
 def compare_two_heuristics(frame: pd.DataFrame,
@@ -832,8 +825,6 @@ def report_on_foresighted(frame: pd.DataFrame,
         print(
             f"      {num_ties} foresighted ties")
 
-    print("\nFORESIGHTED WINS MORE OFTEN AND, WHEN IT WINS IT WINS BIG AND WHEN IT LOSES IT LOSES SMALL")
-
 
 def report_on_reactive(frame: pd.DataFrame,
                        algorithm_names: list[str],
@@ -932,7 +923,6 @@ def report_on_reactive(frame: pd.DataFrame,
         print(
             f"      Number of times 'off' is better than all its competitors, everything else being equal: {num_times_its_better_than_others}"
         )
-    print("\nREACTIVE RESCHEDULING 'off' IS NOT A GOOD IDEA")
 
 
 def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
@@ -1351,7 +1341,7 @@ def main() -> None:
         report_algorithm_ranking(frame, algorithm_names)
 
     if (args.temporal_independent_only and args.exclude_static and args.exclude_reactive_off
-            and args.exclude_nearsighted and args.exclude_probability_success and args.exlude_foresighted):
+            and args.exclude_nearsighted and args.exclude_probability_success and args.exclude_foresighted):
 
         print("\n** PROVING SOME DIRECT DOMINANCE: WARNING HARD-CODED ALGORITHM NAMES BASED ON KNOWN RESULTS**")
         for dominating, dominated in [
