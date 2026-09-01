@@ -29,6 +29,7 @@ DEFAULT_CONFIDENCE = 0.95
 DEFAULT_BOOTSTRAP_RESAMPLES = 20_000
 DEFAULT_RANDOM_SEED = 20260821
 DEFAULT_EFAIL_MULTIPLIER = 0.0
+DEFAULT_NUM_ROWS = 0
 
 E_FAIL_GROUPS: dict[str, tuple[float, ...]] = {
     # "2.0": (2.0,),
@@ -711,6 +712,13 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--num-rows",
+        type=int,
+        default=DEFAULT_NUM_ROWS,
+        help=f"Number of rows to consider in the CSV, where 0 means 'all' (default: {DEFAULT_NUM_ROWS}))",
+    )
+
+    parser.add_argument(
         "--efail-multiplier",
         type=float,
         default=DEFAULT_EFAIL_MULTIPLIER,
@@ -834,6 +842,9 @@ def main() -> None:
         raise ValueError("--efail_multiplier must be non-negative; use 0.0 for all rows.")
 
     frame = pd.read_csv(args.csv_file)
+    if args.num_rows > 0:
+        frame = frame.head(args.num_rows)
+
     print(f"Loaded {len(frame)} rows from {args.csv_file}")
 
     # Filter out non-matching e-fail values
@@ -854,7 +865,6 @@ def main() -> None:
 
     # Figure out all the algorithms
     algorithm_names = discover_algorithm_names(frame)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
 
