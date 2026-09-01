@@ -37,4 +37,20 @@ inline long floor_division(const double numerator, const double denominator) {
     return static_cast<long>(std::floor(result));
 }
 
+/**
+ *
+ * @param candidate
+ * @param incumbent
+ * @return
+ */
+inline bool is_strictly_better(double candidate, double incumbent) {
+
+    if (!std::isfinite(candidate) || !std::isfinite(incumbent)) {
+        return candidate < incumbent;
+    }
+    
+    const double tol = 1e-9 * std::max({1.0, std::abs(candidate), std::abs(incumbent)});
+    return candidate < incumbent - tol;
+}
+
 #endif //UTILS_H
