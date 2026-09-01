@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from itertools import combinations
+
 import argparse
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -384,8 +386,10 @@ def compare_two_things(frame: pd.DataFrame,
                        thing2: str,
                        confidence: float,
                        resamples: int,
-                       seed: int) -> bool:
-    print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
+                       seed: int,
+                       muted: bool = False) -> bool:
+    if not muted:
+        print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
 
     if kind not in ["all", "heuristic", "temporal", "reactive"]:
         raise ValueError(f"{kind} is not valid")
@@ -394,7 +398,8 @@ def compare_two_things(frame: pd.DataFrame,
     thing1_never_loses = True
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
     for num_nodes in num_nodes_values:
-        print(f"  * {num_nodes} nodes:")
+        if not muted:
+            print(f"  * {num_nodes} nodes:")
         matching_rows = np.equal(frame["num_nodes"], num_nodes)
         tmp_frame = frame.loc[matching_rows].copy()
 
@@ -423,7 +428,7 @@ def compare_two_things(frame: pd.DataFrame,
                     continue
                 reference_column = thing1
                 comparison_column = thing2
-            if kind == "heuristic":
+            elif kind == "heuristic":
                 if thing1 not in heuristic:
                     continue
                 reference_column = heuristic + "__" + temporal_redundancy + "__" + reactive_rescheduling
@@ -479,12 +484,13 @@ def compare_two_things(frame: pd.DataFrame,
         else:
             average_win_margin = 0
 
-        print(
-            f"      {num_wins} wins of {kind}:{thing1} over {kind}:{thing2} (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
-        print(
-            f"      {num_losses} losses of {kind}:{thing1} to {kind}:{thing2} (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
-        print(
-            f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties")
+        if not muted:
+            print(
+                f"      {num_wins} wins of {kind}:{thing1} over {kind}:{thing2} (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
+            print(
+                f"      {num_losses} losses of {kind}:{thing1} to {kind}:{thing2} (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
+            print(
+                f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties")
 
     return thing1_never_loses
 
@@ -557,7 +563,7 @@ def keep_independent_temporal_redundancy_columns(frame: pd.DataFrame,) -> pd.Dat
 
     return frame.drop(columns=columns_to_drop)
 
-def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str, starts_with: bool) -> pd.DataFrame:
+def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str) -> pd.DataFrame:
     """ Filter out heuristics
     """
     columns_to_drop: list[str] = []
@@ -570,12 +576,8 @@ def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str, sta
 
         heuristic, _, _ = components
 
-        if starts_with:
-            if heuristic.startswith(substring):
-                columns_to_drop.append(column)
-        else:
-            if substring in heuristic:
-                columns_to_drop.append(column)
+        if substring in heuristic:
+            columns_to_drop.append(column)
 
     print(
         f"Removed {len(columns_to_drop)} algorithm columns for heuristic with substring '{substring}'"
@@ -718,62 +720,55 @@ def build_argument_parser() -> argparse.ArgumentParser:
 
     # Exclusion arguments
     ########################
+
     parser.add_argument(
-        "--exclude-temporal-independent",
-        action="store_true",
+        "--exclude-heuristic",
+        action="append",
+        default=[],
+        metavar="SUBSTRING",
         help=(
-            "Exclude the 'independent' temporal scheme from all results."
+            "Exclude heuristics whose name contain SUBSTRING as a substring. This "
+            "option may be used multiple times."
         ),
     )
 
     parser.add_argument(
-        "--exclude-random",
-        action="store_true",
+        "--exclude-temporal",
+        action="append",
+        default=[],
+        metavar="SUBSTRING",
         help=(
-            "Exclude the 'random' heuristic from all results."
+            "Exclude a particular temporal scheme from all results. This "
+            "option may be used multiple times. "
         ),
     )
 
     parser.add_argument(
-        "--exclude-static",
-        action="store_true",
+        "--exclude-reactive",
+        action="append",
+        default=[],
+        metavar="SUBSTRING",
         help=(
-            "Exclude the 'static_' (as opposed to 'greedy_') heuristics from all results."
-        ),
-    )
-
-    parser.add_argument(
-        "--exclude-nearsighted",
-        action="store_true",
-        help=(
-            "Exclude the 'nearsighted_' (as opposed to 'foresighted_') heuritics from all results."
-        ),
-    )
-
-    parser.add_argument(
-        "--exclude-reactive-off",
-        action="store_true",
-        help=(
-            "Exclude the 'off' reactive rescheduling option from all results."
-        ),
-    )
-
-    parser.add_argument(
-        "--exclude-probability-success",
-        action="store_true",
-        help=(
-            "Exclude the 'probability_success' criterion from all results."
+            "Exclude a particular reactive scheme from all results. This "
+            "option may be used multiple times. "
         ),
     )
 
     # Evaluation arguments
     ########################
     parser.add_argument(
-        "--evaluate-temporal-independent",
+        "--evaluate-temporal",
         action="store_true",
         help=(
-            "Obtain results that show that 'independent' temporal-redundancy "
-            "is 'better' than all other options"
+            "Show results for the temporal redundancy options"
+        ),
+    )
+
+    parser.add_argument(
+        "--evaluate-reactive",
+        action="store_true",
+        help=(
+            "Show results for the reactive rescheduling options"
         ),
     )
 
@@ -781,7 +776,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "--evaluate-greedy",
         action="store_true",
         help=(
-            "Show results to show that 'greedy' is better than 'static'"
+            "Show results for the greedy vs. static heuristics."
         ),
     )
 
@@ -789,23 +784,15 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "--evaluate-foresighted",
         action="store_true",
         help=(
-            "Show results to show that 'foresighted' is better than 'nearsighted'"
+            "Show results for the foresighted vs. nearsighted heuristics."
         ),
     )
 
     parser.add_argument(
-        "--evaluate-reactive-off",
+        "--evaluate-criteria",
         action="store_true",
         help=(
-            "Show results to show that 'off' reactive rescheduling is not a good idea"
-        ),
-    )
-
-    parser.add_argument(
-        "--evaluate-probability-success",
-        action="store_true",
-        help=(
-            "Show results to show that the 'probability_success' criterion is not a good idea"
+            "Show results for the different criteria."
         ),
     )
 
@@ -813,15 +800,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "--evaluate-random",
         action="store_true",
         help=(
-            "Show results to show that 'random' is not a good idea"
-        ),
-    )
-
-    parser.add_argument(
-        "--evaluate-reactive-aggressive",
-        action="store_true",
-        help=(
-            "Show results for reactive aggressive"
+            "Show results that evaluate the random heuristic."
         ),
     )
 
@@ -829,7 +808,15 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "--show-ranking",
         action="store_true",
         help=(
-            "Show algorithm ranking"
+            "Show algorithm ranking."
+        ),
+    )
+
+    parser.add_argument(
+        "--show-ranking-pruned",
+        action="store_true",
+        help=(
+            "Show algorithm ranking, after eliminated all dominated algorithms."
         ),
     )
 
@@ -853,29 +840,17 @@ def main() -> None:
     if args.efail_multiplier != 0.0:
         frame = filter_out_efail_multiplier_rows(frame, args.efail_multiplier)
 
-    # Filter out non-independent temporal redundancy values
-    if args.exclude_temporal_independent:
-        frame = filter_out_temporal_option(frame, "independent")
+    # Filter out heuristics
+    for substring in args.exclude_heuristic:
+        frame = filter_out_heuristic_with_substring(frame, substring)
 
-    # Filter out the random algorithm
-    if args.exclude_random:
-        frame = filter_out_heuristic_with_substring(frame, "random", True)
+    # Filter out temporal scheme
+    for substring in  args.exclude_temporal:
+        frame = filter_out_temporal_option(frame, substring)
 
-    # Filter out the static_* heuristics
-    if args.exclude_static:
-        frame = filter_out_heuristic_with_substring(frame, "static_", True)
-
-    # Filter out the reactive=off versions
-    if args.exclude_reactive_off:
-        frame = filter_out_reactive_option(frame, "off")
-
-    # Filter out the nearsighted_ heuristics
-    if args.exclude_nearsighted:
-        frame = filter_out_heuristic_with_substring(frame, "nearsighted", False)
-
-    # Filter out the error_level criterion
-    if args.exclude_probability_success:
-        frame = filter_out_heuristic_with_substring(frame, "probability_success", False)
+    # Filter out reactive scheme
+    for substring in args.exclude_reactive:
+        frame = filter_out_reactive_option(frame, substring)
 
     # Figure out all the algorithms
     algorithm_names = discover_algorithm_names(frame)
@@ -883,36 +858,51 @@ def main() -> None:
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
 
-    compare_two_things(frame,
-                       algorithm_names,
-                       "temporal",
-                       "dependent",
-                       "aggressive",
-                       args.confidence,
-                       args.bootstrap_resamples,
-                       args.seed)
+    if args.evaluate_temporal:
+        print("\n## RESULTS FOR TEMPORAL REDUNDANCY:")
+        options = [x for x in ["independent", "dependent", "aggressive"] if x not in args.exclude_temporal]
+        if len(options) < 2:
+            print("  No results due to too many exclusions")
+        else:
+            for t1, t2 in list(combinations(options, 2)):
+                compare_two_things(frame,
+                                   algorithm_names,
+                                   "temporal",
+                                   t1,
+                                   t2,
+                                   args.confidence,
+                                   args.bootstrap_resamples,
+                                   args.seed)
 
-    if not args.exclude_temporal_independent and args.evaluate_temporal_independent:
-        compare_two_things(frame,
-                           algorithm_names,
-                           "temporal",
-                           "independent",
-                           "dependent",
-                           args.confidence,
-                           args.bootstrap_resamples,
-                           args.seed)
+    if args.evaluate_reactive:
+        print("\n## RESULTS FOR REACTIVE RESCHEDULING:")
+        options = [x for x in ["off", "variant", "aggressive"] if x not in args.exclude_reactive]
+        if len(options) < 2:
+            print("  No results due to too many exclusions")
+        else:
+            for t1, t2 in list(combinations(options, 2)):
+                compare_two_things(frame,
+                                   algorithm_names,
+                                   "reactive",
+                                   t1,
+                                   t2,
+                                   args.confidence,
+                                   args.bootstrap_resamples,
+                                   args.seed)
 
-    if not args.exclude_static and args.evaluate_greedy:
+    if args.evaluate_greedy:
+        print("\n## RESULTS FOR GREEDY vs. STATIC:")
         compare_two_things(frame,
                            algorithm_names,
                            "heuristic",
-                           "greedy_",
-                           "static_",
+                           "greedy",
+                           "static",
                            args.confidence,
                            args.bootstrap_resamples,
                            args.seed)
 
-    if not args.exclude_nearsighted and args.evaluate_foresighted:
+    if args.evaluate_foresighted:
+        print("\n## RESULTS FOR FORESIGHTED vs. NEARSIGHTED:")
         compare_two_things(frame,
                            algorithm_names,
                            "heuristic",
@@ -922,27 +912,25 @@ def main() -> None:
                            args.bootstrap_resamples,
                            args.seed)
 
-    if not args.exclude_reactive_off and args.evaluate_reactive_off:
-        compare_two_things(frame,
-                           algorithm_names,
-                           "reactive",
-                           "variant",
-                           "off",
-                           args.confidence,
-                           args.bootstrap_resamples,
-                           args.seed)
+    if args.evaluate_criteria:
+        print("\n## RESULTS FOR DIFFERENT CRITERIA:")
+        options = [x for x in ["probability_success", "expected_error", "error_level", "success_error_ratio"] if x not in args.exclude_heuristic]
+        if len(options) < 2:
+            print("  No results due to too many exclusions")
+        else:
+            for t1, t2 in list(combinations(options, 2)):
+                compare_two_things(frame,
+                                   algorithm_names,
+                                   "heuristic",
+                                   t1,
+                                   t2,
+                                   args.confidence,
+                                   args.bootstrap_resamples,
+                                   args.seed)
 
-    if not args.exclude_probability_success and args.evaluate_probability_success:
-        compare_two_things(frame,
-                           algorithm_names,
-                           "heuristic",
-                           "expected_error",
-                           "probability_success",
-                           args.confidence,
-                           args.bootstrap_resamples,
-                           args.seed)
 
-    if not args.exclude_random and args.evaluate_random:
+    if args.evaluate_random:
+        print("\n## RESULTS FOR THE RANDOM HEURISTIC:")
         report_random_heuristic_results(frame,
                                         algorithm_names,
                                         args.confidence,
@@ -950,42 +938,40 @@ def main() -> None:
                                         args.seed)
 
     if args.show_ranking:
+        print("\n## RANKING:")
         report_algorithm_ranking(frame, algorithm_names)
 
-        # If all "losers" are excluded, then eliminate dominated algorithms
-        if args.exclude_temporal_independent and args.exclude_static and args.exclude_reactive_off and args.exclude_nearsighted and args.exclude_probability_success and args.exclude_nearsighted:
-            print("\n** ELIMINATING ALL DOMINATED HEURISTICS **")
-            keep_going = True
-            while keep_going:
-                keep_going = False
-                for reference in algorithm_names:
-                    restart = False
-                    for comparison in algorithm_names:
-                        if reference == comparison:
-                            continue
-                        # print(f"COMPARING {reference} vs {comparison}")
-                        reference_dominates = compare_two_things(frame,
-                                                                 algorithm_names,
-                                                                 "all",
-                                                                 reference,
-                                                                 comparison,
-                                                                 args.confidence,
-                                                                 args.bootstrap_resamples,
-                                                                 args.seed)
-                        # print(f"RESULT OF COMPARING: {reference_dominates}")
-                        if reference_dominates:
-                            print(f"    ** REMOVING {comparison} FROM CONSIDERATION **\n")
-                            algorithm_names.remove(comparison)
-                            restart = True
-                            break
-
-                    if restart:
-                        keep_going = True
+    if args.show_ranking_pruned:
+        print("\n## RANKING WITH ALL DOMINATED HEURISTICS ELIMINATED:")
+        keep_going = True
+        while keep_going:
+            keep_going = False
+            for reference in algorithm_names:
+                restart = False
+                for comparison in algorithm_names:
+                    if reference == comparison:
+                        continue
+                    # print(f"COMPARING {reference} vs {comparison}")
+                    reference_dominates = compare_two_things(frame,
+                                                             algorithm_names,
+                                                             "all",
+                                                             reference,
+                                                             comparison,
+                                                             args.confidence,
+                                                             args.bootstrap_resamples,
+                                                             args.seed,
+                                                             True)
+                    if reference_dominates:
+                        print(f"    ** REMOVING {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
+                        algorithm_names.remove(comparison)
+                        restart = True
                         break
 
-            print("\n*** RANKING AFTER WEEDING OUT DOMINATED HEURISTICS **\n")
+                if restart:
+                    keep_going = True
+                    break
 
-            report_algorithm_ranking(frame, algorithm_names)
+        report_algorithm_ranking(frame, algorithm_names)
 
 if __name__ == "__main__":
     main()
