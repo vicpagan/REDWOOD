@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from fontTools.varLib.models import allEqualTo
-from ipinfo.data import continents
 from scipy.stats import t
 import sys
 
@@ -397,6 +396,8 @@ def compare_two_things(frame: pd.DataFrame,
 
     # Identify all number of nodes
     thing1_never_loses = True
+    thing1_wins_at_least_once = False
+    num_comparisons = 0
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
     for num_nodes in num_nodes_values:
         if not muted:
@@ -460,9 +461,11 @@ def compare_two_things(frame: pd.DataFrame,
                 resamples=resamples,
                 seed=seed
             )
+            num_comparisons += 1
 
             # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
             if low > 0:
+                things1_wins_at_least_once = True
                 num_wins += 1
                 average_win_margin += estimate
                 if estimate > largest_win:
@@ -493,7 +496,9 @@ def compare_two_things(frame: pd.DataFrame,
             print(
                 f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties")
 
-    return thing1_never_loses
+    return (num_comparisons > 0
+            and thing1_never_loses
+            and thing1_wins_at_least_once)
 
 def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
 
