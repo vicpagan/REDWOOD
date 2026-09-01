@@ -1,16 +1,16 @@
 {
   "platform": {
-    "num_compute_nodes": 16,
+    "num_compute_nodes": 2,
     "io_read_bandwidth_per_node": "2GBps",
     "io_write_bandwidth_per_node": "1GBps"
   },
   "failures": {
     "restart_overhead": 0,
     "lambda": 0.001,
-    "seed": 1791958496
+    "seed": 1427743963
   },
   "application": {
-    "initial_data_size": 9065959040.31,
+    "initial_data_size": 4737495601.0,
     "initial_error_level": 1.0,
     "tasks": [
       {
@@ -18,12 +18,12 @@
         "execution_options": [
           {
             "name": "option_0",
-            "amhdal_parallelizable_fraction": 0.9641,
+            "amhdal_parallelizable_fraction": 0.8974,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 236.1687,
+                "a": 117.8659,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -32,7 +32,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 273120901072.62,
+                "a": 239355349135.92,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -43,18 +43,18 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 7.043405
+                "c": 5.756072
               }
             }
           },
           {
             "name": "option_1",
-            "amhdal_parallelizable_fraction": 0.9464,
+            "amhdal_parallelizable_fraction": 0.8613,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 672.7711,
+                "a": 454.9794,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -63,7 +63,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 9362194319.11,
+                "a": 13315190641.95,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -74,7 +74,7 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 3.676964
+                "c": 2.183857
               }
             }
           }
@@ -86,12 +86,12 @@
         "execution_options": [
           {
             "name": "option_0",
-            "amhdal_parallelizable_fraction": 0.9703,
+            "amhdal_parallelizable_fraction": 0.858,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 543.2791,
+                "a": 219.2367,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -100,7 +100,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 322201750332.01,
+                "a": 493092028713.07,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -111,18 +111,18 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 3.087615
+                "c": 8.880386
               }
             }
           },
           {
             "name": "option_1",
-            "amhdal_parallelizable_fraction": 0.9034,
+            "amhdal_parallelizable_fraction": 0.9308,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 1212.6332,
+                "a": 584.7583,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -131,7 +131,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 220010443842.0,
+                "a": 273696008279.34,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -142,18 +142,18 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 2.42761
+                "c": 6.29067
               }
             }
           },
           {
             "name": "option_2",
-            "amhdal_parallelizable_fraction": 0.9638,
+            "amhdal_parallelizable_fraction": 0.9409,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 1881.9873,
+                "a": 950.2799,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -162,7 +162,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 117819137351.99,
+                "a": 54299987845.61,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -173,38 +173,7 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 1.767605
-              }
-            }
-          },
-          {
-            "name": "option_3",
-            "amhdal_parallelizable_fraction": 0.9488,
-            "t_function": {
-              "type": "affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 2551.3414,
-                "b": 0.0,
-                "c": 0.0
-              }
-            },
-            "d_function": {
-              "type": "affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 15627830861.98,
-                "b": 0.0,
-                "c": 0.0
-              }
-            },
-            "e_function": {
-              "type": "affine",
-              "comments": "a + b * x + c * y",
-              "parameters": {
-                "a": 0.0,
-                "b": 0.0,
-                "c": 1.1076
+                "c": 3.700954
               }
             }
           }
@@ -216,12 +185,12 @@
         "execution_options": [
           {
             "name": "option_0",
-            "amhdal_parallelizable_fraction": 0.8844,
+            "amhdal_parallelizable_fraction": 0.9121,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 267.2257,
+                "a": 311.1193,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -230,7 +199,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 227771174764.98,
+                "a": 146853735108.27,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -241,18 +210,18 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 6.71107
+                "c": 3.061865
               }
             }
           },
           {
             "name": "option_1",
-            "amhdal_parallelizable_fraction": 0.8815,
+            "amhdal_parallelizable_fraction": 0.9539,
             "t_function": {
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 932.768,
+                "a": 666.4392,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -261,7 +230,7 @@
               "type": "affine",
               "comments": "a + b * x + c * y",
               "parameters": {
-                "a": 26959936868.83,
+                "a": 106588689063.1,
                 "b": 0.0,
                 "c": 0.0
               }
@@ -272,7 +241,69 @@
               "parameters": {
                 "a": 0.0,
                 "b": 0.0,
-                "c": 2.366391
+                "c": 2.48364
+              }
+            }
+          },
+          {
+            "name": "option_2",
+            "amhdal_parallelizable_fraction": 0.9666,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1021.7592,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 66323643017.94,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.905416
+              }
+            }
+          },
+          {
+            "name": "option_3",
+            "amhdal_parallelizable_fraction": 0.8617,
+            "t_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 1377.0792,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "d_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 26058596972.77,
+                "b": 0.0,
+                "c": 0.0
+              }
+            },
+            "e_function": {
+              "type": "affine",
+              "comments": "a + b * x + c * y",
+              "parameters": {
+                "a": 0.0,
+                "b": 0.0,
+                "c": 1.327191
               }
             }
           }
@@ -282,9 +313,9 @@
     ]
   },
   "execution": {
-    "num_repeats": 10,
+    "num_repeats": 25,
     "deadline": 10000,
-    "e_fail": 729.739
+    "e_fail": 782.5536
   },
   "scheduling": {
     "delta_t_scheme": {
@@ -292,11 +323,11 @@
       "parameter": 5.0
     },
     "algorithms": [
-      "static_nearsighted_expected_error"
+      "static_nearsighted_probability_success"
     ],
     "hacks": {
-      "temporal_redundancy": "dependent",
-      "stop_running_jobs": "variant"
+      "temporal_redundancy": "independent",
+      "stop_running_jobs": "aggressive"
     }
   }
 }
