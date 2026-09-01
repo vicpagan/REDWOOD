@@ -6,6 +6,7 @@
 #include <stack>
 
 #include "FunctionGenerator.h"
+#include "Utils.h"
 
 namespace wrench {
 
@@ -449,7 +450,7 @@ namespace wrench {
 
         // If this is a leaf node
         if (node->children.empty()) {
-            return node->cumulative_error_factor > best_error;
+            return !is_strictly_better(node->cumulative_error_factor, best_error);
         }
 
         // Otherwise, recursively prune children
