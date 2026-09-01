@@ -384,14 +384,14 @@ def compare_two_things(frame: pd.DataFrame,
                        thing2: str,
                        confidence: float,
                        resamples: int,
-                       seed: int) -> None:
+                       seed: int) -> bool:
     print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
 
     if kind not in ["all", "heuristic", "temporal", "reactive"]:
         raise ValueError(f"{kind} is not valid")
 
     # Identify all number of nodes
-    thing1_never_looses = True
+    thing1_never_loses = True
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
     for num_nodes in num_nodes_values:
         print(f"  * {num_nodes} nodes:")
@@ -462,14 +462,13 @@ def compare_two_things(frame: pd.DataFrame,
                 if estimate > largest_win:
                     largest_win = estimate
             elif high < 0:
-                thing1_never_looses = False
+                thing1_never_loses = False
                 num_losses += 1
                 average_loss_margin += estimate
                 if estimate < largest_loss:
                     largest_loss = estimate
             else:
                 num_ties += 1
-
 
         if num_losses > 0:
             average_loss_margin /= num_losses
@@ -487,7 +486,7 @@ def compare_two_things(frame: pd.DataFrame,
         print(
             f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties")
 
-    return thing1_never_looses
+    return thing1_never_loses
 
 def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
 
