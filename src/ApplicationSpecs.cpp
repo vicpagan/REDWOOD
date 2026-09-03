@@ -209,7 +209,7 @@ namespace wrench {
 
     int ApplicationSpecs::get_host_task_to_schedule_index(const std::string& hostname) const {
         std::string current_task = _hosts_current_scheduled_tasks.at(hostname);
-        std::cerr << "Host " << hostname << " current task: " << current_task << std::endl;
+//        std::cerr << "Host " << hostname << " current task: " << current_task << std::endl;
         return get_task_index(_hosts_current_scheduled_tasks.at(hostname));
     }
 
@@ -221,7 +221,7 @@ namespace wrench {
     }
 
     int ApplicationSpecs::get_task_index(const std::string& task_name) const {
-        std::cerr << "Getting task index for task " << task_name << std::endl;
+//        std::cerr << "Getting task index for task " << task_name << std::endl;
         std::string current_task = _task_order.at(0);
         int i = 0;
         while (current_task != task_name && i < _num_tasks) {
