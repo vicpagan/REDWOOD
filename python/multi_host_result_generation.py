@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from fontTools.varLib.models import allEqualTo
-from ipinfo.data import continents
 from scipy.stats import t
 import sys
 
@@ -29,6 +28,7 @@ DEFAULT_CONFIDENCE = 0.95
 DEFAULT_BOOTSTRAP_RESAMPLES = 20_000
 DEFAULT_RANDOM_SEED = 20260821
 DEFAULT_EFAIL_MULTIPLIER = 0.0
+DEFAULT_NUM_ROWS = 0
 
 E_FAIL_GROUPS: dict[str, tuple[float, ...]] = {
     # "2.0": (2.0,),
@@ -387,6 +387,7 @@ def compare_two_things(frame: pd.DataFrame,
                        confidence: float,
                        resamples: int,
                        seed: int,
+                       break_ties = False,
                        muted: bool = False) -> bool:
     if not muted:
         print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
@@ -396,6 +397,10 @@ def compare_two_things(frame: pd.DataFrame,
 
     # Identify all number of nodes
     thing1_never_loses = True
+    thing1_wins_at_least_once = False
+    thing1_ties_but_always_in_top = True
+    num_comparisons = 0
+
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
     for num_nodes in num_nodes_values:
         if not muted:
@@ -421,6 +426,7 @@ def compare_two_things(frame: pd.DataFrame,
         average_loss_margin = 0
         largest_loss = 0
         largest_win = 0
+        average_estimate_for_ties = 0
         for algorithm_name in algorithm_names:
             heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
             if kind == "all":
@@ -459,9 +465,11 @@ def compare_two_things(frame: pd.DataFrame,
                 resamples=resamples,
                 seed=seed
             )
+            num_comparisons += 1
 
             # print(f"Comparison to {algorithm_name}: {100.0*low:2f}%/{100.0 * estimate:.2f}%/{100.0*high:2f}%")
             if low > 0:
+                thing1_wins_at_least_once = True
                 num_wins += 1
                 average_win_margin += estimate
                 if estimate > largest_win:
@@ -473,6 +481,7 @@ def compare_two_things(frame: pd.DataFrame,
                 if estimate < largest_loss:
                     largest_loss = estimate
             else:
+                average_estimate_for_ties += estimate
                 num_ties += 1
 
         if num_losses > 0:
@@ -484,15 +493,28 @@ def compare_two_things(frame: pd.DataFrame,
         else:
             average_win_margin = 0
 
+        if num_ties > 0:
+            average_estimate_for_ties /= num_ties
+            thing1_ties_but_always_in_top = thing1_ties_but_always_in_top and (average_estimate_for_ties > 0.0)
+        else:
+            average_estimate_for_ties = 0
+
         if not muted:
             print(
                 f"      {num_wins} wins of {kind}:{thing1} over {kind}:{thing2} (average win margin {100.0 * average_win_margin:.2f}%, largest win: {100.0 * largest_win:.2f}%)")
             print(
                 f"      {num_losses} losses of {kind}:{thing1} to {kind}:{thing2} (average loss margin {100.0 * average_loss_margin:.2f}%, largest loss: {100.0 * largest_loss:.2f}%)")
             print(
-                f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties")
+                f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties (average estimate for ties: {100.0 * average_estimate_for_ties:.2f}%)")
 
-    return thing1_never_loses
+    # print(f"num_comparisons: {num_comparisons}, thing1_never_loses={thing1_never_loses}, thing1_wins_at_least_once={thing1_wins_at_least_once}, thing1_ties_but_always_on_top={thing1_ties_but_always_in_top}")
+    return ((num_comparisons > 0
+             and thing1_never_loses
+             and thing1_wins_at_least_once) or
+            (break_ties and (
+                    num_comparisons > 0 and
+                    thing1_never_loses and
+                    thing1_ties_but_always_in_top > 0)))
 
 def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
 
@@ -711,6 +733,13 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--num-rows",
+        type=int,
+        default=DEFAULT_NUM_ROWS,
+        help=f"Number of rows to consider in the CSV, where 0 means 'all' (default: {DEFAULT_NUM_ROWS}))",
+    )
+
+    parser.add_argument(
         "--efail-multiplier",
         type=float,
         default=DEFAULT_EFAIL_MULTIPLIER,
@@ -834,6 +863,9 @@ def main() -> None:
         raise ValueError("--efail_multiplier must be non-negative; use 0.0 for all rows.")
 
     frame = pd.read_csv(args.csv_file)
+    if args.num_rows > 0:
+        frame = frame.head(args.num_rows)
+
     print(f"Loaded {len(frame)} rows from {args.csv_file}")
 
     # Filter out non-matching e-fail values
@@ -854,7 +886,6 @@ def main() -> None:
 
     # Figure out all the algorithms
     algorithm_names = discover_algorithm_names(frame)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
 
@@ -960,7 +991,8 @@ def main() -> None:
                                                              args.confidence,
                                                              args.bootstrap_resamples,
                                                              args.seed,
-                                                             True)
+                                                             break_ties = True,
+                                                             muted = True)
                     if reference_dominates:
                         print(f"    ** REMOVING {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
                         algorithm_names.remove(comparison)
