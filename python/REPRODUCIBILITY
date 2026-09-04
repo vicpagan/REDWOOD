@@ -1,5 +1,27 @@
-DYLD_LIBRARY_PATH="" DYLD_FALLBACK_LIBRARY_PATH="" streamlit run interactive_db_results.py
+* TO GENERATE THE DELTA-T FIGURE IN THE ONE-HOST SECTION
 
-./data_parallel_evaluator  --delta_t 5.0 --json ../data/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400  --lambda 0.0001 --e_fail 100  | python ~/PAPERS/WRENCH/wrench-papers/redwood_scheduling/figures/plot_data_parallel_results.py
+python3 ./delta_t_evaluator.py  ./fusion_science_use_case.json 1.0 30.0 1.0 --run-sims --num-repeats 5000000  --executable ../build/delta_t_evaluator --sim-executable ../build/redwood_sim_LOWER_BOUND > delta_t_results_LOWER_BOUND.json
+python3 ./delta_t_evaluator.py  ./fusion_science_use_case.json 1.0 30.0 1.0 --run-sims --num-repeats 5000000  --executable ../build/delta_t_evaluator --sim-executable ../build/redwood_sim_UPPER_BOUND > delta_t_results_UPPER_BOUND.json
+
+python3 ./delta_t_plotter.py delta_t_results_LOWER_BOUND.json delta_t_results_UPPER_BOUND.json
+
+This needs to be done with two versions of redwood_sim: one there the Dynamic Scheduler uses the upper bound and one where it uses the lower bound. Because the corresponding argument is hardcoded to either true or false in the call to preprocess_host_decisions(), this is a modify/recompile thing.  Would be nice to add this as some argument or as part of the json, but not critical. 
+
+* TO GENERATE THE DATA-PARALLEL FIGURE IN THE ONE-HOST SECTION
+
+../build/data_parallel_evaluator  --delta_t 5.0 --json ../data/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400  --lambda 0.0001 --e_fail 100  | python ~/PAPERS/WRENCH/wrench-papers/redwood_scheduling/figures/plot_data_parallel_results.py
+
+
+* TO ANALYZE THE HEURISTIC RESULTS IN THE ONE-HOST SECTION:
+
+python3 ./one_host_results_generation.py ../data/results_single_host.csv
+
+
+* TO ANALYZE THE HEURISTIC RESULTS IN THE ONE-HOST SECTION:
+
+python3 ./multi_host_result_generation.py ../data/results_export.csv
+
+[use --help to see the many command-line options]
+
 
 
