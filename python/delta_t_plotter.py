@@ -115,7 +115,7 @@ def plot_results(all_results, upper_bound_simulation_results, output_file="delta
         delta_t = np.array(all_results['default']["delta_t"])
 
         color3 = 'tab:green'
-        ax2.set_ylabel('Compute Time (sec)', fontsize=fontsize)
+        ax2.set_ylabel('Compute time (sec)', fontsize=fontsize)
 
         ax2.set_yticks([1,2, 10, 100])
         ax2.set_ylim(min(comp_time), max(comp_time))

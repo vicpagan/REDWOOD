@@ -9,15 +9,21 @@ import bisect
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Patch
 
+fontsize = 24
+markersize = 12
+linewidth=5
+
 def plot_curves(data):
     max_num_num_procs = len(data[list(data.keys())[0]])
     colors = plt.cm.viridis(np.linspace(0, 0.9, len(data.keys())))
 
 
     # Paint tiles
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.set_xlabel('Number of compute nodes ($n$)', fontsize=12)
-    ax.set_ylabel('Approximate optimal expected error', fontsize=12)
+    fig, ax = plt.subplots(figsize=(14, 7))
+    ax.set_xlabel('Number of compute nodes ($n$)', fontsize=fontsize)
+    ax.set_ylabel('Approx. optimal expected error', fontsize=fontsize)
+    ax.tick_params(axis='y', labelsize=fontsize)
+    ax.tick_params(axis='x', labelsize=fontsize)
 
     max_min_error = 0.0
     color_idx = 0
@@ -32,7 +38,7 @@ def plot_curves(data):
             deadline_string = str(int(deadline/60)) + " min"
         else:
             deadline_string = str(int(deadline/3600)) + " hour"
-        ax.plot(num_nodes_values, error_values, '.-', label="deadline:" + deadline_string, color=color, linewidth=3, markersize=10)
+        ax.plot(num_nodes_values, error_values, '.-', label="deadline:" + deadline_string, color=color, linewidth=linewidth, markersize=markersize)
         min_error = min(error_values)
         best_num_procs = num_nodes_values[error_values.index(min_error)]
         #ax.plot([best_num_procs], [min_error], 'o', color=color, markersize=6)
@@ -53,10 +59,11 @@ def plot_curves(data):
     # Compute ok limits
     ax.set_ylim(1, 103)
     ax.set_yticks([1,20,40,60,80,100])
-    ax.legend(bbox_to_anchor=(0.35, 0.92))
+    ax.legend(bbox_to_anchor=(0.35, 0.92), fontsize=fontsize)
     plt.tight_layout()
-    sys.stderr.write("Figure saved in ./curves.pdf\n")
-    plt.savefig("./curves.pdf")
+    output_filename = "./data_parallel_results.pdf"
+    sys.stderr.write(f"Figure saved in {output_filename}\n")
+    plt.savefig(output_filename)
 
 def main():
     # Read JSON from stdin or file
