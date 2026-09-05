@@ -19,7 +19,7 @@ python3 ./one_host_results_generation.py ../data/results_single_host.csv
 
 * TO ANALYZE THE HEURISTIC RESULTS IN THE ONE-HOST SECTION:
 
-python3 ./multi_host_result_generation.py ../data/results_export.csv
+python3 ./multi_host_result_generation.py ../data/results_multi_host_new.csv
 
 [use --help to see the many command-line options]
 

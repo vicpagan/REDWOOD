@@ -994,8 +994,8 @@ def main() -> None:
                                                              break_ties = True,
                                                              muted = True)
                     if reference_dominates:
-                        print(f"    ** REMOVING {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
                         algorithm_names.remove(comparison)
+                        print(f"    ** REMOVED {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
                         restart = True
                         break
 
