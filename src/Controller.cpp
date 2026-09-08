@@ -278,7 +278,7 @@ namespace wrench {
                                                _compute_services,
                                                _application_specs->get_seed(),
                                                (repeat == 0),
-                                               _application_specs->get_exponential_distribution(),
+                                               _application_specs->get_lambda(),
                                                _application_specs->get_restart_overhead(),
                                                this->commport);
 

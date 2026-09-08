@@ -104,7 +104,6 @@ namespace wrench {
         double get_lambda() const { return _lambda; }
         std::string get_delta_t_scheme() const { return _delta_t_scheme; }
         double get_delta_t_parameter() const { return _delta_t_parameter; }
-        std::exponential_distribution<double> get_exponential_distribution() const { return _exponential_distribution; }
         int get_seed() const { return _seed; }
         int get_num_tasks() const { return _num_tasks; }
 
@@ -147,7 +146,6 @@ namespace wrench {
         double _lambda;
         std::string _delta_t_scheme;
         double _delta_t_parameter;
-        std::exponential_distribution<double> _exponential_distribution;
         int _seed;
 
         double _initial_data_size;

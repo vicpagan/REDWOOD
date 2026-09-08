@@ -30,7 +30,6 @@ namespace wrench {
         _lambda = boost::json::value_to<double>(failure_spec.at("lambda"));
         _delta_t_parameter = boost::json::value_to<double>(scheduling_spec.at("delta_t_scheme").as_object().at("parameter"));
         _delta_t_scheme = boost::json::value_to<std::string>(scheduling_spec.at("delta_t_scheme").as_object().at("scheme"));
-        _exponential_distribution = std::exponential_distribution<double>(_lambda);
         _seed = boost::json::value_to<int>(failure_spec.at("seed"));
 
         for (const auto& task : application_spec.at("tasks").as_array()) {
@@ -318,7 +317,15 @@ namespace wrench {
             }
         }
 
-        return min_error_factor < max_error_factor;
+        bool result = !is_strictly_better(max_error_factor, min_error_factor);
+
+        std::cerr << "[can_possibly_do_better] hostname=" << hostname
+              << " reference=" << reference_hostname
+              << " hostname_min=" << min_error_factor
+              << " reference_max=" << max_error_factor
+              << " result=" << result << std::endl;
+
+        return result;
     }
 
     void ApplicationSpecs::reset_host_current_decision_node(const std::string& hostname) {
