@@ -18,3 +18,5 @@ experiment/*
 
 # Python venv
 .python-version
+
+python/repro_cases/*
