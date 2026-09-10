@@ -467,7 +467,7 @@ namespace wrench {
                                 std::string hostname = entry.first;
 
                                 if (hostname != success_hostname) {
-                                    if (!_application_specs->can_possibly_do_better(
+                                    if (!_application_specs->cannot_do_worse(
                                             hostname, success_hostname) &&
                                         !_system_state_tracker->is_host_finished(hostname)) {
 
@@ -545,54 +545,83 @@ namespace wrench {
                                 for (const auto& entry : _compute_services) {
                                     std::string hostname = entry.first;
 
-                                    best_error_level_by_host[hostname] = std::min(
-                                        best_error_level_by_host[hostname],
-                                        final_error_level);
+                                    if (hostname != success_hostname) {
+                                        best_error_level_by_host[hostname] = std::min(
+                                            best_error_level_by_host[hostname],
+                                            final_error_level);
 
-                                    algorithm->reset_host_preprocessed_decisions(hostname);
+                                        algorithm->reset_host_preprocessed_decisions(hostname);
 
-                                    _application_specs->update_host_running_data_size(
-                                        hostname, initial_data_size);
+                                        _application_specs->update_host_running_data_size(
+                                            hostname, initial_data_size);
 
-                                    _application_specs->update_host_running_error_level(
-                                        hostname, initial_error_level);
+                                        _application_specs->update_host_running_error_level(
+                                            hostname, initial_error_level);
 
-                                    _application_specs->update_host_task_to_schedule(
-                                        hostname, 0);
+                                        _application_specs->update_host_task_to_schedule(
+                                            hostname, 0);
 
-                                    _application_specs->reset_host_current_decision_node(hostname);
-                                    _application_specs->reset_host_decision_history(hostname);
+                                        _application_specs->reset_host_current_decision_node(hostname);
+                                        _application_specs->reset_host_decision_history(hostname);
 
-                                    _application_specs->clear_decision_tree(hostname);
-                                    _application_specs->build_decision_tree(hostname);
-                                    _application_specs->prune_decision_tree(
-                                        hostname, final_error_level);
+                                        _application_specs->clear_decision_tree(hostname);
+                                        _application_specs->build_decision_tree(hostname);
+                                        _application_specs->prune_decision_tree(
+                                            hostname, final_error_level);
 
-                                    tree_prune_threshold_by_host[hostname] =
-                                        final_error_level;
+                                        tree_prune_threshold_by_host[hostname] =
+                                            final_error_level;
 
-                                    if (_system_state_tracker->is_a_job_running(hostname)) {
-                                        try {
-                                            _job_manager->terminateJob(
-                                                _system_state_tracker->get_running_job(hostname));
+                                        if (_system_state_tracker->is_a_job_running(hostname)) {
+                                            try {
+                                                _job_manager->terminateJob(
+                                                    _system_state_tracker->get_running_job(hostname));
+                                            }
+                                            catch (ExecutionException&) {
+                                                std::cerr
+                                                    << "Tried to terminate job on host: "
+                                                    << hostname
+                                                    << " after finish with TR AGG"
+                                                    << std::endl;
+                                            }
                                         }
-                                        catch (ExecutionException&) {
-                                            std::cerr
-                                                << "Tried to terminate job on host: "
-                                                << hostname
-                                                << " after finish with TR AGG"
-                                                << std::endl;
+
+                                        _system_state_tracker->untrack_job(hostname);
+
+                                        if (!_system_state_tracker->is_host_down(hostname)) {
+                                            _system_state_tracker->reset_host(hostname);
+                                        }
+                                        else {
+                                            _system_state_tracker->reset_host(hostname);
+                                            _system_state_tracker->set_host_down(hostname);
                                         }
                                     }
+                                }
 
-                                    _system_state_tracker->untrack_job(hostname);
+                                if (!_system_state_tracker->is_host_finished(success_hostname)) {
+                                    best_error_level_by_host[success_hostname] = std::min(best_error_level_by_host[success_hostname], final_error_level);
 
-                                    if (!_system_state_tracker->is_host_down(hostname)) {
-                                        _system_state_tracker->reset_host(hostname);
-                                    }
-                                    else {
-                                        _system_state_tracker->reset_host(hostname);
-                                        _system_state_tracker->set_host_down(hostname);
+                                    algorithm->reset_host_preprocessed_decisions(success_hostname);
+
+                                    _application_specs->update_host_running_data_size(success_hostname, initial_data_size);
+                                    _application_specs->update_host_running_error_level(success_hostname, initial_error_level);
+
+                                    _application_specs->update_host_task_to_schedule(success_hostname, 0);
+                                    _application_specs->reset_host_current_decision_node(success_hostname);
+                                    _application_specs->reset_host_decision_history(success_hostname);
+
+                                    _application_specs->clear_decision_tree(success_hostname);
+                                    _application_specs->build_decision_tree(success_hostname);
+                                    _application_specs->prune_decision_tree(success_hostname, final_error_level);
+
+                                    tree_prune_threshold_by_host[success_hostname] = final_error_level;
+
+                                    _system_state_tracker->untrack_job(success_hostname);
+                                    if (!_system_state_tracker->is_host_down(success_hostname)) {
+                                        _system_state_tracker->reset_host(success_hostname);
+                                    } else {
+                                        _system_state_tracker->reset_host(success_hostname);
+                                        _system_state_tracker->set_host_down(success_hostname);
                                     }
                                 }
                             }
@@ -605,7 +634,8 @@ namespace wrench {
                                              .empty() ||
                                          !_application_specs->can_possibly_do_better(
                                              hostname, success_hostname)) &&
-                                        !_system_state_tracker->is_host_finished(hostname)) {
+                                        !_system_state_tracker->is_host_finished(hostname) &&
+                                        hostname != success_hostname) {
 
                                         best_error_level_by_host[hostname] = std::min(
                                             best_error_level_by_host[hostname],
@@ -656,6 +686,33 @@ namespace wrench {
                                             _system_state_tracker->reset_host(hostname);
                                             _system_state_tracker->set_host_down(hostname);
                                         }
+                                    }
+                                }
+
+                                if (!_system_state_tracker->is_host_finished(success_hostname)) {
+                                    best_error_level_by_host[success_hostname] = std::min(best_error_level_by_host[success_hostname], final_error_level);
+
+                                    algorithm->reset_host_preprocessed_decisions(success_hostname);
+
+                                    _application_specs->update_host_running_data_size(success_hostname, initial_data_size);
+                                    _application_specs->update_host_running_error_level(success_hostname, initial_error_level);
+
+                                    _application_specs->update_host_task_to_schedule(success_hostname, 0);
+                                    _application_specs->reset_host_current_decision_node(success_hostname);
+                                    _application_specs->reset_host_decision_history(success_hostname);
+
+                                    _application_specs->clear_decision_tree(success_hostname);
+                                    _application_specs->build_decision_tree(success_hostname);
+                                    _application_specs->prune_decision_tree(success_hostname, final_error_level);
+
+                                    tree_prune_threshold_by_host[success_hostname] = final_error_level;
+
+                                    _system_state_tracker->untrack_job(success_hostname);
+                                    if (!_system_state_tracker->is_host_down(success_hostname)) {
+                                        _system_state_tracker->reset_host(success_hostname);
+                                    } else {
+                                        _system_state_tracker->reset_host(success_hostname);
+                                        _system_state_tracker->set_host_down(success_hostname);
                                     }
                                 }
                             }

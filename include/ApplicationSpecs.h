@@ -134,6 +134,7 @@ namespace wrench {
         void reset_host_decision_history(const std::string& hostname);
         void reset_all_hosts_decision_history();
 
+        bool cannot_do_worse(const std::string& hostname, const std::string& reference_hostname) const;
         bool can_possibly_do_better(const std::string& hostname, const std::string& reference_hostname) const;
 
     protected:
