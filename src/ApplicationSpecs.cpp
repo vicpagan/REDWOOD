@@ -282,6 +282,52 @@ namespace wrench {
         _hosts_decision_history[hostname] = _hosts_decision_history.at(reference_hostname);
     }
 
+    bool ApplicationSpecs::cannot_do_worse(const std::string& hostname, const std::string& reference_hostname) const {
+        double hostname_worst_case = -std::numeric_limits<double>::infinity();
+        double reference_best_case = std::numeric_limits<double>::infinity();
+        const auto current_host_decision_node = _hosts_current_decision_nodes.at(hostname);
+        const auto reference_host_decision_node = _hosts_current_decision_nodes.at(reference_hostname);
+
+        std::stack<std::shared_ptr<ExecOptionDecisionNode>> stack;
+        stack.push(current_host_decision_node);
+        while (!stack.empty()) {
+            const auto current_decision_node = stack.top();
+            stack.pop();
+
+            if (current_decision_node->is_leaf) {
+                hostname_worst_case = std::max(hostname_worst_case, current_decision_node->cumulative_error_factor);
+            } else {
+                for (const auto& child : current_decision_node->children) {
+                    stack.push(child);
+                }
+            }
+        }
+
+        stack.push(reference_host_decision_node);
+        while (!stack.empty()) {
+            const auto current_decision_node = stack.top();
+            stack.pop();
+
+            if (current_decision_node->is_leaf) {
+                reference_best_case = std::min(reference_best_case, current_decision_node->cumulative_error_factor);
+            } else {
+                for (const auto& child : current_decision_node->children) {
+                    stack.push(child);
+                }
+            }
+        }
+
+        bool result = !is_strictly_better(reference_best_case, hostname_worst_case);
+
+        std::cerr << "[cannot_do_worse] hostname=" << hostname
+              << " reference=" << reference_hostname
+              << " hostname_worst=" << hostname_worst_case
+              << " reference_best=" << reference_best_case
+              << " result=" << result << std::endl;
+
+        return result;
+    }
+
     bool ApplicationSpecs::can_possibly_do_better(const std::string& hostname, const std::string& reference_hostname) const {
         double min_error_factor = std::numeric_limits<double>::infinity();
         double max_error_factor = -std::numeric_limits<double>::infinity();
