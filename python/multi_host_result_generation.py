@@ -747,8 +747,17 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
 
 
-    # Exclusion arguments
+    # Exclusion/inclusion arguments
     ########################
+
+    parser.add_argument(
+        "--include-static",
+        action="store_true",
+        help=(
+            "Do not exclude the 'static' heuristics"
+        ),
+    )
+
 
     parser.add_argument(
         "--exclude-heuristic",
@@ -873,7 +882,12 @@ def main() -> None:
         frame = filter_out_efail_multiplier_rows(frame, args.efail_multiplier)
 
     # Filter out heuristics
-    for substring in args.exclude_heuristic:
+    if args.include_static:
+        to_exclude = [x for x in args.exclude_heuristic if x != "static"]
+    else:
+        to_exclude = list(set(args.exclude_heuristic + ["static"]))
+
+    for substring in to_exclude:
         frame = filter_out_heuristic_with_substring(frame, substring)
 
     # Filter out temporal scheme

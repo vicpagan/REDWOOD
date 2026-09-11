@@ -14,12 +14,12 @@ This needs to be done with two versions of redwood_sim: one there the Dynamic Sc
 
 * TO ANALYZE THE HEURISTIC RESULTS IN THE ONE-HOST SECTION:
 
-python3 ./one_host_results_generation.py ../data/results_single_host.csv
+python3 ./one_host_results_generation.py ../experiment_results/results_single_host.csv
 
 
 * TO ANALYZE THE HEURISTIC RESULTS IN THE ONE-HOST SECTION:
 
-python3 ./multi_host_result_generation.py ../data/results_multi_host_new.csv
+python3 ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv
 
 [use --help to see the many command-line options]
 
