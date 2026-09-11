@@ -935,7 +935,7 @@ def main() -> None:
                                    args.bootstrap_resamples,
                                    args.seed)
 
-    if args.evaluate_greedy:
+    if args.evaluate_greedy and args.include_static:
         print("\n## RESULTS FOR GREEDY vs. STATIC:")
         compare_two_things(frame,
                            algorithm_names,
@@ -945,6 +945,8 @@ def main() -> None:
                            args.confidence,
                            args.bootstrap_resamples,
                            args.seed)
+    elif args.evaluate_greedy and not args.include_static:
+       raise Exception("Cannot evaluate greedy if you exclude static") 
 
     if args.evaluate_foresighted:
         print("\n## RESULTS FOR FORESIGHTED vs. NEARSIGHTED:")
