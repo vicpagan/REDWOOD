@@ -861,6 +861,14 @@ def build_argument_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    parser.add_argument(
+        "--show-ranking-pruned-ties",
+        action="store_true",
+        help=(
+            "Show algorithm ranking, after eliminated all dominated algorithms AND algorithms that ties but never better abd sometimes worse in those ties."
+        ),
+    )
+
     return parser
 
 
@@ -992,18 +1000,19 @@ def main() -> None:
         report_algorithm_ranking(frame, algorithm_names)
 
     if args.show_ranking_pruned:
+        pruned_algorithm_names = list(algorithm_names)
         print("\n## RANKING WITH ALL DOMINATED HEURISTICS ELIMINATED:")
         keep_going = True
         while keep_going:
             keep_going = False
-            for reference in algorithm_names:
+            for reference in pruned_algorithm_names:
                 restart = False
-                for comparison in algorithm_names:
+                for comparison in pruned_algorithm_names:
                     if reference == comparison:
                         continue
                     # print(f"COMPARING {reference} vs {comparison}")
                     reference_dominates, reference_ties_but_better = compare_two_things(frame,
-                                                             algorithm_names,
+                                                             pruned_algorithm_names,
                                                              "all",
                                                              reference,
                                                              comparison,
@@ -1012,13 +1021,46 @@ def main() -> None:
                                                              args.seed,
                                                              muted = True)
                     if reference_dominates:
-                        algorithm_names.remove(comparison)
+                        pruned_algorithm_names.remove(comparison)
+                        print(f"    ** REMOVED {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
+                        restart = True
+                        break
+
+                if restart:
+                    keep_going = True
+                    break
+        report_algorithm_ranking(frame, pruned_algorithm_names)
+
+    if args.show_ranking_pruned_ties:
+        print("\n## RANKING WITH ALL DOMINATED OR TIED-BUT-WORSE HEURISTICS ELIMINATED:")
+        pruned_algorithm_names = list(algorithm_names)
+        keep_going = True
+        while keep_going:
+            keep_going = False
+            for reference in pruned_algorithm_names:
+                restart = False
+                for comparison in pruned_algorithm_names:
+                    if reference == comparison:
+                        continue
+                    # print(f"COMPARING {reference} vs {comparison}")
+                    reference_dominates, reference_ties_but_better = compare_two_things(frame,
+                                                                                        pruned_algorithm_names,
+                                                                                        "all",
+                                                                                        reference,
+                                                                                        comparison,
+                                                                                        args.confidence,
+                                                                                        args.bootstrap_resamples,
+                                                                                        args.seed,
+                                                                                        muted=True)
+                    if reference_dominates:
+                        pruned_algorithm_names.remove(comparison)
                         print(f"    ** REMOVED {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
                         restart = True
                         break
                     elif reference_ties_but_better:
-                        algorithm_names.remove(comparison)
-                        print(f"    ** REMOVED {comparison} FROM CONSIDERATION (ALL TIES BUT WORSE THAN {reference}) **")
+                        pruned_algorithm_names.remove(comparison)
+                        print(
+                            f"    ** REMOVED {comparison} FROM CONSIDERATION (ALL TIES BUT WORSE THAN {reference}) **")
                         restart = True
                         break
 
@@ -1026,7 +1068,7 @@ def main() -> None:
                     keep_going = True
                     break
 
-        report_algorithm_ranking(frame, algorithm_names)
+        report_algorithm_ranking(frame, pruned_algorithm_names)
 
 if __name__ == "__main__":
     main()
