@@ -387,8 +387,7 @@ def compare_two_things(frame: pd.DataFrame,
                        confidence: float,
                        resamples: int,
                        seed: int,
-                       break_ties = False,
-                       muted: bool = False) -> bool:
+                       muted: bool = False) -> (bool, bool):
     if not muted:
         print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
 
@@ -398,7 +397,8 @@ def compare_two_things(frame: pd.DataFrame,
     # Identify all number of nodes
     thing1_never_loses = True
     thing1_wins_at_least_once = False
-    thing1_ties_but_always_in_top = True
+    all_ties_but_thing1_never_below = True
+    all_ties_but_thing1_sometimes_above = False
     num_comparisons = 0
 
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
@@ -495,7 +495,8 @@ def compare_two_things(frame: pd.DataFrame,
 
         if num_ties > 0:
             average_estimate_for_ties /= num_ties
-            thing1_ties_but_always_in_top = thing1_ties_but_always_in_top and (average_estimate_for_ties > 0.0)
+            all_ties_but_thing1_never_below = all_ties_but_thing1_never_below and (average_estimate_for_ties >= 0.0)
+            all_ties_but_thing1_sometimes_above = all_ties_but_thing1_sometimes_above or (average_estimate_for_ties > 0.0)
         else:
             average_estimate_for_ties = 0
 
@@ -507,14 +508,16 @@ def compare_two_things(frame: pd.DataFrame,
             print(
                 f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties (average estimate for ties: {100.0 * average_estimate_for_ties:.2f}%)")
 
-    # print(f"num_comparisons: {num_comparisons}, thing1_never_loses={thing1_never_loses}, thing1_wins_at_least_once={thing1_wins_at_least_once}, thing1_ties_but_always_on_top={thing1_ties_but_always_in_top}")
-    return ((num_comparisons > 0
+    if not muted:
+        print(f"num_comparisons: {num_comparisons}, thing1_never_loses={thing1_never_loses}, thing1_wins_at_least_once={thing1_wins_at_least_once}, all_ties_but_thing1_never_below={all_ties_but_thing1_never_below}, all_ties_but_thing1_sometimes_above={all_ties_but_thing1_sometimes_above}")
+    clear_win = (num_comparisons > 0
              and thing1_never_loses
-             and thing1_wins_at_least_once) or
-            (break_ties and (
-                    num_comparisons > 0 and
+             and thing1_wins_at_least_once)
+    ties_but_better = (num_comparisons > 0 and
                     thing1_never_loses and
-                    thing1_ties_but_always_in_top > 0)))
+                    all_ties_but_thing1_never_below and
+                    all_ties_but_thing1_sometimes_above)
+    return clear_win, ties_but_better
 
 def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
 
@@ -946,7 +949,7 @@ def main() -> None:
                            args.bootstrap_resamples,
                            args.seed)
     elif args.evaluate_greedy and not args.include_static:
-       raise Exception("Cannot evaluate greedy if you exclude static") 
+        raise Exception("Cannot evaluate greedy if you exclude static")
 
     if args.evaluate_foresighted:
         print("\n## RESULTS FOR FORESIGHTED vs. NEARSIGHTED:")
@@ -999,7 +1002,7 @@ def main() -> None:
                     if reference == comparison:
                         continue
                     # print(f"COMPARING {reference} vs {comparison}")
-                    reference_dominates = compare_two_things(frame,
+                    reference_dominates, reference_ties_but_better = compare_two_things(frame,
                                                              algorithm_names,
                                                              "all",
                                                              reference,
@@ -1007,11 +1010,15 @@ def main() -> None:
                                                              args.confidence,
                                                              args.bootstrap_resamples,
                                                              args.seed,
-                                                             break_ties = True,
                                                              muted = True)
                     if reference_dominates:
                         algorithm_names.remove(comparison)
                         print(f"    ** REMOVED {comparison} FROM CONSIDERATION (DOMINATED BY {reference}) **")
+                        restart = True
+                        break
+                    elif reference_ties_but_better:
+                        algorithm_names.remove(comparison)
+                        print(f"    ** REMOVED {comparison} FROM CONSIDERATION (ALL TIES BUT WORSE THAN {reference}) **")
                         restart = True
                         break
 
