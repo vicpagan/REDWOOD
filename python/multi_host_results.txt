@@ -172,7 +172,7 @@ python ./multi_host_result_generation.py ../experiment_results/results_multi_hos
 	
 
    CONCLUSION: EXPECTED_ERROR IS GREAT FOR RESOURCE-SCARCE
-	       SIMPLER METRICS ARE GOOD FOR RESOURCE-PLENTIFUL
+	       SIMPLER CRITERIA ARE GOOD FOR RESOURCE-PLENTIFUL
 	       
 
 ----------------------------------------------------
