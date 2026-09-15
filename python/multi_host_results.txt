@@ -1,0 +1,513 @@
+============= EVALUATE RANDOM ================
+
+RANDOM IS AT BEST more than 2x worse than the best heuristic, and typic
+
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --show-ranking | grep random 
+
+   random__dependent__variant:                                      dfb=428.59	dfo=1106.21
+   random__aggressive__aggressive:                                  dfb=436.97	dfo=1058.31
+   random__independent__aggressive:                                 dfb=484.83	dfo=1081.07
+   random__dependent__aggressive:                                   dfb=494.32	dfo=1096.99
+   random__independent__variant:                                    dfb=498.25	dfo=1118.77
+   random__aggressive__variant:                                     dfb=499.93	dfo=1156.14
+   random__dependent__off:                                          dfb=703.26	dfo=1499.88
+   random__independent__off:                                        dfb=779.49	dfo=1557.62
+   random__aggressive__off:                                         dfb=811.49	dfo=1650.55
+   random__dependent__variant:                                      dfb=254.22	dfo=386.27
+   random__independent__variant:                                    dfb=271.90	dfo=391.16
+   random__aggressive__variant:                                     dfb=301.18	dfo=451.94
+   random__independent__aggressive:                                 dfb=336.18	dfo=473.63
+   random__dependent__aggressive:                                   dfb=341.12	dfo=470.87
+   random__aggressive__aggressive:                                  dfb=344.83	dfo=496.53
+   random__independent__off:                                        dfb=567.02	dfo=533.43
+   random__dependent__off:                                          dfb=578.47	dfo=517.90
+   random__aggressive__off:                                         dfb=701.61	dfo=673.39
+   random__independent__variant:                                    dfb=322.44	dfo=250.58
+   random__independent__off:                                        dfb=342.09	dfo=186.88
+   random__dependent__variant:                                      dfb=368.40	dfo=263.36
+   random__dependent__off:                                          dfb=390.10	dfo=191.98
+   random__aggressive__variant:                                     dfb=457.70	dfo=368.84
+   random__dependent__aggressive:                                   dfb=475.36	dfo=386.63
+   random__aggressive__aggressive:                                  dfb=476.89	dfo=386.88
+   random__independent__aggressive:                                 dfb=482.48	dfo=382.02
+   random__aggressive__off:                                         dfb=630.06	dfo=377.43
+   random__dependent__off:                                          dfb=120.33	dfo=61.92
+   random__independent__off:                                        dfb=127.28	dfo=79.21
+   random__dependent__variant:                                      dfb=326.33	dfo=219.41
+   random__independent__variant:                                    dfb=330.78	dfo=226.49
+   random__aggressive__off:                                         dfb=406.57	dfo=265.31
+   random__aggressive__variant:                                     dfb=473.45	dfo=362.27
+   random__aggressive__aggressive:                                  dfb=474.79	dfo=374.21
+   random__independent__aggressive:                                 dfb=485.49	dfo=373.03
+   random__dependent__aggressive:                                   dfb=489.14	dfo=373.70
+
+num_nodes/rank	2/58  4/61  8/70  16/64
+
+
+================ EVALUATE THE "GREEDY" HEURISTICS =====================
+
+--------------------------------------------------------------
+* [CLEAR] FINDING: STATIC ALWAYS BAD, NEVER MENTION IT AGAIN
+
+COMPARE EACH *greedy*/*/* to EACH *static*/*/*
+python3  ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --evaluate-greedy --include-static
+
+  COMPARISON BETWEEN heuristic:greedy AND heuristic:static **
+  * 2 nodes:
+      12 wins of heuristic:greedy over heuristic:static (average win margin 5.80%, largest win: 14.85%)
+      0 losses of heuristic:greedy to heuristic:static (average loss margin 0.00%, largest loss: 0.00%)
+      60 heuristic:greedy and heuristic:static ties (average estimate for ties: 0.56%)
+  * 4 nodes:
+      21 wins of heuristic:greedy over heuristic:static (average win margin 5.26%, largest win: 8.75%)
+      0 losses of heuristic:greedy to heuristic:static (average loss margin 0.00%, largest loss: 0.00%)
+      51 heuristic:greedy and heuristic:static ties (average estimate for ties: 1.24%)
+  * 8 nodes:
+      25 wins of heuristic:greedy over heuristic:static (average win margin 15.14%, largest win: 95.88%)
+      0 losses of heuristic:greedy to heuristic:static (average loss margin 0.00%, largest loss: 0.00%)
+      47 heuristic:greedy and heuristic:static ties (average estimate for ties: 0.79%)
+  * 16 nodes:
+      27 wins of heuristic:greedy over heuristic:static (average win margin 28.53%, largest win: 191.14%)
+      0 losses of heuristic:greedy to heuristic:static (average loss margin 0.00%, largest loss: 0.00%)
+      45 heuristic:greedy and heuristic:static ties (average estimate for ties: 0.00%)
+
+--------------------------------------------------------------
+* WHAT ABOUT FORESIGHTED / NEARSIGHTED
+
+  * FINDING: COMPARISON: WHEN NEARSIGHTED WINS IT'S TYPICALLY BY LITTLE, WHEN IT LOSES IT'S BY A LOT. AND WHEN IT WINS BY "A LOT", ITS FOR CASES THAT ARE VERY FAR FROM THE BEST APPROACHES ANYWAY 
+
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --evaluate-foresighted
+
+COMPARISON BETWEEN heuristic:foresighted AND heuristic:nearsighted **
+  * 2 nodes:
+	LOSS OF greedy_foresighted_error_level__aggressive__off TO greedy_nearsighted_error_level__aggressive__off: [-9.15%,-4.61%,-1.37%]: REF_DFB=740.38% COMP_DFB=701.63%
+	LOSS OF greedy_foresighted_error_level__dependent__off TO greedy_nearsighted_error_level__dependent__off: [-9.15%,-4.61%,-1.37%]: REF_DFB=740.38% COMP_DFB=701.63%
+	LOSS OF greedy_foresighted_error_level__independent__off TO greedy_nearsighted_error_level__independent__off: [-9.15%,-4.61%,-1.37%]: REF_DFB=740.38% COMP_DFB=701.63%
+      12 wins of heuristic:foresighted over heuristic:nearsighted (average win margin 47.39%, largest win: 58.94%)
+      3 losses of heuristic:foresighted to heuristic:nearsighted (average loss margin -4.61%, largest loss: -4.61%)
+      21 heuristic:foresighted and heuristic:nearsighted ties (average estimate for ties: 2.20%)
+  * 4 nodes:
+	LOSS OF greedy_foresighted_error_level__aggressive__off TO greedy_nearsighted_error_level__aggressive__off: [-21.55%,-10.77%,-2.73%]: REF_DFB=508.19% COMP_DFB=442.70%
+	LOSS OF greedy_foresighted_error_level__dependent__off TO greedy_nearsighted_error_level__dependent__off: [-21.56%,-10.77%,-2.73%]: REF_DFB=508.19% COMP_DFB=442.68%
+	LOSS OF greedy_foresighted_error_level__independent__off TO greedy_nearsighted_error_level__independent__off: [-21.56%,-10.77%,-2.73%]: REF_DFB=508.19% COMP_DFB=442.68%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__off TO greedy_nearsighted_success_error_ratio__aggressive__off: [-29.33%,-15.36%,-3.29%]: REF_DFB=362.03% COMP_DFB=291.07%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__off TO greedy_nearsighted_success_error_ratio__dependent__off: [-29.44%,-15.48%,-3.45%]: REF_DFB=362.64% COMP_DFB=291.01%
+	LOSS OF greedy_foresighted_success_error_ratio__independent__off TO greedy_nearsighted_success_error_ratio__independent__off: [-29.44%,-15.48%,-3.45%]: REF_DFB=362.64% COMP_DFB=291.01%
+      23 wins of heuristic:foresighted over heuristic:nearsighted (average win margin 28.24%, largest win: 57.98%)
+      6 losses of heuristic:foresighted to heuristic:nearsighted (average loss margin -13.11%, largest loss: -15.48%)
+      7 heuristic:foresighted and heuristic:nearsighted ties (average estimate for ties: 2.10%)
+  * 8 nodes:
+	LOSS OF greedy_foresighted_success_error_ratio__independent__variant TO greedy_nearsighted_success_error_ratio__independent__variant: [-1.25%,-1.09%,-0.93%]: REF_DFB=1.25% COMP_DFB=0.15%
+	LOSS OF greedy_foresighted_success_error_ratio__independent__aggressive TO greedy_nearsighted_success_error_ratio__independent__aggressive: [-1.01%,-0.87%,-0.73%]: REF_DFB=0.88% COMP_DFB=0.00%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__variant TO greedy_nearsighted_success_error_ratio__dependent__variant: [-1.25%,-1.09%,-0.93%]: REF_DFB=1.25% COMP_DFB=0.15%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__aggressive TO greedy_nearsighted_success_error_ratio__dependent__aggressive: [-1.01%,-0.87%,-0.73%]: REF_DFB=0.88% COMP_DFB=0.00%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__variant TO greedy_nearsighted_success_error_ratio__aggressive__variant: [-1.38%,-1.20%,-1.04%]: REF_DFB=1.35% COMP_DFB=0.13%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__aggressive TO greedy_nearsighted_success_error_ratio__aggressive__aggressive: [-1.01%,-0.87%,-0.73%]: REF_DFB=0.88% COMP_DFB=0.00%
+	LOSS OF greedy_foresighted_error_level__aggressive__off TO greedy_nearsighted_error_level__aggressive__off: [-1.41%,-0.73%,-0.31%]: REF_DFB=183.31% COMP_DFB=181.23%
+	LOSS OF greedy_foresighted_error_level__dependent__off TO greedy_nearsighted_error_level__dependent__off: [-1.41%,-0.73%,-0.31%]: REF_DFB=183.31% COMP_DFB=181.23%
+	LOSS OF greedy_foresighted_error_level__independent__off TO greedy_nearsighted_error_level__independent__off: [-1.41%,-0.73%,-0.31%]: REF_DFB=183.31% COMP_DFB=181.23%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__off TO greedy_nearsighted_success_error_ratio__aggressive__off: [-5.72%,-2.72%,-0.64%]: REF_DFB=73.21% COMP_DFB=68.50%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__off TO greedy_nearsighted_success_error_ratio__dependent__off: [-6.59%,-3.51%,-1.42%]: REF_DFB=74.65% COMP_DFB=68.52%
+	LOSS OF greedy_foresighted_success_error_ratio__independent__off TO greedy_nearsighted_success_error_ratio__independent__off: [-6.59%,-3.51%,-1.42%]: REF_DFB=74.65% COMP_DFB=68.52%
+      17 wins of heuristic:foresighted over heuristic:nearsighted (average win margin 43.33%, largest win: 72.57%)
+      12 losses of heuristic:foresighted to heuristic:nearsighted (average loss margin -1.49%, largest loss: -3.51%)
+      7 heuristic:foresighted and heuristic:nearsighted ties (average estimate for ties: 3.29%)
+  * 16 nodes:
+	LOSS OF greedy_foresighted_success_error_ratio__independent__variant TO greedy_nearsighted_success_error_ratio__independent__variant: [-1.16%,-1.02%,-0.89%]: REF_DFB=3.94% COMP_DFB=2.88%
+	LOSS OF greedy_foresighted_success_error_ratio__independent__aggressive TO greedy_nearsighted_success_error_ratio__independent__aggressive: [-1.10%,-0.96%,-0.83%]: REF_DFB=3.79% COMP_DFB=2.79%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__variant TO greedy_nearsighted_success_error_ratio__dependent__variant: [-1.16%,-1.02%,-0.89%]: REF_DFB=3.94% COMP_DFB=2.88%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__aggressive TO greedy_nearsighted_success_error_ratio__dependent__aggressive: [-1.10%,-0.96%,-0.83%]: REF_DFB=3.79% COMP_DFB=2.79%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__variant TO greedy_nearsighted_success_error_ratio__aggressive__variant: [-1.38%,-1.22%,-1.06%]: REF_DFB=4.13% COMP_DFB=2.86%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__aggressive TO greedy_nearsighted_success_error_ratio__aggressive__aggressive: [-1.10%,-0.96%,-0.83%]: REF_DFB=3.79% COMP_DFB=2.79%
+	LOSS OF greedy_foresighted_error_level__aggressive__off TO greedy_nearsighted_error_level__aggressive__off: [-1.13%,-0.57%,-0.15%]: REF_DFB=3.30% COMP_DFB=2.71%
+	LOSS OF greedy_foresighted_error_level__dependent__off TO greedy_nearsighted_error_level__dependent__off: [-1.13%,-0.57%,-0.15%]: REF_DFB=3.30% COMP_DFB=2.71%
+	LOSS OF greedy_foresighted_error_level__independent__off TO greedy_nearsighted_error_level__independent__off: [-1.13%,-0.57%,-0.15%]: REF_DFB=3.30% COMP_DFB=2.71%
+	LOSS OF greedy_foresighted_success_error_ratio__aggressive__off TO greedy_nearsighted_success_error_ratio__aggressive__off: [-1.28%,-0.94%,-0.54%]: REF_DFB=8.25% COMP_DFB=7.24%
+	LOSS OF greedy_foresighted_success_error_ratio__dependent__off TO greedy_nearsighted_success_error_ratio__dependent__off: [-2.29%,-1.98%,-1.62%]: REF_DFB=9.86% COMP_DFB=7.69%
+	LOSS OF greedy_foresighted_success_error_ratio__independent__off TO greedy_nearsighted_success_error_ratio__independent__off: [-2.29%,-1.98%,-1.62%]: REF_DFB=9.87% COMP_DFB=7.69%
+      18 wins of heuristic:foresighted over heuristic:nearsighted (average win margin 43.71%, largest win: 103.06%)
+      12 losses of heuristic:foresighted to heuristic:nearsighted (average loss margin -1.06%, largest loss: -1.98%)
+      6 heuristic:foresighted and heuristic:nearsighted ties (average estimate for ties: 0.00%)
+
+
+--------------------------------------------------------------
+* WHAT ABOUT CRITERIA??
+
+  * FINDING: PROBABILITY_SUCCES IS STRICTLY DOMINATED BY EXPECTED ERROR, AND WORSE AS N GROWS
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic nearsighted --evaluate-criteria --exclude-heuristic success_error_ratio --exclude-heuristic error_level
+
+COMPARISON BETWEEN heuristic:probability_success AND heuristic:expected_error **
+  * 2 nodes:
+      0 wins of heuristic:probability_success over heuristic:expected_error (average win margin 0.00%, largest win: 0.00%)
+      9 losses of heuristic:probability_success to heuristic:expected_error (average loss margin -32.45%, largest loss: -35.31%)
+      0 heuristic:probability_success and heuristic:expected_error ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of heuristic:probability_success over heuristic:expected_error (average win margin 0.00%, largest win: 0.00%)
+      9 losses of heuristic:probability_success to heuristic:expected_error (average loss margin -45.39%, largest loss: -49.45%)
+      0 heuristic:probability_success and heuristic:expected_error ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      0 wins of heuristic:probability_success over heuristic:expected_error (average win margin 0.00%, largest win: 0.00%)
+      9 losses of heuristic:probability_success to heuristic:expected_error (average loss margin -53.99%, largest loss: -70.17%)
+      0 heuristic:probability_success and heuristic:expected_error ties (average estimate for ties: 0.00%)
+  * 16 nodes:
+      0 wins of heuristic:probability_success over heuristic:expected_error (average win margin 0.00%, largest win: 0.00%)
+      9 losses of heuristic:probability_success to heuristic:expected_error (average loss margin -58.31%, largest loss: -79.68%)
+      0 heuristic:probability_success and heuristic:expected_error ties (average estimate for ties: 0.00%)
+
+  * GENERAL FINDINGS ABOUT THE OTHER CRITERIA
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic nearsighted --evaluate-criteria --exclude-heuristic probability_success 	
+
+   (">" means "STRICTLY BETTER"):
+   FOR 2 NODES 
+	EXPECTED_ERROR > SUCCESS_ERROR_RATIO > ERROR_LEVEL 
+
+   FOR 4 NODES
+	EXPECTED_ERROR > SUCCESS_ERROR_RATIO > ERROR_LEVEL
+
+   FOR 8 NODES
+	SUCCESS_ERROR_RATIO > ERROR_LEVEL  almost> EXPECTED_ERROR
+
+   FOR 16 NODES
+	ERROR_LEVEL > SUCCESS_ERROR_RATIO  almost> EXPECTED_ERROR
+                  ~5%
+	
+
+   CONCLUSION: EXPECTED_ERROR IS GREAT FOR RESOURCE-SCARCE
+	       SIMPLER METRICS ARE GOOD FOR RESOURCE-PLENTIFUL
+	       
+
+----------------------------------------------------
+* WHAT ABOUT TEMPORAL REDUNDANCY?
+
+  FINDING: INDEPENDENT AND DEPENDENT ARE ABOUT THE SAME, BUT DEPENDENT IS BETTER
+  FINDING: DEPENDENT IS BETTER THAN AGGRESSIVE: IT WINS MORE, WHEN WINS WINS BY A UP TO A LOT AND WHEN LOSES LOSES BY LITTLE 
+
+
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic nearsighted  --exclude-heuristic probability_success --evaluate-temporal --exclude-heuristic random --exclude-heuristic dynamic
+
+  COMPARISON BETWEEN temporal:independent AND temporal:dependent **
+  * 2 nodes:
+      0 wins of temporal:independent over temporal:dependent (average win margin 0.00%, largest win: 0.00%)
+      1 losses of temporal:independent to temporal:dependent (average loss margin -0.02%, largest loss: -0.02%)
+      8 temporal:independent and temporal:dependent ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of temporal:independent over temporal:dependent (average win margin 0.00%, largest win: 0.00%)
+      1 losses of temporal:independent to temporal:dependent (average loss margin -0.02%, largest loss: -0.02%)
+      8 temporal:independent and temporal:dependent ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      0 wins of temporal:independent over temporal:dependent (average win margin 0.00%, largest win: 0.00%)
+      0 losses of temporal:independent to temporal:dependent (average loss margin 0.00%, largest loss: 0.00%)
+      9 temporal:independent and temporal:dependent ties (average estimate for ties: -0.00%)
+  * 16 nodes:
+      0 wins of temporal:independent over temporal:dependent (average win margin 0.00%, largest win: 0.00%)
+      1 losses of temporal:independent to temporal:dependent (average loss margin -0.01%, largest loss: -0.01%)
+      8 temporal:independent and temporal:dependent ties (average estimate for ties: 0.00%)
+
+** COMPARISON BETWEEN temporal:independent AND temporal:aggressive **
+  * 2 nodes:
+      3 wins of temporal:independent over temporal:aggressive (average win margin 3.05%, largest win: 8.06%)
+      1 losses of temporal:independent to temporal:aggressive (average loss margin -0.01%, largest loss: -0.01%)
+      5 temporal:independent and temporal:aggressive ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      3 wins of temporal:independent over temporal:aggressive (average win margin 8.66%, largest win: 24.96%)
+      1 losses of temporal:independent to temporal:aggressive (average loss margin -0.13%, largest loss: -0.13%)
+      5 temporal:independent and temporal:aggressive ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      2 wins of temporal:independent over temporal:aggressive (average win margin 22.27%, largest win: 44.46%)
+      1 losses of temporal:independent to temporal:aggressive (average loss margin -0.83%, largest loss: -0.83%)
+      6 temporal:independent and temporal:aggressive ties (average estimate for ties: 0.09%)
+  * 16 nodes:
+      2 wins of temporal:independent over temporal:aggressive (average win margin 24.54%, largest win: 48.90%)
+      1 losses of temporal:independent to temporal:aggressive (average loss margin -1.47%, largest loss: -1.47%)
+      6 temporal:independent and temporal:aggressive ties (average estimate for ties: 0.08%)
+
+** COMPARISON BETWEEN temporal:dependent AND temporal:aggressive **
+  * 2 nodes:
+      3 wins of temporal:dependent over temporal:aggressive (average win margin 3.05%, largest win: 8.08%)
+      1 losses of temporal:dependent to temporal:aggressive (average loss margin -0.01%, largest loss: -0.01%)
+      5 temporal:dependent and temporal:aggressive ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      3 wins of temporal:dependent over temporal:aggressive (average win margin 8.67%, largest win: 24.98%)
+      1 losses of temporal:dependent to temporal:aggressive (average loss margin -0.13%, largest loss: -0.13%)
+      5 temporal:dependent and temporal:aggressive ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      2 wins of temporal:dependent over temporal:aggressive (average win margin 22.28%, largest win: 44.46%)
+      1 losses of temporal:dependent to temporal:aggressive (average loss margin -0.83%, largest loss: -0.83%)
+      6 temporal:dependent and temporal:aggressive ties (average estimate for ties: 0.09%)
+  * 16 nodes:
+      2 wins of temporal:dependent over temporal:aggressive (average win margin 24.54%, largest win: 48.90%)
+      1 losses of temporal:dependent to temporal:aggressive (average loss margin -1.46%, largest loss: -1.46%)
+      6 temporal:dependent and temporal:aggressive ties (average estimate for ties: 0.08%)
+
+
+
+----------------------------------------------------
+* WHAT ABOUT REACTIVE RESCHEDULING 
+
+FINDING: VARIANT AND AGGRESSIVE ARE BASICALLY THE SAME WITH TINY WINS/LOSSES
+FINDING: OFF LOSES WITH LOW N, BUT WINS SOME AT HIGH N=16
+
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic nearsighted  --exclude-heuristic probability_success --evaluate-reactive --exclude-heuristic random --exclude-heuristic dynamic
+
+COMPARISON BETWEEN reactive:off AND reactive:variant **
+  * 2 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      9 losses of reactive:off to reactive:variant (average loss margin -39.55%, largest loss: -44.01%)
+      0 reactive:off and reactive:variant ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      7 losses of reactive:off to reactive:variant (average loss margin -64.65%, largest loss: -73.94%)
+      2 reactive:off and reactive:variant ties (average estimate for ties: -28.40%)
+  * 8 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      6 losses of reactive:off to reactive:variant (average loss margin -48.64%, largest loss: -55.43%)
+      3 reactive:off and reactive:variant ties (average estimate for ties: 15.16%)
+  * 16 nodes:
+      3 wins of reactive:off over reactive:variant (average win margin 76.61%, largest win: 98.09%)
+      6 losses of reactive:off to reactive:variant (average loss margin -4.03%, largest loss: -5.39%)
+      0 reactive:off and reactive:variant ties (average estimate for ties: 0.00%)
+
+** COMPARISON BETWEEN reactive:off AND reactive:aggressive **
+  * 2 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      9 losses of reactive:off to reactive:aggressive (average loss margin -39.44%, largest loss: -44.00%)
+      0 reactive:off and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      7 losses of reactive:off to reactive:aggressive (average loss margin -64.70%, largest loss: -73.96%)
+      2 reactive:off and reactive:aggressive ties (average estimate for ties: -28.10%)
+  * 8 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      6 losses of reactive:off to reactive:aggressive (average loss margin -48.75%, largest loss: -55.43%)
+      3 reactive:off and reactive:aggressive ties (average estimate for ties: 15.32%)
+  * 16 nodes:
+      3 wins of reactive:off over reactive:aggressive (average win margin 77.83%, largest win: 99.68%)
+      6 losses of reactive:off to reactive:aggressive (average loss margin -4.13%, largest loss: -5.53%)
+      0 reactive:off and reactive:aggressive ties (average estimate for ties: 0.00%)
+
+** COMPARISON BETWEEN reactive:variant AND reactive:aggressive **
+  * 2 nodes:
+      2 wins of reactive:variant over reactive:aggressive (average win margin 0.90%, largest win: 0.90%)
+      2 losses of reactive:variant to reactive:aggressive (average loss margin -0.09%, largest loss: -0.17%)
+      5 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of reactive:variant over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      2 losses of reactive:variant to reactive:aggressive (average loss margin -0.33%, largest loss: -0.52%)
+      7 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.11%)
+  * 8 nodes:
+      0 wins of reactive:variant over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      4 losses of reactive:variant to reactive:aggressive (average loss margin -0.36%, largest loss: -0.46%)
+      5 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.11%)
+  * 16 nodes:
+      3 wins of reactive:variant over reactive:aggressive (average win margin 0.65%, largest win: 0.81%)
+      3 losses of reactive:variant to reactive:aggressive (average loss margin -0.21%, largest loss: -0.33%)
+      3 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.00%)
+
+--------------------------------------------------------------------------------
+RANKING INCLUDE ALL THE POSSIBLE OPTIONS, PRUNING DOMINATED-ONES
+
+ python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --exclude-heuristic random --exclude-heuristic dynamic --exclude-heuristic probability_success  --show-ranking-pruned-ties  --exclude-temporal independent
+Loaded 52400 rows from ../experiment_results/results_multi_host_new.csv
+Removed 36 algorithm columns for heuristic with substring 'probability_success'
+Removed 9 algorithm columns for heuristic with substring 'random'
+Removed 9 algorithm columns for heuristic with substring 'dynamic'
+Removed 54 algorithm columns for heuristic with substring 'static'
+Processing results for 54 algorithms
+
+## RANKING WITH ALL DOMINATED OR TIED-BUT-WORSE HEURISTICS ELIMINATED:
+    ** REMOVED greedy_foresighted_error_level__dependent__variant FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_foresighted_error_level__dependent__aggressive FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_foresighted_error_level__aggressive__variant FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_foresighted_error_level__aggressive__aggressive FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_nearsighted_error_level__dependent__variant FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_nearsighted_error_level__dependent__aggressive FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_nearsighted_error_level__aggressive__variant FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_nearsighted_error_level__aggressive__aggressive FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+    ** REMOVED greedy_foresighted_expected_error__aggressive__off FROM CONSIDERATION (DOMINATED BY greedy_foresighted_expected_error__dependent__off) **
+
+** ALGORITHM RANKING **
+	
+  * 2 nodes:
+    greedy_foresighted_expected_error__dependent__variant:           dfb=0.00	dfo=258.77
+    greedy_foresighted_expected_error__dependent__off:               dfb=62.75	dfo=340.73
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=229.47	dfo=948.12
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=229.47	dfo=948.12
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=249.78	dfo=1002.86
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=249.78	dfo=1002.86
+  * 4 nodes:
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.00	dfo=177.48
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=0.00	dfo=177.48
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.28	dfo=185.17
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=2.28	dfo=185.17
+    greedy_foresighted_expected_error__dependent__variant:           dfb=4.79	dfo=119.16
+    greedy_foresighted_expected_error__dependent__off:               dfb=46.35	dfo=95.19
+  * 8 nodes:
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=0.00	dfo=21.33
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=0.00	dfo=21.33
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.88	dfo=22.66
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=0.88	dfo=22.66
+    greedy_foresighted_expected_error__dependent__off:               dfb=44.93	dfo=21.38
+    greedy_foresighted_expected_error__dependent__variant:           dfb=85.74	dfo=82.53
+  * 16 nodes:
+    greedy_foresighted_expected_error__dependent__off:               dfb=0.00	dfo=0.84
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.49	dfo=1.89
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=2.49	dfo=1.89
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=3.49	dfo=3.31
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=3.49	dfo=3.31
+    greedy_foresighted_expected_error__dependent__variant:           dfb=98.09	dfo=73.36
+
+
+Every *__dependent__aggressive  and its corresponding *__aggressive__aggressive  is the SAME. Removing the __aggressive__aggressive version we get:
+
+** ALGORITHM RANKING **
+	
+  * 2 nodes:
+    greedy_foresighted_expected_error__dependent__variant:           dfb=0.00	dfo=258.77
+    greedy_foresighted_expected_error__dependent__off:               dfb=62.75	dfo=340.73
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=229.47	dfo=948.12
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=249.78	dfo=1002.86
+  * 4 nodes:
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.00	dfo=177.48
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.28	dfo=185.17
+    greedy_foresighted_expected_error__dependent__variant:           dfb=4.79	dfo=119.16
+    greedy_foresighted_expected_error__dependent__off:               dfb=46.35	dfo=95.19
+  * 8 nodes:
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=0.00	dfo=21.33
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.88	dfo=22.66
+    greedy_foresighted_expected_error__dependent__off:               dfb=44.93	dfo=21.38
+    greedy_foresighted_expected_error__dependent__variant:           dfb=85.74	dfo=82.53
+  * 16 nodes:
+    greedy_foresighted_expected_error__dependent__off:               dfb=0.00	dfo=0.84
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.49	dfo=1.89
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=3.49	dfo=3.31
+    greedy_foresighted_expected_error__dependent__variant:           dfb=98.09	dfo=73.36
+
+
+======================= EVALUATE DYNAMIC ====================
+
+FINDING: FOR DYNAMIC REACTIVE MUST BE AGGRESSIVE
+FINDING: FOR DYNAMIC TEMPORAL DOESN'T REALLY MATTER
+	
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --exclude-heuristic random --exclude-heuristic greedy --show-ranking-pruned-ties
+Loaded 52400 rows from ../experiment_results/results_multi_host_new.csv
+Removed 9 algorithm columns for heuristic with substring 'random'
+Removed 72 algorithm columns for heuristic with substring 'greedy'
+Removed 72 algorithm columns for heuristic with substring 'static'
+Processing results for 9 algorithms
+
+## RANKING WITH ALL DOMINATED OR TIED-BUT-WORSE HEURISTICS ELIMINATED:
+    ** REMOVED dynamic__aggressive__variant FROM CONSIDERATION (DOMINATED BY dynamic__independent__variant) **
+    ** REMOVED dynamic__aggressive__off FROM CONSIDERATION (DOMINATED BY dynamic__independent__variant) **
+    ** REMOVED dynamic__dependent__off FROM CONSIDERATION (DOMINATED BY dynamic__independent__variant) **
+    ** REMOVED dynamic__independent__off FROM CONSIDERATION (DOMINATED BY dynamic__independent__variant) **
+    ** REMOVED dynamic__independent__variant FROM CONSIDERATION (DOMINATED BY dynamic__independent__aggressive) **
+    ** REMOVED dynamic__dependent__variant FROM CONSIDERATION (DOMINATED BY dynamic__independent__aggressive) **
+
+** ALGORITHM RANKING **
+  * 2 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00	dfo=204.40
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=204.40
+    dynamic__aggressive__aggressive:                                 dfb=0.00	dfo=204.40
+  * 4 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00	dfo=76.16
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=76.16
+    dynamic__aggressive__aggressive:                                 dfb=0.00	dfo=76.16
+  * 8 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00	dfo=48.03
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=48.03
+    dynamic__aggressive__aggressive:                                 dfb=0.00	dfo=48.03
+  * 16 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00	dfo=43.16
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=43.16
+    dynamic__aggressive__aggressive:                                 dfb=0.00	dfo=43.16
+
+
+========================== OVERALL COMPARISON OF HEURISTICS ==========================
+
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --exclude-heuristic greedy --exclude-heuristic probability_success --exclude_heuristic error_level  --show-ranking-pruned-ties
+
+  * 2 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00	dfo=204.40
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=204.40
+    dynamic__aggressive__aggressive:                                 dfb=0.00	dfo=204.40
+    greedy_foresighted_expected_error__dependent__off:               dfb=88.80	dfo=340.73
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=282.19	dfo=948.12
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=282.19	dfo=948.12
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=282.19	dfo=948.12
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=305.76	dfo=1002.86
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=305.76	dfo=1002.86
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=305.76	dfo=1002.86
+  * 4 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00	dfo=76.16
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=76.16
+    dynamic__aggressive__aggressive:                                 dfb=0.00	dfo=76.16
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=20.49	dfo=177.48
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=20.49	dfo=177.48
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=20.49	dfo=177.48
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=23.24	dfo=185.17
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=23.24	dfo=185.17
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=23.24	dfo=185.17
+    greedy_foresighted_expected_error__dependent__off:               dfb=76.33	dfo=95.19
+  * 8 nodes:
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=0.00	dfo=21.33
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=0.00	dfo=21.33
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=0.00	dfo=21.33
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=0.88	dfo=22.66
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.88	dfo=22.66
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=0.88	dfo=22.66
+    greedy_foresighted_expected_error__dependent__off:               dfb=44.93	dfo=21.38
+    dynamic__independent__aggressive:                                dfb=47.76	dfo=48.03
+    dynamic__dependent__aggressive:                                  dfb=47.76	dfo=48.03
+    dynamic__aggressive__aggressive:                                 dfb=47.76	dfo=48.03
+  * 16 nodes:
+    greedy_foresighted_expected_error__dependent__off:               dfb=0.00	dfo=0.84
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=2.49	dfo=1.89
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.49	dfo=1.89
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=2.49	dfo=1.89
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=3.49	dfo=3.31
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=3.49	dfo=3.31
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=3.49	dfo=3.31
+    dynamic__independent__aggressive:                                dfb=58.28	dfo=43.16
+    dynamic__dependent__aggressive:                                  dfb=58.28	dfo=43.16
+    dynamic__aggressive__aggressive:                                 dfb=58.28	dfo=43.16
+
+
+NOTE ALL THE DUPLICATES/EQUIVALENTS ABOVE
+
+
+
+* QUICK-TO-RUN RANKING OF PARTICULAR STRATEGIES, EXCLUDING ALL THE OTHERS, FOR INSTANCE
+
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --exclude-heuristic random --exclude-heuristic greedy --exclude-heuristic dynamic  --show-ranking-pruned-ties --include-algorithm dynamic__dependent__aggressive --include-algorithm greedy_foresighted_expected_error__dependent__off --include-algorithm greedy_nearsighted_success_error_ratio__dependent__aggressive --include-algorithm greedy_foresighted_success_error_ratio__dependent__aggressive --include-algorithm greedy_foresighted_expected_error__dependent__variant
+Loaded 52400 rows from ../experiment_results/results_multi_host_new.csv
+Removed 8 algorithm columns for heuristic with substring 'dynamic'
+Removed 72 algorithm columns for heuristic with substring 'static'
+Removed 9 algorithm columns for heuristic with substring 'random'
+Removed 68 algorithm columns for heuristic with substring 'greedy'
+Processing results for 5 algorithms
+
+## RANKING WITH ALL DOMINATED OR TIED-BUT-WORSE HEURISTICS ELIMINATED:
+    ** REMOVED greedy_foresighted_expected_error__dependent__variant FROM CONSIDERATION (DOMINATED BY dynamic__dependent__aggressive) **
+
+** ALGORITHM RANKING **
+  * 2 nodes:
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=204.40
+    greedy_foresighted_expected_error__dependent__off:               dfb=88.80	dfo=340.73
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=282.19	dfo=948.12
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=305.76	dfo=1002.86
+  * 4 nodes:
+    dynamic__dependent__aggressive:                                  dfb=0.00	dfo=76.16
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=20.49	dfo=177.48
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=23.24	dfo=185.17
+    greedy_foresighted_expected_error__dependent__off:               dfb=76.33	dfo=95.19
+  * 8 nodes:
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=0.00	dfo=21.33
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.88	dfo=22.66
+    greedy_foresighted_expected_error__dependent__off:               dfb=44.93	dfo=21.38
+    dynamic__dependent__aggressive:                                  dfb=47.76	dfo=48.03
+  * 16 nodes:
+    greedy_foresighted_expected_error__dependent__off:               dfb=0.00	dfo=0.84
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.49	dfo=1.89
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=3.49	dfo=3.31
+    dynamic__dependent__aggressive:                                  dfb=58.28	dfo=43.16
+
+
