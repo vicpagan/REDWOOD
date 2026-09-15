@@ -385,7 +385,71 @@ Every *__dependent__aggressive  and its corresponding *__aggressive__aggressive 
 ======================= EVALUATE DYNAMIC ====================
 
 FINDING: FOR DYNAMIC REACTIVE MUST BE AGGRESSIVE
-FINDING: FOR DYNAMIC TEMPORAL DOESN'T REALLY MATTER
+
+python3 ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic random --exclude-heuristic greedy --evaluate-reactive
+Loaded 52400 rows from ../experiment_results/results_multi_host_new.csv
+Removed 9 algorithm columns for heuristic with substring 'random'
+Removed 72 algorithm columns for heuristic with substring 'static'
+Removed 72 algorithm columns for heuristic with substring 'greedy'
+Processing results for 9 algorithms
+
+## RESULTS FOR REACTIVE RESCHEDULING:
+
+** COMPARISON BETWEEN reactive:off AND reactive:variant **
+  * 2 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:variant (average loss margin -49.66%, largest loss: -49.75%)
+      0 reactive:off and reactive:variant ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:variant (average loss margin -32.26%, largest loss: -32.55%)
+      0 reactive:off and reactive:variant ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:variant (average loss margin -18.78%, largest loss: -19.28%)
+      0 reactive:off and reactive:variant ties (average estimate for ties: 0.00%)
+  * 16 nodes:
+      0 wins of reactive:off over reactive:variant (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:variant (average loss margin -10.36%, largest loss: -11.62%)
+      0 reactive:off and reactive:variant ties (average estimate for ties: 0.00%)
+
+** COMPARISON BETWEEN reactive:off AND reactive:aggressive **
+  * 2 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:aggressive (average loss margin -49.71%, largest loss: -49.83%)
+      0 reactive:off and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 4 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:aggressive (average loss margin -32.64%, largest loss: -32.92%)
+      0 reactive:off and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:aggressive (average loss margin -19.15%, largest loss: -19.62%)
+      0 reactive:off and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 16 nodes:
+      0 wins of reactive:off over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:off to reactive:aggressive (average loss margin -10.68%, largest loss: -11.88%)
+      0 reactive:off and reactive:aggressive ties (average estimate for ties: 0.00%)
+
+** COMPARISON BETWEEN reactive:variant AND reactive:aggressive **
+  * 2 nodes:
+      0 wins of reactive:variant over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      1 losses of reactive:variant to reactive:aggressive (average loss margin -0.16%, largest loss: -0.16%)
+      2 reactive:variant and reactive:aggressive ties (average estimate for ties: -0.08%)
+  * 4 nodes:
+      0 wins of reactive:variant over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:variant to reactive:aggressive (average loss margin -0.56%, largest loss: -0.57%)
+      0 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 8 nodes:
+      0 wins of reactive:variant over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:variant to reactive:aggressive (average loss margin -0.46%, largest loss: -0.54%)
+      0 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.00%)
+  * 16 nodes:
+      0 wins of reactive:variant over reactive:aggressive (average win margin 0.00%, largest win: 0.00%)
+      3 losses of reactive:variant to reactive:aggressive (average loss margin -0.36%, largest loss: -0.49%)
+      0 reactive:variant and reactive:aggressive ties (average estimate for ties: 0.00%)
+
+FINDING: IF AGGRESSIVE REACTIVE, THEN DYNAMIC TEMPORAL DOESN'T MATTER
 	
 python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --exclude-heuristic random --exclude-heuristic greedy --show-ranking-pruned-ties
 Loaded 52400 rows from ../experiment_results/results_multi_host_new.csv
