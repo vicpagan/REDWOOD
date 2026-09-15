@@ -610,7 +610,7 @@ def keep_independent_temporal_redundancy_columns(frame: pd.DataFrame,) -> pd.Dat
 
     return frame.drop(columns=columns_to_drop)
 
-def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str) -> pd.DataFrame:
+def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str, to_keep: list[str]) -> pd.DataFrame:
     """ Filter out heuristics
     """
     columns_to_drop: list[str] = []
@@ -623,7 +623,7 @@ def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str) -> 
 
         heuristic, _, _ = components
 
-        if substring in heuristic:
+        if substring in heuristic and column not in to_keep:
             columns_to_drop.append(column)
 
     print(
@@ -633,7 +633,7 @@ def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str) -> 
     return frame.drop(columns=columns_to_drop)
 
 
-def filter_out_reactive_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFrame:
+def filter_out_reactive_option(frame: pd.DataFrame, to_remove: str, to_keep: list[str]) -> pd.DataFrame:
     """ Filter out reactive option
     """
     columns_to_drop: list[str] = []
@@ -646,7 +646,7 @@ def filter_out_reactive_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFr
 
         _, _, reactive = components
 
-        if reactive == to_remove:
+        if reactive == to_remove and column not in to_keep:
             columns_to_drop.append(column)
 
     print(
@@ -655,7 +655,7 @@ def filter_out_reactive_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFr
 
     return frame.drop(columns=columns_to_drop)
 
-def filter_out_temporal_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFrame:
+def filter_out_temporal_option(frame: pd.DataFrame, to_remove: str, to_keep: list[str]) -> pd.DataFrame:
     """ Filter out reactive option
     """
     columns_to_drop: list[str] = []
@@ -668,7 +668,7 @@ def filter_out_temporal_option(frame: pd.DataFrame, to_remove: str) -> pd.DataFr
 
         _, temporal, _ = components
 
-        if temporal == to_remove:
+        if temporal == to_remove and column not in to_keep:
             columns_to_drop.append(column)
 
     print(
@@ -780,6 +780,16 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "Do not exclude the 'static' heuristics"
+        ),
+    )
+
+    parser.add_argument(
+        "--include-algorithm",
+        action="append",
+        default=[],
+        metavar="SUBSTRING",
+        help=(
+            "Include the algorithm regardless of exclusions, given the algorithm's full name, e.g., greedy_foresighted_expected_error__independent__aggressive"
         ),
     )
 
@@ -921,18 +931,20 @@ def main() -> None:
         to_exclude = list(set(args.exclude_heuristic + ["static"]))
 
     for substring in to_exclude:
-        frame = filter_out_heuristic_with_substring(frame, substring)
+        frame = filter_out_heuristic_with_substring(frame, substring, args.include_algorithm)
 
     # Filter out temporal scheme
     for substring in  args.exclude_temporal:
-        frame = filter_out_temporal_option(frame, substring)
+        frame = filter_out_temporal_option(frame, substring, args.include_algorithm)
 
     # Filter out reactive scheme
     for substring in args.exclude_reactive:
-        frame = filter_out_reactive_option(frame, substring)
+        frame = filter_out_reactive_option(frame, substring, args.include_algorithm)
 
     # Figure out all the algorithms
     algorithm_names = discover_algorithm_names(frame)
+
+
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
 
