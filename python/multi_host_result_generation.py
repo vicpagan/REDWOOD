@@ -387,9 +387,15 @@ def compare_two_things(frame: pd.DataFrame,
                        confidence: float,
                        resamples: int,
                        seed: int,
+                       show_ranks_for_loss: bool = False,
+                       show_ranks_for_win: bool = False,
                        muted: bool = False) -> (bool, bool):
     if not muted:
         print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
+
+    if show_ranks_for_loss:
+        rankings_dict = report_algorithm_ranking(frame, algorithm_names, muted=True)
+
 
     if kind not in ["all", "heuristic", "temporal", "reactive"]:
         raise ValueError(f"{kind} is not valid")
@@ -427,6 +433,7 @@ def compare_two_things(frame: pd.DataFrame,
         largest_loss = 0
         largest_win = 0
         average_estimate_for_ties = 0
+
         for algorithm_name in algorithm_names:
             heuristic, temporal_redundancy, reactive_rescheduling = algorithm_name.split("__")
             if kind == "all":
@@ -474,12 +481,20 @@ def compare_two_things(frame: pd.DataFrame,
                 average_win_margin += estimate
                 if estimate > largest_win:
                     largest_win = estimate
+                if show_ranks_for_win:
+                    print(f"\tWIN OF {reference_column} OVER {comparison_column}: [{100.0*low:.2f}%,{100.0*estimate:.2f}%,{100.0*high:.2f}%]: "
+                          f"REF_DFB={100.0*rankings_dict[num_nodes][reference_column]}  "
+                          f"COMP_DFB={100.0*rankings_dict[num_nodes][comparison_column]}")
             elif high < 0:
                 thing1_never_loses = False
                 num_losses += 1
                 average_loss_margin += estimate
                 if estimate < largest_loss:
                     largest_loss = estimate
+                if show_ranks_for_loss:
+                    print(f"\tLOSS OF {reference_column} TO {comparison_column}: [{100.0*low:.2f}%,{100.0*estimate:.2f}%,{100.0*high:.2f}%]: "
+                          f"REF_DFB={100.0*rankings_dict[num_nodes][reference_column]:.2f}% "
+                          f"COMP_DFB={100.0*rankings_dict[num_nodes][comparison_column]:.2f}%")
             else:
                 average_estimate_for_ties += estimate
                 num_ties += 1
@@ -508,8 +523,8 @@ def compare_two_things(frame: pd.DataFrame,
             print(
                 f"      {num_ties} {kind}:{thing1} and {kind}:{thing2} ties (average estimate for ties: {100.0 * average_estimate_for_ties:.2f}%)")
 
-    if not muted:
-        print(f"num_comparisons: {num_comparisons}, thing1_never_loses={thing1_never_loses}, thing1_wins_at_least_once={thing1_wins_at_least_once}, all_ties_but_thing1_never_below={all_ties_but_thing1_never_below}, all_ties_but_thing1_sometimes_above={all_ties_but_thing1_sometimes_above}")
+ #   if not muted:
+ #       print(f"\nnum_comparisons: {num_comparisons}, thing1_never_loses={thing1_never_loses}, thing1_wins_at_least_once={thing1_wins_at_least_once}, all_ties_but_thing1_never_below={all_ties_but_thing1_never_below}, all_ties_but_thing1_sometimes_above={all_ties_but_thing1_sometimes_above}")
     clear_win = (num_comparisons > 0
              and thing1_never_loses
              and thing1_wins_at_least_once)
@@ -519,14 +534,17 @@ def compare_two_things(frame: pd.DataFrame,
                     all_ties_but_thing1_sometimes_above)
     return clear_win, ties_but_better
 
-def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
+def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str], muted: bool = False) -> dict[int, dict[str, float]]:
 
-    print(f"\n** ALGORITHM RANKING **")
+    ranking_dict = {}
+    if not muted:
+        print(f"\n** ALGORITHM RANKING **")
 
     # Identify all number of nodes
     num_nodes_values = sorted(list(set(frame["num_nodes"].to_numpy(dtype=int))))
     for num_nodes in num_nodes_values:
-        print(f"  * {num_nodes} nodes:")
+        if not muted:
+            print(f"  * {num_nodes} nodes:")
         matching_rows = np.equal(frame["num_nodes"], num_nodes)
         tmp_frame = frame.loc[matching_rows].copy()
 
@@ -541,6 +559,7 @@ def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
         lowest_mean_error = min(mean_errors.values())
         for algorithm_name, mean_value in mean_errors.items():
             mean_errors[algorithm_name] = (mean_errors[algorithm_name] - lowest_mean_error) / lowest_mean_error
+        ranking_dict[num_nodes] = mean_errors
 
         # Compute relative different with best-case
         distance_from_optimal = {}
@@ -554,8 +573,11 @@ def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str]):
             dfo /= len(values)
             distance_from_optimal[algorithm_name] = dfo
 
-        for key, value in sorted(mean_errors.items(), key=lambda item: item[1]):
-            print(f"    {key+":":64} dfb={100.0 * value:.2f}\tdfo={100.0 * distance_from_optimal[key]:.2f}")
+        if not muted:
+            for key, value in sorted(mean_errors.items(), key=lambda item: item[1]):
+                print(f"    {key+":":64} dfb={100.0 * value:.2f}\tdfo={100.0 * distance_from_optimal[key]:.2f}")
+
+    return ranking_dict
 
 #
 # Filtering methods
@@ -968,7 +990,9 @@ def main() -> None:
                            "nearsighted",
                            args.confidence,
                            args.bootstrap_resamples,
-                           args.seed)
+                           args.seed,
+                           show_ranks_for_loss=True,
+                           muted=False)
 
     if args.evaluate_criteria:
         print("\n## RESULTS FOR DIFFERENT CRITERIA:")
@@ -984,7 +1008,10 @@ def main() -> None:
                                    t2,
                                    args.confidence,
                                    args.bootstrap_resamples,
-                                   args.seed)
+                                   args.seed,
+                                   show_ranks_for_loss=True,
+                                   show_ranks_for_win=True,
+                                   muted=False)
 
 
     if args.evaluate_random:
