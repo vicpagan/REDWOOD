@@ -288,15 +288,11 @@ def plot_multi_host_ranking(
 
         max_value = max((value for _, _, _, value in records), default=0.0)
         for row_y, _, _, value in records:
-            text = (
-                "best"
-                if math.isclose(value, 0.0, abs_tol=1e-12)
-                else f"{value:.{value_decimals}f}%"
-            )
+            text = "← best (0%)" if math.isclose(value, 0.0, abs_tol=1e-12) else f"{value:.1f}%"
             ax.annotate(
                 text,
                 xy=(value, row_y),
-                xytext=(3, 0),
+                xytext=(2, -0.5),
                 textcoords="offset points",
                 ha="left",
                 va="center",
@@ -318,7 +314,7 @@ def plot_multi_host_ranking(
             ax.set_ylim(ymax, ymin)
         ax.margins(y=0)
 
-        ax.set_xlabel("Degradation from best mean error (%)")
+        ax.set_xlabel("Degradation from best mean error")
         ax.grid(axis="x", linestyle=":", linewidth=0.55)
         ax.set_axisbelow(True)
         ax.spines["top"].set_visible(False)
@@ -333,6 +329,8 @@ def plot_multi_host_ranking(
             ax.set_xlim(0, max_value * 1.17)
         else:
             ax.set_xlim(0, 1)
+
+        ax.set_xticks([0,1,10,100],["0%","1%","10%","100%"])
 
         if output_path is not None:
             output = Path(output_path)
