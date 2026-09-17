@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from fontTools.varLib.models import allEqualTo
 from scipy.stats import t
-import sys
+import json
 
 
 # CSV naming conventions.
@@ -394,7 +394,7 @@ def compare_two_things(frame: pd.DataFrame,
         print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
 
     if show_ranks_for_loss:
-        rankings_dict = report_algorithm_ranking(frame, algorithm_names, muted=True)
+        rankings_dict = report_algorithm_ranking(frame, algorithm_names, muted=True, generate_json=False)
 
 
     if kind not in ["all", "heuristic", "temporal", "reactive"]:
@@ -534,7 +534,8 @@ def compare_two_things(frame: pd.DataFrame,
                     all_ties_but_thing1_sometimes_above)
     return clear_win, ties_but_better
 
-def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str], muted: bool = False) -> dict[int, dict[str, float]]:
+def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str],
+                             muted: bool = False, generate_json: bool = True) -> dict[int, dict[str, float]]:
 
     ranking_dict = {}
     if not muted:
@@ -576,6 +577,14 @@ def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str], mu
         if not muted:
             for key, value in sorted(mean_errors.items(), key=lambda item: item[1]):
                 print(f"    {key+":":64} dfb={100.0 * value:.2f}\tdfo={100.0 * distance_from_optimal[key]:.2f}")
+
+    if generate_json:
+        ranking_results_file = "./multi_host_ranking_results.json"
+        json_object = {}
+        for num_nodes in ranking_dict.keys():
+            json_object[int(num_nodes)] = ranking_dict[num_nodes]
+        json.dump(json_object, open(ranking_results_file, "w"))
+        print(f"\nRanking results output in file {ranking_results_file}")
 
     return ranking_dict
 
@@ -1036,7 +1045,7 @@ def main() -> None:
 
     if args.show_ranking:
         print("\n## RANKING:")
-        report_algorithm_ranking(frame, algorithm_names)
+        report_algorithm_ranking(frame, algorithm_names, muted=False, generate_json=True)
 
     if args.show_ranking_pruned:
         pruned_algorithm_names = list(algorithm_names)
@@ -1068,7 +1077,7 @@ def main() -> None:
                 if restart:
                     keep_going = True
                     break
-        report_algorithm_ranking(frame, pruned_algorithm_names)
+        report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True)
 
     if args.show_ranking_pruned_ties:
         print("\n## RANKING WITH ALL DOMINATED OR TIED-BUT-WORSE HEURISTICS ELIMINATED:")
@@ -1107,7 +1116,7 @@ def main() -> None:
                     keep_going = True
                     break
 
-        report_algorithm_ranking(frame, pruned_algorithm_names)
+        report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True)
 
 if __name__ == "__main__":
     main()
