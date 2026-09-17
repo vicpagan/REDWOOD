@@ -487,6 +487,7 @@ Processing results for 9 algorithms
 
 ========================== OVERALL COMPARISON OF HEURISTICS ==========================
 
+QUICK-ISH TO RUN:
 python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv  --exclude-heuristic greedy --exclude-heuristic probability_success --exclude_heuristic error_level  --show-ranking-pruned-ties
 
   * 2 nodes:
@@ -537,6 +538,57 @@ python ./multi_host_result_generation.py ../experiment_results/results_multi_hos
 
 NOTE ALL THE DUPLICATES/EQUIVALENTS ABOVE
 
+
+SUPER SLOW FULL RUN:
+python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --show-ranking-pruned-ties
+
+  * 2 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00   dfo=204.40
+    dynamic__dependent__aggressive:                                  dfb=0.00   dfo=204.40
+    dynamic__aggressive__aggressive:                                 dfb=0.00   dfo=204.40
+    greedy_foresighted_expected_error__dependent__off:               dfb=88.80  dfo=340.73
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=282.19 dfo=948.12
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=282.19 dfo=948.12
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=282.19 dfo=948.12
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=305.76 dfo=1002.86
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=305.76 dfo=1002.86
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=305.76 dfo=1002.86
+  * 4 nodes:
+    dynamic__independent__aggressive:                                dfb=0.00   dfo=76.16
+    dynamic__dependent__aggressive:                                  dfb=0.00   dfo=76.16
+    dynamic__aggressive__aggressive:                                 dfb=0.00   dfo=76.16
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=20.49  dfo=177.48
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=20.49  dfo=177.48
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=20.49  dfo=177.48
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=23.24  dfo=185.17
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=23.24  dfo=185.17
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=23.24  dfo=185.17
+    greedy_foresighted_expected_error__dependent__off:               dfb=76.33  dfo=95.19
+  * 8 nodes:
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=0.00   dfo=21.33
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=0.00   dfo=21.33
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=0.00   dfo=21.33
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=0.88   dfo=22.66
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=0.88   dfo=22.66
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=0.88   dfo=22.66
+    greedy_foresighted_expected_error__dependent__off:               dfb=44.93  dfo=21.38
+    dynamic__independent__aggressive:                                dfb=47.76  dfo=48.03
+    dynamic__dependent__aggressive:                                  dfb=47.76  dfo=48.03
+    dynamic__aggressive__aggressive:                                 dfb=47.76  dfo=48.03
+  * 16 nodes:
+    greedy_foresighted_expected_error__dependent__off:               dfb=0.00   dfo=0.84
+    greedy_nearsighted_success_error_ratio__independent__aggressive: dfb=2.49   dfo=1.89
+    greedy_nearsighted_success_error_ratio__dependent__aggressive:   dfb=2.49   dfo=1.89
+    greedy_nearsighted_success_error_ratio__aggressive__aggressive:  dfb=2.49   dfo=1.89
+    greedy_foresighted_success_error_ratio__independent__aggressive: dfb=3.49   dfo=3.31
+    greedy_foresighted_success_error_ratio__dependent__aggressive:   dfb=3.49   dfo=3.31
+    greedy_foresighted_success_error_ratio__aggressive__aggressive:  dfb=3.49   dfo=3.31
+    dynamic__independent__aggressive:                                dfb=58.28  dfo=43.16
+    dynamic__dependent__aggressive:                                  dfb=58.28  dfo=43.16
+    dynamic__aggressive__aggressive:                                 dfb=58.28  dfo=43.16
+
+
+NOTE ALL THE DUPLICATES/EQUIVALENTS ABOVE
 
 
 * QUICK-TO-RUN RANKING OF PARTICULAR STRATEGIES, EXCLUDING ALL THE OTHERS, FOR INSTANCE
