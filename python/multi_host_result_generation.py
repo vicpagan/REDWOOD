@@ -28,7 +28,9 @@ DEFAULT_CONFIDENCE = 0.95
 DEFAULT_BOOTSTRAP_RESAMPLES = 20_000
 DEFAULT_RANDOM_SEED = 20260821
 DEFAULT_EFAIL_MULTIPLIER = 0.0
-DEFAULT_NUM_ROWS = 0
+DEFAULT_HEAD_PERCENTAGE = 100
+DEFAULT_TAIL_PERCENTAGE = 100
+DEFAULT_SHUFFLE_SEED = 0
 
 E_FAIL_GROUPS: dict[str, tuple[float, ...]] = {
     # "2.0": (2.0,),
@@ -767,10 +769,24 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--num-rows",
+        "--head",
+        type=float,
+        default=DEFAULT_HEAD_PERCENTAGE,
+        help=f"Keep only the first rows in the CSV, where the argument specifies the percentage of rows to keep (default: {DEFAULT_HEAD_PERCENTAGE}))",
+    )
+
+    parser.add_argument(
+        "--tail",
+        type=float,
+        default=DEFAULT_TAIL_PERCENTAGE,
+        help=f"Keep only the last rows in the CSV, where the argument specifies the percentage of rows to keep (default: {DEFAULT_TAIL_PERCENTAGE}))",
+    )
+
+    parser.add_argument(
+        "--shuffle-rows",
         type=int,
-        default=DEFAULT_NUM_ROWS,
-        help=f"Number of rows to consider in the CSV, where 0 means 'all' (default: {DEFAULT_NUM_ROWS}))",
+        default=DEFAULT_SHUFFLE_SEED,
+        help=f"Randomly shuffle the rows in the CSV, using a particular seed (seed={DEFAULT_SHUFFLE_SEED}, which is the default, means to do no shuffling)",
     )
 
     parser.add_argument(
@@ -924,10 +940,21 @@ def main() -> None:
         raise ValueError("--efail_multiplier must be non-negative; use 0.0 for all rows.")
 
     frame = pd.read_csv(args.csv_file)
-    if args.num_rows > 0:
-        frame = frame.head(args.num_rows)
+
+    # Shuffling rows if need be
+    if args.shuffle_rows > 0:
+        frame = frame.sample(frac=1, random_state=args.shuffle_rows, ignore_index=True)
+
+    # Select rows
+    if args.head < 100.0 and args.tail < 100.0:
+        raise ValueError("Only one of --head or --tail may be specified.")
+    if args.head < 100.0:
+        frame = frame.head(int(len(frame) * (args.head / 100.0)))
+    elif args.tail < 100.0:
+        frame = frame.tail(int(len(frame) * (args.tail / 100.0)))
 
     print(f"Loaded {len(frame)} rows from {args.csv_file}")
+
 
     # Filter out non-matching e-fail values
     if args.efail_multiplier != 0.0:
