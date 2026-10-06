@@ -320,7 +320,9 @@ def plot_multi_host_ranking(
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
 
+        ax.xaxis.set_major_formatter("{x:g}%")
         if xscale == "symlog":
+            ax.set_xticks([0,1,10,100],["0","1","10","100"])
             ax.set_xscale("symlog", linthresh=symlog_linthresh)
         elif xscale != "linear":
             raise ValueError("xscale must be either 'linear' or 'symlog'")
@@ -330,7 +332,6 @@ def plot_multi_host_ranking(
         else:
             ax.set_xlim(0, 1)
 
-        ax.set_xticks([0,1,10,100],["0%","1%","10%","100%"])
 
         if output_path is not None:
             output = Path(output_path)

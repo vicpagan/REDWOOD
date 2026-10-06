@@ -941,19 +941,40 @@ def main() -> None:
 
     frame = pd.read_csv(args.csv_file)
 
-    # Shuffling rows if need be
-    if args.shuffle_rows > 0:
-        frame = frame.sample(frac=1, random_state=args.shuffle_rows, ignore_index=True)
+    # Get app_config_id groups in their original order
+    group_ids = frame["app_config_id"].drop_duplicates().tolist()
 
-    # Select rows
+    # Shuffle groups if need be
+    if args.shuffle_rows > 0:
+        group_ids = (
+            pd.Series(group_ids)
+            .sample(frac=1, random_state=args.shuffle_rows)
+            .tolist()
+        )
+
+    # Select groups
     if args.head < 100.0 and args.tail < 100.0:
         raise ValueError("Only one of --head or --tail may be specified.")
-    if args.head < 100.0:
-        frame = frame.head(int(len(frame) * (args.head / 100.0)))
-    elif args.tail < 100.0:
-        frame = frame.tail(int(len(frame) * (args.tail / 100.0)))
 
-    print(f"Loaded {len(frame)} rows from {args.csv_file}")
+    if args.head < 100.0:
+        num_groups = int(len(group_ids) * (args.head / 100.0))
+        group_ids = group_ids[:num_groups]
+    elif args.tail < 100.0:
+        num_groups = int(len(group_ids) * (args.tail / 100.0))
+        group_ids = group_ids[-num_groups:]
+
+    # Reorder/filter the dataframe according to group_ids.
+    # This preserves the original order of rows within each group.
+    frame = pd.concat(
+        [frame[frame["app_config_id"] == group_id] for group_id in group_ids],
+        ignore_index=True,
+    )
+
+    print(
+        f"Loaded {len(frame)} rows "
+        f"({len(group_ids)} app_config_id groups) "
+        f"from {args.csv_file}"
+    )
 
 
     # Filter out non-matching e-fail values
@@ -979,7 +1000,6 @@ def main() -> None:
 
     # Figure out all the algorithms
     algorithm_names = discover_algorithm_names(frame)
-
 
 
     print(f"Processing results for {len(algorithm_names)} algorithms")
