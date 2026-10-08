@@ -396,9 +396,7 @@ def compare_two_things(frame: pd.DataFrame,
     if not muted:
         print(f"\n** COMPARISON BETWEEN {kind}:{thing1} AND {kind}:{thing2} **")
 
-    if show_ranks_for_loss:
-        rankings_dict = report_algorithm_ranking(frame, algorithm_names, muted=True, generate_json=False)
-
+    rankings_dict = report_algorithm_ranking(frame, algorithm_names, muted=True, generate_json=False)
 
     if kind not in ["all", "heuristic", "temporal", "reactive"]:
         raise ValueError(f"{kind} is not valid")
@@ -811,6 +809,7 @@ def output_reproducibility_results(frame: pd.DataFrame, confidence: float, boots
                        show_ranks_for_loss=False,
                        muted=False)
     greedy_frame = filter_out_heuristic_with_substring(greedy_frame, "probability_success", [])
+    algorithm_names = discover_algorithm_names(greedy_frame)
     options = ["expected_error", "error_level", "success_error_ratio"]
     for t1, t2 in list(combinations(options, 2)):
         print(f"* Comparison of {t1} to {t2}: ")
