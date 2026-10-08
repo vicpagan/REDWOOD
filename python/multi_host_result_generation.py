@@ -16,6 +16,7 @@ import pandas as pd
 from fontTools.varLib.models import allEqualTo
 from scipy.stats import t
 import json
+import sys
 
 
 # CSV naming conventions.
@@ -615,9 +616,9 @@ def keep_independent_temporal_redundancy_columns(frame: pd.DataFrame,) -> pd.Dat
         if temporal_redundancy != "independent":
             columns_to_drop.append(column)
 
-    print(
-        f"Removed {len(columns_to_drop)} algorithm columns for non-independent temporal redundancy options"
-    )
+    # print(
+    #     f"Removed {len(columns_to_drop)} strategy columns for non-independent temporal redundancy options"
+    # )
 
     return frame.drop(columns=columns_to_drop)
 
@@ -638,7 +639,7 @@ def filter_out_heuristic_with_substring(frame: pd.DataFrame, substring: str, to_
             columns_to_drop.append(column)
 
     print(
-        f"Removed {len(columns_to_drop)} algorithm columns for heuristic with substring '{substring}'"
+        f"Removed {len(columns_to_drop)} strategy columns for heuristic with substring '{substring}'."
     )
 
     return frame.drop(columns=columns_to_drop)
@@ -683,7 +684,7 @@ def filter_out_temporal_option(frame: pd.DataFrame, to_remove: str, to_keep: lis
             columns_to_drop.append(column)
 
     print(
-        f"Removed {len(columns_to_drop)} algorithm columns for the '{to_remove}' reactive rescheduling option"
+        f"Removed {len(columns_to_drop)} strategy columns for the '{to_remove}' temporal redundancy option"
     )
 
     return frame.drop(columns=columns_to_drop)
@@ -727,6 +728,227 @@ def filter_out_efail_multiplier_rows(frame: pd.DataFrame, to_keep: float) -> pd.
         f"{E_FAIL_MULTIPLIER_COLUMN}={to_keep:g}"
     )
     return frame
+
+
+def output_reproducibility_results(frame: pd.DataFrame, confidence: float, bootstrap_resamples: int, seed: int):
+
+    print("\n******************************************************")
+    print("* QUESTION: Is RANDOM useful?")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(frame)
+    print(f"{len(algorithm_names)} strategies under consideration.")
+
+    # report_random_heuristic_results(frame,
+    #                                 algorithm_names,
+    #                                 confidence,
+    #                                 bootstrap_resamples,
+    #                                 seed)
+    ranking_results = report_algorithm_ranking(frame, algorithm_names, muted=True, generate_json=False)
+    for num_nodes, results in ranking_results.items():
+        sorted_results = sorted((v, k) for k, v in results.items())
+        for i in range (len(sorted_results)):
+            if "random" in sorted_results[i][1]:
+                print(f" * {num_nodes} NODES:  best strategy that uses the random heuristic is ranked {i+1} / {len(sorted_results)} (in the bottom ({100.0*(len(sorted_results) - (i+1))/len(sorted_results):.2f}%), "
+                      f"and achieves mean error that's {(sorted_results[i][0] + 1.0):.2f}x larger than that of the best strategy.")
+                break
+
+    frame = filter_out_heuristic_with_substring(frame, "random", [])
+
+    print("\n#################################################")
+    print("#### DESIGN CHOICES FOR THE GREEDY HEURISTICS ###")
+    print("#################################################\n")
+    greedy_frame = filter_out_heuristic_with_substring(frame, "dynamic", [])
+
+
+    print("\n******************************************************")
+    print("* QUESTION: Is the multi-PE greedy extension useful?")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(greedy_frame)
+    print(f"{len(algorithm_names)} strategies remaining")
+    compare_two_things(greedy_frame,
+                       algorithm_names,
+                       "heuristic",
+                       "greedy",
+                       "static",
+                       confidence,
+                       bootstrap_resamples,
+                       seed)
+    greedy_frame = filter_out_heuristic_with_substring(greedy_frame, "static", [])
+
+    print("\n******************************************************")
+    print("* QUESTION: Is foresighted scheduling worthwhile?")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(greedy_frame)
+    print(f"{len(algorithm_names)} strategies remaining")
+    compare_two_things(greedy_frame,
+                       algorithm_names,
+                       "heuristic",
+                       "foresighted",
+                       "nearsighted",
+                       confidence,
+                       bootstrap_resamples,
+                       seed,
+                       show_ranks_for_loss=False,
+                       muted=False)
+    greedy_frame = filter_out_heuristic_with_substring(greedy_frame, "nearsighted", [])
+
+
+    print("\n******************************************************")
+    print("* QUESTION: Which criteria should be used? ")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(greedy_frame)
+    print(f"{len(algorithm_names)} strategies remaining")
+
+    print(" * probability_success is DOMINATED by expected_error:")
+    compare_two_things(greedy_frame,
+                       algorithm_names,
+                       "heuristic",
+                       "probability_success",
+                       "expected_error",
+                       confidence,
+                       bootstrap_resamples,
+                       seed,
+                       show_ranks_for_loss=False,
+                       muted=False)
+    greedy_frame = filter_out_heuristic_with_substring(greedy_frame, "probability_success", [])
+    options = ["expected_error", "error_level", "success_error_ratio"]
+    for t1, t2 in list(combinations(options, 2)):
+        print(f"* Comparison of {t1} to {t2}: ")
+        compare_two_things(greedy_frame, algorithm_names, "heuristic",
+                           t1, t2,
+                           confidence,
+                           bootstrap_resamples,
+                           seed,
+                           show_ranks_for_loss=False,
+                           show_ranks_for_win=True,
+                           muted=False)
+
+    print("\n******************************************************")
+    print("* QUESTION: Which temporal redundancy option is best?")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(greedy_frame)
+
+    print(f"{len(algorithm_names)} strategies remaining")
+    options = ["independent", "dependent", "aggressive"]
+    for t1, t2 in list(combinations(options, 2)):
+        print(f"* Comparison of {t1} to {t2}: ")
+        compare_two_things(greedy_frame,
+                           algorithm_names,
+                           "temporal",
+                           t1,
+                           t2,
+                           confidence,
+                           bootstrap_resamples,
+                           seed)
+
+    greedy_frame = filter_out_temporal_option(greedy_frame, "independent", [])
+    greedy_frame = filter_out_temporal_option(greedy_frame, "aggressive", [])
+
+    print("\n******************************************************")
+    print("* QUESTION: Should reactive rescheduling be used?")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(greedy_frame)
+    options = ["off", "variant", "aggressive"]
+    for t1, t2 in list(combinations(options, 2)):
+        print(f"* Comparison of {t1} to {t2}: ")
+        compare_two_things(greedy_frame, algorithm_names, "reactive",
+                           t1, t2,
+                           confidence,
+                           bootstrap_resamples,
+                           seed)
+    greedy_frame = filter_out_reactive_option(greedy_frame, "variant", [])
+    algorithm_names = discover_algorithm_names(greedy_frame)
+    print(f"\nNUMBER OF GREEDY HEURISTICS LEFT TO CONSIDER: {len(algorithm_names)}\n")
+    greedy_heuristics_to_consider = algorithm_names
+
+    print("\n#################################################")
+    print("#### DESIGN CHOICES FOR THE DYNAMIC HEURISTIC ###")
+    print("#################################################\n")
+
+    dynamic_frame = filter_out_heuristic_with_substring(frame, "nearsighted", [])
+    dynamic_frame = filter_out_heuristic_with_substring(dynamic_frame, "foresighted", [])
+    algorithm_names = discover_algorithm_names(dynamic_frame)
+    print(f"\nNUMBER OF DYNAMIC HEURISTICS TO CONSIDER: {len(algorithm_names)}\n")
+
+
+    print("\n******************************************************")
+    print("* QUESTION: Should reactive rescheduling be used?")
+    print("******************************************************\n")
+    options = ["off", "variant", "aggressive"]
+    for t1, t2 in list(combinations(options, 2)):
+        print(f"* Comparison of {t1} to {t2}: ")
+        compare_two_things(dynamic_frame, algorithm_names, "reactive",
+                           t1, t2,
+                           confidence,
+                           bootstrap_resamples,
+                           seed)
+    dynamic_frame = filter_out_reactive_option(dynamic_frame, "variant", [])
+    dynamic_frame = filter_out_reactive_option(dynamic_frame, "off", [])
+
+    print("\n******************************************************")
+    print("* QUESTION: Does the temporal redundancy option matter?")
+    print("******************************************************\n")
+    algorithm_names = discover_algorithm_names(dynamic_frame)
+    options = ["dependent", "independent", "aggressive"]
+    for t1, t2 in list(combinations(options, 2)):
+        print(f"* Comparison of {t1} to {t2}: ")
+        compare_two_things(dynamic_frame, algorithm_names, "temporal",
+                           t1, t2,
+                           confidence,
+                           bootstrap_resamples,
+                           seed)
+    dynamic_frame = filter_out_temporal_option(dynamic_frame, "independent", [])
+    dynamic_frame = filter_out_temporal_option(dynamic_frame, "aggressive", [])
+    algorithm_names = discover_algorithm_names(dynamic_frame)
+    print(f"\nNUMBER OF DYNAMIC HEURISTICS LEFT TO CONSIDER: {len(algorithm_names)}\n")
+    dynamic_heuristics_to_consider = algorithm_names
+
+    print("\n#################################################")
+    print("#### TOP-PERFORMING STRATEGIES                ###")
+    print("#################################################\n")
+
+    top_performing_frame = filter_out_heuristic_with_substring(frame, "", greedy_heuristics_to_consider + dynamic_heuristics_to_consider)
+    algorithm_names = discover_algorithm_names(top_performing_frame)
+    print(f"Considering {len(greedy_heuristics_to_consider)} greedy heuristics and {len(dynamic_heuristics_to_consider)} dynamic heuristics.")
+
+    # Prune dominated algorithms
+    pruned_algorithm_names = list(algorithm_names)
+    keep_going = True
+    while keep_going:
+        keep_going = False
+        for reference in pruned_algorithm_names:
+            restart = False
+            for comparison in pruned_algorithm_names:
+                if reference == comparison:
+                    continue
+                reference_dominates, reference_ties_but_better = compare_two_things(frame,
+                                                         pruned_algorithm_names,
+                                                         "all",
+                                                         reference,
+                                                         comparison,
+                                                         confidence,
+                                                         bootstrap_resamples,
+                                                         seed,
+                                                         muted = True)
+                if reference_dominates:
+                    pruned_algorithm_names.remove(comparison)
+                    print(f"    ** REMOVED {comparison} FROM CONSIDERATION: DOMINATED BY {reference} **")
+                    restart = True
+                    break
+
+            if restart:
+                keep_going = True
+                break
+    report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True)
+    print("The ranking results JSON file can be passed to a plotting script to generate the figure in the paper")
+
+
+
+
+
+
+
+
 
 
 
@@ -926,6 +1148,16 @@ def build_argument_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    parser.add_argument(
+        "--reproduce-paper-results",
+        action="store_true",
+        help=(
+            "Outputs the data that was used for results in the 'Multi-PE Platform' section of the research paper"
+        ),
+    )
+
+
+
     return parser
 
 
@@ -976,10 +1208,14 @@ def main() -> None:
         f"from {args.csv_file}"
     )
 
-
     # Filter out non-matching e-fail values
     if args.efail_multiplier != 0.0:
         frame = filter_out_efail_multiplier_rows(frame, args.efail_multiplier)
+
+    # Do the "reproducible research" version?
+    if args.reproduce_paper_results:
+        output_reproducibility_results(frame, args.confidence, args.bootstrap_resamples, args.seed)
+        sys.exit(0)
 
     # Filter out heuristics
     if args.include_static:

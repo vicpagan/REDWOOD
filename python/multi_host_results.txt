@@ -164,7 +164,9 @@ python ./multi_host_result_generation.py ../experiment_results/results_multi_hos
 	EXPECTED_ERROR > SUCCESS_ERROR_RATIO > ERROR_LEVEL
 
    FOR 8 NODES
-	SUCCESS_ERROR_RATIO > ERROR_LEVEL  almost> EXPECTED_ERROR
+        SUCCESS_ERROR_RATIO > EXPECTED_ERROR > ERROR_LEVEL
+         
+	#### WRONG ### SUCCESS_ERROR_RATIO > ERROR_LEVEL  almost> EXPECTED_ERROR
 
    FOR 16 NODES
 	ERROR_LEVEL > SUCCESS_ERROR_RATIO  almost> EXPECTED_ERROR
@@ -246,7 +248,8 @@ python ./multi_host_result_generation.py ../experiment_results/results_multi_hos
 FINDING: VARIANT AND AGGRESSIVE ARE BASICALLY THE SAME WITH TINY WINS/LOSSES
 FINDING: OFF LOSES WITH LOW N, BUT WINS SOME AT HIGH N=16
 
-python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic nearsighted  --exclude-heuristic probability_success --evaluate-reactive --exclude-heuristic random --exclude-heuristic dynamic
+python [main] % python ./multi_host_result_generation.py ../experiment_results/results_multi_host_new.csv --exclude-heuristic nearsighted  --exclude-heuristic probability_success --evaluate-reactive --exclude-heuristic random --exclude-heuristic dynamic --exclude-temporal independent --exclude-temporal aggressive
+
 
 COMPARISON BETWEEN reactive:off AND reactive:variant **
   * 2 nodes:
