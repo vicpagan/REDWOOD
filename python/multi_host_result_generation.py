@@ -819,7 +819,7 @@ def output_reproducibility_results(frame: pd.DataFrame, confidence: float, boots
                            bootstrap_resamples,
                            seed,
                            show_ranks_for_loss=False,
-                           show_ranks_for_win=True,
+                           show_ranks_for_win=False,
                            muted=False)
 
     print("\n******************************************************")
