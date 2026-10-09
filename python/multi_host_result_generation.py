@@ -943,15 +943,6 @@ def output_reproducibility_results(frame: pd.DataFrame, confidence: float, boots
 
 
 
-
-
-
-
-
-
-
-
-
 def build_argument_parser() -> argparse.ArgumentParser:
     """Create the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -960,7 +951,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
             "Lower error values are assumed to be better."
         )
     )
-    parser.add_argument("csv_file", type=Path, help="Input CSV file")
+    parser.add_argument("csv_file", type=Path, help="Input .csv or .csv.gz file")
+
     parser.add_argument(
         "--output-dir",
         type=Path,
