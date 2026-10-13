@@ -28,25 +28,37 @@ This needs to be done with two versions of redwood_sim: one there the Dynamic Sc
 * TO GENERATE THE SINGLE-HOST DB AND POPULATE IT
 **********************************************************
 
-TODO
+TODO:
+	- Generate instances
+	- Run simulation
+	- Export the db as a csv
 
 **********************************************************
 * TO ANALYZE THE RESULTS IN THE ONE-HOST SECTION
 **********************************************************
 
-    python3 ./scripts/single_host_results_generation.py ./results/results_single_host.csv
+    - Generate the results files (and useful ASCII output):
 
-TODO: Separate result generation from plotting!
+        python3 ./single_host_results_generation.py --csv-input ../results/results_single_host.csv  --output-average-errors-json  /tmp/single_host_average_error.json --output-relative-errors-json /tmp/single_host_relative_error.json
+
+    - Plotting the results:
+        python3 ./plot_single_host_average_errors.py --json-result-file ../results/single_host_average_error.json --output-pdf single-host-average-error.pdf
+        python3 ./plot_single_host_relative_errors.py --json-result-file ../results/single_host_relative_error.json --output-pdf single-host-relative-error.pdf
 
 **********************************************************
 * TO GENERATE THE MULTI-HOST DB AND POPULATE IT
 **********************************************************
 
-TODO
+TODO:
+	- Generate instances
+	- Run simulation
+	- Export the db as a csv
 
 ***********************************************************
 * TO ANALYZE THE RESULTS IN THE MULTI-HOST SECTION
 ***********************************************************
+
+    - Generate the results
 
     python3 ./multi_host_result_generation.py ./results/results_multi_host_new.csv --reproduce-paper-results
 

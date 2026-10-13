@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Generate summary statistics and plots for one-host scheduling results."""
+"""Generate summary statistics and plot-ready JSON for one-host results."""
 
 from __future__ import annotations
 
 import argparse
+import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import TypedDict
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import t
@@ -44,6 +44,28 @@ ALGORITHM_NAME_MAP : dict[str, str] = {
     "static_nearsighted_success_error_ratio": "NS-R",
     "static_nearsighted_error_level": "NS-E",
 }
+
+
+class AverageErrorResult(TypedDict):
+    """One algorithm's mean error and Student-t confidence interval."""
+
+    algorithm: str
+    label: str
+    num_observations: int
+    mean: float
+    ci_lower: float
+    ci_upper: float
+
+
+class RelativeErrorResult(TypedDict):
+    """A paired comparison with the reference; all effect sizes are percent."""
+
+    algorithm: str
+    label: str
+    num_pairs: int
+    estimate_percent: float
+    ci_lower_percent: float
+    ci_upper_percent: float
 
 
 class WinTieLossStats(TypedDict):
@@ -310,92 +332,47 @@ def relative_improvement_between_means(
     return improvement, baseline_mean, improved_mean
 
 
-def save_or_show_figure(fig: plt.Figure, output_file: Path | None) -> None:
-    """Save a figure and close it, or display it when no path is supplied."""
-    fig.tight_layout()
-
-    if output_file is None:
-        plt.show()
-        return
-
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_file, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  Saved plot to {output_file}")
-
-
-def plot_average_errors(
+def compute_average_errors(
     values_by_algorithm: Mapping[str, Sequence[float] | np.ndarray],
     *,
     confidence: float = DEFAULT_CONFIDENCE,
-    output_file: Path | None = None,
-) -> None:
-    """Plot each algorithm's mean error and t confidence interval."""
-    results: list[tuple[str, float, float, float]] = []
+) -> list[AverageErrorResult]:
+    """Compute each algorithm's mean error and t confidence interval."""
+    results: list[AverageErrorResult] = []
 
     for algorithm_name, values in values_by_algorithm.items():
+        numeric_values = np.asarray(values, dtype=float)
         mean, low, high = mean_t_confidence_interval(
-            np.asarray(values, dtype=float),
+            numeric_values,
             confidence,
         )
-        results.append((algorithm_name, mean, low, high))
+        results.append({
+            "algorithm": algorithm_name,
+            "label": ALGORITHM_NAME_MAP[algorithm_name],
+            "num_observations": int(np.count_nonzero(np.isfinite(numeric_values))),
+            "mean": mean,
+            "ci_lower": low,
+            "ci_upper": high,
+        })
 
-    # Lower error is better, so display the smallest mean first.
-    results.sort(key=lambda result: result[1])
-
-    algorithm_names = [ALGORITHM_NAME_MAP[result[0]] for result in results]
-    means = np.array([result[1] for result in results])
-    lower_bounds = np.array([result[2] for result in results])
-    upper_bounds = np.array([result[3] for result in results])
-    error_bars = np.vstack(
-        [means - lower_bounds, upper_bounds - means]
-    )
-
-    figure_height = max(4.0, 0.55 * len(algorithm_names))
-    fig, ax = plt.subplots(figsize=(10, figure_height))
-    ax.barh(
-        algorithm_names,
-        means,
-        xerr=error_bars,
-        capsize=4,
-    )
-    ax.invert_yaxis()
-    ax.set_xlabel("Mean error")
-    ax.set_ylabel("Algorithm")
-    ax.set_title(
-        "Mean error by algorithm "
-        f"({100.0 * confidence:g}% confidence intervals)"
-    )
-    ax.grid(axis="x", alpha=0.3)
-
-    for y_position, (mean, low, high) in enumerate(
-        zip(means, lower_bounds, upper_bounds, strict=True)
-    ):
-        ax.text(
-            high,
-            y_position,
-            f"  {mean:.2f} [{low:.2f}, {high:.2f}]",
-            va="center",
-            ha="left",
-        )
-
-    ax.margins(x=0.20)
-    save_or_show_figure(fig, output_file)
+    # Lower error is better; preserve CSV order when means are equal.
+    results.sort(key=lambda result: result["mean"])
+    return results
 
 
-def plot_relative_errors_vs_reference(
+def compute_relative_errors_vs_reference(
     values_by_algorithm: Mapping[str, Sequence[float] | np.ndarray],
     *,
     reference_name: str = REFERENCE_ALGORITHM,
     confidence: float = DEFAULT_CONFIDENCE,
     bootstrap_resamples: int = DEFAULT_BOOTSTRAP_RESAMPLES,
     seed: int = DEFAULT_RANDOM_SEED,
-    output_file: Path | None = None,
-) -> None:
-    """Plot relative mean error versus a reference algorithm.
+) -> list[RelativeErrorResult]:
+    """Compute paired-bootstrap relative mean errors, expressed as percentages.
 
     Positive values mean that an algorithm has a higher mean error than the
-    reference and is therefore worse.
+    reference and is therefore worse. Each comparison uses its own finite
+    pairs, exactly as in the original plotting function.
     """
     if reference_name not in values_by_algorithm:
         raise KeyError(
@@ -406,7 +383,7 @@ def plot_relative_errors_vs_reference(
         values_by_algorithm[reference_name],
         dtype=float,
     )
-    results: list[tuple[str, float, float, float]] = []
+    results: list[RelativeErrorResult] = []
 
     for algorithm_name, algorithm_values in values_by_algorithm.items():
         if algorithm_name == reference_name:
@@ -435,62 +412,27 @@ def plot_relative_errors_vs_reference(
             resamples=bootstrap_resamples,
             seed=seed,
         )
-        results.append(
-            (
-                algorithm_name,
-                100.0 * estimate,
-                100.0 * low,
-                100.0 * high,
-            )
-        )
+        results.append({
+            "algorithm": algorithm_name,
+            "label": ALGORITHM_NAME_MAP[algorithm_name],
+            "num_pairs": int(reference.size),
+            "estimate_percent": 100.0 * estimate,
+            "ci_lower_percent": 100.0 * low,
+            "ci_upper_percent": 100.0 * high,
+        })
 
-    # Put the closest competitors first.
-    results.sort(key=lambda result: result[1])
+    # Put the closest competitors first, as in the original script.
+    results.sort(key=lambda result: result["estimate_percent"])
+    return results
 
-    algorithm_names = [result[0] for result in results]
-    estimates = np.array([result[1] for result in results])
-    lower_bounds = np.array([result[2] for result in results])
-    upper_bounds = np.array([result[3] for result in results])
-    error_bars = np.vstack(
-        [estimates - lower_bounds, upper_bounds - estimates]
-    )
-    y_positions = np.arange(len(algorithm_names))
 
-    figure_height = max(4.0, 0.55 * len(algorithm_names))
-    fig, ax = plt.subplots(figsize=(10, figure_height))
-    ax.errorbar(
-        estimates,
-        y_positions,
-        xerr=error_bars,
-        fmt="o",
-        capsize=6,
-        linewidth=3,
-    )
-
-    # Print text labels
-    for x,y in zip(estimates, y_positions):
-        ax.text(x-3, y-0.25,f"{x:.2f}%", fontsize=16)
-
-    ax.axvline(0.0, linewidth=1.0, linestyle="--")
-    ax.set_yticks(y_positions)
-    ax.set_yticklabels([ALGORITHM_NAME_MAP[algorithm_name] for algorithm_name in algorithm_names], fontsize=18)
-    ax.invert_yaxis()
-    ax.set_xlabel(
-        f"Increase in mean error relative to {ALGORITHM_NAME_MAP[reference_name]} (%)", fontsize=18
-    )
-    ax.tick_params(axis='x', labelsize=16)
-    ax.set_ylabel("Heuristic", fontsize=18)
-    # ax.set_title(
-    #     f"Relative mean error compared with {reference_name} "
-    #     f"({100.0 * confidence:g}% paired-bootstrap intervals)"
-    # )
-    ax.grid(axis="x", alpha=0.3)
-
-    # Adjust the limits for prettiness
-    ax.set_ylim(ymax=ax.get_ylim()[1] - 0.5)
-    ax.set_xlim(xmin=-2)
-
-    save_or_show_figure(fig, output_file)
+def write_json(data: object, output_file: Path) -> None:
+    """Write indented, standards-compliant JSON, creating parent directories."""
+    # Serialize first so invalid data cannot truncate an existing output file.
+    serialized = json.dumps(data, indent=2, allow_nan=False) + "\n"
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(serialized, encoding="utf-8")
+    print(f"  Saved JSON to {output_file}")
 
 
 def report_temporal_redundancy_improvements(
@@ -535,19 +477,27 @@ def report_temporal_redundancy_improvements(
         )
 
 
-def generate_average_error_plots(
+def generate_average_error_json(
     frame: pd.DataFrame,
     algorithm_names: Sequence[str],
     *,
-    output_dir: Path,
+    source_csv: Path,
+    average_errors_output: Path,
+    relative_errors_output: Path,
     confidence: float,
     bootstrap_resamples: int,
     seed: int,
 ) -> None:
-    """Generate absolute- and relative-error plots by failure multiplier."""
+    """Write two plot-ready JSON files, each containing all failure groups.
+
+    Store final estimates and interval endpoints, not the raw observations:
+    plotting these files never needs to recompute confidence intervals.
+    """
     print("\n** AVERAGE ERRORS **")
     require_columns(frame, [E_FAIL_MULTIPLIER_COLUMN])
 
+    average_groups = {}
+    relative_groups = {}
     for group_name, multipliers in E_FAIL_GROUPS.items():
         row_mask = frame[E_FAIL_MULTIPLIER_COLUMN].isin(multipliers)
         matching_rows = int(row_mask.sum())
@@ -567,25 +517,52 @@ def generate_average_error_plots(
             suffix=WITH_TEMPORAL_REDUNDANCY_SUFFIX,
             row_mask=row_mask,
         )
+        group_metadata = {
+            "filter": {E_FAIL_MULTIPLIER_COLUMN: list(multipliers)},
+            "num_rows": matching_rows,
+        }
+        average_groups[group_name] = {
+            **group_metadata,
+            "results": compute_average_errors(
+                values_by_algorithm,
+                confidence=confidence,
+            ),
+        }
+        relative_groups[group_name] = {
+            **group_metadata,
+            "results": compute_relative_errors_vs_reference(
+                values_by_algorithm,
+                reference_name=REFERENCE_ALGORITHM,
+                confidence=confidence,
+                bootstrap_resamples=bootstrap_resamples,
+                seed=seed,
+            ),
+        }
 
-        plot_average_errors(
-            values_by_algorithm,
-            confidence=confidence,
-            output_file=(
-                output_dir / f"average_error_plot_efail_{group_name}.pdf"
-            ),
-        )
-        plot_relative_errors_vs_reference(
-            values_by_algorithm,
-            reference_name=REFERENCE_ALGORITHM,
-            confidence=confidence,
-            bootstrap_resamples=bootstrap_resamples,
-            seed=seed,
-            output_file=(
-                output_dir
-                / f"relative_error_vs_dynamic_efail_{group_name}.pdf"
-            ),
-        )
+    common_metadata = {
+        "schema_version": 1,
+        "source_csv": str(source_csv),
+        "algorithm_suffix": WITH_TEMPORAL_REDUNDANCY_SUFFIX,
+        "confidence": confidence,
+    }
+    write_json({
+        **common_metadata,
+        "plot_type": "average_errors",
+        "confidence_interval_method": "student_t",
+        "groups": average_groups,
+    }, average_errors_output)
+    write_json({
+        **common_metadata,
+        "plot_type": "relative_errors",
+        "reference_algorithm": REFERENCE_ALGORITHM,
+        "reference_label": ALGORITHM_NAME_MAP[REFERENCE_ALGORITHM],
+        "statistic": "100 * (mean(comparison) / mean(reference) - 1)",
+        "units": "percent",
+        "confidence_interval_method": "paired_percentile_bootstrap",
+        "bootstrap_resamples": bootstrap_resamples,
+        "seed": seed,
+        "groups": relative_groups,
+    }, relative_errors_output)
 
 
 def print_pair_comparison(
@@ -914,16 +891,24 @@ def build_argument_parser() -> argparse.ArgumentParser:
     """Create the command-line parser."""
     parser = argparse.ArgumentParser(
         description=(
-            "Generate statistics and plots for one-host scheduling results. "
-            "Lower error values are assumed to be better."
-        )
+            "Generate statistics and two plot-ready JSON files for one-host "
+            "scheduling results. Lower error values are assumed to be better. "
+            "No plots are generated by this script."
+        ),
+        allow_abbrev=False,
     )
-    parser.add_argument("csv_file", type=Path, help="Input CSV file")
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=Path("."),
-        help="Directory for generated plots (default: current directory)",
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
+        "--csv-input", required=True, type=Path, metavar="PATH",
+        help="Input CSV file.",
+    )
+    required.add_argument(
+        "--output-average-errors-json", required=True, type=Path, metavar="PATH",
+        help="Output JSON file for mean errors and t confidence intervals.",
+    )
+    required.add_argument(
+        "--output-relative-errors-json", required=True, type=Path, metavar="PATH",
+        help="Output JSON file for relative errors and paired-bootstrap intervals.",
     )
     parser.add_argument(
         "--confidence",
@@ -949,43 +934,58 @@ def build_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
-    args = build_argument_parser().parse_args()
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = build_argument_parser()
+    args = parser.parse_args(argv)
 
     if not 0.0 < args.confidence < 1.0:
-        raise ValueError("--confidence must be strictly between 0 and 1.")
+        parser.error("--confidence must be strictly between 0 and 1.")
     if args.bootstrap_resamples < 1:
-        raise ValueError("--bootstrap-resamples must be positive.")
+        parser.error("--bootstrap-resamples must be positive.")
+    if args.seed < 0:
+        parser.error("--seed must be nonnegative.")
 
-    frame = pd.read_csv(args.csv_file)
-    algorithm_names = discover_algorithm_names(frame)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    paths = [
+        args.csv_input.resolve(),
+        args.output_average_errors_json.resolve(),
+        args.output_relative_errors_json.resolve(),
+    ]
+    if len(set(paths)) != len(paths):
+        parser.error("The input CSV and the two output JSON paths must be distinct.")
 
-    print(f"Loaded {len(frame)} rows from {args.csv_file}")
-    print(f"Discovered {len(algorithm_names)} algorithms")
+    try:
+        frame = pd.read_csv(args.csv_input)
+        algorithm_names = discover_algorithm_names(frame)
 
-    report_temporal_redundancy_improvements(frame, algorithm_names)
-    generate_average_error_plots(
-        frame,
-        algorithm_names,
-        output_dir=args.output_dir,
-        confidence=args.confidence,
-        bootstrap_resamples=args.bootstrap_resamples,
-        seed=args.seed,
-    )
-    report_dynamic_vs_best_heuristic(
-        frame,
-        confidence=args.confidence,
-        bootstrap_resamples=args.bootstrap_resamples,
-        seed=args.seed,
-    )
-    report_split_half_stability(
-        frame,
-        algorithm_names,
-        repeats=500,
-        seed=args.seed,
-        group_column="app_config_id",
-    )
+        print(f"Loaded {len(frame)} rows from {args.csv_input}")
+        print(f"Discovered {len(algorithm_names)} algorithms")
+
+        report_temporal_redundancy_improvements(frame, algorithm_names)
+        generate_average_error_json(
+            frame,
+            algorithm_names,
+            source_csv=args.csv_input,
+            average_errors_output=args.output_average_errors_json,
+            relative_errors_output=args.output_relative_errors_json,
+            confidence=args.confidence,
+            bootstrap_resamples=args.bootstrap_resamples,
+            seed=args.seed,
+        )
+        report_dynamic_vs_best_heuristic(
+            frame,
+            confidence=args.confidence,
+            bootstrap_resamples=args.bootstrap_resamples,
+            seed=args.seed,
+        )
+        report_split_half_stability(
+            frame,
+            algorithm_names,
+            repeats=500,
+            seed=args.seed,
+            group_column="app_config_id",
+        )
+    except (OSError, ValueError, KeyError) as error:
+        parser.error(str(error))
 
 
 if __name__ == "__main__":
