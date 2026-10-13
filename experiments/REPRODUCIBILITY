@@ -39,11 +39,11 @@ TODO:
 
     - Generate the results files (and useful ASCII output):
 
-        python3 ./single_host_results_generation.py --csv-input ../results/results_single_host.csv  --output-average-errors-json  /tmp/single_host_average_error.json --output-relative-errors-json /tmp/single_host_relative_error.json
+        python3 ./single_host_results_generation.py --csv-input ../results/results_single_host.csv  --output-average-errors-json  /tmp/results_single_host_average_error.json --output-relative-errors-json /tmp/results_single_host_relative_error.json
 
     - Plotting the results:
-        python3 ./plot_single_host_average_errors.py --json-result-file ../results/single_host_average_error.json --output-pdf single-host-average-error.pdf
-        python3 ./plot_single_host_relative_errors.py --json-result-file ../results/single_host_relative_error.json --output-pdf single-host-relative-error.pdf
+        NOT USED IN THE PAPER: python3 ./plot_single_host_average_errors.py --json-result-file ../results/results_single_host_average_error.json --output-pdf single-host-average-error.pdf
+        python3 ./plot_single_host_relative_errors.py --json-result-file ../results/results_single_host_relative_error.json --output-pdf single-host-relative-error.pdf
 
 **********************************************************
 * TO GENERATE THE MULTI-HOST DB AND POPULATE IT
