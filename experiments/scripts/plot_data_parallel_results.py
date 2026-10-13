@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -13,7 +14,7 @@ fontsize = 24
 markersize = 12
 linewidth=5
 
-def plot_curves(data):
+def plot_curves(data, output_file):
     max_num_num_procs = len(data[list(data.keys())[0]])
     colors = plt.cm.viridis(np.linspace(0, 0.9, len(data.keys())))
 
@@ -61,23 +62,35 @@ def plot_curves(data):
     ax.set_yticks([1,20,40,60,80,100])
     ax.legend(bbox_to_anchor=(0.35, 0.92), fontsize=fontsize)
     plt.tight_layout()
-    output_filename = "./data_parallel_results.pdf"
-    sys.stderr.write(f"Figure saved in {output_filename}\n")
-    plt.savefig(output_filename)
+    plt.savefig(output_file, format="pdf")
+    sys.stderr.write(f"Figure saved in {output_file}\n")
+
+def parse_args(argv=None):
+    """Parse the required input JSON and output PDF paths."""
+    parser = argparse.ArgumentParser(
+        description="Plot data-parallel results from a JSON file.",
+        allow_abbrev=False,
+    )
+    parser.add_argument(
+        "--json-result-file", required=True, metavar="PATH",
+        help="Path to the input JSON results file.",
+    )
+    parser.add_argument(
+        "--output-pdf", required=True, metavar="PATH",
+        help="Path of the PDF figure to generate.",
+    )
+    return parser.parse_args(argv)
 
 def main():
-    # Read JSON from stdin or file
-    if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r') as f:
-            json_object = json.load(f)
-    else:
-        json_object = json.load(sys.stdin)
+    args = parse_args()
+    with open(args.json_result_file, 'r') as f:
+        json_object = json.load(f)
 
     data = {}
     for key, values in json_object.items():
         data[float(key)] = values
 
-    plot_curves(data)
+    plot_curves(data, args.output_pdf)
 
 
 if __name__ == '__main__':

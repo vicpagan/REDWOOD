@@ -18,14 +18,11 @@ This needs to be done with two versions of redwood_sim: one there the Dynamic Sc
 **************************************************************
 
   - Getting the results file:
-        ../build/data_parallel_evaluator  --delta_t 5.0 --json ../example_problem_instances/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400  --lambda 0.0001 --e_fail 100 > ./results/results_data_parallel.json
-
-TODO: Add the result file path as a command-line argument
+        ../build/data_parallel_evaluator  --delta_t 5.0 --json_input ../example_problem_instances/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400  --lambda 0.0001 --e_fail 100 --json_output /tmp/results/results_data_parallel.json
 
   - Generating the plot:
-        python ./scripts/plot_data_parallel_results.py ./results/results_data_parallel.json
+        python ./scripts/plot_data_parallel_results.py --json-result-file ./results/results_data_parallel.json --output-pdf ./data_parallel_results.pdf
 
-TODO: Add the figure file path as a command-line argument
 
 **********************************************************
 * TO GENERATE THE SINGLE-HOST DB AND POPULATE IT

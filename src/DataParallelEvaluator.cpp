@@ -172,7 +172,7 @@ std::vector<std::pair<unsigned long, double>> wrench::DataParallelEvaluator::eva
 int main(int argc, char** argv) {
     // Define command-line argument options
     std::string json_input_arg;
-    std::string json_data_parallel_input_arg;
+    std::string json_output_arg;
     unsigned long max_num_nodes;
     unsigned long step_num_nodes;
     std::string num_nodes_list;
@@ -188,8 +188,10 @@ int main(int argc, char** argv) {
     desc.add_options()
     ("help",
      "Show this help message\n")
-    ("json", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
+    ("json_input", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
      "JSON input string or file path\n")
+    ("json_output", po::value<std::string>(&json_output_arg)->required()->value_name("<JSON output file file path>"),
+     "JSON output file path\n")
     ("max_num_nodes", po::value<unsigned long>(&max_num_nodes)->value_name("<max number of nodes>"),
      "Maximum number of compute nodes\n")
     ("step_num_nodes", po::value<unsigned long>(&step_num_nodes)->value_name("<step number of nodes>"),
@@ -328,20 +330,21 @@ int main(int argc, char** argv) {
         json_obj[std::to_string(key)] = arr;
     }
 
-    //
-    //
-    //
-    // for (const auto& [key, vec] : results) {
-    //     boost::json::array json_array;
-    //     for (double val : vec) {
-    //         json_array.push_back(val);
-    //     }
-    //     json_obj[std::to_string(key)] = json_array;
-    // }
-
     // Convert to string
     std::string json_string = boost::json::serialize(json_obj);
-    std::cout << json_string << std::endl;
+    // std::cout << json_string << std::endl;
+
+    // Write to the output file
+    std::ofstream output(json_output_arg, std::ios::out | std::ios::trunc);
+    if (!output) {
+        throw std::runtime_error("Cannot open output file: " + json_output_arg);
+    }
+    output << json_string;
+    output << '\n';
+    output.close();
+    if (!output) {
+        throw std::runtime_error("Failed to write output file: " + json_output_arg);
+    }
 
     return 0;
 }

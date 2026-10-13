@@ -103,7 +103,7 @@ namespace wrench {
                 action_executor) {
                     auto disk =
                         wrench::S4U_Simulation::hostHasMountPoint(
-                            action_executor->hostname, "/");
+                            action_executor->getHostname(), "/");
                     double read_time = running_output_data_size /
                         disk->get_read_bandwidth();
                     double flops = _task_functions.at(task_name).at(
@@ -113,7 +113,7 @@ namespace wrench {
                      running_output_error_level);
                     double compute_time = flops /
                         S4U_Simulation::getHostFlopRate(
-                            action_executor->hostname);
+                            action_executor->getHostname());
 
                     auto num_out_bytes = _task_functions.at(task_name).
                                                          at(execution_option)
@@ -138,7 +138,7 @@ namespace wrench {
                     action_executor) {
                         auto disk =
                             wrench::S4U_Simulation::hostHasMountPoint(
-                                action_executor->hostname, "/");
+                                action_executor->getHostname(), "/");
                         if (_fake_io) {
                             Simulation::sleep(running_output_data_size /
                                 disk->get_read_bandwidth());
@@ -183,7 +183,7 @@ namespace wrench {
                                                          running_output_error_level);
                         auto disk =
                             wrench::S4U_Simulation::hostHasMountPoint(
-                                action_executor->hostname, "/");
+                                action_executor->getHostname(), "/");
                         if (_fake_io) {
                             Simulation::sleep(
                                 num_bytes / disk->get_write_bandwidth());
@@ -280,7 +280,7 @@ namespace wrench {
                                                (repeat == 0),
                                                _application_specs->get_lambda(),
                                                _application_specs->get_restart_overhead(),
-                                               this->commport);
+                                               this->getCommPort());
 
                 /* Create an alarm for the deadline */
                 auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _application_specs->get_deadline();
