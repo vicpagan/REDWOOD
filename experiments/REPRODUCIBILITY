@@ -12,6 +12,9 @@ This needs to be done with two versions of redwood_sim: one there the Dynamic Sc
 ../build/data_parallel_evaluator  --delta_t 5.0 --json ../data/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400  --lambda 0.0001 --e_fail 100  | python ~/PAPERS/WRENCH/wrench-papers/redwood_scheduling/figures/plot_data_parallel_results.py
 
 
+OLD?../../build/data_parallel_evaluator --json ../../example_problem_instances/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,96,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400 --delta_t 3 > data_parallel_experiment.json
+
+
 * TO ANALYZE THE HEURISTIC RESULTS IN THE ONE-HOST SECTION:
 
 python3 ./one_host_results_generation.py ../experiment_results/results_single_host.csv
