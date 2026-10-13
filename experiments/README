@@ -1,10 +1,11 @@
-This directory contains useful scripts in scripts/ to generate experiments, obtain results from these experiments, and plot/present the results. The results themselves are in results/. See details hereafter:
+This directory contains useful scripts in scripts/ to generate experiments, obtain results from these experiments, and plot/present the results.
+The results themselves are in results/. See details hereafter:
 
 * scripts/generate_configs.py: This script is used to generate sets of synthetic application configurations. It generates a SQLLite database file.
   
-* scripts/run_configs.py: Based on a SQLList database file, this script invokes the simulator to fill in results in that database. 
+* scripts/run_configs.py: Based on a SQLLite database file, this script invokes the simulator to fill in results in that database.
 
-* scripts/delta_t_evaluator.py: This script runs expected error upper/lower-bound computations, as well as simulations if needed, to quantify the effect of delta_t
+* scripts/delta_t_evaluator.py: This script runs expected error upper/lower-bound computations, as well as simulations if wanted, to quantify the effect of delta_t
 
 * scripts/single_host_results_generation.py: This script takes as input a .csv file generated from a SQLLite database of results (see above), and outputs to the terminal relevant results for the one-PE case, as well as result plots. 
 

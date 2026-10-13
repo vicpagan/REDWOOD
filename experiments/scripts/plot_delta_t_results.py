@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import argparse
 import json
 import subprocess
-import sys
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
@@ -11,7 +11,7 @@ import tempfile
 import os
 import math
 
-def plot_results(all_results, upper_bound_simulation_results, output_file="delta_t_results.pdf"):
+def plot_results(all_results, upper_bound_simulation_results, output_file):
     """Create visualization of delta_t analysis"""
 
     fontsize = 26
@@ -225,24 +225,43 @@ def compute_statistics(all_results, upper_bound_simulation_results):
 
 
 def main():
-    if len(sys.argv) != 2 and len(sys.argv) != 3:
-        print("Usage: delta_t_plotter.py <raw data json file (lower-bound scheduling)> [raw data json file (upper-bound scheduling)]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Plot delta_t results from lower-bound and optional upper-bound scheduling simulations."
+    )
+    parser.add_argument(
+        "--lower-bound-result-file",
+        required=True,
+        metavar="PATH",
+        help="JSON results file for lower-bound scheduling.",
+    )
+    parser.add_argument(
+        "--upper-bound-result-file",
+        metavar="PATH",
+        help="Optional JSON results file for upper-bound scheduling.",
+    )
+    parser.add_argument(
+        "--output-pdf",
+        required=True,
+        metavar="PATH",
+        help="Path of the output PDF figure.",
+    )
+    args = parser.parse_args()
 
-    with open(sys.argv[1], 'r') as f:
+    with open(args.lower_bound_result_file, 'r') as f:
         all_results = json.load(f)
 
-    if len(sys.argv) == 3:
-        with open(sys.argv[2], 'r') as f:
+    if args.upper_bound_result_file is not None:
+        with open(args.upper_bound_result_file, 'r') as f:
             upper_bound_simulation_results = json.load(f)["default"]["simulation_avg_error"]
     else:
         upper_bound_simulation_results = None
 
     # Generate plot
-    plot_results(all_results, upper_bound_simulation_results)
+    plot_results(all_results, upper_bound_simulation_results, output_file=args.output_pdf)
 
-    # Generate statistics/data
-    compute_statistics(all_results, upper_bound_simulation_results)
+    # Comparison statistics require upper-bound simulation results.
+    if upper_bound_simulation_results is not None:
+        compute_statistics(all_results, upper_bound_simulation_results)
 
 if __name__ == "__main__":
     main()

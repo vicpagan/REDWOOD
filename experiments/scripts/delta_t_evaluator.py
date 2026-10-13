@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import json
 import subprocess
 import sys
@@ -9,22 +10,6 @@ import re
 import tempfile
 import os
 import math
-
-def get_executable_names(base_evaluator, base_sim, optimistic_exec, optimistic_sched):
-    """Get the appropriate executable names based on flags"""
-    suffix = ""
-    if optimistic_exec and optimistic_sched:
-        suffix = "_opt_both"
-    elif optimistic_exec:
-        suffix = "_opt_exec"
-    elif optimistic_sched:
-        suffix = "_opt_sched"
-
-    # Add suffix before file extension or at end
-    evaluator = base_evaluator.replace("delta_t_evaluator", f"delta_t_evaluator{suffix}")
-    sim = base_sim.replace("redwood_sim", f"redwood_sim{suffix}")
-
-    return evaluator, sim
 
 def force_required_config_values(config):
     """Force the config to be compatible with the delta_t evaluator:
@@ -154,27 +139,66 @@ def run_simulation(json_file, delta_t, num_repeats, seed, sim_executable):
         os.unlink(tmp_file)
 
 
-def main():
-    if len(sys.argv) < 5:
-        print("Usage: python delta_t_evaluator.py <json_file> <min_delta_t> <max_delta_t> <step_size> [options]")
-        print("\nOptions:")
-        print("  --executable <path>          Path to delta_t_evaluator executable (default: ../build/delta_t_evaluator)")
-        print("  --sim-executable <path>      Path to simulation executable (default: ../build/redwood_sim)")
-        print("  --run-sims                   Run actual simulations")
-        print("  --num-repeats <n>            Number of simulation repeats (default: 1000)")
-        print("  --compare-all                Run all configurations (default + all optimistic variants)")
-        print("\nExample:")
-        print("  python delta_t_evaluator.py config.json 1.0 10.0 1.0 --run-sims")
-        print("  python delta_t_evaluator.py config.json 1.0 10.0 1.0 --compare-all --run-sims")
-        print("\nNote: Requires pre-built executables with suffixes:")
-        print("  delta_t_evaluator, delta_t_evaluator_opt_exec, delta_t_evaluator_opt_sched, delta_t_evaluator_opt_both")
-        print("  redwood_sim, redwood_sim_opt_exec, redwood_sim_opt_sched, redwood_sim_opt_both")
-        sys.exit(1)
+def parse_args(argv=None):
+    """Parse command-line arguments without running the evaluator."""
+    parser = argparse.ArgumentParser(
+        description="Compute delta_t bounds and optionally run simulations.",
+        epilog=(
+            ""
+        ),
+        allow_abbrev=False,
+    )
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
+        "--json-file", required=True, metavar="PATH",
+        help="Path to the input JSON configuration file.",
+    )
+    required.add_argument(
+        "--output-json", required=True, metavar="PATH",
+        help="Path to the output JSON file (overwritten if it already exists).",
+    )
+    required.add_argument(
+        "--min-delta-t", required=True, type=float, metavar="FLOAT",
+        help="Minimum delta_t value.",
+    )
+    required.add_argument(
+        "--max-delta-t", required=True, type=float, metavar="FLOAT",
+        help="Maximum delta_t value.",
+    )
+    required.add_argument(
+        "--step-size", required=True, type=float, metavar="FLOAT",
+        help="Step size between delta_t values.",
+    )
+    parser.add_argument(
+        "--executable", default="../build/delta_t_evaluator", metavar="PATH",
+        help="Path to the delta_t evaluator executable (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--sim-executable", default="../build/redwood_sim", metavar="PATH",
+        help="Path to the simulation executable (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--run-sims", action="store_true",
+        help="Run actual simulations in addition to computing bounds.",
+    )
+    parser.add_argument(
+        "--num-repeats", type=int, default=1000, metavar="N",
+        help="Number of simulation repeats (default: %(default)s).",
+    )
+    return parser.parse_args(argv)
 
-    json_file = sys.argv[1]
-    min_delta_t = float(sys.argv[2])
-    max_delta_t = float(sys.argv[3])
-    step_size = float(sys.argv[4])
+
+def main():
+    args = parse_args()
+    json_file = args.json_file
+    output_json = args.output_json
+    min_delta_t = args.min_delta_t
+    max_delta_t = args.max_delta_t
+    step_size = args.step_size
+    evaluator_executable = args.executable
+    sim_executable = args.sim_executable
+    run_sims = args.run_sims
+    num_repeats = args.num_repeats
 
     # Force the config to be compatible with the delta_t evaluator (1 host,
     # dynamic-only scheduling, both hacks off) rather than erroring out, and
@@ -183,133 +207,86 @@ def main():
     # inside the C++ evaluator.
     prepared_json_file = prepare_config_file(json_file)
 
-    # Parse remaining arguments
-    base_executable = "../build/delta_t_evaluator"
-    base_sim_executable = "../build/redwood_sim"
-    run_sims = False
-    num_repeats = 1000
-    compare_all = False
-
-    i = 5
-    while i < len(sys.argv):
-        if sys.argv[i] == "--run-sims":
-            run_sims = True
-            i += 1
-        elif sys.argv[i] == "--executable":
-            base_executable = sys.argv[i + 1]
-            i += 2
-        elif sys.argv[i] == "--sim-executable":
-            base_sim_executable = sys.argv[i + 1]
-            i += 2
-        elif sys.argv[i] == "--num-repeats":
-            num_repeats = int(sys.argv[i + 1])
-            i += 2
-        elif sys.argv[i] == "--compare-all":
-            compare_all = True
-            i += 1
-        else:
-            i += 1
-
-    # Determine which configurations to run
-    if compare_all:
-        configurations = [
-            ('default', False, False),
-            ('opt_exec', True, False),
-            ('opt_sched', False, True),
-            ('opt_both', True, True)
-        ]
-    else:
-        configurations = [('default', False, False)]
 
     all_results = {}
 
-    for config_name, opt_exec, opt_sched in configurations:
-        print(f"\n{'='*60}")
-        print(f"Running configuration: {config_name}")
-        print(f"{'='*60}")
+    print(f"\n{'='*60}")
+    print(f"{'='*60}")
 
-        # Get the appropriate executables for this configuration
-        evaluator_exe, sim_exe = get_executable_names(base_executable, base_sim_executable,
-                                                      opt_exec, opt_sched)
+    # Check if executables exist
+    if not os.path.exists(evaluator_executable):
+        print(f"ERROR: Executable not found: {evaluator_executable}")
+        print(f"Please build with: make")
+        sys.exit(1)
 
-        # Check if executables exist
-        if not os.path.exists(evaluator_exe):
-            print(f"ERROR: Executable not found: {evaluator_exe}")
-            print(f"Please build with: make")
-            sys.exit(1)
+    # Run evaluator
+    data = run_evaluator(prepared_json_file, min_delta_t, max_delta_t, step_size, evaluator_executable)
 
-        # Run evaluator
-        data = run_evaluator(prepared_json_file, min_delta_t, max_delta_t, step_size, evaluator_exe)
-        print(f"Bounds results: {data}")
+    # Run simulations if requested
+    sim_results = None
+    if run_sims:
+        if not os.path.exists(sim_executable):
+            print(f"ERROR: Simulation executable not found: {sim_executable}")
+            print("Skipping simulations")
+        else:
+            batch_size = 100000
+            print(f"\n=== Running Simulations (in batches of {batch_size} repeats) ===")
+            sim_results = {}
+            delta_t_values = data["delta_t"]
 
-        # Run simulations if requested
-        sim_results = None
-        if run_sims:
-            if not os.path.exists(sim_exe):
-                print(f"ERROR: Simulation executable not found: {sim_exe}")
-                print(f"Skipping simulations for {config_name}")
-            else:
-                batch_size = 100000
-                print(f"\n=== Running Simulations (in batches of {batch_size} repeats) ===")
-                sim_results = {}
-                delta_t_values = data["delta_t"]
+            for dt in delta_t_values:
 
-                for dt in delta_t_values:
-
-                    error_counts = {}
-                    # Deal with repeats (too many repeats, i.e., in the millions, make things crash!)
-                    num_repeats_done = 0
-                    seed = 31212342
-                    running_sum = 0
-                    while num_repeats_done < num_repeats:
-                        num_repeats_to_do = min(num_repeats - num_repeats_done, batch_size)
-                        [batch_avg_error, batch_error_counts] = run_simulation(prepared_json_file, dt, num_repeats_to_do, seed, sim_exe)
-                        seed += num_repeats_to_do
-                        num_repeats_done += num_repeats_to_do
-                        running_sum += batch_avg_error * num_repeats_to_do
-                        print(f"Average error after {num_repeats_done  } repeats: {running_sum / (num_repeats_done)}")
-                        # Accumulate into error_counts
-                        for error, count in batch_error_counts.items():
-                            if error not in error_counts:
-                                error_counts[error] = count
-                            else:
-                                error_counts[error] += count
+                error_counts = {}
+                # Deal with repeats (too many repeats, i.e., in the millions, make things crash!)
+                num_repeats_done = 0
+                seed = 31212342
+                running_sum = 0
+                while num_repeats_done < num_repeats:
+                    num_repeats_to_do = min(num_repeats - num_repeats_done, batch_size)
+                    [batch_avg_error, batch_error_counts] = run_simulation(prepared_json_file, dt, num_repeats_to_do, seed, sim_executable)
+                    seed += num_repeats_to_do
+                    num_repeats_done += num_repeats_to_do
+                    running_sum += batch_avg_error * num_repeats_to_do
+                    print(f"Average error after {num_repeats_done  } repeats: {running_sum / (num_repeats_done)}")
+                    # Accumulate into error_counts
+                    for error, count in batch_error_counts.items():
+                        if error not in error_counts:
+                            error_counts[error] = count
+                        else:
+                            error_counts[error] += count
 
 
-                    # Compute avg_error from scratch
-                    avg_error = 0
-                    num_samples = 0
-                    print(error_counts)
-                    for error, count in error_counts.items():
-                        avg_error += count * error
-                        num_samples += count
-                    avg_error /= num_samples
+                # Compute avg_error from scratch
+                avg_error = 0
+                num_samples = 0
+                for error, count in error_counts.items():
+                    avg_error += count * error
+                    num_samples += count
+                avg_error /= num_samples
 
-                    sim_results[dt] = [avg_error, error_counts]
+                sim_results[dt] = [avg_error, error_counts]
 
-                print("\nSimulation results:")
-                for dt, [err, errors] in sim_results.items():
-                    if err is not None:
-                        print(f"  delta_t={dt}: avg_error={err:.3f}")
+            print("\nSimulation results:")
+            for dt, [err, errors] in sim_results.items():
+                if err is not None:
+                    print(f"  delta_t={dt}: avg_error={err:.3f}")
 
-        all_results[config_name] = {
-            'data': data,
-            'sim_results': sim_results
-        }
+    results = {
+        'data': data,
+        'sim_results': sim_results
+    }
 
     # Save raw data
     output_data = {}
-    for config_name, result in all_results.items():
-        output_data[config_name] = result['data'].copy()
-        if result['sim_results']:
-            output_data[config_name]["simulation_avg_error"] = [
-                result['sim_results'].get(dt) for dt in result['data']["delta_t"]
-            ]
+    output_data['data'] = results['data'].copy()
+    if results['sim_results']:
+        output_data['simulation_avg_error'] = [
+            results['sim_results'].get(dt) for dt in results['data']["delta_t"]
+        ]
 
-    with open("delta_t_results.json", "w") as f:
+    with open(output_json, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2)
-    print("\nRaw data saved to delta_t_results.json")
-    print("\nPlot with: python3 ./delta_t_plotter.py ./delta_t_results.json")
+    print(f"\nJSON results saved to {output_json}")
 
     os.unlink(prepared_json_file)
 
