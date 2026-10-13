@@ -1,9 +1,6 @@
-This directory contains useful scripts in scripts/ to generate experiments, 
-obtain results from these experiments, and plot/present the results. The results
-themselves are in results/. See details hereafter:
+This directory contains useful scripts in scripts/ to generate experiments, obtain results from these experiments, and plot/present the results. The results themselves are in results/. See details hereafter:
 
-* scripts/generate_configs.py: This script is used to generate sets of synthetic
-  application configurations. It generates a SQLLite database file. 
+* scripts/generate_configs.py: This script is used to generate sets of synthetic application configurations. It generates a SQLLite database file.
   
 * scripts/run_configs.py: Based on a SQLList database file, this script invokes the simulator to fill in results in that database. 
 
@@ -11,9 +8,7 @@ themselves are in results/. See details hereafter:
 
 * scripts/single_host_results_generation.py: This script takes as input a .csv file generated from a SQLLite database of results (see above), and outputs to the terminal relevant results for the one-PE case, as well as result plots. 
 
-* scripts/multi_host_result_generation.py: This script takes as input a .csv file generated from
-a SQLLite database of results (see above), and outputs to the terminal relevant results for the
-multi-PE case. It also generates a .json file for algorithm ranking results.
+* scripts/multi_host_result_generation.py: This script takes as input a .csv file generated from a SQLLite database of results (see above), and outputs to the terminal relevant results for the multi-PE case. It also generates a .json file for algorithm ranking results.
 
 * scripts/multi_host_statistical_significance.py: This script is used to determine the variations in strategy rankings for multiple half-size sample sets, so as to determine sensitivity to the (number of) samples, for the multi-PE case. 
 
