@@ -32,6 +32,7 @@ DEFAULT_EFAIL_MULTIPLIER = 0.0
 DEFAULT_HEAD_PERCENTAGE = 100
 DEFAULT_TAIL_PERCENTAGE = 100
 DEFAULT_SHUFFLE_SEED = 0
+DEFAULT_RANKING_OUTPUT_JSON = Path("multi_host_ranking_results.json")
 
 E_FAIL_GROUPS: dict[str, tuple[float, ...]] = {
     # "2.0": (2.0,),
@@ -536,7 +537,8 @@ def compare_two_things(frame: pd.DataFrame,
     return clear_win, ties_but_better
 
 def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str],
-                             muted: bool = False, generate_json: bool = True) -> dict[int, dict[str, float]]:
+                             muted: bool = False, generate_json: bool = True,
+                             ranking_output_json: Path = DEFAULT_RANKING_OUTPUT_JSON) -> dict[int, dict[str, float]]:
 
     ranking_dict = {}
     if not muted:
@@ -580,11 +582,13 @@ def report_algorithm_ranking(frame: pd.DataFrame, algorithm_names: list[str],
                 print(f"    {key+":":64} dfb={100.0 * value:.2f}\tdfo={100.0 * distance_from_optimal[key]:.2f}")
 
     if generate_json:
-        ranking_results_file = "./multi_host_ranking_results.json"
+        ranking_results_file = Path(ranking_output_json)
         json_object = {}
         for num_nodes in ranking_dict.keys():
             json_object[int(num_nodes)] = ranking_dict[num_nodes]
-        json.dump(json_object, open(ranking_results_file, "w"))
+        ranking_results_file.parent.mkdir(parents=True, exist_ok=True)
+        with ranking_results_file.open("w", encoding="utf-8") as output_file:
+            json.dump(json_object, output_file)
         print(f"\nRanking results output in file {ranking_results_file}")
 
     return ranking_dict
@@ -728,7 +732,8 @@ def filter_out_efail_multiplier_rows(frame: pd.DataFrame, to_keep: float) -> pd.
     return frame
 
 
-def output_reproducibility_results(frame: pd.DataFrame, confidence: float, bootstrap_resamples: int, seed: int):
+def output_reproducibility_results(frame: pd.DataFrame, confidence: float, bootstrap_resamples: int, seed: int,
+                                   ranking_output_json: Path = DEFAULT_RANKING_OUTPUT_JSON):
 
     print("\n******************************************************")
     print("* QUESTION: Is RANDOM useful?")
@@ -938,7 +943,8 @@ def output_reproducibility_results(frame: pd.DataFrame, confidence: float, boots
             if restart:
                 keep_going = True
                 break
-    report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True)
+    report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True,
+                             ranking_output_json=ranking_output_json)
     print("The ranking results JSON file can be passed to a plotting script to generate the figure in the paper")
 
 
@@ -951,7 +957,20 @@ def build_argument_parser() -> argparse.ArgumentParser:
             "Lower error values are assumed to be better."
         )
     )
-    parser.add_argument("csv_file", type=Path, help="Input .csv or .csv.gz file")
+    parser.add_argument(
+        "--csv-input",
+        type=Path,
+        required=True,
+        metavar="PATH",
+        help="Input .csv or .csv.gz file",
+    )
+    parser.add_argument(
+        "--ranking-output-json",
+        type=Path,
+        default=DEFAULT_RANKING_OUTPUT_JSON,
+        metavar="PATH",
+        help="Path for ranking JSON output (default: %(default)s)",
+    )
 
     parser.add_argument(
         "--output-dir",
@@ -1162,7 +1181,7 @@ def main() -> None:
     if args.efail_multiplier < 0.0:
         raise ValueError("--efail_multiplier must be non-negative; use 0.0 for all rows.")
 
-    frame = pd.read_csv(args.csv_file)
+    frame = pd.read_csv(args.csv_input)
 
     # Get app_config_id groups in their original order
     group_ids = frame["app_config_id"].drop_duplicates().tolist()
@@ -1196,7 +1215,7 @@ def main() -> None:
     print(
         f"Loaded {len(frame)} rows "
         f"({len(group_ids)} app_config_id groups) "
-        f"from {args.csv_file}"
+        f"from {args.csv_input}"
     )
 
     # Filter out non-matching e-fail values
@@ -1205,7 +1224,8 @@ def main() -> None:
 
     # Do the "reproducible research" version?
     if args.reproduce_paper_results:
-        output_reproducibility_results(frame, args.confidence, args.bootstrap_resamples, args.seed)
+        output_reproducibility_results(frame, args.confidence, args.bootstrap_resamples, args.seed,
+                                       ranking_output_json=args.ranking_output_json)
         sys.exit(0)
 
     # Filter out heuristics
@@ -1319,7 +1339,8 @@ def main() -> None:
 
     if args.show_ranking:
         print("\n## RANKING:")
-        report_algorithm_ranking(frame, algorithm_names, muted=False, generate_json=True)
+        report_algorithm_ranking(frame, algorithm_names, muted=False, generate_json=True,
+                                 ranking_output_json=args.ranking_output_json)
 
     if args.show_ranking_pruned:
         pruned_algorithm_names = list(algorithm_names)
@@ -1351,7 +1372,8 @@ def main() -> None:
                 if restart:
                     keep_going = True
                     break
-        report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True)
+        report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True,
+                                 ranking_output_json=args.ranking_output_json)
 
     if args.show_ranking_pruned_ties:
         print("\n## RANKING WITH ALL DOMINATED OR TIED-BUT-WORSE HEURISTICS ELIMINATED:")
@@ -1390,7 +1412,8 @@ def main() -> None:
                     keep_going = True
                     break
 
-        report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True)
+        report_algorithm_ranking(frame, pruned_algorithm_names, muted=False, generate_json=True,
+                                 ranking_output_json=args.ranking_output_json)
 
 if __name__ == "__main__":
     main()

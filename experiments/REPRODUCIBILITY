@@ -60,17 +60,13 @@ TODO:
 
     - Generate the results
 
-    python3 ./multi_host_result_generation.py ./results/results_multi_host_new.csv --reproduce-paper-results
+    python3 ./scripts/multi_host_result_generation.py --csv-input ./results/results_multi_host_new.csv --reproduce-paper-results --ranking-output-json /tmp/results_multi_host_ranking.json
 
-        - Will generate output on the terminal
-        - Will generate a json file with ranking results (results_multi_host_ranking.json)
+        - Produces output on the terminal
+        - Generates a json file with the ranking results (results_multi_host_ranking.json)
 
-        TODO: Pass the ranking file path as a command-line argument
+    - Generating the ranking plot:
 
-    Generating the ranking plot:
         python3 ./scripts/plot_multi_host_ranking.py ./results/results_multi_host_ranking.json
-
-
-
 
 
