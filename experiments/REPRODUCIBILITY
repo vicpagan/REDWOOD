@@ -2,12 +2,14 @@
 * TO GENERATE THE DELTA-T FIGURE IN THE ONE-HOST SECTION
 ********************************************************
 
-  - Getting the results files:
+  - Generating the results files:
+
 	python3 ./delta_t_evaluator.py  --executable ../build/delta_t_evaluator --sim-executable ../build/redwood_sim --run-sims --num-repeats 5000000 --json-file ../example_problem_instances/fusion_science_use_case.json --min-delta-t 1.0 --max-delta-t 30.0 --step-size 1.0 --output-json /tmp/results_delta_t_lower_bound.json
 
    TODO: MODIFY THE SCRIPT ABOVE ONCE VICTOR HAS MERGED AND IMPLEMENTED "dynamic_lower" and "dynamic_upper" algorithms
 
   - Generating the plot (and producing some useful ASCII output):
+
         python3 ./scripts/plot_delta_t_results.py --lower-bound-result-file ./results/results_delta_t_lower_bound.json --upper-bound-result-file ./results/results_delta_t_upper_bound.json --output-pdf ./delta_t_results.pdf
 
 
@@ -17,12 +19,12 @@ This needs to be done with two versions of redwood_sim: one there the Dynamic Sc
 * TO GENERATE THE DATA-PARALLEL FIGURE IN THE ONE-HOST SECTION
 **************************************************************
 
-  - Getting the results file:
+    - Generating the results file:
+
         ../build/data_parallel_evaluator  --delta_t 5.0 --json_input ../example_problem_instances/fusion_science_use_case.json --num_nodes_list 1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,48,64,128,192,256,384,512,768,1024 --deadline_list 120,300,600,3600,14400  --lambda 0.0001 --e_fail 100 --json_output /tmp/results/results_data_parallel.json
 
-  - Generating the plot:
+    - Generating the plot:
         python ./scripts/plot_data_parallel_results.py --json-result-file ./results/results_data_parallel.json --output-pdf ./data_parallel_results.pdf
-
 
 **********************************************************
 * TO GENERATE THE SINGLE-HOST DB AND POPULATE IT
@@ -37,11 +39,12 @@ TODO:
 * TO ANALYZE THE RESULTS IN THE ONE-HOST SECTION
 **********************************************************
 
-    - Generate the results files (and useful ASCII output):
+    - Generating the results files (and useful output on the terminal):
 
         python3 ./single_host_results_generation.py --csv-input ../results/results_single_host.csv  --output-average-errors-json  /tmp/results_single_host_average_error.json --output-relative-errors-json /tmp/results_single_host_relative_error.json
 
-    - Plotting the results:
+    - Generating the plot(s):
+
         NOT USED IN THE PAPER: python3 ./plot_single_host_average_errors.py --json-result-file ../results/results_single_host_average_error.json --output-pdf single-host-average-error.pdf
         python3 ./plot_single_host_relative_errors.py --json-result-file ../results/results_single_host_relative_error.json --output-pdf single-host-relative-error.pdf
 
@@ -58,12 +61,9 @@ TODO:
 * TO ANALYZE THE RESULTS IN THE MULTI-HOST SECTION
 ***********************************************************
 
-    - Generate the results
+    - Generating the results files (and useful output on the terminal)
 
-    python3 ./scripts/multi_host_result_generation.py --csv-input ./results/results_multi_host_new.csv --reproduce-paper-results --ranking-output-json /tmp/results_multi_host_ranking.json
-
-        - Produces output on the terminal
-        - Generates a json file with the ranking results (results_multi_host_ranking.json)
+        python3 ./scripts/multi_host_result_generation.py --csv-input ./results/results_multi_host_new.csv --reproduce-paper-results --ranking-output-json /tmp/results_multi_host_ranking.json
 
     - Generating the ranking plot:
 
