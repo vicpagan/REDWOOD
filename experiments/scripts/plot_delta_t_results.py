@@ -14,7 +14,7 @@ import math
 def plot_results(all_results, upper_bound_simulation_results, output_file="delta_t_results.pdf"):
     """Create visualization of delta_t analysis"""
 
-    fontsize = 24
+    fontsize = 26
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
 
@@ -80,10 +80,11 @@ def plot_results(all_results, upper_bound_simulation_results, output_file="delta
             alpha=0.8
         )
 
-        plot_up_to = 27
+        plot_up_to = 15
         all_lines.extend(line_u + line_l)
-        ax1.set_xlim(0, plot_up_to)
-        ax1.set_ylim(0.999*min(lower_bound[0:plot_up_to]), 1.001*max(upper_bound[0:plot_up_to]))
+        ax1.set_xlim(1, plot_up_to)
+        ax1.set_xticks([1, 5, 10, 15])
+        ax1.set_ylim(0.999*min(lower_bound[0:plot_up_to]), 1.005*max(upper_bound[0:plot_up_to]))
 
         # # Fill between bounds
         # ax1.fill_between(
@@ -145,7 +146,7 @@ def plot_results(all_results, upper_bound_simulation_results, output_file="delta
             frameon=True,
             facecolor='white',
             edgecolor='black',
-            framealpha=0.5
+            framealpha=0.8
         )
 
     labels = [l.get_label() for l in all_lines]
@@ -162,12 +163,12 @@ def plot_results(all_results, upper_bound_simulation_results, output_file="delta
     frameon=True,
     facecolor='white',
     edgecolor='black',
-    framealpha=0.5
+    framealpha=0.8
     )
     legend_ax.add_artist(time_leg)
 
     plt.tight_layout()
-    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.savefig(output_file, dpi=300, bbox_inches='tight', pad_inches=0)
     print(f"Plot saved to {output_file}")
 
     return fig
