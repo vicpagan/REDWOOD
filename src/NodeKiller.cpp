@@ -6,11 +6,12 @@
 #include <wrench/execution_controller/ExecutionControllerMessage.h>
 
 WRENCH_LOG_CATEGORY(node_killer, "Log category for HostSwitcher");
+
 namespace wrench {
-    std::map<std::string, std::shared_ptr<NodeKiller>> NodeKiller::_node_killers;
+    std::map<std::string, std::shared_ptr<NodeKiller> > NodeKiller::_node_killers;
     std::map<std::string, std::mt19937> NodeKiller::_node_killers_generators;
 
-    static double portable_exponential_sample(std::mt19937& rng, double lambda) {
+    static double portable_exponential_sample(std::mt19937 &rng, double lambda) {
         const uint32_t raw = rng();
         double uniform = static_cast<double>(raw) / 4294967296.0;
         if (uniform <= 0.0) {
@@ -32,9 +33,9 @@ namespace wrench {
         std::mt19937 *rng,
         const double lambda,
         const double restart_overhead,
-        const std::string& victim_host,
-        S4U_CommPort* notify_commport,
-        const std::string& hostname) : Service(hostname, "node_killer"),
+        const std::string &victim_host,
+        S4U_CommPort *notify_commport,
+        const std::string &hostname) : Service(hostname, "node_killer"),
                                        _rng(rng),
                                        _lambda(lambda),
                                        _restart_overhead(restart_overhead),
@@ -76,16 +77,16 @@ namespace wrench {
          * @return A node killer service
          */
     std::shared_ptr<NodeKiller> NodeKiller::start_node_killer(
-        Simulation* simulation,
-        const std::string& victim,
+        Simulation *simulation,
+        const std::string &victim,
         const int seed,
         double lambda,
         const double restart_overhead,
-        S4U_CommPort* notify_commport) {
-
+        S4U_CommPort *notify_commport) {
         if (_node_killers_generators.find(victim) == _node_killers_generators.end()) {
             if (seed == -1) {
-                throw std::invalid_argument("No existing RNG for existing NodeKiller victim '" + victim + "' during reset");
+                throw std::invalid_argument(
+                    "No existing RNG for existing NodeKiller victim '" + victim + "' during reset");
             }
             _node_killers_generators[victim] = std::mt19937(static_cast<std::mt19937::result_type>(seed));
         }
@@ -106,22 +107,21 @@ namespace wrench {
     /**
      * @brief Start a node killer on each host
      */
-    void NodeKiller::start_node_killers(Simulation* simulation,
-                                        const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
+    void NodeKiller::start_node_killers(Simulation *simulation,
+                                        const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &
                                         compute_services,
                                         int initial_seed,
                                         bool reset_seed,
                                         double lambda,
                                         const double restart_overhead,
-                                        S4U_CommPort* notify_commport) {
-
+                                        S4U_CommPort *notify_commport) {
         static int seed = initial_seed;
         if (reset_seed) {
             seed = initial_seed;
         }
 
         _node_killers_generators.clear();
-        for (auto const& cs : compute_services) {
+        for (auto const &cs: compute_services) {
             auto victim_hostname = cs.second->getHosts().at(0);
 
             // Kill an existing node killer if any
@@ -136,11 +136,10 @@ namespace wrench {
     }
 
     void NodeKiller::reset_node_killer(Simulation *simulation,
-        const std::string &victim_hostname,
-        double lambda,
-        const double restart_overhead,
-        S4U_CommPort *notify_commport) {
-
+                                       const std::string &victim_hostname,
+                                       double lambda,
+                                       const double restart_overhead,
+                                       S4U_CommPort *notify_commport) {
         if (_node_killers.find(victim_hostname) != _node_killers.end()) {
             _node_killers[victim_hostname]->killActor();
             _node_killers[victim_hostname] = start_node_killer(
@@ -153,20 +152,19 @@ namespace wrench {
         }
     }
 
-    void NodeKiller::reset_all_node_killers(Simulation* simulation,
-        const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
-        compute_services,
-        double lambda,
-        const double restart_overhead,
-        S4U_CommPort* notify_commport) {
-
-        for (auto const& cs : compute_services) {
+    void NodeKiller::reset_all_node_killers(Simulation *simulation,
+                                            const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &
+                                            compute_services,
+                                            double lambda,
+                                            const double restart_overhead,
+                                            S4U_CommPort *notify_commport) {
+        for (auto const &cs: compute_services) {
             auto victim_hostname = cs.second->getHosts().at(0);
             reset_node_killer(simulation,
-                victim_hostname,
-                lambda,
-                restart_overhead,
-                notify_commport);
+                              victim_hostname,
+                              lambda,
+                              restart_overhead,
+                              notify_commport);
         }
     }
 

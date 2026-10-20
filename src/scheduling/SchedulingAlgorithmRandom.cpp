@@ -4,17 +4,17 @@
 #include <iostream>
 
 namespace wrench {
-
     SchedulingAlgorithmRandom::SchedulingAlgorithmRandom(
-        const std::shared_ptr<ApplicationSpecs>& application_specs,
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
-        ProbabilityComputation* probability_computation)
+        const std::shared_ptr<ApplicationSpecs> &application_specs,
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
+            (double, double)> > > > &exec_options,
+        ProbabilityComputation *probability_computation)
         : SchedulingAlgorithm(application_specs, "random", exec_options, probability_computation),
           _rng(std::chrono::steady_clock::now().time_since_epoch().count()) {
     }
 
     void SchedulingAlgorithmRandom::preprocess_host_decisions(
-        const std::string& hostname,
+        const std::string &hostname,
         const double initial_data_size,
         const double initial_error_level,
         const double deadline,
@@ -22,12 +22,11 @@ namespace wrench {
     }
 
     std::vector<SchedulingAlgorithm::SchedulingDecision> SchedulingAlgorithmRandom::make_decisions(
-        SystemState* system_state_tracker,
+        SystemState *system_state_tracker,
         const double remaining_time) {
-
         std::vector<SchedulingDecision> decisions;
 
-        for (const auto& entry : *system_state_tracker) {
+        for (const auto &entry: *system_state_tracker) {
             std::string hostname = entry.first;
             std::cerr << "HOSTNAME RANDOM MAKE DECISIONS = " << hostname << "\n";
             std::string task_to_schedule = _application_specs->get_host_task_to_schedule(hostname);
@@ -39,7 +38,7 @@ namespace wrench {
                 // Create a vector of option names
                 std::vector<std::string> option_names;
                 std::cerr << "Options available for host " << hostname << ": ";
-                for (const auto& child : current_decision_node->children) {
+                for (const auto &child: current_decision_node->children) {
                     std::cerr << child->execution_option << "   ";
                     option_names.push_back(child->execution_option);
                 }

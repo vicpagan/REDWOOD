@@ -8,11 +8,12 @@
 class FunctionGenerator {
 public:
     FunctionGenerator() = default;
-    static std::function<double(double, double)> get_function(const boost::json::object& spec);
+
+    static std::function<double(double, double)> get_function(const boost::json::object &spec);
 
     class AffineFunctor {
     public:
-        AffineFunctor(double a, double b, double c): _a(a), _b(b), _c(c) {
+        AffineFunctor(double a, double b, double c) : _a(a), _b(b), _c(c) {
         }
 
         double operator()(double x, double y) const {
@@ -25,7 +26,7 @@ public:
 
     class QuadraticFunctor {
     public:
-        QuadraticFunctor(double a, double b, double c, double d, double e): _a(a), _b(b), _c(c), _d(d), _e(e) {
+        QuadraticFunctor(double a, double b, double c, double d, double e) : _a(a), _b(b), _c(c), _d(d), _e(e) {
         }
 
         double operator()(double x, double y) const {
@@ -37,7 +38,7 @@ public:
     };
 
 private:
-    static std::map<std::string, std::function<double(double, double)>> _function_registry;
+    static std::map<std::string, std::function<double(double, double)> > _function_registry;
 };
 
 

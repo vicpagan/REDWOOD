@@ -13,7 +13,6 @@
 #include <boost/json.hpp>
 
 
-
 namespace sg4 = simgrid::s4u;
 
 /**
@@ -24,7 +23,7 @@ namespace sg4 = simgrid::s4u;
  */
 class PlatformCreator {
 public:
-    explicit PlatformCreator(const boost::json::object& platform_spec) {
+    explicit PlatformCreator(const boost::json::object &platform_spec) {
         _platform_spec = platform_spec;
     }
 

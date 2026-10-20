@@ -7,6 +7,11 @@ project(REDWOOD CXX)
 add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS")
 
 set(CMAKE_CXX_STANDARD 23)
+
+# Optimize by default (without a build type, nothing is optimized)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
 # Find Boost
@@ -81,6 +86,7 @@ set(SIMULATOR_SOURCE_FILES
         src/Controller.cpp
         src/ApplicationSpecs.cpp
         src/ProbabilityComputation.cpp
+        src/OptimalExpectedError.cpp
         src/FunctionGenerator.cpp
         src/scheduling/OptionComparatorFunction.cpp
         src/scheduling/SchedulingAlgorithm.cpp
@@ -99,6 +105,7 @@ set(SIMULATOR_SOURCE_FILES
         include/Controller.h
         include/ApplicationSpecs.h
         include/ProbabilityComputation.h
+        include/OptimalExpectedError.h
         include/FunctionGenerator.h
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
@@ -139,6 +146,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
+        src/OptimalExpectedError.cpp
         include/ApplicationSpecs.h
         include/Utils.h
         include/scheduling/SchedulingAlgorithm.h
@@ -154,6 +162,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
+        include/OptimalExpectedError.h
 )
 
 add_executable(data_parallel_evaluator ${DATA_PARALLEL_EVALUATOR_SOURCE_FILES})
@@ -181,6 +190,7 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
+        src/OptimalExpectedError.cpp
         include/ApplicationSpecs.h
         include/Utils.h
         include/scheduling/SchedulingAlgorithm.h
@@ -196,6 +206,7 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
+        include/OptimalExpectedError.h
 )
 
 add_executable(delta_t_evaluator ${DELTA_T_EVALUATOR_SOURCE_FILES})

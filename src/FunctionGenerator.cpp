@@ -1,10 +1,8 @@
 #include "FunctionGenerator.h"
 
-#include <iostream>
+std::map<std::string, std::function<double(double, double)> > FunctionGenerator::_function_registry;
 
-std::map<std::string, std::function<double(double, double)>> FunctionGenerator::_function_registry;
-
-std::function<double(double, double)> FunctionGenerator::get_function(const boost::json::object& spec) {
+std::function<double(double, double)> FunctionGenerator::get_function(const boost::json::object &spec) {
     std::string key = boost::json::serialize(spec);
     // Lookup the registry in case we've done that one before
     if (_function_registry.find(key) == _function_registry.end()) {
@@ -28,5 +26,3 @@ std::function<double(double, double)> FunctionGenerator::get_function(const boos
     // Return the function (which is really a functor)
     return _function_registry[key];
 }
-
-

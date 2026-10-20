@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <boost/json.hpp>
-#include <cmath>
 #include "Utils.h"
 
 /**
@@ -9,7 +8,7 @@
  * @param filepath: the file path
  * @return a boost::json::object object
  */
-boost::json::object readJSONFromFile(const std::string& filepath) {
+boost::json::object readJSONFromFile(const std::string &filepath) {
     // Open the file using ifstream
     std::ifstream file(filepath);
 

@@ -35,7 +35,7 @@ void PlatformCreator::create_platform() const {
         auto compute_host = zone->add_host("ComputeHost_" + std::to_string(i), "1f");
         compute_host->set_core_count(10);
         auto io_read_bandwidth = wrench::UnitParser::parse_bandwidth(
-        boost::json::value_to<std::string>(_platform_spec.at("io_read_bandwidth_per_node")));
+            boost::json::value_to<std::string>(_platform_spec.at("io_read_bandwidth_per_node")));
         auto io_write_bandwidth = wrench::UnitParser::parse_bandwidth(
             boost::json::value_to<std::string>(_platform_spec.at("io_write_bandwidth_per_node")));
 

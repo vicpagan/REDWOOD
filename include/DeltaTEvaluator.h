@@ -11,17 +11,12 @@
 #ifndef DELTA_T_EVALUATOR_H
 #define DELTA_T_EVALUATOR_H
 
-#include <wrench-dev.h>
 #include <boost/json/object.hpp>
 
 #include "ProbabilityComputation.h"
-#include "ApplicationSpecs.h"
-#include "scheduling/SchedulingAlgorithm.h"
-#include "scheduling/OptionComparatorFunction.h"
 
 
 namespace wrench {
-
     struct DeltaTResult {
         double delta_t;
         double upper_bound_error;
@@ -32,8 +27,7 @@ namespace wrench {
     /**
      *  @brief A DataParallelEvaluator implementation
      */
-    class DeltaTEvaluator  {
-
+    class DeltaTEvaluator {
     public:
         // Constructor
         explicit DeltaTEvaluator(boost::json::object json_input);
@@ -42,8 +36,6 @@ namespace wrench {
 
     private:
         boost::json::object json_input;
-
     };
-
 } // namespace wrench
 #endif //DELTA_T_EVALUATOR_H

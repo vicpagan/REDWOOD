@@ -24,51 +24,51 @@ namespace wrench {
             std::mt19937 *rng,
             double lambda,
             double restart_overhead,
-            const std::string& victim_host,
-            S4U_CommPort* notify_commport,
-            const std::string& hostname);
+            const std::string &victim_host,
+            S4U_CommPort *notify_commport,
+            const std::string &hostname);
 
-        static void start_node_killers(Simulation* simulation,
-                                const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
-                                compute_services,
-                                int initial_seed,
-                                bool reset_seed,
-                                double lambda,
-                                double restart_overhead,
-                                S4U_CommPort* notify_commport);
+        static void start_node_killers(Simulation *simulation,
+                                       const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &
+                                       compute_services,
+                                       int initial_seed,
+                                       bool reset_seed,
+                                       double lambda,
+                                       double restart_overhead,
+                                       S4U_CommPort *notify_commport);
 
         static void reset_node_killer(Simulation *simulation,
-                                    const std::string &victim_host,
-                                    double lambda,
-                                    double restart_overhead,
-                                    S4U_CommPort *notify_commport);
+                                      const std::string &victim_host,
+                                      double lambda,
+                                      double restart_overhead,
+                                      S4U_CommPort *notify_commport);
 
-        static void reset_all_node_killers(Simulation* simulation,
-                                        const std::map<std::string, std::shared_ptr<BareMetalComputeService>>&
-                                        compute_services,
-                                        double lambda,
-                                        double restart_overhead,
-                                        S4U_CommPort* notify_commport);
+        static void reset_all_node_killers(Simulation *simulation,
+                                           const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &
+                                           compute_services,
+                                           double lambda,
+                                           double restart_overhead,
+                                           S4U_CommPort *notify_commport);
 
         static void stop_node_killer(const std::string &victim_hostname);
 
     private:
         [[noreturn]] int main() override;
 
-        static std::shared_ptr<NodeKiller> start_node_killer(Simulation* simulation,
-                                                             const std::string& victim,
+        static std::shared_ptr<NodeKiller> start_node_killer(Simulation *simulation,
+                                                             const std::string &victim,
                                                              int seed,
                                                              double lambda,
                                                              double restart_overhead,
-                                                             S4U_CommPort* notify_commport);
+                                                             S4U_CommPort *notify_commport);
 
-        static std::map<std::string, std::shared_ptr<NodeKiller>> _node_killers;
+        static std::map<std::string, std::shared_ptr<NodeKiller> > _node_killers;
         static std::map<std::string, std::mt19937> _node_killers_generators;
         std::mt19937 *_rng;
         double _lambda;
         double _restart_overhead;
         std::string _victim_host;
-        S4U_CommPort* _notify_commport;
+        S4U_CommPort *_notify_commport;
     };
 } // namespace wrench
 #endif//NODE_KILLER_H

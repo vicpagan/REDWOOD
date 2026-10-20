@@ -17,7 +17,6 @@
 
 #include <iostream>
 #include <limits>
-#include <wrench/util/UnitParser.h>
 
 #include "Controller.h"
 #include "FunctionGenerator.h"
@@ -40,13 +39,13 @@ namespace wrench {
      * @param fake_io: Whether to fake I/O operations or not
      * @param hostname: the name of the host on which to start the Execution Controller
      */
-    Controller::Controller(const boost::json::object& application_spec,
-                           const boost::json::object& execution_spec,
-                           const boost::json::object& scheduling_spec,
-                           const std::shared_ptr<ApplicationSpecs>& application_specs,
-                           const std::map<std::string, std::shared_ptr<BareMetalComputeService>>& compute_services,
+    Controller::Controller(const boost::json::object &application_spec,
+                           const boost::json::object &execution_spec,
+                           const boost::json::object &scheduling_spec,
+                           const std::shared_ptr<ApplicationSpecs> &application_specs,
+                           const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &compute_services,
                            const bool fake_io,
-                           const std::string& hostname) : ExecutionController(hostname, "controller"),
+                           const std::string &hostname) : ExecutionController(hostname, "controller"),
                                                           _application_specs(application_specs),
                                                           _application_spec(application_spec),
                                                           _execution_spec(execution_spec),
@@ -59,13 +58,13 @@ namespace wrench {
             _scheduling_spec.at("hacks").as_object().at("temporal_redundancy"));
         _stop_running_jobs = boost::json::value_to<std::string>(
             _scheduling_spec.at("hacks").as_object().at("stop_running_jobs"));
+        _keep_preprocessed_decisions = (_temporal_redundancy == "off" && _stop_running_jobs == "off");
 
         /* Create the probability computation utility */
         _probability_computation = std::make_unique<ProbabilityComputation>(_application_specs);
 
         /* Determine the list of scheduling algorithms */
-        /* Determine/validate the scheduling algorithms to use */
-        for (auto const& alg_name : _scheduling_spec.at("algorithms").as_array()) {
+        for (auto const &alg_name: _scheduling_spec.at("algorithms").as_array()) {
             auto alg = SchedulingAlgorithm::create_scheduling_algorithm(
                 boost::json::value_to<string>(alg_name), _application_specs, _task_functions,
                 _probability_computation.get());
@@ -83,11 +82,11 @@ namespace wrench {
      * @param hostname The hostname on which to start the job
      * @return a job
      */
-    void Controller::submit_job(const std::string& task_name,
-                                const std::string& execution_option,
+    void Controller::submit_job(const std::string &task_name,
+                                const std::string &execution_option,
                                 double running_output_data_size,
                                 double running_output_error_level,
-                                const std::string& hostname) {
+                                const std::string &hostname) {
         const auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
 
         // std::cerr << "Submitting job for task " << task_name << " with execution option " << execution_option <<
@@ -99,103 +98,101 @@ namespace wrench {
                 [this, task_name, execution_option,
                     running_output_error_level, running_output_data_size
                 ](
-                const std::shared_ptr<wrench::ActionExecutor>&
-                action_executor) {
+            const std::shared_ptr<wrench::ActionExecutor> &
+            action_executor) {
                     auto disk =
-                        wrench::S4U_Simulation::hostHasMountPoint(
-                            action_executor->getHostname(), "/");
+                            wrench::S4U_Simulation::hostHasMountPoint(
+                                action_executor->getHostname(), "/");
                     double read_time = running_output_data_size /
-                        disk->get_read_bandwidth();
+                                       disk->get_read_bandwidth();
                     double flops = _task_functions.at(task_name).at(
                         execution_option).at(
                         "t_function")
                     (running_output_data_size,
                      running_output_error_level);
                     double compute_time = flops /
-                        S4U_Simulation::getHostFlopRate(
-                            action_executor->getHostname());
+                                          S4U_Simulation::getHostFlopRate(
+                                              action_executor->getHostname());
 
                     auto num_out_bytes = _task_functions.at(task_name).
-                                                         at(execution_option)
-                                                         .at("d_function")
-                                                         (running_output_data_size,
-                                                          running_output_error_level);
+                            at(execution_option)
+                            .at("d_function")
+                            (running_output_data_size,
+                             running_output_error_level);
 
                     double write_time = num_out_bytes / disk->
-                        get_write_bandwidth();
+                                        get_write_bandwidth();
 
                     S4U_Simulation::sleep(read_time + compute_time + write_time);
                 },
-                [](const std::shared_ptr<wrench::ActionExecutor>&
-                action_executor) {
+                [](const std::shared_ptr<wrench::ActionExecutor> &
+            action_executor) {
                 });
         } else {
             const auto read_input_action =
-                job->addCustomAction(
-                    "read", 0, 1,
-                    [this, running_output_data_size](
-                    const std::shared_ptr<wrench::ActionExecutor>&
+                    job->addCustomAction(
+                        "read", 0, 1,
+                        [this, running_output_data_size](
+                    const std::shared_ptr<wrench::ActionExecutor> &
                     action_executor) {
-                        auto disk =
-                            wrench::S4U_Simulation::hostHasMountPoint(
-                                action_executor->getHostname(), "/");
-                        if (_fake_io) {
-                            Simulation::sleep(running_output_data_size /
-                                disk->get_read_bandwidth());
-                        }
-                        else {
-                            disk->write(
-                                static_cast<sg_size_t>(
-                                    running_output_data_size));
-                        }
-                    },
-                    [](const std::shared_ptr<wrench::ActionExecutor>&
+                            auto disk =
+                                    wrench::S4U_Simulation::hostHasMountPoint(
+                                        action_executor->getHostname(), "/");
+                            if (_fake_io) {
+                                Simulation::sleep(running_output_data_size /
+                                                  disk->get_read_bandwidth());
+                            } else {
+                                disk->write(
+                                    static_cast<sg_size_t>(
+                                        running_output_data_size));
+                            }
+                        },
+                        [](const std::shared_ptr<wrench::ActionExecutor> &
                     action_executor) {
-                    });
+                        });
 
             // std::cerr << "Read input action for task " << task_name << " with execution option " << execution_option <<
             //     " on host " << hostname << std::endl;
 
             const auto compute_action =
-                job->addComputeAction(
-                    "compute",
-                    _task_functions.at(task_name).at(execution_option).at(
-                        "t_function")
-                    (running_output_data_size, running_output_error_level),
-                    0.0,
-                    1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
+                    job->addComputeAction(
+                        "compute",
+                        _task_functions.at(task_name).at(execution_option).at(
+                            "t_function")
+                        (running_output_data_size, running_output_error_level),
+                        0.0,
+                        1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
 
             // std::cerr << "Compute action for task " << task_name << " with execution option " << execution_option <<
             //     " on host " << hostname << std::endl;
 
             const auto write_output_action =
-                job->addCustomAction(
-                    "write", 0, 1,
-                    [this, task_name, execution_option,
-                        running_output_data_size,
-                        running_output_error_level](
-                    const std::shared_ptr<wrench::ActionExecutor>&
+                    job->addCustomAction(
+                        "write", 0, 1,
+                        [this, task_name, execution_option,
+                            running_output_data_size,
+                            running_output_error_level](
+                    const std::shared_ptr<wrench::ActionExecutor> &
                     action_executor) {
-                        auto num_bytes = _task_functions.at(task_name).at(
-                                                            execution_option)
-                                                        .at("d_function")
-                                                        (running_output_data_size,
-                                                         running_output_error_level);
-                        auto disk =
-                            wrench::S4U_Simulation::hostHasMountPoint(
-                                action_executor->getHostname(), "/");
-                        if (_fake_io) {
-                            Simulation::sleep(
-                                num_bytes / disk->get_write_bandwidth());
-                        }
-                        else {
-                            disk->write(
-                                static_cast<sg_size_t>(num_bytes));
-                        }
-                    },
-                    [](const std::shared_ptr<wrench::ActionExecutor>&
+                            auto num_bytes = _task_functions.at(task_name).at(
+                                        execution_option)
+                                    .at("d_function")
+                                    (running_output_data_size,
+                                     running_output_error_level);
+                            auto disk =
+                                    wrench::S4U_Simulation::hostHasMountPoint(
+                                        action_executor->getHostname(), "/");
+                            if (_fake_io) {
+                                Simulation::sleep(
+                                    num_bytes / disk->get_write_bandwidth());
+                            } else {
+                                disk->write(
+                                    static_cast<sg_size_t>(num_bytes));
+                            }
+                        },
+                        [](const std::shared_ptr<wrench::ActionExecutor> &
                     action_executor) {
-                    });
+                        });
 
             // std::cerr << "Write output action for task " << task_name << " with execution option " << execution_option <<
             //     " on host " << hostname << std::endl;
@@ -211,6 +208,113 @@ namespace wrench {
                                          Simulation::getCurrentSimulatedDate());
     }
 
+    /**
+     * @brief Terminate the job running on a host, if any
+     * @param hostname The host
+     * @param context Description of the situation, for the error message
+     */
+    void Controller::terminate_running_job(const std::string &hostname, const std::string &context) const {
+        if (_system_state_tracker->is_a_job_running(hostname)) {
+            try {
+                _job_manager->terminateJob(_system_state_tracker->get_running_job(hostname));
+            } catch (ExecutionException &) {
+                std::cerr << "Tried to terminate job on host: " << hostname << " " << context << std::endl;
+            }
+        }
+    }
+
+    /**
+     * @brief Reset a host's state, but a host that is down stays down
+     * @param hostname The host
+     */
+    void Controller::reset_host_keeping_down_state(const std::string &hostname) const {
+        const bool is_down = _system_state_tracker->is_host_down(hostname);
+        _system_state_tracker->reset_host(hostname);
+        if (is_down) {
+            _system_state_tracker->set_host_down(hostname);
+        }
+    }
+
+    /**
+     * @brief Make a host restart the application from the first task, with a decision tree pruned so
+     *        that only option sequences with an error lower than prune_threshold are considered
+     *        (temporal redundancy)
+     * @param hostname The host
+     * @param algorithm The scheduling algorithm
+     * @param prune_threshold The error level to improve on
+     * @param tree_prune_threshold_by_host The current prune thresholds (updated)
+     * @param terminate_job Whether to terminate the job currently running on the host, if any
+     * @param context Description of the situation, for error messages
+     */
+    void Controller::restart_host_from_first_task(const std::string &hostname,
+                                                  const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                                  const double prune_threshold,
+                                                  std::map<std::string, double> &tree_prune_threshold_by_host,
+                                                  const bool terminate_job,
+                                                  const std::string &context) {
+        algorithm->reset_host_preprocessed_decisions(hostname);
+
+        _application_specs->update_host_running_data_size(hostname, _application_specs->get_initial_data_size());
+        _application_specs->update_host_running_error_level(hostname, _application_specs->get_initial_error_level());
+        _application_specs->update_host_task_to_schedule(hostname, 0);
+        _application_specs->reset_host_current_decision_node(hostname);
+        _application_specs->reset_host_decision_history(hostname);
+
+        _application_specs->clear_decision_tree(hostname);
+        _application_specs->build_decision_tree(hostname);
+        _application_specs->prune_decision_tree(hostname, prune_threshold);
+        tree_prune_threshold_by_host[hostname] = prune_threshold;
+
+        if (terminate_job) {
+            terminate_running_job(hostname, context);
+        }
+        _system_state_tracker->untrack_job(hostname);
+        reset_host_keeping_down_state(hostname);
+    }
+
+    /**
+     * @brief Make a host abandon its execution and continue from the output just produced by
+     *        success_hostname (reactive rescheduling)
+     * @param hostname The host
+     * @param success_hostname The host that just completed a task
+     * @param algorithm The scheduling algorithm
+     * @param prune_threshold The prune threshold of success_hostname's decision tree
+     * @param tree_prune_threshold_by_host The current prune thresholds (updated)
+     * @param context Description of the situation, for error messages
+     */
+    void Controller::continue_from_host_output(const std::string &hostname,
+                                               const std::string &success_hostname,
+                                               const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                               const double prune_threshold,
+                                               std::map<std::string, double> &tree_prune_threshold_by_host,
+                                               const std::string &context) {
+        const std::string success_host_current_task_to_schedule =
+                _application_specs->get_host_task_to_schedule(success_hostname);
+
+        algorithm->reset_host_preprocessed_decisions(hostname);
+
+        _application_specs->update_host_running_data_size(
+            hostname, _application_specs->get_host_running_data_size(success_hostname));
+        _application_specs->update_host_running_error_level(
+            hostname, _application_specs->get_host_running_error_level(success_hostname));
+        _application_specs->update_host_task_to_schedule(hostname, success_host_current_task_to_schedule);
+
+        if (!success_host_current_task_to_schedule.empty()) {
+            _application_specs->clear_decision_tree(hostname);
+            _application_specs->build_decision_tree(hostname);
+            _application_specs->prune_decision_tree(hostname, prune_threshold);
+            tree_prune_threshold_by_host[hostname] = prune_threshold;
+            _application_specs->update_host_current_decision_node(hostname, success_hostname);
+        } else {
+            _application_specs->reset_host_decision_history(hostname);
+            _application_specs->reset_host_current_decision_node(hostname);
+        }
+
+        terminate_running_job(hostname, context);
+        _system_state_tracker->untrack_job(hostname);
+        reset_host_keeping_down_state(hostname);
+    }
+
     void Controller::restart_system() const {
         for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
             std::string hostname = "ComputeHost_" + std::to_string(i);
@@ -220,8 +324,7 @@ namespace wrench {
                 try {
                     _job_manager->terminateJob(
                         _system_state_tracker->get_running_job(hostname));
-                }
-                catch (ExecutionException&) {
+                } catch (ExecutionException &) {
                     // std::cerr << "Tried to terminate job on down host: " << hostname << " for stop running jobs hack" << std::endl;
                 }
                 _system_state_tracker->reset_host(hostname);
@@ -246,778 +349,518 @@ namespace wrench {
 
         /* Create the system state tracker */
         std::vector<std::string> hostnames;
-        for (auto const& entry : _compute_services) { hostnames.push_back(entry.first); }
+        for (auto const &entry: _compute_services) { hostnames.push_back(entry.first); }
         _system_state_tracker = SystemState::create_tracker(hostnames);
 
-        /* Get initial x (data size) and y (error) from the JSON file */
-        auto initial_data_size = boost::json::value_to<double>(_application_spec.at("initial_data_size"));
-        auto initial_error_level = boost::json::value_to<double>(_application_spec.at("initial_error_level"));
+        /* Loop over all the scheduling algorithms */
+        for (const auto &algorithm: _scheduling_algorithms) {
+            run_algorithm(algorithm);
+        }
+        return 0;
+    }
 
-        bool keep_preprocessed_decisions = false;
-        if (_temporal_redundancy == "off" && _stop_running_jobs == "off") {
-            keep_preprocessed_decisions = true;
+    /**
+     * @brief Run all the repetitions with one scheduling algorithm, and print the results
+     * @param algorithm The scheduling algorithm
+     */
+    void Controller::run_algorithm(const std::shared_ptr<SchedulingAlgorithm> &algorithm) {
+        std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
+        WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
+
+        /* Keep track of number of successes */
+        std::vector<std::pair<bool, double> > repetition_results(_num_repeats, {
+                                                                     false, _application_specs->get_e_fail()
+                                                                 });
+
+        /* Do all the repeats */
+        for (int repeat = 0; repeat < _num_repeats; repeat++) {
+            run_repetition(algorithm, repeat, repetition_results);
         }
 
-        /* Loop over all the scheduling algorithms */
-        for (const auto& algorithm : _scheduling_algorithms) {
-            std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
-            WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
+        print_results(repetition_results);
+    }
 
-            /* Keep track of number of successes */
-            std::vector<std::pair<bool, double>> repetition_results(_num_repeats, {
-                                                                        false, _application_specs->get_e_fail()
-                                                                    });
+    /**
+     * @brief Run one repetition, i.e., one application execution from time zero until the deadline
+     *        (or until no better error level can be achieved)
+     * @param algorithm The scheduling algorithm
+     * @param repeat The repetition index
+     * @param repetition_results The results of all repetitions (updated)
+     */
+    void Controller::run_repetition(const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                    const int repeat,
+                                    std::vector<std::pair<bool, double> > &repetition_results) {
+        RepetitionState state;
+        state.repeat = repeat;
 
-            /* Do all the repeats */
-            for (int repeat = 0; repeat < _num_repeats; repeat++) {
-                double repeat_start_date = Simulation::getCurrentSimulatedDate();
-                std::cout << "Repetition " << repeat << std::endl;
+        state.start_date = Simulation::getCurrentSimulatedDate();
+        std::cout << "Repetition " << repeat << std::endl;
 
-                /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
-                NodeKiller::start_node_killers(this->getSimulation(),
-                                               _compute_services,
-                                               _application_specs->get_seed(),
-                                               (repeat == 0),
-                                               _application_specs->get_lambda(),
-                                               _application_specs->get_restart_overhead(),
-                                               this->getCommPort());
+        /* (Re-)Create node on/off turners, resetting the seed at every experiment start */
+        NodeKiller::start_node_killers(this->getSimulation(),
+                                       _compute_services,
+                                       _application_specs->get_seed(),
+                                       (repeat == 0),
+                                       _application_specs->get_lambda(),
+                                       _application_specs->get_restart_overhead(),
+                                       this->getCommPort());
 
-                /* Create an alarm for the deadline */
-                auto time_to_deadline = Simulation::getCurrentSimulatedDate() + _application_specs->get_deadline();
-                // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
-                this->setTimer(time_to_deadline, "time_out:" + algorithm->get_name() + "-" + std::to_string(repeat));
+        /* Create an alarm for the deadline */
+        state.deadline_date = Simulation::getCurrentSimulatedDate() + _application_specs->get_deadline();
+        // WRENCH_INFO("Setting an alarm for repeat %d at time %lf", repeat, execution_deadline);
+        this->setTimer(state.deadline_date, "time_out:" + algorithm->get_name() + "-" + std::to_string(repeat));
 
-                /* Running values of output data size, error level, and the best error level for each host */
-                std::map<std::string, double> best_error_level_by_host;
-                std::map<std::string, double> tree_prune_threshold_by_host;
-                for (auto& entry : _compute_services) {
-                    best_error_level_by_host[entry.first] = _application_specs->get_e_fail();
-                    tree_prune_threshold_by_host[entry.first] = std::numeric_limits<double>::infinity();
-                }
+        /* Error level that each host's decision tree has been pruned to improve on (temporal redundancy) */
+        for (auto &entry: _compute_services) {
+            state.tree_prune_threshold_by_host[entry.first] = std::numeric_limits<double>::infinity();
+        }
 
-                /* Current task for all hosts is the first task */
-                for (auto const& entry : _compute_services) {
-                    _application_specs->update_host_task_to_schedule(entry.first, 0);
-                    _application_specs->update_host_running_data_size(entry.first, initial_data_size);
-                    _application_specs->update_host_running_error_level(entry.first, initial_error_level);
-                }
+        /* Current task for all hosts is the first task */
+        for (auto const &entry: _compute_services) {
+            _application_specs->update_host_task_to_schedule(entry.first, 0);
+            _application_specs->update_host_running_data_size(entry.first, _application_specs->get_initial_data_size());
+            _application_specs->update_host_running_error_level(entry.first,
+                                                                _application_specs->get_initial_error_level());
+        }
 
-                /* Build/reset decision trees to use for temporal redundancy */
-                if (!keep_preprocessed_decisions || repeat == 0) {
-                    _application_specs->clear_decision_trees();
-                    _application_specs->build_decision_trees();
+        /* Build/reset decision trees to use for temporal redundancy */
+        if (!_keep_preprocessed_decisions || repeat == 0) {
+            _application_specs->clear_decision_trees();
+            _application_specs->build_decision_trees();
+            algorithm->reset_all_preprocessed_decisions();
+        }
+
+        _application_specs->reset_all_hosts_current_decision_nodes();
+        _application_specs->reset_all_hosts_decision_history();
+
+        _system_state_tracker->reset_all_hosts();
+
+        /* Loop until the repetition is over */
+        while (true) {
+            // Invoke the scheduler
+            auto decisions =
+                    algorithm->make_decisions(_system_state_tracker.get(),
+                                              state.deadline_date - Simulation::getCurrentSimulatedDate());
+
+            // Implement the scheduling decisions
+            for (const auto &[hostname, task, execution_option]: decisions) {
+                // std::cerr << "Scheduling decision: run task " << task <<
+                //     " with option " << execution_option <<
+                //     " on host " << hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
+                this->submit_job(task,
+                                 execution_option,
+                                 _application_specs->get_host_running_data_size(hostname),
+                                 _application_specs->get_host_running_error_level(hostname),
+                                 hostname);
+            }
+
+            auto event = this->waitForNextEvent();
+            bool repetition_is_over = false;
+            if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
+                repetition_is_over = process_job_completion(success_event, algorithm, state, repetition_results);
+            } else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
+                repetition_is_over = process_timer_event(timer_event, algorithm, state, repetition_results);
+            }
+            if (repetition_is_over) {
+                break;
+            }
+        }
+
+        // Cancel all pending jobs as we're done
+        for (const auto &entry: _compute_services) {
+            std::string hostname = entry.first;
+            terminate_running_job(hostname, "at the end of the repetition");
+        }
+    }
+
+    /**
+     * @brief Process the completion of a job: move the host on to its next task, apply reactive
+     *        rescheduling, and, if the host completed the last task, temporal redundancy
+     * @return true if the repetition is over
+     */
+    bool Controller::process_job_completion(const std::shared_ptr<CompoundJobCompletedEvent> &success_event,
+                                            const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                            RepetitionState &state,
+                                            std::vector<std::pair<bool, double> > &repetition_results) {
+        const int repeat = state.repeat;
+        const double repeat_start_date = state.start_date;
+
+        auto success_hostname = success_event->compute_service->getHosts().at(0);
+
+        auto job_task_name = success_event->job->getName();
+        auto success_host_completed_task_name = _system_state_tracker->get_host_current_task(
+            success_hostname);
+
+        // checks if the task completed in the event is the same as the current task the host is working on
+        // if its different, we know the host in question has already been reset and rescheduled
+        // if its the same, then we have to reset the host
+        if (job_task_name.compare(0, success_host_completed_task_name.length(),
+                                  success_host_completed_task_name)) {
+            // spurious timeout or whatever its called
+            return false;
+        }
+
+        // checks if the task completed in the event is the same as the current task the host SHOULD have been working on
+        // if its different, then we have to reset the host to make sure it gets rescheduled to the proper task
+        // if its the same, then we know it completed what it set out to do successfully
+        std::string success_host_current_task_to_schedule = _application_specs->
+                get_host_task_to_schedule(success_hostname);
+        if (job_task_name.compare(0, success_host_current_task_to_schedule.length(),
+                                  success_host_current_task_to_schedule)) {
+            _system_state_tracker->reset_host(success_hostname);
+            _system_state_tracker->untrack_job(success_hostname);
+            return false;
+        }
+        std::cout << job_task_name << " completed successfully by host " << success_hostname << " at "
+                << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
+
+        std::string success_host_selected_option = job_task_name.substr(
+            success_host_completed_task_name.length() + 1);
+        double success_host_running_data_size = _application_specs->get_host_running_data_size(
+            success_hostname);
+        double success_host_running_error_level = _application_specs->get_host_running_error_level(
+            success_hostname);
+
+        // update data size and error level trackers
+        std::cerr << "success_host_completed_task_name = " << success_host_completed_task_name << "\n";
+        std::cerr << "Completed task name: " << success_host_completed_task_name << std::endl;
+        std::cerr << "Completed selected option: " << success_host_selected_option << std::endl;
+        _application_specs->update_host_running_data_size(
+            success_hostname,
+            _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).
+            at("d_function")(success_host_running_data_size,
+                             success_host_running_error_level));
+        _application_specs->update_host_running_error_level(
+            success_hostname,
+            _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).
+            at("e_function")(success_host_running_data_size,
+                             success_host_running_error_level));
+        _application_specs->increment_host_task_to_schedule(success_hostname);
+        _application_specs->increment_host_current_decision_node(
+            success_hostname, success_host_completed_task_name, success_host_selected_option);
+
+        // update local trackers
+        success_host_running_error_level = _application_specs->get_host_running_error_level(
+            success_hostname);
+
+        apply_reactive_rescheduling(success_hostname, algorithm, state);
+
+        if (_application_specs->get_host_task_to_schedule(success_hostname).empty()) {
+            double final_error_level = success_host_running_error_level;
+
+            if (repetition_results[repeat].second > final_error_level) {
+                repetition_results[repeat] = {true, final_error_level};
+            }
+
+            std::cout
+                    << "Host "
+                    << success_hostname
+                    << " succeeded with error: "
+                    << final_error_level
+                    << std::endl;
+
+            apply_temporal_redundancy(success_hostname, final_error_level, algorithm, state);
+
+            if (_application_specs->decision_tree_empty(success_hostname)) {
+                std::cout
+                        << "Best possible error level achieved."
+                        << std::endl;
+
+                if (!_keep_preprocessed_decisions) {
                     algorithm->reset_all_preprocessed_decisions();
                 }
 
-                _application_specs->reset_all_hosts_current_decision_nodes();
-                _application_specs->reset_all_hosts_decision_history();
+                _system_state_tracker->reset_all_hosts();
+                return true;
+            }
+
+            if (_system_state_tracker->are_all_hosts_finished()) {
+                std::cout
+                        << "All hosts finished."
+                        << std::endl;
+
+                if (!_keep_preprocessed_decisions) {
+                    algorithm->reset_all_preprocessed_decisions();
+                }
 
                 _system_state_tracker->reset_all_hosts();
-
-                /* Loop until an event message arrives */
-                while (true) {
-                    // Invoke the scheduler
-                    auto decisions =
-                        algorithm->make_decisions(_system_state_tracker.get(),
-                                                  time_to_deadline - Simulation::getCurrentSimulatedDate());
-
-                    // Implement the scheduling decisions
-                    for (const auto& [hostname, task, execution_option] : decisions) {
-                        // std::cerr << "Scheduling decision: run task " << task <<
-                        //     " with option " << execution_option <<
-                        //     " on host " << hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
-                        this->submit_job(task,
-                                         execution_option,
-                                         _application_specs->get_host_running_data_size(hostname),
-                                         _application_specs->get_host_running_error_level(hostname),
-                                         hostname);
-                    }
-
-                    // Here we could instead call waitForAndProcessNextEvent() and define the handling
-                    // methods, in case this if-else-if thing becomes too unwieldly
-                    auto event = this->waitForNextEvent();
-                    if (auto success_event = std::dynamic_pointer_cast<CompoundJobCompletedEvent>(event)) {
-                        auto success_hostname = success_event->compute_service->getHosts().at(0);
-
-                        auto job_task_name = success_event->job->getName();
-                        auto success_host_completed_task_name = _system_state_tracker->get_host_current_task(
-                            success_hostname);
-
-                        // checks if the task completed in the event is the same as the current task the host is working on
-                        // if its different, we know the host in question has already been reset and rescheduled
-                        // if its the same, then we have to reset the host
-                        if (job_task_name.compare(0, success_host_completed_task_name.length(),
-                                                  success_host_completed_task_name)) {
-                            // spurious timeout or whatever its called
-                            continue;
-                        }
-
-                        // checks if the task completed in the event is the same as the current task the host SHOULD have been working on
-                        // if its different, then we have to reset the host to make sure it gets rescheduled to the proper task
-                        // if its the same, then we know it completed what it set out to do successfully
-                        std::string success_host_current_task_to_schedule = _application_specs->
-                            get_host_task_to_schedule(success_hostname);
-                        if (job_task_name.compare(0, success_host_current_task_to_schedule.length(),
-                                                  success_host_current_task_to_schedule)) {
-                            _system_state_tracker->reset_host(success_hostname);
-                            _system_state_tracker->untrack_job(success_hostname);
-                            continue;
-                        }
-                        std::cout << job_task_name << " completed successfully by host " << success_hostname << " at "
-                            << (Simulation::getCurrentSimulatedDate() - repeat_start_date) << std::endl;
-
-                        std::string success_host_selected_option = job_task_name.substr(
-                            success_host_completed_task_name.length() + 1);
-                        double success_host_running_data_size = _application_specs->get_host_running_data_size(
-                            success_hostname);
-                        double success_host_running_error_level = _application_specs->get_host_running_error_level(
-                            success_hostname);
-
-                        // update data size and error level trackers
-                        std::cerr << "success_host_completed_task_name = " << success_host_completed_task_name << "\n";
-                        std::cerr << "Completed task name: " << success_host_completed_task_name << std::endl;
-                        std::cerr << "Completed selected option: " << success_host_selected_option << std::endl;
-                        _application_specs->update_host_running_data_size(
-                            success_hostname,
-                            _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).
-                                            at("d_function")(success_host_running_data_size,
-                                                             success_host_running_error_level));
-                        _application_specs->update_host_running_error_level(
-                            success_hostname,
-                            _task_functions.at(success_host_completed_task_name).at(success_host_selected_option).
-                                            at("e_function")(success_host_running_data_size,
-                                                             success_host_running_error_level));
-                        _application_specs->increment_host_task_to_schedule(success_hostname);
-                        _application_specs->increment_host_current_decision_node(
-                            success_hostname, success_host_completed_task_name, success_host_selected_option);
-
-                        // update local trackers
-                        success_host_current_task_to_schedule = _application_specs->get_host_task_to_schedule(
-                            success_hostname);
-                        success_host_running_data_size = _application_specs->get_host_running_data_size(
-                            success_hostname);
-                        success_host_running_error_level = _application_specs->get_host_running_error_level(
-                            success_hostname);
-
-                        const double success_host_tree_prune_threshold = tree_prune_threshold_by_host.at(success_hostname);
-
-                        if (_stop_running_jobs == "aggressive") {
-                            for (const auto& entry : _compute_services) {
-                                std::string hostname = entry.first;
-
-                                if (hostname != success_hostname &&
-                                    !_system_state_tracker->is_host_finished(hostname)) {
-
-                                    algorithm->reset_host_preprocessed_decisions(hostname);
-
-                                    _application_specs->update_host_running_data_size(
-                                        hostname, success_host_running_data_size);
-
-                                    _application_specs->update_host_running_error_level(
-                                        hostname, success_host_running_error_level);
-
-                                    _application_specs->update_host_task_to_schedule(
-                                        hostname, success_host_current_task_to_schedule);
-
-                                    if (!success_host_current_task_to_schedule.empty()) {
-                                        _application_specs->clear_decision_tree(hostname);
-                                        _application_specs->build_decision_tree(hostname);
-                                        _application_specs->prune_decision_tree(
-                                            hostname, success_host_tree_prune_threshold);
-
-                                        tree_prune_threshold_by_host[hostname] =
-                                            success_host_tree_prune_threshold;
-
-                                        _application_specs->update_host_current_decision_node(
-                                            hostname, success_hostname);
-                                    }
-                                    else {
-                                        _application_specs->reset_host_decision_history(hostname);
-                                        _application_specs->reset_host_current_decision_node(hostname);
-                                    }
-
-                                    if (_system_state_tracker->is_a_job_running(hostname)) {
-                                        try {
-                                            _job_manager->terminateJob(
-                                                _system_state_tracker->get_running_job(hostname));
-                                        }
-                                        catch (ExecutionException&) {
-                                            std::cerr
-                                                << "Tried to terminate job on host: "
-                                                << hostname
-                                                << " with SRJ AGG"
-                                                << std::endl;
-                                        }
-                                    }
-
-                                    _system_state_tracker->untrack_job(hostname);
-
-                                    if (!_system_state_tracker->is_host_down(hostname)) {
-                                        _system_state_tracker->reset_host(hostname);
-                                    }
-                                    else {
-                                        _system_state_tracker->reset_host(hostname);
-                                        _system_state_tracker->set_host_down(hostname);
-                                    }
-                                }
-                            }
-                        }
-                        else if (_stop_running_jobs == "variant") {
-                            for (const auto& entry : _compute_services) {
-                                std::string hostname = entry.first;
-
-                                if (hostname != success_hostname) {
-                                    if (!_application_specs->cannot_do_worse(
-                                            hostname, success_hostname) &&
-                                        !_system_state_tracker->is_host_finished(hostname)) {
-
-                                        algorithm->reset_host_preprocessed_decisions(hostname);
-
-                                        _application_specs->update_host_running_data_size(
-                                            hostname, success_host_running_data_size);
-
-                                        _application_specs->update_host_running_error_level(
-                                            hostname, success_host_running_error_level);
-
-                                        _application_specs->update_host_task_to_schedule(
-                                            hostname, success_host_current_task_to_schedule);
-
-                                        if (!success_host_current_task_to_schedule.empty()) {
-                                            _application_specs->clear_decision_tree(hostname);
-                                            _application_specs->build_decision_tree(hostname);
-                                            _application_specs->prune_decision_tree(
-                                                hostname, success_host_tree_prune_threshold);
-
-                                            tree_prune_threshold_by_host[hostname] =
-                                                success_host_tree_prune_threshold;
-
-                                            _application_specs->update_host_current_decision_node(
-                                                hostname, success_hostname);
-                                        }
-                                        else {
-                                            _application_specs->reset_host_decision_history(hostname);
-                                            _application_specs->reset_host_current_decision_node(hostname);
-                                        }
-
-                                        if (_system_state_tracker->is_a_job_running(hostname)) {
-                                            try {
-                                                _job_manager->terminateJob(
-                                                    _system_state_tracker->get_running_job(hostname));
-                                            }
-                                            catch (ExecutionException&) {
-                                                std::cerr
-                                                    << "Tried to terminate job on host: "
-                                                    << hostname
-                                                    << " with SRJ VAR"
-                                                    << std::endl;
-                                            }
-                                        }
-
-                                        _system_state_tracker->untrack_job(hostname);
-
-                                        if (!_system_state_tracker->is_host_down(hostname)) {
-                                            _system_state_tracker->reset_host(hostname);
-                                        }
-                                        else {
-                                            _system_state_tracker->reset_host(hostname);
-                                            _system_state_tracker->set_host_down(hostname);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (_application_specs->get_host_task_to_schedule(success_hostname).empty()) {
-                            double final_error_level = success_host_running_error_level;
-
-                            if (repetition_results[repeat].second > final_error_level) {
-                                repetition_results[repeat] = {true, final_error_level};
-                            }
-
-                            std::cout
-                                << "Host "
-                                << success_hostname
-                                << " succeeded with error: "
-                                << final_error_level
-                                << std::endl;
-
-                            if (_temporal_redundancy == "aggressive") {
-                                for (const auto& entry : _compute_services) {
-                                    std::string hostname = entry.first;
-
-                                    if (hostname != success_hostname) {
-                                        best_error_level_by_host[hostname] = std::min(
-                                            best_error_level_by_host[hostname],
-                                            final_error_level);
-
-                                        algorithm->reset_host_preprocessed_decisions(hostname);
-
-                                        _application_specs->update_host_running_data_size(
-                                            hostname, initial_data_size);
-
-                                        _application_specs->update_host_running_error_level(
-                                            hostname, initial_error_level);
-
-                                        _application_specs->update_host_task_to_schedule(
-                                            hostname, 0);
-
-                                        _application_specs->reset_host_current_decision_node(hostname);
-                                        _application_specs->reset_host_decision_history(hostname);
-
-                                        _application_specs->clear_decision_tree(hostname);
-                                        _application_specs->build_decision_tree(hostname);
-                                        _application_specs->prune_decision_tree(
-                                            hostname, final_error_level);
-
-                                        tree_prune_threshold_by_host[hostname] =
-                                            final_error_level;
-
-                                        if (_system_state_tracker->is_a_job_running(hostname)) {
-                                            try {
-                                                _job_manager->terminateJob(
-                                                    _system_state_tracker->get_running_job(hostname));
-                                            }
-                                            catch (ExecutionException&) {
-                                                std::cerr
-                                                    << "Tried to terminate job on host: "
-                                                    << hostname
-                                                    << " after finish with TR AGG"
-                                                    << std::endl;
-                                            }
-                                        }
-
-                                        _system_state_tracker->untrack_job(hostname);
-
-                                        if (!_system_state_tracker->is_host_down(hostname)) {
-                                            _system_state_tracker->reset_host(hostname);
-                                        }
-                                        else {
-                                            _system_state_tracker->reset_host(hostname);
-                                            _system_state_tracker->set_host_down(hostname);
-                                        }
-                                    }
-                                }
-
-                                if (!_system_state_tracker->is_host_finished(success_hostname)) {
-                                    best_error_level_by_host[success_hostname] = std::min(best_error_level_by_host[success_hostname], final_error_level);
-
-                                    algorithm->reset_host_preprocessed_decisions(success_hostname);
-
-                                    _application_specs->update_host_running_data_size(success_hostname, initial_data_size);
-                                    _application_specs->update_host_running_error_level(success_hostname, initial_error_level);
-
-                                    _application_specs->update_host_task_to_schedule(success_hostname, 0);
-                                    _application_specs->reset_host_current_decision_node(success_hostname);
-                                    _application_specs->reset_host_decision_history(success_hostname);
-
-                                    _application_specs->clear_decision_tree(success_hostname);
-                                    _application_specs->build_decision_tree(success_hostname);
-                                    _application_specs->prune_decision_tree(success_hostname, final_error_level);
-
-                                    tree_prune_threshold_by_host[success_hostname] = final_error_level;
-
-                                    _system_state_tracker->untrack_job(success_hostname);
-                                    if (!_system_state_tracker->is_host_down(success_hostname)) {
-                                        _system_state_tracker->reset_host(success_hostname);
-                                    } else {
-                                        _system_state_tracker->reset_host(success_hostname);
-                                        _system_state_tracker->set_host_down(success_hostname);
-                                    }
-                                }
-                            }
-                            else if (_temporal_redundancy == "dependent") {
-                                for (const auto& entry : _compute_services) {
-                                    std::string hostname = entry.first;
-
-                                    if ((_application_specs
-                                             ->get_host_task_to_schedule(hostname)
-                                             .empty() ||
-                                         !_application_specs->can_possibly_do_better(
-                                             hostname, success_hostname)) &&
-                                        !_system_state_tracker->is_host_finished(hostname) &&
-                                        hostname != success_hostname) {
-
-                                        best_error_level_by_host[hostname] = std::min(
-                                            best_error_level_by_host[hostname],
-                                            final_error_level);
-
-                                        algorithm->reset_host_preprocessed_decisions(hostname);
-
-                                        _application_specs->update_host_running_data_size(
-                                            hostname, initial_data_size);
-
-                                        _application_specs->update_host_running_error_level(
-                                            hostname, initial_error_level);
-
-                                        _application_specs->update_host_task_to_schedule(
-                                            hostname, 0);
-
-                                        _application_specs->reset_host_current_decision_node(hostname);
-                                        _application_specs->reset_host_decision_history(hostname);
-
-                                        _application_specs->clear_decision_tree(hostname);
-                                        _application_specs->build_decision_tree(hostname);
-                                        _application_specs->prune_decision_tree(
-                                            hostname, final_error_level);
-
-                                        tree_prune_threshold_by_host[hostname] =
-                                            final_error_level;
-
-                                        if (_system_state_tracker->is_a_job_running(hostname)) {
-                                            try {
-                                                _job_manager->terminateJob(
-                                                    _system_state_tracker->get_running_job(hostname));
-                                            }
-                                            catch (ExecutionException&) {
-                                                std::cerr
-                                                    << "Tried to terminate job on host: "
-                                                    << hostname
-                                                    << " after finish with TR DEP"
-                                                    << std::endl;
-                                            }
-                                        }
-
-                                        _system_state_tracker->untrack_job(hostname);
-
-                                        if (!_system_state_tracker->is_host_down(hostname)) {
-                                            _system_state_tracker->reset_host(hostname);
-                                        }
-                                        else {
-                                            _system_state_tracker->reset_host(hostname);
-                                            _system_state_tracker->set_host_down(hostname);
-                                        }
-                                    }
-                                }
-
-                                if (!_system_state_tracker->is_host_finished(success_hostname)) {
-                                    best_error_level_by_host[success_hostname] = std::min(best_error_level_by_host[success_hostname], final_error_level);
-
-                                    algorithm->reset_host_preprocessed_decisions(success_hostname);
-
-                                    _application_specs->update_host_running_data_size(success_hostname, initial_data_size);
-                                    _application_specs->update_host_running_error_level(success_hostname, initial_error_level);
-
-                                    _application_specs->update_host_task_to_schedule(success_hostname, 0);
-                                    _application_specs->reset_host_current_decision_node(success_hostname);
-                                    _application_specs->reset_host_decision_history(success_hostname);
-
-                                    _application_specs->clear_decision_tree(success_hostname);
-                                    _application_specs->build_decision_tree(success_hostname);
-                                    _application_specs->prune_decision_tree(success_hostname, final_error_level);
-
-                                    tree_prune_threshold_by_host[success_hostname] = final_error_level;
-
-                                    _system_state_tracker->untrack_job(success_hostname);
-                                    if (!_system_state_tracker->is_host_down(success_hostname)) {
-                                        _system_state_tracker->reset_host(success_hostname);
-                                    } else {
-                                        _system_state_tracker->reset_host(success_hostname);
-                                        _system_state_tracker->set_host_down(success_hostname);
-                                    }
-                                }
-                            }
-                            else if (_temporal_redundancy == "independent") {
-                                for (const auto& entry : _compute_services) {
-                                    std::string hostname = entry.first;
-
-                                    if (_application_specs
-                                            ->get_host_task_to_schedule(hostname)
-                                            .empty() &&
-                                        !_system_state_tracker->is_host_finished(hostname)) {
-
-                                        best_error_level_by_host[hostname] =
-                                            _application_specs->get_host_running_error_level(
-                                                hostname);
-
-                                        algorithm->reset_host_preprocessed_decisions(hostname);
-
-                                        _application_specs->update_host_running_data_size(
-                                            hostname, initial_data_size);
-
-                                        _application_specs->update_host_running_error_level(
-                                            hostname, initial_error_level);
-
-                                        _application_specs->update_host_task_to_schedule(
-                                            hostname, 0);
-
-                                        _application_specs->reset_host_current_decision_node(hostname);
-                                        _application_specs->reset_host_decision_history(hostname);
-
-                                        _application_specs->clear_decision_tree(hostname);
-                                        _application_specs->build_decision_tree(hostname);
-                                        _application_specs->prune_decision_tree(
-                                            hostname, final_error_level);
-
-                                        tree_prune_threshold_by_host[hostname] =
-                                            final_error_level;
-
-                                        if (_system_state_tracker->is_a_job_running(hostname)) {
-                                            try {
-                                                _job_manager->terminateJob(
-                                                    _system_state_tracker->get_running_job(hostname));
-                                            }
-                                            catch (ExecutionException&) {
-                                                std::cerr
-                                                    << "Tried to terminate job on host: "
-                                                    << hostname
-                                                    << " after finish with TR INDEP"
-                                                    << std::endl;
-                                            }
-                                        }
-
-                                        _system_state_tracker->untrack_job(hostname);
-
-                                        if (!_system_state_tracker->is_host_down(hostname)) {
-                                            _system_state_tracker->reset_host(hostname);
-                                        }
-                                        else {
-                                            _system_state_tracker->reset_host(hostname);
-                                            _system_state_tracker->set_host_down(hostname);
-                                        }
-                                    }
-                                }
-                            }
-                            else {
-                                for (const auto& entry : _compute_services) {
-                                    std::string hostname = entry.first;
-
-                                    if (_application_specs
-                                            ->get_host_task_to_schedule(hostname)
-                                            .empty() &&
-                                        !_system_state_tracker->is_host_finished(hostname)) {
-
-                                        best_error_level_by_host[hostname] =
-                                            _application_specs->get_host_running_error_level(
-                                                hostname);
-
-                                        if (!keep_preprocessed_decisions) {
-                                            algorithm->reset_host_preprocessed_decisions(hostname);
-
-                                            _application_specs->clear_decision_tree(hostname);
-                                            _application_specs->build_decision_tree(hostname);
-                                            _application_specs->prune_decision_tree(
-                                                hostname, final_error_level);
-
-                                            tree_prune_threshold_by_host[hostname] =
-                                                final_error_level;
-                                        }
-
-                                        _application_specs->update_host_running_data_size(
-                                            hostname, initial_data_size);
-
-                                        _application_specs->update_host_running_error_level(
-                                            hostname, initial_error_level);
-
-                                        _application_specs->update_host_task_to_schedule(
-                                            hostname, 0);
-
-                                        _application_specs->reset_host_current_decision_node(hostname);
-                                        _application_specs->reset_host_decision_history(hostname);
-
-                                        std::cerr
-                                            << "Stopping host "
-                                            << hostname
-                                            << std::endl;
-
-                                        if (_system_state_tracker->is_a_job_running(hostname)) {
-                                            try {
-                                                _job_manager->terminateJob(
-                                                    _system_state_tracker->get_running_job(hostname));
-                                            }
-                                            catch (ExecutionException&) {
-                                                std::cerr
-                                                    << "Tried to terminate job on host: "
-                                                    << hostname
-                                                    << " after finish with TR OFF"
-                                                    << std::endl;
-                                            }
-                                        }
-
-                                        _system_state_tracker->untrack_job(hostname);
-                                        NodeKiller::stop_node_killer(hostname);
-                                        _system_state_tracker->reset_host(hostname);
-                                        _system_state_tracker->set_host_down(hostname);
-                                        _system_state_tracker->set_host_finished(hostname);
-                                    }
-                                }
-                            }
-
-                            if (_application_specs->decision_tree_empty(success_hostname)) {
-                                std::cout
-                                    << "Best possible error level achieved."
-                                    << std::endl;
-
-                                if (!keep_preprocessed_decisions) {
-                                    algorithm->reset_all_preprocessed_decisions();
-                                }
-
-                                _system_state_tracker->reset_all_hosts();
-                                break;
-                            }
-
-                            if (_system_state_tracker->are_all_hosts_finished()) {
-                                std::cout
-                                    << "All hosts finished."
-                                    << std::endl;
-
-                                if (!keep_preprocessed_decisions) {
-                                    algorithm->reset_all_preprocessed_decisions();
-                                }
-
-                                _system_state_tracker->reset_all_hosts();
-                                break;
-                            }
-                        }
-                        else {
-                            if (_system_state_tracker->is_a_job_running(success_hostname)) {
-                                try {
-                                    _job_manager->terminateJob(
-                                        _system_state_tracker->get_running_job(success_hostname));
-                                }
-                                catch (ExecutionException&) {
-                                    std::cerr
-                                        << "Tried to terminate job on host: "
-                                        << success_hostname
-                                        << " after task success"
-                                        << std::endl;
-                                }
-                            }
-
-                            _system_state_tracker->untrack_job(success_hostname);
-                            _system_state_tracker->reset_host(success_hostname);
-                        }
-                    }
-                    else if (auto timer_event = std::dynamic_pointer_cast<TimerEvent>(event)) {
-                        // This is the catch-all timer-based stuff
-                        std::string timeout_prefix = "time_out";
-                        std::string hostup_prefix = "host_up";
-                        std::string hostdown_prefix = "host_down";
-
-                        // Is it a timeout?
-                        if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
-                            // Check if the colon and hyphen exist
-                            size_t colon_pos = timer_event->message.find(':');
-                            size_t hyphen_pos = timer_event->message.find('-');
-
-                            std::string algorithm_name = timer_event->message.substr(
-                                colon_pos + 1, hyphen_pos - colon_pos - 1);
-                            std::string repeat_id = timer_event->message.substr(hyphen_pos + 1);
-                            if (algorithm_name != algorithm->get_name() || repeat_id != std::to_string(repeat)) {
-                                continue; // Spurious timeout
-                            }
-                            if (!repetition_results[repeat].first) {
-                                std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
-                                    Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" <<
-                                    std::endl;
-                            }
-                            WRENCH_INFO("Deadline reached");
-                            std::cout << "Error: " << repetition_results[repeat].second << std::endl;
-
-                            if (!keep_preprocessed_decisions) {
-                                algorithm->reset_all_preprocessed_decisions();
-                            }
-                            this->restart_system();
-                            break;
-                        }
-
-                        if (timer_event->message.compare(0, hostup_prefix.length(), hostup_prefix) == 0) {
-                            size_t pos = timer_event->message.find(':');
-                            std::string hostname = timer_event->message.substr(pos + 1);
-                            // Reset the host's entry to nullptr, so that we now know it's idle
-                            std::cerr << "Host " << hostname.c_str() << " is back up at time " <<
-                                Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
-
-                            WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
-                            _system_state_tracker->set_host_up(hostname);
-                            continue;
-                        }
-
-                        if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
-                            size_t pos = timer_event->message.find(':');
-                            std::string hostname = timer_event->message.substr(pos + 1);
-                            std::cerr << "Host " << hostname.c_str() << " is down at time " <<
-                                Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
-
-                            // Cancel the job
-                            WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());
-                            if (_system_state_tracker->is_a_job_running(hostname)) {
-                                try {
-                                    _job_manager->terminateJob(
-                                        _system_state_tracker->get_running_job(hostname));
-                                }
-                                catch (ExecutionException&) {
-                                    std::cerr << "Tried to terminate job on down host: " << hostname <<
-                                        " for host going down" << std::endl;
-                                }
-                            }
-
-                            // Could any of these functions be combined?
-                            _system_state_tracker->untrack_job(hostname);
-                            _system_state_tracker->reset_host(hostname);
-                            _system_state_tracker->set_host_down(hostname);
-                        }
-                    }
-                }
-
-                // Cancel all pending jobs as we're done
-                for (const auto& entry : _compute_services) {
-                    std::string hostname = entry.first;
-                    if (_system_state_tracker->is_a_job_running(hostname)) {
-                        try {
-                            _job_manager->terminateJob(
-                                _system_state_tracker->get_running_job(hostname));
-                        }
-                        catch (ExecutionException&) {
-                            std::cerr << "Tried to terminate job on host: " << hostname <<
-                                " at the end of the repetition" << std::endl;
-                        }
-                    }
+                return true;
+            }
+        } else {
+            terminate_running_job(success_hostname, "after task success");
+
+            _system_state_tracker->untrack_job(success_hostname);
+            _system_state_tracker->reset_host(success_hostname);
+        }
+        return false;
+    }
+
+    /**
+     * @brief Reactive rescheduling (Section VI-C): after success_hostname completed a task, other hosts may
+     *        abandon their executions and continue from its output instead
+     */
+    void Controller::apply_reactive_rescheduling(const std::string &success_hostname,
+                                                 const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                                 RepetitionState &state) {
+        auto &tree_prune_threshold_by_host = state.tree_prune_threshold_by_host;
+        const double success_host_tree_prune_threshold = tree_prune_threshold_by_host.at(success_hostname);
+
+        if (_stop_running_jobs == "aggressive") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if (hostname != success_hostname &&
+                    !_system_state_tracker->is_host_finished(hostname)) {
+                    continue_from_host_output(hostname, success_hostname, algorithm,
+                                              success_host_tree_prune_threshold,
+                                              tree_prune_threshold_by_host, "with SRJ AGG");
                 }
             }
+        } else if (_stop_running_jobs == "variant") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
 
-            int num_successes = 0;
-            double cumulative_error_level_successes = 0.0;
-            double cumulative_error_level = 0.0;
-            for (int repeat = 0; repeat < _num_repeats; repeat++) {
-                if (repetition_results[repeat].first) {
-                    num_successes++;
-                    cumulative_error_level_successes += repetition_results[repeat].second;
+                if (hostname != success_hostname) {
+                    if (!_application_specs->cannot_do_worse(
+                            hostname, success_hostname) &&
+                        !_system_state_tracker->is_host_finished(hostname)) {
+                        continue_from_host_output(hostname, success_hostname, algorithm,
+                                                  success_host_tree_prune_threshold,
+                                                  tree_prune_threshold_by_host, "with SRJ VAR");
+                    }
                 }
-                cumulative_error_level += repetition_results[repeat].second;
-            }
-
-            std::cout << std::endl;
-            std::cout << "Total repeats: " << _num_repeats << "\n";
-            std::cout << "Num successes: " << num_successes << "\n";
-            std::cout << "Success rate: " << static_cast<double>(num_successes) / static_cast<double>(_num_repeats) <<
-                "\n";
-            std::cout << "Avg error level: " << cumulative_error_level / static_cast<double>(_num_repeats) << "\n";
-            if (num_successes > 0) {
-                std::cout << "Avg error level of successes: " << cumulative_error_level_successes / static_cast<double>(
-                    num_successes) << "\n\n";
-            }
-            else {
-                std::cout << "Avg error level of successes: N/A\n\n";
-            }
-            for (int repeat = 0; repeat < _num_repeats; repeat++) {
-                std::cout << "Repetition " << repeat << ": " << repetition_results[repeat].second << std::endl;
-            }
-            std::cout << std::endl;
-
-            std::cout << "FINAL RESULTS PER REPETITION:\n";
-            std::map<double, unsigned long> final_results_per_repetition;
-            for (int repeat = 0; repeat < _num_repeats; repeat++) {
-                double error = repetition_results[repeat].second;
-                if (final_results_per_repetition.find(error)  == final_results_per_repetition.end()) {
-                    final_results_per_repetition[error] = 1;
-                } else {
-                    final_results_per_repetition[error]++;
-                }
-            }
-            for (const auto& entry : final_results_per_repetition) {
-                std::cout << entry.first << " " << entry.second << "\n";
             }
         }
-        return 0;
+    }
+
+    /**
+     * @brief Temporal redundancy (Section VI-B): after success_hostname completed the last task with the
+     *        given error level, hosts may restart the application to try to achieve a lower error level
+     */
+    void Controller::apply_temporal_redundancy(const std::string &success_hostname,
+                                               const double final_error_level,
+                                               const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                               RepetitionState &state) {
+        auto &tree_prune_threshold_by_host = state.tree_prune_threshold_by_host;
+        const double initial_data_size = _application_specs->get_initial_data_size();
+        const double initial_error_level = _application_specs->get_initial_error_level();
+
+        if (_temporal_redundancy == "aggressive") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if (hostname != success_hostname) {
+                    restart_host_from_first_task(hostname, algorithm, final_error_level,
+                                                 tree_prune_threshold_by_host, true,
+                                                 "after finish with TR AGG");
+                }
+            }
+
+            if (!_system_state_tracker->is_host_finished(success_hostname)) {
+                restart_host_from_first_task(success_hostname, algorithm, final_error_level,
+                                             tree_prune_threshold_by_host, false, "");
+            }
+        } else if (_temporal_redundancy == "dependent") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if ((_application_specs
+                     ->get_host_task_to_schedule(hostname)
+                     .empty() ||
+                     !_application_specs->can_possibly_do_better(
+                         hostname, success_hostname)) &&
+                    !_system_state_tracker->is_host_finished(hostname) &&
+                    hostname != success_hostname) {
+                    restart_host_from_first_task(hostname, algorithm, final_error_level,
+                                                 tree_prune_threshold_by_host, true,
+                                                 "after finish with TR DEP");
+                }
+            }
+
+            if (!_system_state_tracker->is_host_finished(success_hostname)) {
+                restart_host_from_first_task(success_hostname, algorithm, final_error_level,
+                                             tree_prune_threshold_by_host, false, "");
+            }
+        } else if (_temporal_redundancy == "independent") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if (_application_specs
+                    ->get_host_task_to_schedule(hostname)
+                    .empty() &&
+                    !_system_state_tracker->is_host_finished(hostname)) {
+                    restart_host_from_first_task(hostname, algorithm, final_error_level,
+                                                 tree_prune_threshold_by_host, true,
+                                                 "after finish with TR INDEP");
+                }
+            }
+        } else {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if (_application_specs
+                    ->get_host_task_to_schedule(hostname)
+                    .empty() &&
+                    !_system_state_tracker->is_host_finished(hostname)) {
+                    if (!_keep_preprocessed_decisions) {
+                        algorithm->reset_host_preprocessed_decisions(hostname);
+
+                        _application_specs->clear_decision_tree(hostname);
+                        _application_specs->build_decision_tree(hostname);
+                        _application_specs->prune_decision_tree(
+                            hostname, final_error_level);
+
+                        tree_prune_threshold_by_host[hostname] =
+                                final_error_level;
+                    }
+
+                    _application_specs->update_host_running_data_size(
+                        hostname, initial_data_size);
+
+                    _application_specs->update_host_running_error_level(
+                        hostname, initial_error_level);
+
+                    _application_specs->update_host_task_to_schedule(
+                        hostname, 0);
+
+                    _application_specs->reset_host_current_decision_node(hostname);
+                    _application_specs->reset_host_decision_history(hostname);
+
+                    std::cerr
+                            << "Stopping host "
+                            << hostname
+                            << std::endl;
+
+                    terminate_running_job(hostname, "after finish with TR OFF");
+
+                    _system_state_tracker->untrack_job(hostname);
+                    NodeKiller::stop_node_killer(hostname);
+                    _system_state_tracker->reset_host(hostname);
+                    _system_state_tracker->set_host_down(hostname);
+                    _system_state_tracker->set_host_finished(hostname);
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief Process a timer event: the deadline, or a host going down or coming back up
+     * @return true if the repetition is over
+     */
+    bool Controller::process_timer_event(const std::shared_ptr<TimerEvent> &timer_event,
+                                         const std::shared_ptr<SchedulingAlgorithm> &algorithm,
+                                         const RepetitionState &state,
+                                         std::vector<std::pair<bool, double> > &repetition_results) {
+        const int repeat = state.repeat;
+        const double repeat_start_date = state.start_date;
+
+        // This is the catch-all timer-based stuff
+        std::string timeout_prefix = "time_out";
+        std::string hostup_prefix = "host_up";
+        std::string hostdown_prefix = "host_down";
+
+        // Is it a timeout?
+        if (timer_event->message.compare(0, timeout_prefix.length(), timeout_prefix) == 0) {
+            // Check if the colon and hyphen exist
+            size_t colon_pos = timer_event->message.find(':');
+            size_t hyphen_pos = timer_event->message.find('-');
+
+            std::string algorithm_name = timer_event->message.substr(
+                colon_pos + 1, hyphen_pos - colon_pos - 1);
+            std::string repeat_id = timer_event->message.substr(hyphen_pos + 1);
+            if (algorithm_name != algorithm->get_name() || repeat_id != std::to_string(repeat)) {
+                return false; // Spurious timeout
+            }
+            if (!repetition_results[repeat].first) {
+                std::cout << "REPETITION " << std::to_string(repeat) << " HAS FAILED (after " <<
+                        Simulation::getCurrentSimulatedDate() - repeat_start_date << " seconds)" <<
+                        std::endl;
+            }
+            WRENCH_INFO("Deadline reached");
+            std::cout << "Error: " << repetition_results[repeat].second << std::endl;
+
+            if (!_keep_preprocessed_decisions) {
+                algorithm->reset_all_preprocessed_decisions();
+            }
+            this->restart_system();
+            return true;
+        }
+
+        if (timer_event->message.compare(0, hostup_prefix.length(), hostup_prefix) == 0) {
+            size_t pos = timer_event->message.find(':');
+            std::string hostname = timer_event->message.substr(pos + 1);
+            // Reset the host's entry to nullptr, so that we now know it's idle
+            std::cerr << "Host " << hostname.c_str() << " is back up at time " <<
+                    Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+
+            WRENCH_INFO("Was notified that %s is up again", hostname.c_str());
+            _system_state_tracker->set_host_up(hostname);
+            return false;
+        }
+
+        if (timer_event->message.compare(0, hostdown_prefix.length(), hostdown_prefix) == 0) {
+            size_t pos = timer_event->message.find(':');
+            std::string hostname = timer_event->message.substr(pos + 1);
+            std::cerr << "Host " << hostname.c_str() << " is down at time " <<
+                    Simulation::getCurrentSimulatedDate() - repeat_start_date << std::endl;
+
+            // Cancel the job
+            WRENCH_INFO("Was notified that %s is down... terminating job of need be", hostname.c_str());
+            terminate_running_job(hostname, "for host going down");
+
+            // Could any of these functions be combined?
+            _system_state_tracker->untrack_job(hostname);
+            _system_state_tracker->reset_host(hostname);
+            _system_state_tracker->set_host_down(hostname);
+        }
+        return false;
+    }
+
+    /**
+     * @brief Print the results of all repetitions with one scheduling algorithm
+     * @param repetition_results The results
+     */
+    void Controller::print_results(const std::vector<std::pair<bool, double> > &repetition_results) const {
+        int num_successes = 0;
+        double cumulative_error_level_successes = 0.0;
+        double cumulative_error_level = 0.0;
+        for (int repeat = 0; repeat < _num_repeats; repeat++) {
+            if (repetition_results[repeat].first) {
+                num_successes++;
+                cumulative_error_level_successes += repetition_results[repeat].second;
+            }
+            cumulative_error_level += repetition_results[repeat].second;
+        }
+
+        std::cout << std::endl;
+        std::cout << "Total repeats: " << _num_repeats << "\n";
+        std::cout << "Num successes: " << num_successes << "\n";
+        std::cout << "Success rate: " << static_cast<double>(num_successes) / static_cast<double>(_num_repeats) <<
+                "\n";
+        std::cout << "Avg error level: " << cumulative_error_level / static_cast<double>(_num_repeats) << "\n";
+        if (num_successes > 0) {
+            std::cout << "Avg error level of successes: " << cumulative_error_level_successes / static_cast<double>(
+                num_successes) << "\n\n";
+        } else {
+            std::cout << "Avg error level of successes: N/A\n\n";
+        }
+        for (int repeat = 0; repeat < _num_repeats; repeat++) {
+            std::cout << "Repetition " << repeat << ": " << repetition_results[repeat].second << std::endl;
+        }
+        std::cout << std::endl;
+
+        std::cout << "FINAL RESULTS PER REPETITION:\n";
+        std::map<double, unsigned long> final_results_per_repetition;
+        for (int repeat = 0; repeat < _num_repeats; repeat++) {
+            double error = repetition_results[repeat].second;
+            if (final_results_per_repetition.find(error) == final_results_per_repetition.end()) {
+                final_results_per_repetition[error] = 1;
+            } else {
+                final_results_per_repetition[error]++;
+            }
+        }
+        for (const auto &entry: final_results_per_repetition) {
+            std::cout << entry.first << " " << entry.second << "\n";
+        }
     }
 } // namespace wrench
