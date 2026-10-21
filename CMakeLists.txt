@@ -219,7 +219,6 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
 add_executable(delta_t_evaluator ${DELTA_T_EVALUATOR_SOURCE_FILES})
 target_link_libraries(delta_t_evaluator
         ${WRENCH_LIBRARY}   # For UnitParser :)
-        ${SimGrid_LIBRARY}  # For logging
         ${Boost_LIBRARIES}
         ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
 )
