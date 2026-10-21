@@ -113,7 +113,12 @@ namespace wrench {
         std::string get_delta_t_scheme() const { return _delta_t_scheme; }
         double get_delta_t_parameter() const { return _delta_t_parameter; }
 
-        double select_delta_t() const;
+        // Read + compute + write time of an execution option on input (x, y)
+        double get_execution_time(const std::map<std::string, std::function<double(double, double)> > &option_functions,
+                                  double x, double y) const {
+            return (x / _io_read_bandwidth_per_node) + option_functions.at("t_function")(x, y) +
+                   (option_functions.at("d_function")(x, y) / _io_write_bandwidth_per_node);
+        }
 
         int get_seed() const { return _seed; }
         int get_num_tasks() const { return _num_tasks; }
@@ -121,47 +126,32 @@ namespace wrench {
         double get_initial_data_size() const { return _initial_data_size; }
         double get_initial_error_level() const { return _initial_error_level; }
 
-        void update_host_running_data_size(const std::string &hostname, double data_size);
-
-        void update_host_running_error_level(const std::string &hostname, double error_level);
-
         double get_host_running_data_size(const std::string &hostname) const;
-
         double get_host_running_error_level(const std::string &hostname) const;
 
         std::string get_task(int index) const;
-
         int get_task_index(const std::string &task_name) const;
-
         std::string get_host_task_to_schedule(const std::string &hostname) const;
-
         int get_host_task_to_schedule_index(const std::string &hostname) const;
-
-        void update_host_task_to_schedule(const std::string &hostname, int task_index);
-
-        void update_host_task_to_schedule(const std::string &hostname, const std::string &task_name);
-
-        void increment_host_task_to_schedule(const std::string &hostname);
-
         const ExecOptionDecisionNode *get_host_current_decision_node(const std::string &hostname) const;
 
+        void update_host_running_data_size(const std::string &hostname, double data_size);
+        void update_host_running_error_level(const std::string &hostname, double error_level);
+
+        void update_host_task_to_schedule(const std::string &hostname, int task_index);
+        void update_host_task_to_schedule(const std::string &hostname, const std::string &task_name);
+        void increment_host_task_to_schedule(const std::string &hostname);
         void increment_host_current_decision_node(const std::string &hostname, const std::string &task_name,
                                                   const std::string &execution_option);
-
         void update_host_current_decision_node(const std::string &hostname, const std::string &reference_hostname);
-
         void reset_host_current_decision_node(const std::string &hostname);
-
         void reset_all_hosts_current_decision_nodes();
 
         void update_host_decision_history(const std::string &hostname, const std::string &reference_hostname);
-
         void reset_host_decision_history(const std::string &hostname);
-
         void reset_all_hosts_decision_history();
 
         bool cannot_do_worse(const std::string &hostname, const std::string &reference_hostname) const;
-
         bool can_possibly_do_better(const std::string &hostname, const std::string &reference_hostname) const;
 
     protected:

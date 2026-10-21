@@ -33,13 +33,11 @@ namespace wrench {
 
         void reset_all_preprocessed_decisions() override {
             _static_decisions_per_host.clear();
-            _expected_error = 0.0;
         }
 
     protected:
         OptionComparatorFunction *_comparator_function;
         std::map<std::string, std::map<std::string, std::string> > _static_decisions_per_host;
-        double _expected_error = 0.0;
     };
 }
 

@@ -51,8 +51,6 @@ namespace wrench {
 
         int main() override;
 
-        void run_algorithm(const std::shared_ptr<SchedulingAlgorithm> &algorithm);
-
         void run_repetition(const std::shared_ptr<SchedulingAlgorithm> &algorithm,
                             int repeat,
                             std::vector<std::pair<bool, double> > &repetition_results);
@@ -66,12 +64,6 @@ namespace wrench {
                                  const std::shared_ptr<SchedulingAlgorithm> &algorithm,
                                  const RepetitionState &state,
                                  std::vector<std::pair<bool, double> > &repetition_results);
-
-        void print_results(const std::vector<std::pair<bool, double> > &repetition_results) const;
-
-        void apply_reactive_rescheduling(const std::string &success_hostname,
-                                         const std::shared_ptr<SchedulingAlgorithm> &algorithm,
-                                         RepetitionState &state);
 
         void apply_temporal_redundancy(const std::string &success_hostname,
                                        double final_error_level,
@@ -87,8 +79,6 @@ namespace wrench {
                         const std::string &hostname);
 
         void terminate_running_job(const std::string &hostname, const std::string &context) const;
-
-        void reset_host_keeping_down_state(const std::string &hostname) const;
 
         void restart_host_from_first_task(const std::string &hostname,
                                           const std::shared_ptr<SchedulingAlgorithm> &algorithm,

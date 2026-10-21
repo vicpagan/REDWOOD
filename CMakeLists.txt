@@ -87,6 +87,7 @@ set(SIMULATOR_SOURCE_FILES
         src/ApplicationSpecs.cpp
         src/ProbabilityComputation.cpp
         src/OptimalExpectedError.cpp
+        src/DeltaTComputation.cpp
         src/FunctionGenerator.cpp
         src/scheduling/OptionComparatorFunction.cpp
         src/scheduling/SchedulingAlgorithm.cpp
@@ -106,6 +107,7 @@ set(SIMULATOR_SOURCE_FILES
         include/ApplicationSpecs.h
         include/ProbabilityComputation.h
         include/OptimalExpectedError.h
+        include/DeltaTComputation.h
         include/FunctionGenerator.h
         include/scheduling/SchedulingAlgorithm.h
         include/scheduling/SchedulingAlgorithmDynamic.h
@@ -147,6 +149,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
         src/OptimalExpectedError.cpp
+        src/DeltaTComputation.cpp
         include/ApplicationSpecs.h
         include/Utils.h
         include/scheduling/SchedulingAlgorithm.h
@@ -163,12 +166,14 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
         include/OptimalExpectedError.h
+        include/DeltaTComputation.h
 )
 
 add_executable(data_parallel_evaluator ${DATA_PARALLEL_EVALUATOR_SOURCE_FILES})
 
 target_link_libraries(data_parallel_evaluator
         ${WRENCH_LIBRARY}   # For UnitParser :)
+        ${SimGrid_LIBRARY}  # For logging
         ${Boost_LIBRARIES}
         ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
 )
@@ -191,6 +196,7 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
         src/OptimalExpectedError.cpp
+        src/DeltaTComputation.cpp
         include/ApplicationSpecs.h
         include/Utils.h
         include/scheduling/SchedulingAlgorithm.h
@@ -207,11 +213,13 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
         include/OptimalExpectedError.h
+        include/DeltaTComputation.h
 )
 
 add_executable(delta_t_evaluator ${DELTA_T_EVALUATOR_SOURCE_FILES})
 target_link_libraries(delta_t_evaluator
         ${WRENCH_LIBRARY}   # For UnitParser :)
+        ${SimGrid_LIBRARY}  # For logging
         ${Boost_LIBRARIES}
         ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
 )

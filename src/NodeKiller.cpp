@@ -52,16 +52,16 @@ namespace wrench {
         WRENCH_INFO("Node killer for %s starting...", _victim_host.c_str());
         while (true) {
             double sleep_time = portable_exponential_sample(*_rng, _lambda);
-            // std::cout << "Host " << _victim_host << " will run for " << sleep_time << " seconds" << std::endl;
+            WRENCH_INFO("Host %s will run for %lf seconds", _victim_host.c_str(), sleep_time);
             Simulation::sleep(sleep_time);
             WRENCH_INFO("Turning host %s \"off\"", _victim_host.c_str());
             // Simulation::turnOffHost(_victim_host);
-            // std::cout << "Host " << _victim_host << " got turned off" << std::endl;
+            WRENCH_INFO("Host %s got turned off", _victim_host.c_str());
             _notify_commport->dputMessage(new ExecutionControllerAlarmTimerMessage("host_down:" + _victim_host, 0));
             Simulation::sleep(_restart_overhead);
             WRENCH_INFO("Turning host %s \"on\"", _victim_host.c_str());
             // Simulation::turnOnHost(_victim_host);
-            // std::cout << "Host " << _victim_host << " got turned on" << std::endl;
+            WRENCH_INFO("Host %s got turned on", _victim_host.c_str());
             _notify_commport->dputMessage(new ExecutionControllerAlarmTimerMessage("host_up:" + _victim_host, 0));
         }
     }

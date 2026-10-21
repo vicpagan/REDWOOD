@@ -89,8 +89,8 @@ namespace wrench {
                                 const std::string &hostname) {
         const auto job = _job_manager->createCompoundJob(task_name + "_" + execution_option);
 
-        // std::cerr << "Submitting job for task " << task_name << " with execution option " << execution_option <<
-        //     " on host " << hostname << std::endl;
+        WRENCH_INFO("Submitting job for task %s with execution option %s on host %s", task_name.c_str(),
+                    execution_option.c_str(), hostname.c_str());
 
         if (_fake_io) {
             job->addCustomAction(
@@ -151,8 +151,8 @@ namespace wrench {
                     action_executor) {
                         });
 
-            // std::cerr << "Read input action for task " << task_name << " with execution option " << execution_option <<
-            //     " on host " << hostname << std::endl;
+            WRENCH_INFO("Read input action for task %s with execution option %s on host %s", task_name.c_str(),
+                        execution_option.c_str(), hostname.c_str());
 
             const auto compute_action =
                     job->addComputeAction(
@@ -163,8 +163,8 @@ namespace wrench {
                         0.0,
                         1, 1, ParallelModel::CONSTANTEFFICIENCY(1.0));
 
-            // std::cerr << "Compute action for task " << task_name << " with execution option " << execution_option <<
-            //     " on host " << hostname << std::endl;
+            WRENCH_INFO("Compute action for task %s with execution option %s on host %s", task_name.c_str(),
+                        execution_option.c_str(), hostname.c_str());
 
             const auto write_output_action =
                     job->addCustomAction(
@@ -194,8 +194,8 @@ namespace wrench {
                     action_executor) {
                         });
 
-            // std::cerr << "Write output action for task " << task_name << " with execution option " << execution_option <<
-            //     " on host " << hostname << std::endl;
+            WRENCH_INFO("Write output action for task %s with execution option %s on host %s", task_name.c_str(),
+                        execution_option.c_str(), hostname.c_str());
 
             job->addActionDependency(read_input_action, compute_action);
             job->addActionDependency(compute_action, write_output_action);
@@ -220,18 +220,6 @@ namespace wrench {
             } catch (ExecutionException &) {
                 std::cerr << "Tried to terminate job on host: " << hostname << " " << context << std::endl;
             }
-        }
-    }
-
-    /**
-     * @brief Reset a host's state, but a host that is down stays down
-     * @param hostname The host
-     */
-    void Controller::reset_host_keeping_down_state(const std::string &hostname) const {
-        const bool is_down = _system_state_tracker->is_host_down(hostname);
-        _system_state_tracker->reset_host(hostname);
-        if (is_down) {
-            _system_state_tracker->set_host_down(hostname);
         }
     }
 
@@ -269,7 +257,11 @@ namespace wrench {
             terminate_running_job(hostname, context);
         }
         _system_state_tracker->untrack_job(hostname);
-        reset_host_keeping_down_state(hostname);
+        const bool is_down = _system_state_tracker->is_host_down(hostname);
+        _system_state_tracker->reset_host(hostname);
+        if (is_down) {
+            _system_state_tracker->set_host_down(hostname);
+        }
     }
 
     /**
@@ -312,20 +304,24 @@ namespace wrench {
 
         terminate_running_job(hostname, context);
         _system_state_tracker->untrack_job(hostname);
-        reset_host_keeping_down_state(hostname);
+        const bool is_down = _system_state_tracker->is_host_down(hostname);
+        _system_state_tracker->reset_host(hostname);
+        if (is_down) {
+            _system_state_tracker->set_host_down(hostname);
+        }
     }
 
     void Controller::restart_system() const {
         for (int i = 0; i < _application_specs->get_num_compute_nodes(); i++) {
             std::string hostname = "ComputeHost_" + std::to_string(i);
-            // std::cout << "Resetting host " << hostname << std::endl;
+            WRENCH_INFO("Resetting host %s", hostname.c_str());
             if (_system_state_tracker->is_a_job_running(hostname)) {
-                // std::cout << "Job is running on " << hostname << ", terminating it" << std::endl;
+                WRENCH_INFO("Job is running on %s, terminating it", hostname.c_str());
                 try {
                     _job_manager->terminateJob(
                         _system_state_tracker->get_running_job(hostname));
                 } catch (ExecutionException &) {
-                    // std::cerr << "Tried to terminate job on down host: " << hostname << " for stop running jobs hack" << std::endl;
+                    WRENCH_INFO("Tried to terminate job on down host: %s for stop running jobs hack", hostname.c_str());
                 }
                 _system_state_tracker->reset_host(hostname);
                 _system_state_tracker->untrack_job(hostname);
@@ -354,30 +350,63 @@ namespace wrench {
 
         /* Loop over all the scheduling algorithms */
         for (const auto &algorithm: _scheduling_algorithms) {
-            run_algorithm(algorithm);
+            std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
+            WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
+
+            /* Keep track of number of successes */
+            std::vector<std::pair<bool, double> > repetition_results(_num_repeats, {
+                                                                         false, _application_specs->get_e_fail()
+                                                                     });
+
+            /* Do all the repeats */
+            for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                run_repetition(algorithm, repeat, repetition_results);
+            }
+
+            /* Print the results */
+            int num_successes = 0;
+            double cumulative_error_level_successes = 0.0;
+            double cumulative_error_level = 0.0;
+            for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                if (repetition_results[repeat].first) {
+                    num_successes++;
+                    cumulative_error_level_successes += repetition_results[repeat].second;
+                }
+                cumulative_error_level += repetition_results[repeat].second;
+            }
+
+            std::cout << std::endl;
+            std::cout << "Total repeats: " << _num_repeats << "\n";
+            std::cout << "Num successes: " << num_successes << "\n";
+            std::cout << "Success rate: " << static_cast<double>(num_successes) / static_cast<double>(_num_repeats) <<
+                    "\n";
+            std::cout << "Avg error level: " << cumulative_error_level / static_cast<double>(_num_repeats) << "\n";
+            if (num_successes > 0) {
+                std::cout << "Avg error level of successes: " << cumulative_error_level_successes / static_cast<double>(
+                    num_successes) << "\n\n";
+            } else {
+                std::cout << "Avg error level of successes: N/A\n\n";
+            }
+            for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                std::cout << "Repetition " << repeat << ": " << repetition_results[repeat].second << std::endl;
+            }
+            std::cout << std::endl;
+
+            std::cout << "FINAL RESULTS PER REPETITION:\n";
+            std::map<double, unsigned long> final_results_per_repetition;
+            for (int repeat = 0; repeat < _num_repeats; repeat++) {
+                double error = repetition_results[repeat].second;
+                if (final_results_per_repetition.find(error) == final_results_per_repetition.end()) {
+                    final_results_per_repetition[error] = 1;
+                } else {
+                    final_results_per_repetition[error]++;
+                }
+            }
+            for (const auto &entry: final_results_per_repetition) {
+                std::cout << entry.first << " " << entry.second << "\n";
+            }
         }
         return 0;
-    }
-
-    /**
-     * @brief Run all the repetitions with one scheduling algorithm, and print the results
-     * @param algorithm The scheduling algorithm
-     */
-    void Controller::run_algorithm(const std::shared_ptr<SchedulingAlgorithm> &algorithm) {
-        std::cerr << "** " << algorithm->get_name().c_str() << " **" << std::endl;
-        WRENCH_INFO("** Running experiments with algorithm '%s' **", algorithm->get_name().c_str());
-
-        /* Keep track of number of successes */
-        std::vector<std::pair<bool, double> > repetition_results(_num_repeats, {
-                                                                     false, _application_specs->get_e_fail()
-                                                                 });
-
-        /* Do all the repeats */
-        for (int repeat = 0; repeat < _num_repeats; repeat++) {
-            run_repetition(algorithm, repeat, repetition_results);
-        }
-
-        print_results(repetition_results);
     }
 
     /**
@@ -444,9 +473,8 @@ namespace wrench {
 
             // Implement the scheduling decisions
             for (const auto &[hostname, task, execution_option]: decisions) {
-                // std::cerr << "Scheduling decision: run task " << task <<
-                //     " with option " << execution_option <<
-                //     " on host " << hostname << " at time " << Simulation::getCurrentSimulatedDate()  - repeat_start_date <<std::endl;
+                WRENCH_INFO("Scheduling decision: run task %s with option %s on host %s at time %lf", task.c_str(),
+                            execution_option.c_str(), hostname.c_str(), Simulation::getCurrentSimulatedDate() - state.start_date);
                 this->submit_job(task,
                                  execution_option,
                                  _application_specs->get_host_running_data_size(hostname),
@@ -543,7 +571,36 @@ namespace wrench {
         success_host_running_error_level = _application_specs->get_host_running_error_level(
             success_hostname);
 
-        apply_reactive_rescheduling(success_hostname, algorithm, state);
+        /* Reactive rescheduling (Section VI-C) */
+        auto &tree_prune_threshold_by_host = state.tree_prune_threshold_by_host;
+        const double success_host_tree_prune_threshold = tree_prune_threshold_by_host.at(success_hostname);
+
+        if (_stop_running_jobs == "aggressive") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if (hostname != success_hostname &&
+                    !_system_state_tracker->is_host_finished(hostname)) {
+                    continue_from_host_output(hostname, success_hostname, algorithm,
+                                              success_host_tree_prune_threshold,
+                                              tree_prune_threshold_by_host, "with SRJ AGG");
+                }
+            }
+        } else if (_stop_running_jobs == "variant") {
+            for (const auto &entry: _compute_services) {
+                std::string hostname = entry.first;
+
+                if (hostname != success_hostname) {
+                    if (!_application_specs->cannot_do_worse(
+                            hostname, success_hostname) &&
+                        !_system_state_tracker->is_host_finished(hostname)) {
+                        continue_from_host_output(hostname, success_hostname, algorithm,
+                                                  success_host_tree_prune_threshold,
+                                                  tree_prune_threshold_by_host, "with SRJ VAR");
+                    }
+                }
+            }
+        }
 
         if (_application_specs->get_host_task_to_schedule(success_hostname).empty()) {
             double final_error_level = success_host_running_error_level;
@@ -593,44 +650,6 @@ namespace wrench {
             _system_state_tracker->reset_host(success_hostname);
         }
         return false;
-    }
-
-    /**
-     * @brief Reactive rescheduling (Section VI-C): after success_hostname completed a task, other hosts may
-     *        abandon their executions and continue from its output instead
-     */
-    void Controller::apply_reactive_rescheduling(const std::string &success_hostname,
-                                                 const std::shared_ptr<SchedulingAlgorithm> &algorithm,
-                                                 RepetitionState &state) {
-        auto &tree_prune_threshold_by_host = state.tree_prune_threshold_by_host;
-        const double success_host_tree_prune_threshold = tree_prune_threshold_by_host.at(success_hostname);
-
-        if (_stop_running_jobs == "aggressive") {
-            for (const auto &entry: _compute_services) {
-                std::string hostname = entry.first;
-
-                if (hostname != success_hostname &&
-                    !_system_state_tracker->is_host_finished(hostname)) {
-                    continue_from_host_output(hostname, success_hostname, algorithm,
-                                              success_host_tree_prune_threshold,
-                                              tree_prune_threshold_by_host, "with SRJ AGG");
-                }
-            }
-        } else if (_stop_running_jobs == "variant") {
-            for (const auto &entry: _compute_services) {
-                std::string hostname = entry.first;
-
-                if (hostname != success_hostname) {
-                    if (!_application_specs->cannot_do_worse(
-                            hostname, success_hostname) &&
-                        !_system_state_tracker->is_host_finished(hostname)) {
-                        continue_from_host_output(hostname, success_hostname, algorithm,
-                                                  success_host_tree_prune_threshold,
-                                                  tree_prune_threshold_by_host, "with SRJ VAR");
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -816,51 +835,4 @@ namespace wrench {
         return false;
     }
 
-    /**
-     * @brief Print the results of all repetitions with one scheduling algorithm
-     * @param repetition_results The results
-     */
-    void Controller::print_results(const std::vector<std::pair<bool, double> > &repetition_results) const {
-        int num_successes = 0;
-        double cumulative_error_level_successes = 0.0;
-        double cumulative_error_level = 0.0;
-        for (int repeat = 0; repeat < _num_repeats; repeat++) {
-            if (repetition_results[repeat].first) {
-                num_successes++;
-                cumulative_error_level_successes += repetition_results[repeat].second;
-            }
-            cumulative_error_level += repetition_results[repeat].second;
-        }
-
-        std::cout << std::endl;
-        std::cout << "Total repeats: " << _num_repeats << "\n";
-        std::cout << "Num successes: " << num_successes << "\n";
-        std::cout << "Success rate: " << static_cast<double>(num_successes) / static_cast<double>(_num_repeats) <<
-                "\n";
-        std::cout << "Avg error level: " << cumulative_error_level / static_cast<double>(_num_repeats) << "\n";
-        if (num_successes > 0) {
-            std::cout << "Avg error level of successes: " << cumulative_error_level_successes / static_cast<double>(
-                num_successes) << "\n\n";
-        } else {
-            std::cout << "Avg error level of successes: N/A\n\n";
-        }
-        for (int repeat = 0; repeat < _num_repeats; repeat++) {
-            std::cout << "Repetition " << repeat << ": " << repetition_results[repeat].second << std::endl;
-        }
-        std::cout << std::endl;
-
-        std::cout << "FINAL RESULTS PER REPETITION:\n";
-        std::map<double, unsigned long> final_results_per_repetition;
-        for (int repeat = 0; repeat < _num_repeats; repeat++) {
-            double error = repetition_results[repeat].second;
-            if (final_results_per_repetition.find(error) == final_results_per_repetition.end()) {
-                final_results_per_repetition[error] = 1;
-            } else {
-                final_results_per_repetition[error]++;
-            }
-        }
-        for (const auto &entry: final_results_per_repetition) {
-            std::cout << entry.first << " " << entry.second << "\n";
-        }
-    }
 } // namespace wrench

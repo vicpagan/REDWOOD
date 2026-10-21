@@ -53,7 +53,6 @@ namespace wrench {
             bool lower_bound);
 
 
-        double _optimal_EV = 0;
         std::map<std::string, std::map<const ApplicationSpecs::ExecOptionDecisionNode *, std::vector<std::pair<long,
             std::string> > > > _preprocessed_decisions_by_host;
     };

@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 #include <cmath>
 
@@ -5,7 +6,11 @@
 #include "ProbabilityComputation.h"
 #include "SystemState.h"
 #include "Utils.h"
-#include "DynamicProgramming.h"
+#include "OptimalExpectedError.h"
+
+#include <wrench-dev.h>
+
+WRENCH_LOG_CATEGORY(scheduling_dynamic, "Log category for SchedulingAlgorithmDynamic");
 
 namespace wrench {
     void SchedulingAlgorithmDynamic::preprocess_host_decisions(const std::string &hostname,
@@ -44,10 +49,6 @@ namespace wrench {
                                                      current_decision_node, task_to_schedule_index,
                                                      input_data_size, input_error_level, remaining_time, lower_bound);
 
-        if (task_to_schedule_index == 0) {
-            _optimal_EV = dp.at(current_decision_node).back().second;
-        }
-
         for (const auto &[node, expected_errors]: dp) {
             std::vector<std::pair<long, std::string> > compressed;
             std::string last_option = "";
@@ -78,23 +79,7 @@ namespace wrench {
             std::string task_to_schedule = _application_specs->get_host_task_to_schedule(hostname);
 
             if (_preprocessed_decisions_by_host.find(hostname) == _preprocessed_decisions_by_host.end()) {
-                // std::cerr << "preprocessing for host " << hostname << " not found" << std::endl;
-                // std::function<void(const ApplicationSpecs::ExecOptionDecisionNode*, int)> print_tree = [&](const ApplicationSpecs::ExecOptionDecisionNode* node, int depth) {
-                //     if (!node) return;
-                //
-                //     std::string indent(depth * 2, ' ');
-                //
-                //     std::cout << indent
-                //               << "execution_option: " << node->execution_option
-                //               << " | task: " << node->task
-                //               << " | error_lvl: " << node->cumulative_error_factor
-                //               << std::endl;
-                //
-                //     for (const auto& child : node->children) {
-                //         print_tree(child.get(), depth + 1);
-                //     }
-                // };
-                // print_tree(_application_specs->get_decision_tree_root(hostname), 0);
+                WRENCH_INFO("preprocessing for host %s not found", hostname.c_str());
                 double host_running_data_size = _application_specs->get_host_running_data_size(hostname);
                 double host_running_error_level = _application_specs->get_host_running_error_level(hostname);
                 preprocess_host_decisions(hostname, host_running_data_size, host_running_error_level, remaining_time,
@@ -117,8 +102,8 @@ namespace wrench {
                 --it;
                 const std::string &execution_option = it->second;
 
-                // std::cout << "Selected execution_option " << execution_option << " after task completion " << current_decision_node->task <<
-                //     " on host " << hostname << " with remaining time " << remaining_time << std::endl;
+                WRENCH_INFO("Selected execution_option %s after task completion %s on host %s with remaining time %lf",
+                            execution_option.c_str(), current_decision_node->task.c_str(), hostname.c_str(), remaining_time);
                 decisions.push_back({hostname, task_to_schedule, execution_option});
             }
         }

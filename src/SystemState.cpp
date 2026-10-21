@@ -1,6 +1,10 @@
+#include <wrench-dev.h>
+
 #include "SystemState.h"
 
 #include <iostream>
+
+WRENCH_LOG_CATEGORY(system_state, "Log category for SystemState");
 
 namespace wrench {
     void HostState::reset() {
@@ -63,18 +67,18 @@ namespace wrench {
 
     void SystemState::reset_all_hosts() {
         for (auto &[hostname, host_state]: _host_states) {
-            // std::cout << "resetting host " << hostname << std::endl;
+            WRENCH_INFO("resetting host %s", hostname.c_str());
             host_state.reset();
         }
     }
 
     void SystemState::set_host_down(const std::string &hostname) {
-        // std::cout << "setting host down for " << hostname << std::endl;
+        WRENCH_INFO("setting host down for %s", hostname.c_str());
         _host_states[hostname].is_down = true;
     }
 
     void SystemState::set_host_up(const std::string &hostname) {
-        // std::cout << "setting host up for " << hostname << std::endl;
+        WRENCH_INFO("setting host up for %s", hostname.c_str());
         _host_states[hostname].is_down = false;
     }
 

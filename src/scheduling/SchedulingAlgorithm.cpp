@@ -10,7 +10,8 @@
 #include "scheduling/SchedulingAlgorithmGreedyForesighted.h"
 #include "scheduling/SchedulingAlgorithmGreedyNearsighted.h"
 #include "scheduling/SchedulingAlgorithmRandom.h"
-#include "DynamicProgramming.h"
+#include "OptimalExpectedError.h"
+#include "DeltaTComputation.h"
 
 
 namespace wrench {
@@ -120,7 +121,7 @@ namespace wrench {
      */
     void SchedulingAlgorithm::initialize_delta_t() {
         if (_delta_t == -1) {
-            _delta_t = _application_specs->select_delta_t();
+            _delta_t = select_delta_t(_application_specs);
         }
         _probability_computation->set_delta_t(_delta_t);
     }
@@ -202,7 +203,7 @@ namespace wrench {
         // probability of success of each combination
         std::map<std::vector<std::string>, double> ps_by_combo;
         for (const auto &combo: all_combinations) {
-            ps_by_combo[combo] = compute_success_probability(*_application_specs, *_probability_computation,
+            ps_by_combo[combo] = _probability_computation->compute_success_probability(*_application_specs,
                                                              task_to_schedule_index, combo, initial_data_size,
                                                              initial_error_level, deadline, lower_bound);
         }

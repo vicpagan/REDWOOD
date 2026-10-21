@@ -10,7 +10,7 @@
 #include "ApplicationSpecs.h"
 #include "FunctionGenerator.h"
 #include "Utils.h"
-#include "DynamicProgramming.h"
+#include "OptimalExpectedError.h"
 
 namespace po = boost::program_options;
 
@@ -60,6 +60,7 @@ namespace wrench {
 } // namespace wrench
 
 int main(int argc, char **argv) {
+
     std::string json_input_arg;
     double min_delta_t, max_delta_t, step_size;
 

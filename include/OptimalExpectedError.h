@@ -1,5 +1,5 @@
 #ifndef OPTIMALEXPECTEDERROR_H
-#define DYNAMICPROGRAMMING_H
+#define OPTIMALEXPECTEDERROR_H
 
 #include <map>
 #include <memory>
@@ -59,4 +59,4 @@ namespace wrench {
                                           bool lower_bound);
 }
 
-#endif //DYNAMICPROGRAMMING_H
+#endif //OPTIMALEXPECTEDERROR_H

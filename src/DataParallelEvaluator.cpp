@@ -22,7 +22,10 @@
 
 #include <wrench/util/UnitParser.h>
 
-#include "DynamicProgramming.h"
+#include "OptimalExpectedError.h"
+#include "DeltaTComputation.h"
+
+WRENCH_LOG_CATEGORY(data_parallel_evaluator, "Log category for DataParallelEvaluator");
 
 namespace po = boost::program_options;
 
@@ -123,7 +126,7 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
 
     // Optimal expected error (upper bound)
     ProbabilityComputation probability_computation(application_specs);
-    probability_computation.set_delta_t(application_specs->select_delta_t());
+    probability_computation.set_delta_t(select_delta_t(application_specs));
     return compute_optimal_expected_error(application_specs, probability_computation, false);
 }
 
@@ -149,6 +152,10 @@ std::vector<std::pair<unsigned long, double> > wrench::DataParallelEvaluator::ev
  * @return 0 on success, non-zero otherwise
  */
 int main(int argc, char **argv) {
+    // As in redwood_sim: logging off by default, enabled per category with --log=<category>.thres:info
+    xbt_log_control_set("root.thresh:critical");
+    xbt_log_init(&argc, argv);
+
     // Define command-line argument options
     std::string json_input_arg;
     std::string json_output_arg;
@@ -315,7 +322,7 @@ int main(int argc, char **argv) {
 
     // Convert to string
     std::string json_string = boost::json::serialize(json_obj);
-    // std::cout << json_string << std::endl;
+    WRENCH_INFO("%s", json_string.c_str());
 
     // Write to the output file
     std::ofstream output(json_output_arg, std::ios::out | std::ios::trunc);

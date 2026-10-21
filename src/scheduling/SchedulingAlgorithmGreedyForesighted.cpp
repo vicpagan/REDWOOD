@@ -6,7 +6,11 @@
 #include "ApplicationSpecs.h"
 #include "ProbabilityComputation.h"
 #include "Utils.h"
-#include "DynamicProgramming.h"
+#include "OptimalExpectedError.h"
+
+#include <wrench-dev.h>
+
+WRENCH_LOG_CATEGORY(scheduling_greedy_foresighted, "Log category for SchedulingAlgorithmGreedyForesighted");
 
 namespace wrench {
     void SchedulingAlgorithmGreedyForesighted::initial_decisions(
@@ -47,11 +51,11 @@ namespace wrench {
             std::vector<std::string> best_combo;
 
             for (const auto &combo: all_combinations) {
-                // std::cout << "trying combo" << std::endl;
+                WRENCH_INFO("trying combo");
 
-                double ps = compute_success_probability(*_application_specs, *_probability_computation, 0, combo,
+                double ps = _probability_computation->compute_success_probability(*_application_specs, 0, combo,
                                                         initial_data_size, initial_error_level, deadline, lower_bound);
-                // std::cout << "finished calculation for combo" << std::endl;
+                WRENCH_INFO("finished calculation for combo");
 
                 if (ps > best_ps) {
                     best_ps = ps;
@@ -65,7 +69,7 @@ namespace wrench {
             std::map<std::vector<std::string>, double> ps_by_combo;
 
             for (const auto &combo: all_combinations) {
-                ps_by_combo[combo] = compute_success_probability(*_application_specs, *_probability_computation, 0,
+                ps_by_combo[combo] = _probability_computation->compute_success_probability(*_application_specs, 0,
                                                                  combo,
                                                                  initial_data_size, initial_error_level, deadline,
                                                                  lower_bound);
@@ -94,7 +98,7 @@ namespace wrench {
             std::vector<std::string> best_combo;
 
             for (const auto &combo: all_combinations) {
-                double ps = compute_success_probability(*_application_specs, *_probability_computation, 0, combo,
+                double ps = _probability_computation->compute_success_probability(*_application_specs, 0, combo,
                                                         initial_data_size, initial_error_level, deadline, lower_bound);
                 double el = el_by_combo[combo];
 
@@ -112,7 +116,7 @@ namespace wrench {
             double ps_threshold = error_level_comparator_function->get_prob_success_threshold();
 
             for (const auto &combo: all_combinations) {
-                double ps = compute_success_probability(*_application_specs, *_probability_computation, 0, combo,
+                double ps = _probability_computation->compute_success_probability(*_application_specs, 0, combo,
                                                         initial_data_size, initial_error_level, deadline, lower_bound);
                 double el = el_by_combo[combo];
 
@@ -171,13 +175,6 @@ namespace wrench {
 
     //FIXME: Does not properly handle when scheduling every host on a task that is NOT the first task
     void SchedulingAlgorithmGreedyForesighted::translate_to_static_decisions(SystemState *system_state_tracker) {
-        // for (const auto& [combo, num_nodes] : _nodes_per_combo_decision) {
-        //     std::cerr << "[DEBUG]   combo = [";
-        //     for (const auto& option : combo) {
-        //         std::cerr << option << ", ";
-        //     }
-        //     std::cerr << "]  num_nodes = " << num_nodes << std::endl;
-        // }
 
         auto hostname_iterator = system_state_tracker->begin();
         if (hostname_iterator == system_state_tracker->end()) {
