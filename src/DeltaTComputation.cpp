@@ -60,4 +60,11 @@ namespace wrench {
         }
         throw std::invalid_argument("Unknown delta_t_scheme '" + scheme + "'");
     }
+
+    void initialize_delta_t(const std::shared_ptr<ApplicationSpecs> &application_specs,
+                            ProbabilityComputation &probability_computation) {
+        if (probability_computation.get_delta_t() < 0) {
+            probability_computation.set_delta_t(select_delta_t(application_specs));
+        }
+    }
 }

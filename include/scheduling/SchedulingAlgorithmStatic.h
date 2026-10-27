@@ -2,6 +2,7 @@
 #define SCHEDULINGALGORITHMSTATIC_H
 
 #include "SchedulingAlgorithm.h"
+#include "scheduling/HeuristicPlanning.h"
 
 namespace wrench {
     class SchedulingAlgorithmStatic : public SchedulingAlgorithm {
@@ -12,9 +13,9 @@ namespace wrench {
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
                 (double, double)> > > > &exec_options,
             ProbabilityComputation *probability_computation,
-            OptionComparatorFunction *comparator_function)
+            const Criterion criterion)
             : SchedulingAlgorithm(application_specs, name, exec_options, probability_computation),
-              _comparator_function(comparator_function) {
+              _criterion(criterion) {
         }
 
         void preprocess_host_decisions(const std::string &hostname,
@@ -36,7 +37,7 @@ namespace wrench {
         }
 
     protected:
-        OptionComparatorFunction *_comparator_function;
+        Criterion _criterion;
         std::map<std::string, std::map<std::string, std::string> > _static_decisions_per_host;
     };
 }

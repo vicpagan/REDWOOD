@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "scheduling/SchedulingAlgorithmStaticForesighted.h"
+#include "scheduling/HeuristicPlanning.h"
 #include "ApplicationSpecs.h"
 
 namespace wrench {
@@ -11,8 +12,12 @@ namespace wrench {
         const double deadline,
         const bool lower_bound) {
         const int task_to_schedule_index = _application_specs->get_host_task_to_schedule_index(hostname);
-        const auto best_combo = select_foresighted_combination(hostname, _comparator_function, initial_data_size,
-                                                               initial_error_level, deadline, lower_bound);
+        const auto candidates = foresighted_candidates(_application_specs, _probability_computation,
+                                                       _application_specs->get_host_current_decision_node(hostname),
+                                                       task_to_schedule_index, initial_data_size, initial_error_level,
+                                                       deadline, lower_bound);
+        // One PE: the best combination for the criterion
+        const auto &best_combo = best_candidate(_criterion, candidates, _e_fail).options;
 
         int task_idx = task_to_schedule_index;
         for (const auto &option: best_combo) {

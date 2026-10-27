@@ -15,9 +15,9 @@ namespace wrench {
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
                 (double, double)> > > > &exec_options,
             ProbabilityComputation *probability_computation,
-            OptionComparatorFunction *comparator_function)
+            const Criterion criterion)
             : SchedulingAlgorithmGreedy(application_specs, "greedy_foresighted", exec_options,
-                                        probability_computation, comparator_function) {
+                                        probability_computation, criterion) {
         }
 
         void initial_decisions(const std::string &hostname,
@@ -45,11 +45,6 @@ namespace wrench {
 
     protected:
         std::map<std::vector<std::string>, long> _nodes_per_combo_decision;
-
-        double calculate_expected_error(
-            const std::vector<std::vector<std::string> > &all_combinations,
-            const std::map<std::vector<std::string>, double> &ps_by_combo,
-            const std::map<std::vector<std::string>, double> &el_by_combo) const;
 
         void translate_to_static_decisions(SystemState *system_state_tracker) override;
     };

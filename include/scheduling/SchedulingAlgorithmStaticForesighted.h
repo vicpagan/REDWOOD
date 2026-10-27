@@ -6,7 +6,7 @@
 namespace wrench {
     /**
      * Static foresighted heuristic (FS-x in Section V-D):
-     * selects the best combination of options for all remaining tasks, according to the comparator.
+     * selects the best combination of options for all remaining tasks, according to the criterion.
      */
     class SchedulingAlgorithmStaticForesighted : public SchedulingAlgorithmStatic {
     public:
@@ -15,9 +15,9 @@ namespace wrench {
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
                 (double, double)> > > > &exec_options,
             ProbabilityComputation *probability_computation,
-            OptionComparatorFunction *comparator_function)
+            const Criterion criterion)
             : SchedulingAlgorithmStatic(application_specs, "static_foresighted", exec_options,
-                                        probability_computation, comparator_function) {
+                                        probability_computation, criterion) {
         }
 
         void preprocess_host_decisions(const std::string &hostname,

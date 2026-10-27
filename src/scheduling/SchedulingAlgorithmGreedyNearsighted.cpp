@@ -1,8 +1,8 @@
 #include <iostream>
-#include <limits>
-#include <cmath>
+#include <algorithm>
 
 #include "scheduling/SchedulingAlgorithmGreedyNearsighted.h"
+#include "scheduling/HeuristicPlanning.h"
 #include "ApplicationSpecs.h"
 #include "ProbabilityComputation.h"
 #include "Utils.h"
@@ -14,132 +14,19 @@ namespace wrench {
         const double initial_error_level,
         const double deadline,
         const bool lower_bound) {
-        initialize_delta_t();
-
-        // initialize list of combinations
-        std::string first_task = _application_specs->get_task(0);
-        const auto current_decision_node = _application_specs->get_host_current_decision_node(hostname);
-
-        // sort list of combinations by error level
-        std::map<std::string, double> el_by_option;
-        for (const auto &child: current_decision_node->children) {
-            _list_of_options.push_back(child->execution_option);
-            el_by_option.emplace(child->execution_option,
-                                 _exec_options.at(first_task).at(child->execution_option).at("e_function")(1, 1));
-        }
-        std::sort(_list_of_options.begin(), _list_of_options.end(), [&](const auto &a, const auto &b) {
-            return el_by_option.at(a) < el_by_option.at(b);
+        // The options of the first task, sorted by error level
+        auto candidates = nearsighted_candidates(_application_specs, _probability_computation,
+                                                 _application_specs->get_host_current_decision_node(hostname),
+                                                 _application_specs->get_task(0), initial_data_size,
+                                                 initial_error_level, deadline);
+        std::sort(candidates.begin(), candidates.end(), [](const Candidate &a, const Candidate &b) {
+            return a.error_level < b.error_level;
         });
 
-        // initialize the decisions starting at N nodes per combination
-        for (const auto &option: _list_of_options) {
-            _nodes_per_initial_option_decision[option] = 0;
-        }
-        long num_nodes_scheduled = 0;
-
-        // Select combo with the highest probability of success
-        // Schedules this option on all compute nodes
-        if (dynamic_cast<ProbabilitySuccessComparator *>(_comparator_function)) {
-            double best_ps = -std::numeric_limits<double>::infinity();
-            std::string best_option;
-
-            for (const auto &option: _list_of_options) {
-                double ps = _comparator_function->comp_value(_probability_computation,
-                                                             _exec_options.at(first_task).at(option),
-                                                             initial_data_size,
-                                                             initial_error_level,
-                                                             deadline);
-
-                if (ps > best_ps) {
-                    best_ps = ps;
-                    best_option = option;
-                }
-            }
-
-            _nodes_per_initial_option_decision[best_option] = _num_compute_nodes;
-        }
-        // Schedules based on the lowest expected error of any combination of option paths (combination of combinations lol)
-        else if (dynamic_cast<ExpectedErrorComparator *>(_comparator_function)) {
-            std::map<std::string, double> ps_by_option;
-
-            for (const auto &option: _list_of_options) {
-                const double exec_option_time = _exec_options.at(first_task).at(option).at("t_function")(
-                    initial_data_size, initial_error_level);
-                const double exec_option_data = _exec_options.at(first_task).at(option).at("d_function")(
-                    initial_data_size, initial_error_level);
-                const double exec_option_time_total =
-                        (initial_data_size / _io_read_bandwidth_per_node) + exec_option_time +
-                        (exec_option_data / _io_write_bandwidth_per_node);
-
-                ps_by_option[option] = _probability_computation->compute_probability(
-                    exec_option_time_total, deadline, false);
-            }
-
-            while (num_nodes_scheduled < _num_compute_nodes) {
-                double best_exp_err = std::numeric_limits<double>::infinity();
-                std::string option_to_add;
-
-                for (const auto &option: _list_of_options) {
-                    _nodes_per_initial_option_decision[option]++;
-                    double exp_err = this->calculate_expected_error(ps_by_option, el_by_option);
-                    if (exp_err < best_exp_err) {
-                        best_exp_err = exp_err;
-                        option_to_add = option;
-                    }
-                    _nodes_per_initial_option_decision[option]--;
-                }
-                _nodes_per_initial_option_decision[option_to_add]++;
-                num_nodes_scheduled++;
-            }
-        }
-        //
-        else if (dynamic_cast<SuccessErrorRatioComparator *>(_comparator_function)) {
-            double best_ps_el_ratio = -std::numeric_limits<double>::infinity();
-            std::string best_option;
-
-            for (const auto &option: _list_of_options) {
-                double ps_el_ratio = _comparator_function->comp_value(_probability_computation,
-                                                                      _exec_options.at(first_task).at(option),
-                                                                      initial_data_size,
-                                                                      initial_error_level,
-                                                                      deadline);
-
-                if (ps_el_ratio > best_ps_el_ratio) {
-                    best_ps_el_ratio = ps_el_ratio;
-                    best_option = option;
-                }
-            }
-
-            _nodes_per_initial_option_decision[best_option] = _num_compute_nodes;
-        } else if (auto error_level_comparator_function = dynamic_cast<ErrorLevelComparator *>(_comparator_function)) {
-            double best_el = std::numeric_limits<double>::infinity();
-            std::string best_option;
-            double ps_threshold = error_level_comparator_function->get_prob_success_threshold();
-
-            std::map<const ApplicationSpecs::ExecOptionDecisionNode *, std::vector<double> > dp;
-            for (const auto &option: _list_of_options) {
-                double ps = _comparator_function->comp_value(_probability_computation,
-                                                             _exec_options.at(first_task).at(option),
-                                                             initial_data_size,
-                                                             initial_error_level,
-                                                             deadline);
-                double el = el_by_option[option];
-
-                if (ps > ps_threshold) {
-                    if (el < best_el) {
-                        best_el = el;
-                        best_option = option;
-                    }
-                }
-            }
-
-            if (best_option.empty()) {
-                best_option = _list_of_options.front();
-            }
-
-            _nodes_per_initial_option_decision[best_option] = _num_compute_nodes;
-        } else {
-            throw std::runtime_error("Unknown comparator type");
+        // Number of PEs that execute each option
+        const auto allocation = allocate_pes(_criterion, candidates, _num_compute_nodes, _e_fail);
+        for (size_t k = 0; k < candidates.size(); k++) {
+            _nodes_per_initial_option_decision[candidates[k].options.front()] = allocation[k];
         }
     }
 
@@ -149,27 +36,14 @@ namespace wrench {
         const double input_error_level,
         const double remaining_time,
         const bool lower_bound) {
-        const std::string best_option = select_nearsighted_option(hostname, _comparator_function, input_data_size,
-                                                                  input_error_level, remaining_time);
-        _static_decisions_per_host[hostname][_application_specs->get_host_task_to_schedule(hostname)] = best_option;
-    }
-
-    double SchedulingAlgorithmGreedyNearsighted::calculate_expected_error(
-        const std::map<std::string, double> &ps_by_option,
-        const std::map<std::string, double> &el_by_option) const {
-        double p_all_fail = 1.0;
-        double weighted_sum = 0.0;
-        double running_prod = 1.0;
-
-        for (const auto &option: _list_of_options) {
-            const double p_one_succeeds = 1.0 - std::pow(1.0 - ps_by_option.at(option),
-                                                         _nodes_per_initial_option_decision.at(option));
-
-            weighted_sum += el_by_option.at(option) * p_one_succeeds * running_prod;
-            running_prod *= (1.0 - p_one_succeeds);
-            p_all_fail *= (1.0 - p_one_succeeds);
-        }
-        return weighted_sum + _e_fail * p_all_fail;
+        const std::string task_to_schedule = _application_specs->get_host_task_to_schedule(hostname);
+        const auto candidates = nearsighted_candidates(_application_specs, _probability_computation,
+                                                       _application_specs->get_host_current_decision_node(hostname),
+                                                       task_to_schedule, input_data_size, input_error_level,
+                                                       remaining_time);
+        // One PE: the best option for the criterion
+        _static_decisions_per_host[hostname][task_to_schedule] =
+                candidates.empty() ? "" : best_candidate(_criterion, candidates, _e_fail).options.front();
     }
 
     void SchedulingAlgorithmGreedyNearsighted::translate_to_static_decisions(SystemState *system_state_tracker) {

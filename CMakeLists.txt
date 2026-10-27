@@ -89,8 +89,8 @@ set(SIMULATOR_SOURCE_FILES
         src/OptimalExpectedError.cpp
         src/DeltaTComputation.cpp
         src/FunctionGenerator.cpp
-        src/scheduling/OptionComparatorFunction.cpp
         src/scheduling/SchedulingAlgorithm.cpp
+        src/scheduling/HeuristicPlanning.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
@@ -110,6 +110,7 @@ set(SIMULATOR_SOURCE_FILES
         include/DeltaTComputation.h
         include/FunctionGenerator.h
         include/scheduling/SchedulingAlgorithm.h
+        include/scheduling/HeuristicPlanning.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
         include/scheduling/SchedulingAlgorithmStaticForesighted.h
@@ -136,6 +137,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/ApplicationSpecs.cpp
         src/Utils.cpp
         src/scheduling/SchedulingAlgorithm.cpp
+        src/scheduling/HeuristicPlanning.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
@@ -144,7 +146,6 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithmGreedyForesighted.cpp
         src/scheduling/SchedulingAlgorithmGreedyNearsighted.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
-        src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
@@ -153,6 +154,7 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/ApplicationSpecs.h
         include/Utils.h
         include/scheduling/SchedulingAlgorithm.h
+        include/scheduling/HeuristicPlanning.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
         include/scheduling/SchedulingAlgorithmStaticForesighted.h
@@ -161,7 +163,6 @@ set(DATA_PARALLEL_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithmGreedyForesighted.h
         include/scheduling/SchedulingAlgorithmGreedyNearsighted.h
         include/scheduling/SchedulingAlgorithmRandom.h
-        include/scheduling/OptionComparatorFunction.h
         include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
@@ -183,6 +184,7 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/ApplicationSpecs.cpp
         src/Utils.cpp
         src/scheduling/SchedulingAlgorithm.cpp
+        src/scheduling/HeuristicPlanning.cpp
         src/scheduling/SchedulingAlgorithmDynamic.cpp
         src/scheduling/SchedulingAlgorithmStatic.cpp
         src/scheduling/SchedulingAlgorithmStaticForesighted.cpp
@@ -191,7 +193,6 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         src/scheduling/SchedulingAlgorithmGreedyForesighted.cpp
         src/scheduling/SchedulingAlgorithmGreedyNearsighted.cpp
         src/scheduling/SchedulingAlgorithmRandom.cpp
-        src/scheduling/OptionComparatorFunction.cpp
         src/SystemState.cpp
         src/FunctionGenerator.cpp
         src/ProbabilityComputation.cpp
@@ -200,6 +201,7 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/ApplicationSpecs.h
         include/Utils.h
         include/scheduling/SchedulingAlgorithm.h
+        include/scheduling/HeuristicPlanning.h
         include/scheduling/SchedulingAlgorithmDynamic.h
         include/scheduling/SchedulingAlgorithmStatic.h
         include/scheduling/SchedulingAlgorithmStaticForesighted.h
@@ -208,7 +210,6 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
         include/scheduling/SchedulingAlgorithmGreedyForesighted.h
         include/scheduling/SchedulingAlgorithmGreedyNearsighted.h
         include/scheduling/SchedulingAlgorithmRandom.h
-        include/scheduling/OptionComparatorFunction.h
         include/SystemState.h
         include/FunctionGenerator.h
         include/ProbabilityComputation.h
@@ -219,6 +220,7 @@ set(DELTA_T_EVALUATOR_SOURCE_FILES
 add_executable(delta_t_evaluator ${DELTA_T_EVALUATOR_SOURCE_FILES})
 target_link_libraries(delta_t_evaluator
         ${WRENCH_LIBRARY}   # For UnitParser :)
+        ${SimGrid_LIBRARY}  # For logging
         ${Boost_LIBRARIES}
         ${WRENCH_WFCOMMONS_WORKFLOW_PARSER_LIBRARY}
 )

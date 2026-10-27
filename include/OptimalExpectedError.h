@@ -12,7 +12,7 @@
 
 /**
  * Dynamic programs of Section V of the paper, in discretized time (time steps of
- * ProbabilityComputation::get_delta_t() seconds), computed bottom-up.
+ * ProbabilityComputation::get_delta_t() seconds), computed recursively with memoization.
  *
  * With lower_bound == false, durations are rounded up and the time to the deadline down
  * (pessimistic upper bound on the expected error); with lower_bound == true, the opposite
@@ -20,8 +20,8 @@
  */
 namespace wrench {
     /// For each decision node: for n = 0, 1, ... remaining time steps, the option that minimizes the
-    /// expected error and that expected error, i.e., E(i, x, y, n) of Eq. (1). Each node's entries only
-    /// cover the time steps that can remain at that node.
+    /// expected error and that expected error, i.e., E(i, x, y, n) of Eq. (1). Entries that the recursion
+    /// did not need are ("impossible", -1.0).
     using ExpectedErrorTable = std::map<const ApplicationSpecs::ExecOptionDecisionNode *,
         std::vector<std::pair<std::string, double> > >;
 

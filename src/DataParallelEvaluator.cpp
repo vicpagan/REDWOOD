@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "ProbabilityComputation.h"
-#include "scheduling/OptionComparatorFunction.h"
 #include "ApplicationSpecs.h"
 #include "Utils.h"
 #include "DataParallelEvaluator.h"

@@ -13,21 +13,26 @@
 namespace wrench {
     class SchedulingAlgorithmDynamic : public SchedulingAlgorithm {
     public:
+        /**
+         * @param lower_bound Whether the decision table is computed for the lower bound (optimistic) on the
+         *        expected error, instead of the upper bound (pessimistic) (Section V-B)
+         */
         explicit SchedulingAlgorithmDynamic(
             const std::shared_ptr<ApplicationSpecs> &application_specs,
+            const std::string &name,
             const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
                 (double, double)> > > > &exec_options,
-            ProbabilityComputation *probability_computation) : SchedulingAlgorithm(application_specs,
-            "dynamic",
-            exec_options,
-            probability_computation) {
+            ProbabilityComputation *probability_computation,
+            const bool lower_bound) : SchedulingAlgorithm(application_specs,
+                                                          name,
+                                                          exec_options,
+                                                          probability_computation),
+                                      _lower_bound(lower_bound) {
         };
 
         std::vector<SchedulingDecision> make_decisions(
             SystemState *system_state_tracker,
             double remaining_time) override;
-
-        double get_expected_error() const { return _optimal_EV; };
 
         void preprocess_host_decisions(
             const std::string &hostname,
@@ -45,14 +50,7 @@ namespace wrench {
         }
 
     private:
-        void fill_host_preprocessing_table(
-            const std::string &hostname,
-            double input_data_size,
-            double input_error_level,
-            double remaining_time,
-            bool lower_bound);
-
-
+        bool _lower_bound;
         std::map<std::string, std::map<const ApplicationSpecs::ExecOptionDecisionNode *, std::vector<std::pair<long,
             std::string> > > > _preprocessed_decisions_by_host;
     };

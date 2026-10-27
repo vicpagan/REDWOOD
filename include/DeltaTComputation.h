@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "ApplicationSpecs.h"
+#include "ProbabilityComputation.h"
 
 namespace wrench {
     /**
@@ -28,6 +29,15 @@ namespace wrench {
      * @return delta_t
      */
     double select_delta_t(const std::shared_ptr<ApplicationSpecs> &application_specs);
+
+    /**
+     * @brief Set the probability computation's delta_t according to the instance's delta_t scheme,
+     *        unless it is already set
+     * @param application_specs The application specification
+     * @param probability_computation The probability computation
+     */
+    void initialize_delta_t(const std::shared_ptr<ApplicationSpecs> &application_specs,
+                            ProbabilityComputation &probability_computation);
 }
 
 #endif //DELTATCOMPUTATION_H
