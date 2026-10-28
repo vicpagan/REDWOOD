@@ -11,7 +11,7 @@ import tempfile
 import os
 import math
 
-def force_required_config_values(config):
+def force_required_config_values(config, upper_or_lower):
     """Force the config to be compatible with the delta_t evaluator:
     - exactly 1 compute node
     - the only scheduling algorithm is 'dynamic'
@@ -23,7 +23,7 @@ def force_required_config_values(config):
     config['platform']['num_compute_nodes'] = 1
 
     config.setdefault('scheduling', {})
-    config['scheduling']['algorithms'] = ["dynamic"]
+    config['scheduling']['algorithms'] = ["dynamic_" + upper_or_lower]
 
     config['scheduling'].setdefault('hacks', {})
     config['scheduling']['hacks']['temporal_redundancy'] = "off"
@@ -31,13 +31,13 @@ def force_required_config_values(config):
 
     return config
 
-def prepare_config_file(json_file):
+def prepare_config_file(json_file, upper_or_lower):
     """Load json_file, force the required values into it, and write the
     result to a temp file. Returns the path to the temp file."""
     with open(json_file, 'r') as f:
         config = json.load(f)
 
-    force_required_config_values(config)
+    force_required_config_values(config, upper_or_lower)
 
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
         json.dump(config, tmp, indent=2)
@@ -185,6 +185,10 @@ def parse_args(argv=None):
         "--num-repeats", type=int, default=1000, metavar="N",
         help="Number of simulation repeats (default: %(default)s).",
     )
+    parser.add_argument(
+        "--bound-used-for-scheduling", required=True, type=str, default="upper", metavar="<upper|lower>",
+        help="Bound used for scheduling decisions during simulations (upper | lower).",
+    )
     return parser.parse_args(argv)
 
 
@@ -199,13 +203,18 @@ def main():
     sim_executable = args.sim_executable
     run_sims = args.run_sims
     num_repeats = args.num_repeats
+    bound_used_for_scheduling = args.bound_used_for_scheduling
+
+    if (bound_used_for_scheduling != "lower" and bound_used_for_scheduling != "upper"):
+        print(f"ERROR: the --bound-used-for-scheduling argument should be 'upper' or 'lower'")
+        sys.exit(1)
 
     # Force the config to be compatible with the delta_t evaluator (1 host,
-    # dynamic-only scheduling, both hacks off) rather than erroring out, and
+    # dynamic-only scheduling, both hacks off) rather than error out, and
     # use the resulting temp file for everything below. This avoids the
     # single-host-only ExecOptionDecisionNode map lookups crashing deep
     # inside the C++ evaluator.
-    prepared_json_file = prepare_config_file(json_file)
+    prepared_json_file = prepare_config_file(json_file, bound_used_for_scheduling)
 
 
     all_results = {}

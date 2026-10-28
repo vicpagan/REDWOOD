@@ -4,9 +4,10 @@
 
   - Generating the results files:
 
-	python3 ./delta_t_evaluator.py  --executable ../build/delta_t_evaluator --sim-executable ../build/redwood_sim --run-sims --num-repeats 5000000 --json-file ../example_problem_instances/fusion_science_use_case.json --min-delta-t 1.0 --max-delta-t 30.0 --step-size 1.0 --output-json /tmp/results_delta_t_lower_bound.json
+	python3 ./delta_t_evaluator.py  --executable ../../build/delta_t_evaluator --sim-executable ../../build/redwood_sim --run-sims --num-repeats 5000000 --json-file ../../example_problem_instances/fusion_science_use_case.json --min-delta-t 1.0 --max-delta-t 30.0 --step-size 1.0 --bound-used-for-scheduling lower --output-json /tmp/results_delta_t_lower_bound.json  
 
-   TODO: MODIFY THE SCRIPT ABOVE ONCE VICTOR HAS MERGED AND IMPLEMENTED "dynamic_lower" and "dynamic_upper" algorithms
+	python3 ./delta_t_evaluator.py  --executable ../../build/delta_t_evaluator --sim-executable ../../build/redwood_sim --run-sims --num-repeats 5000000 --json-file ../../example_problem_instances/fusion_science_use_case.json --min-delta-t 1.0 --max-delta-t 30.0 --step-size 1.0 --bound-used-for-scheduling upper --output-json /tmp/results_delta_t_upper_bound.json  
+
 
   - Generating the plot (and producing some useful ASCII output):
 
