@@ -13,6 +13,7 @@
 #include <boost/json.hpp>
 
 
+
 namespace sg4 = simgrid::s4u;
 
 /**
@@ -23,10 +24,17 @@ namespace sg4 = simgrid::s4u;
  */
 class PlatformCreator {
 public:
-    explicit PlatformCreator(const boost::json::object &platform_spec) {
+    /**
+     * @brief Constructor
+     * @param platform_spec The "platform" JSON object (number of compute nodes, I/O bandwidths)
+     */
+    explicit PlatformCreator(const boost::json::object& platform_spec) {
         _platform_spec = platform_spec;
     }
 
+    /**
+     * @brief Create the simulated platform (see create_platform())
+     */
     void operator()() const {
         create_platform();
     }

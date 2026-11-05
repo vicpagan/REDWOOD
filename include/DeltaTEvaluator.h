@@ -11,12 +11,15 @@
 #ifndef DELTA_T_EVALUATOR_H
 #define DELTA_T_EVALUATOR_H
 
+#include <wrench-dev.h>
 #include <boost/json/object.hpp>
 
-#include "ProbabilityComputation.h"
+#include <vector>
+#include "ApplicationSpecs.h"
 
 
 namespace wrench {
+
     struct DeltaTResult {
         double delta_t;
         double upper_bound_error;
@@ -25,17 +28,20 @@ namespace wrench {
     };
 
     /**
-     *  @brief A DataParallelEvaluator implementation
+     *  @brief Computes the lower and upper bounds on the optimal expected error for a range of delta_t values
      */
-    class DeltaTEvaluator {
+    class DeltaTEvaluator  {
+
     public:
-        // Constructor
+        // constructor
         explicit DeltaTEvaluator(boost::json::object json_input);
 
         std::vector<DeltaTResult> evaluate(double min_delta_t, double max_delta_t, double step_size);
 
     private:
         boost::json::object json_input;
+
     };
+
 } // namespace wrench
 #endif //DELTA_T_EVALUATOR_H

@@ -14,37 +14,47 @@
 #include <boost/program_options.hpp>
 #include <utility>
 
-#include "ProbabilityComputation.h"
+#include "Discretization.h"
+#include "RecursiveFormulae.h"
 #include "ApplicationSpecs.h"
+#include "FunctionGenerator.h"
 #include "Utils.h"
 #include "DataParallelEvaluator.h"
 
 #include <wrench/util/UnitParser.h>
 
-#include "OptimalExpectedError.h"
-#include "DeltaTComputation.h"
-
-WRENCH_LOG_CATEGORY(data_parallel_evaluator, "Log category for DataParallelEvaluator");
 
 namespace po = boost::program_options;
 
+/**
+ * @brief Constructor
+ * @param json_input The JSON input (problem instance)
+ * @param list_of_num_nodes The numbers of compute nodes to evaluate
+ */
 wrench::DataParallelEvaluator::DataParallelEvaluator(boost::json::object json_input,
-                                                     std::vector<unsigned long> &
-                                                     list_of_num_nodes) : json_input(std::move(json_input)),
-                                                                          list_of_num_nodes(list_of_num_nodes) {
+                                                     std::vector<unsigned long>& list_of_num_nodes) :
+    json_input(std::move(json_input)), list_of_num_nodes(list_of_num_nodes) {
 }
 
+/**
+ * @brief Optimal expected error (upper bound) when every task runs data-parallel on num_compute_nodes nodes,
+ *        modeled as a single node: each option's t_function parameters are divided by its parallel speedup (from
+ *        "speedup_measurements" or "amhdal_parallelizable_fraction"), and lambda and the I/O bandwidths are
+ *        multiplied by num_compute_nodes. Uses ComputeHost_1's decision tree and the JSON's delta_t scheme.
+ * @param num_compute_nodes The number of compute nodes
+ * @return The upper bound on the optimal expected error
+ */
 double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_compute_nodes) {
-    // Make a copy of the object
+    // make a copy of the object
     auto input = this->json_input;
 
-    // Compute the speedup factor for each task
-    std::map<std::string, std::vector<double> > speedups;
-    for (const auto &task: input["application"].get_object()["tasks"].as_array()) {
+    // compute the speedup factor for each task
+    std::map<std::string, std::vector<double>> speedups;
+    for (const auto& task : input["application"].get_object()["tasks"].as_array()) {
         auto task_name = std::string(task.as_object().at("name").as_string().c_str());
         speedups[task_name] = {};
-        auto &task_options = task.as_object().at("execution_options").as_array();
-        for (auto &option: task_options) {
+        auto& task_options = task.as_object().at("execution_options").as_array();
+        for (auto& option : task_options) {
             auto opt_obj = option.as_object();
             double parallel_speedup;
             if (opt_obj.contains("speedup_measurements") && opt_obj.contains("amhdal_parallelizable_fraction")) {
@@ -59,61 +69,58 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
                         "Speedup spec for an option of task " + task_name + ": vector's first element should be 1.0 ");
                 }
                 parallel_speedup = speedup_array[std::min(num_compute_nodes - 1, speedup_array.size() - 1)].
-                        to_number<double>();
-            } else if (opt_obj.contains("amhdal_parallelizable_fraction")) {
+                    to_number<double>();
+            }
+            else if (opt_obj.contains("amhdal_parallelizable_fraction")) {
                 auto amhdal_parallelizable_fraction = opt_obj["amhdal_parallelizable_fraction"].to_number<double>();
-                parallel_speedup = 1.0 / (1. - amhdal_parallelizable_fraction + amhdal_parallelizable_fraction /
-                                          static_cast<double>(num_compute_nodes));
-            } else {
+                parallel_speedup = 1.0 / (1. - amhdal_parallelizable_fraction + amhdal_parallelizable_fraction /  static_cast<double>(num_compute_nodes));
+            }
+            else {
                 throw std::invalid_argument("Speedup spec invalid/missing for an option of task " + task_name);
             }
             speedups[task_name].push_back(parallel_speedup);
         }
     }
 
-    // Tweak the task descriptions in json_input spec to implement the parallel speedup
-    auto &tasks = input["application"].get_object()["tasks"].get_array();
+    // tweak the task descriptions in json_input spec to implement the parallel speedup
+    auto& tasks = input["application"].get_object()["tasks"].get_array();
 
-    // Find the task by name
-    for (auto &task: tasks) {
+    // find the task by name
+    for (auto& task : tasks) {
         std::string task_name(task.at("name").as_string().c_str());
-        auto &task_options = task.get_object()["execution_options"].get_array();
+        auto& task_options = task.get_object()["execution_options"].get_array();
 
         for (int i = 0; i < task_options.size(); i++) {
-            // Get the parameters object (not array!)
-            boost::json::object &opt_obj = task_options[i].get_object();
-            boost::json::object &t_func = opt_obj["t_function"].get_object();
-            boost::json::object &t_params = t_func["parameters"].get_object();
+            // get the parameters object (not array!)
+            boost::json::object& opt_obj = task_options[i].get_object();
+            boost::json::object& t_func = opt_obj["t_function"].get_object();
+            boost::json::object& t_params = t_func["parameters"].get_object();
 
-            // Collect parameter keys, values
+            // collect parameter keys, values
             std::map<std::string, double> key_value_pairs;
-            for (auto &[key, val]: t_params) {
+            for (auto& [key, val] : t_params) {
                 key_value_pairs[std::string(key)] = val.to_number<double>() / speedups[task_name].at(i);
             }
 
-            for (const auto &[key, val]: key_value_pairs) {
+            for (const auto& [key, val] : key_value_pairs) {
                 t_params[key] = val;
             }
         }
     }
 
 
-    // Tweak the lambda value in input to scale up the failure rate
+    // tweak the lambda value in input to scale up the failure rate
     double lambda = input["failures"].get_object()["lambda"].to_number<double>();
     input["failures"].get_object()["lambda"] = static_cast<double>(num_compute_nodes) * lambda;
 
-    // Tweak the IO bandwidth value
-    double original_io_read_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(
-        boost::json::value_to<std::string>(input["platform"].get_object()["io_read_bandwidth_per_node"]));
-    double original_io_write_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(
-        boost::json::value_to<std::string>(input["platform"].get_object()["io_write_bandwidth_per_node"]));
+    // tweak the IO bandwidth value
+    double original_io_read_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(boost::json::value_to<std::string>(input["platform"].get_object()["io_read_bandwidth_per_node"]));
+    double original_io_write_bandwidth_per_node = wrench::UnitParser::parse_bandwidth(boost::json::value_to<std::string>(input["platform"].get_object()["io_write_bandwidth_per_node"]));
 
-    input["platform"].get_object()["io_read_bandwidth_per_node"] = std::to_string(
-        static_cast<double>(num_compute_nodes) * original_io_read_bandwidth_per_node);
-    input["platform"].get_object()["io_write_bandwidth_per_node"] = std::to_string(
-        static_cast<double>(num_compute_nodes) * original_io_write_bandwidth_per_node);
+    input["platform"].get_object()["io_read_bandwidth_per_node"] = std::to_string(static_cast<double>(num_compute_nodes) * original_io_read_bandwidth_per_node);
+    input["platform"].get_object()["io_write_bandwidth_per_node"] = std::to_string(static_cast<double>(num_compute_nodes) * original_io_write_bandwidth_per_node);
 
-    std::vector<std::string> hostnames = {};
+    std::vector<std::string> hostnames = {"ComputeHost_1"};
 
     auto application_specs = wrench::ApplicationSpecs::create_application_specs(
         input.at("platform").as_object(),
@@ -123,19 +130,26 @@ double wrench::DataParallelEvaluator::compute_expected_error(unsigned long num_c
         input.at("scheduling").as_object(),
         hostnames);
 
-    // Optimal expected error (upper bound)
-    ProbabilityComputation probability_computation(application_specs);
-    probability_computation.set_delta_t(select_delta_t(application_specs));
-    return compute_optimal_expected_error(application_specs, probability_computation, false);
+    application_specs->prune_decision_trees(0.0);
+    application_specs->build_decision_trees();
+    application_specs->reset_all_hosts_current_decision_nodes();
+
+    // optimal expected error (upper bound), from the root of ComputeHost_1's decision tree
+    const ApplicationSpecs::ExecOptionDecisionNode* root_node = application_specs->get_decision_tree_root("ComputeHost_1");
+    Discretization discretization(application_specs);
+    discretization.initialize_delta_t(application_specs, root_node);
+    auto optimal_error = compute_optimal_expected_error(application_specs, discretization, root_node, false);
+    return optimal_error;
 }
 
 /**
- * @brief Function to evaluate data parallel options
+ * @brief Compute the optimal expected error (upper bound) for each number of compute nodes in the list
+ * @return (number of nodes, expected error) for each number of nodes, in list order
  */
-std::vector<std::pair<unsigned long, double> > wrench::DataParallelEvaluator::evaluate() {
-    std::vector<std::pair<unsigned long, double> > errors;
+std::vector<std::pair<unsigned long, double>> wrench::DataParallelEvaluator::evaluate() {
+    std::vector<std::pair<unsigned long, double>> errors;
     errors.reserve(this->list_of_num_nodes.size());
-    for (auto &num_compute_nodes: this->list_of_num_nodes) {
+    for (auto &num_compute_nodes : this->list_of_num_nodes) {
         double expected_error = compute_expected_error(num_compute_nodes);
         errors.push_back(std::make_pair(num_compute_nodes, expected_error));
     }
@@ -144,18 +158,15 @@ std::vector<std::pair<unsigned long, double> > wrench::DataParallelEvaluator::ev
 
 
 /**
- * @brief The Simulator's main function
- *
- * @param argc: argument count
- * @param argv: argument array
- * @return 0 on success, non-zero otherwise
+ * @brief The data_parallel_evaluator's main function: parses the JSON input, the lists (or ranges) of node counts
+ *        and deadlines and the optional overrides, computes the expected error for every deadline and node count,
+ *        and writes the results as JSON to the output file
+ * @param argc Argument count
+ * @param argv Argument array
+ * @return 0 on success (exits with 1 on invalid arguments, throws if the output file cannot be written)
  */
-int main(int argc, char **argv) {
-    // As in redwood_sim: logging off by default, enabled per category with --log=<category>.thres:info
-    xbt_log_control_set("root.thresh:critical");
-    xbt_log_init(&argc, argv);
-
-    // Define command-line argument options
+int main(int argc, char** argv) {
+    // define command-line argument options
     std::string json_input_arg;
     std::string json_output_arg;
     unsigned long max_num_nodes;
@@ -173,8 +184,7 @@ int main(int argc, char **argv) {
     desc.add_options()
     ("help",
      "Show this help message\n")
-    ("json_input",
-     po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
+    ("json_input", po::value<std::string>(&json_input_arg)->required()->value_name("<JSON spec input (str or file path)>"),
      "JSON input string or file path\n")
     ("json_output", po::value<std::string>(&json_output_arg)->required()->value_name("<JSON output file file path>"),
      "JSON output file path\n")
@@ -198,7 +208,7 @@ int main(int argc, char **argv) {
      "Error associated to a failed execution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<delta_t>"),
      "delta_t value - will override JSON-provided value\n");
-    // Parse command-line arguments
+    // parse command-line arguments
     po::variables_map vm;
     po::store(
         po::parse_command_line(argc, argv, desc),
@@ -206,20 +216,20 @@ int main(int argc, char **argv) {
     );
 
     try {
-        // Print help message and exit if needed
+        // print help message and exit if needed
         if (vm.count("help")) {
             std::cerr << desc;
             exit(0);
         }
-        // Throw whatever exception in case argument values are erroneous
+        // throw whatever exception in case argument values are erroneous
         po::notify(vm);
-    } catch (std::exception &e) {
+    } catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
-        std::cerr << desc;
+	    std::cerr << desc;
         exit(1);
     }
 
-    // Process the list of num nodes
+    // process the list of num nodes
     if (vm.count("num_nodes_list")) {
         if (vm.count("max_num_nodes") or vm.count("step_num_nodes")) {
             cerr << "Error: Cannot specify --max_num_nodes or --step_num_nodes if --num_nodes_list is used\n\n";
@@ -238,21 +248,18 @@ int main(int argc, char **argv) {
             std::cerr << desc;
             exit(1);
         }
-        for (unsigned long num_compute_nodes = 1; num_compute_nodes <= max_num_nodes;
-             num_compute_nodes += step_num_nodes) {
-            if ((step_num_nodes > 1) and (num_compute_nodes == 1 + step_num_nodes)) {
-                // Stupid hack make one special
+        for (unsigned long num_compute_nodes = 1; num_compute_nodes <= max_num_nodes; num_compute_nodes += step_num_nodes) {
+            if ((step_num_nodes > 1) and (num_compute_nodes == 1 + step_num_nodes)) { // stupid hack make one special
                 num_compute_nodes -= 1;
             }
             list_of_num_nodes.push_back(num_compute_nodes);
         }
     }
 
-    // Process the list of deadlines
+    // process the list of deadlines
     if (vm.count("deadline_list")) {
         if (vm.count("min_deadline") or vm.count("max_deadline") or vm.count("step_deadline")) {
-            cerr <<
-                    "Error: Cannot specify --min_deadline or --max_deadline  or --step_deadline if --deadline_list is used\n\n";
+            cerr << "Error: Cannot specify --min_deadline or --max_deadline  or --step_deadline if --deadline_list is used\n\n";
             std::cerr << desc;
             exit(1);
         }
@@ -264,8 +271,7 @@ int main(int argc, char **argv) {
         }
     } else {
         if (not vm.count("min_deadline") or not vm.count("max_deadline") or not vm.count("step_deadline")) {
-            cerr <<
-                    "Error: Must specify --min_deadline and --max_deadline  and --step_deadline if --deadline_list is not used\n\n";
+            cerr << "Error: Must specify --min_deadline and --max_deadline  and --step_deadline if --deadline_list is not used\n\n";
             std::cerr << desc;
             exit(1);
         }
@@ -277,7 +283,8 @@ int main(int argc, char **argv) {
     boost::json::object json_input;
     if (json_input_arg[0] == '{') {
         json_input = boost::json::parse(json_input_arg).as_object();
-    } else {
+    }
+    else {
         json_input = readJSONFromFile(json_input_arg);
     }
 
@@ -293,9 +300,9 @@ int main(int argc, char **argv) {
     }
 
 
-    // Compute results
-    std::map<double, std::vector<std::pair<unsigned long, double> > > results;
-    for (auto const &deadline: list_of_deadlines) {
+    // compute results
+    std::map<double, std::vector<std::pair<unsigned long, double>>> results;
+    for (auto const &deadline : list_of_deadlines) {
         std::cerr << "." << std::flush;
         json_input.at("execution").get_object().at("deadline") = deadline;
         auto evaluator = std::make_unique<wrench::DataParallelEvaluator>(json_input, list_of_num_nodes);
@@ -303,27 +310,27 @@ int main(int argc, char **argv) {
     }
     std::cerr << std::endl;
 
-    // Output them in JSON
+    // output them in JSON
     boost::json::object json_obj;
 
-    for (const auto &[key, vec]: results) {
+    for (const auto& [key, vec] : results) {
         boost::json::array arr;
 
-        for (const auto &[id, value]: vec) {
+        for (const auto& [id, value] : vec) {
             boost::json::object pair_obj;
             pair_obj["num_nodes"] = id;
             pair_obj["expected_error"] = value;
             arr.push_back(pair_obj);
         }
-        // Convert double key to string for JSON object key
+        // convert double key to string for JSON object key
         json_obj[std::to_string(key)] = arr;
     }
 
-    // Convert to string
+    // convert to string
     std::string json_string = boost::json::serialize(json_obj);
-    WRENCH_INFO("%s", json_string.c_str());
+    // std::cout << json_string << std::endl;
 
-    // Write to the output file
+    // write to the output file
     std::ofstream output(json_output_arg, std::ios::out | std::ios::trunc);
     if (!output) {
         throw std::runtime_error("Cannot open output file: " + json_output_arg);

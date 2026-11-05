@@ -22,20 +22,21 @@ namespace po = boost::program_options;
 
 
 /**
- * @brief The Simulator's main function
- *
- * @param argc: argument count
- * @param argv: argument array
+ * @brief The Simulator's main function (redwood_sim): reads the JSON input, applies the command-line overrides
+ *        (--num_repeats, --deadline, --seed, --lambda, --e_fail, --delta_t, --fake_io), creates the platform and
+ *        a compute service on each compute host, and runs the Controller
+ * @param argc Argument count
+ * @param argv Argument array (WRENCH/SimGrid arguments are consumed by the simulation)
  * @return 0 on success, non-zero otherwise
  */
-int main(int argc, char **argv) {
-    /* Create a WRENCH simulation object */
+int main(int argc, char** argv) {
+    // create a WRENCH simulation object
     auto simulation = wrench::Simulation::createSimulation();
 
-    /* Initialize the simulation */
+    // initialize the simulation
     simulation->init(&argc, argv);
 
-    // Define command-line argument options
+    // define command-line argument options
     std::string json_input_arg;
     unsigned long num_repeats;
     double deadline;
@@ -53,18 +54,18 @@ int main(int argc, char **argv) {
     ("num_repeats", po::value<unsigned long>(&num_repeats)->value_name("<number of repeats>"),
      "Number of repeats for each each experiment (i.e., for each algorithm) - will override JSON-provided value\n")
     ("deadline", po::value<double>(&deadline)->value_name("<deadline>"),
-     "Application execution deadline - will override JSON-provided value\n")
+         "Application execution deadline - will override JSON-provided value\n")
     ("seed", po::value<int>(&seed)->value_name("<seed>"),
-     "RNG seed - will override JSON-provided value\n")
+         "RNG seed - will override JSON-provided value\n")
     ("lambda", po::value<double>(&lambda)->value_name("<lambda>"),
-     "Parameter of the exponential distribution - will override JSON-provided value\n")
+         "Parameter of the exponential distribution - will override JSON-provided value\n")
     ("e_fail", po::value<double>(&e_fail)->value_name("<e_fail>"),
-     "Error associated to a failed execution - will override JSON-provided value\n")
+         "Error associated to a failed execution - will override JSON-provided value\n")
     ("delta_t", po::value<double>(&delta_t)->value_name("<fixed delta_t>"),
-     "delta_t value - will override JSON-provided scheme/value\n")
+         "delta_t value - will override JSON-provided scheme/value\n")
     ("fake_io", po::bool_switch(&fake_io),
-     "Pass this flag to fake all I/O - will override JSON-provided scheme\n");
-    // Parse command-line arguments
+         "Pass this flag to fake all I/O - will override JSON-provided scheme\n");
+    // parse command-line arguments
     po::variables_map vm;
     po::store(
         po::parse_command_line(argc, argv, desc),
@@ -72,17 +73,17 @@ int main(int argc, char **argv) {
     );
 
     try {
-        // Print help message and exit if needed
+        // print help message and exit if needed
         if (vm.count("help")) {
             std::cerr << desc;
             exit(0);
         }
-        // Throw whatever exception in case argument values are erroneous
+        // throw whatever exception in case argument values are erroneous
         po::notify(vm);
-    } catch (std::exception &e) {
+    } catch (std::exception& e) {
         cerr << "Error: " << e.what() << "\n\n";
         std::string usage_string = std::string(argv[0]) + " [--help] --json <JSON input (file)> "
-                                   + "[--log=controller.threshold=info | --wrench-full-log]";
+            + "[--log=controller.threshold=info | --wrench-full-log]";
         cerr << "Usage: " << usage_string << "\n";
         exit(1);
     }
@@ -90,12 +91,13 @@ int main(int argc, char **argv) {
     boost::json::object json_input;
     if (json_input_arg[0] == '{') {
         json_input = boost::json::parse(json_input_arg).as_object();
-    } else {
+    }
+    else {
         json_input = readJSONFromFile(json_input_arg);
     }
 
 
-    /* Override JSON content if need be */
+    // override JSON content if need be
     if (vm.count("num_repeats") == 1) {
         json_input.at("execution").get_object().at("num_repeats") = num_repeats;
     }
@@ -117,20 +119,20 @@ int main(int argc, char **argv) {
     }
 
     if (fake_io) {
-        auto &platform_obj = json_input.at("platform").as_object();
+        auto& platform_obj = json_input.at("platform").as_object();
         auto it = platform_obj.find("fake_io");
         if (it != platform_obj.end()) {
             it->value() = fake_io;
         }
     }
 
-    /* Instantiating the platform */
+    // instantiating the platform
     simulation->instantiatePlatform(PlatformCreator(json_input["platform"].as_object()));
 
-    /* Instantiate a bare-metal compute service on each host of the platform */
+    // instantiate a bare-metal compute service on each host of the platform
     auto num_compute_nodes = boost::json::value_to<int>(json_input.at("platform").at("num_compute_nodes"));
     std::vector<std::string> hostnames;
-    std::map<std::string, std::shared_ptr<wrench::BareMetalComputeService> > compute_services;
+    std::map<std::string, std::shared_ptr<wrench::BareMetalComputeService>> compute_services;
     for (int i = 0; i < num_compute_nodes; i++) {
         std::string hostname = "ComputeHost_" + std::to_string(i);
         hostnames.push_back(hostname);
@@ -147,7 +149,7 @@ int main(int argc, char **argv) {
         json_input["scheduling"].as_object(),
         hostnames);
 
-    /* Instantiate the execution controller */
+    // instantiate the execution controller
     auto controller = simulation->add(
         new wrench::Controller(
             json_input["application"].as_object(),
@@ -157,7 +159,7 @@ int main(int argc, char **argv) {
             compute_services,
             fake_io, "ControllerHost"));
 
-    /* Launch the simulation */
+    // launch the simulation
     simulation->launch();
 
     return 0;

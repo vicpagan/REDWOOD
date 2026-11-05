@@ -19,7 +19,13 @@ experiment/*
 # CSV files
 **/*.csv
 
+# paper files
+paper/*
+
 # Python venv
 .python-version
 
 python/repro_cases/*
+
+# mac stuff
+.DS_Store

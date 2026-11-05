@@ -102,12 +102,12 @@
       "parameter": 1.0
     },
     "algorithms": {
-      "one_task": ["dynamic"],
-      "multi_task": ["dynamic"]
+      "one_task": ["dynamic_lower"],
+      "multi_task": ["dynamic_lower"]
     },
     "hacks": {
       "temporal_redundancy": false,
-      "stop_running_jobs": true
+      "reactive_rescheduling": true
     }
   }
 }

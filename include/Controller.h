@@ -14,7 +14,7 @@
 #include <wrench-dev.h>
 #include <boost/json/object.hpp>
 
-#include "ProbabilityComputation.h"
+#include "Discretization.h"
 #include "ApplicationSpecs.h"
 #include "scheduling/SchedulingAlgorithm.h"
 
@@ -29,23 +29,21 @@ namespace wrench {
      */
     class Controller : public ExecutionController {
     public:
-        // Constructor
+        // constructor
         Controller(
             const boost::json::object &application_spec,
             const boost::json::object &execution_spec,
             const boost::json::object &scheduling_spec,
             const std::shared_ptr<ApplicationSpecs> &_application_specs,
             const std::map<std::string, std::shared_ptr<BareMetalComputeService> > &compute_services,
-            const bool fake_io,
+            bool fake_io,
             const std::string &hostname);
 
     private:
-        /// State of the repetition in progress
         struct RepetitionState {
-            int repeat; ///< repetition index
-            double start_date; ///< simulated date at which the repetition started
-            double deadline_date; ///< simulated date of the deadline
-            /// Error level that each host's decision tree has been pruned to improve on (temporal redundancy)
+            int repeat;
+            double start_date;
+            double deadline_date;
             std::map<std::string, double> tree_prune_threshold_by_host;
         };
 
@@ -62,8 +60,7 @@ namespace wrench {
 
         bool process_timer_event(const std::shared_ptr<TimerEvent> &timer_event,
                                  const std::shared_ptr<SchedulingAlgorithm> &algorithm,
-                                 const RepetitionState &state,
-                                 std::vector<std::pair<bool, double> > &repetition_results);
+                                 const RepetitionState &state);
 
         void apply_temporal_redundancy(const std::string &success_hostname,
                                        double final_error_level,
@@ -96,12 +93,12 @@ namespace wrench {
 
         std::shared_ptr<ApplicationSpecs> _application_specs;
 
-        std::unique_ptr<ProbabilityComputation> _probability_computation;
+        std::unique_ptr<Discretization> _discretization;
 
         const boost::json::object _application_spec;
         const boost::json::object _execution_spec;
         const boost::json::object _scheduling_spec;
-        const std::map<std::string, std::shared_ptr<BareMetalComputeService> > _compute_services;
+        const std::map<std::string, std::shared_ptr<BareMetalComputeService>> _compute_services;
         const bool _fake_io;
 
         std::shared_ptr<SystemState> _system_state_tracker;
@@ -109,14 +106,12 @@ namespace wrench {
 
         long _num_repeats;
         std::string _temporal_redundancy;
-        std::string _stop_running_jobs;
+        std::string _reactive_rescheduling;
         bool _keep_preprocessed_decisions;
 
-        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
-            (double, double)> > > > &
-        _task_functions;
-        std::vector<std::pair<std::vector<std::string>, double> > _execution_combinations;
-        std::vector<std::shared_ptr<wrench::SchedulingAlgorithm> > _scheduling_algorithms;
+        const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>> &_task_functions;
+        std::vector<std::pair<std::vector<std::string>, double>> _execution_combinations;
+        std::vector<std::shared_ptr<SchedulingAlgorithm>> _scheduling_algorithms;
     };
 } // namespace wrench
 #endif//CONTROLLER_H

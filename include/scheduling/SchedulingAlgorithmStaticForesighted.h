@@ -5,35 +5,39 @@
 
 namespace wrench {
     /**
-     * Static foresighted heuristic (FS-x in Section V-D):
-     * selects the best combination of options for all remaining tasks, according to the criterion.
+     * Static Foresighted:
+     * For each host, chooses the best sequence of options for all of its remaining tasks
+     * according to the criterion, and then follows it.
      */
     class SchedulingAlgorithmStaticForesighted : public SchedulingAlgorithmStatic {
     public:
+        /**
+         * @brief Constructor
+         * @param application_specs The application specification
+         * @param name The algorithm's name
+         * @param exec_options The option functions of each option of each task
+         * @param discretization The discretization
+         * @param criterion The criterion: expected_error, probability_success, success_error_ratio or error_level
+         * @param lower_bound Whether durations are discretized for the lower bound (instead of the upper bound)
+         */
         SchedulingAlgorithmStaticForesighted(
-            const std::shared_ptr<ApplicationSpecs> &application_specs,
-            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double
-                (double, double)> > > > &exec_options,
-            ProbabilityComputation *probability_computation,
-            const Criterion criterion)
-            : SchedulingAlgorithmStatic(application_specs, "static_foresighted", exec_options,
-                                        probability_computation, criterion) {
-        }
+            const std::shared_ptr<ApplicationSpecs>& application_specs,
+            const std::string& name,
+            const std::map<std::string, std::map<std::string, std::map<std::string, std::function<double(double, double)>>>>& exec_options,
+            Discretization* discretization,
+            const std::string& criterion,
+            const bool lower_bound)
+            : SchedulingAlgorithmStatic(application_specs, name, exec_options,
+                                       discretization, criterion, lower_bound) {}
 
-        void preprocess_host_decisions(const std::string &hostname,
-                                       double initial_data_size,
-                                       double initial_error_level,
-                                       double deadline,
-                                       bool lower_bound) override;
+        void preprocess_host_decisions(const std::string& hostname,
+                                 double initial_data_size,
+                                 double initial_error_level,
+                                 double deadline,
+                                 bool lower_bound) override;
 
-        void reset_host_preprocessed_decisions(const std::string &hostname) override {
-            SchedulingAlgorithmStatic::reset_host_preprocessed_decisions(hostname);
-        }
-
-        void reset_all_preprocessed_decisions() override {
-            SchedulingAlgorithmStatic::reset_all_preprocessed_decisions();
-        }
     };
+
 }
 
 #endif

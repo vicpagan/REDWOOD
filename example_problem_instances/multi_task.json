@@ -179,7 +179,7 @@
     },
     "hacks": {
       "temporal_redundancy": true,
-      "stop_running_jobs": true
+      "reactive_rescheduling": true
     }
   }
 }
