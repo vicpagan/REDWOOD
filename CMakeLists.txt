@@ -8,7 +8,7 @@ add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS")
 
 set(CMAKE_CXX_STANDARD 23)
 
-# Optimize by default (without a build type, nothing is optimized)
+# Optimize by default
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
